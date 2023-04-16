@@ -24,8 +24,34 @@
     "commands": [
       {
         "command": "fluttergpt.createWidget",
-        "title": "Create Widget"
+        "title": "FlutterGPT: Create Widget"
+      },
+      {
+        "command": "fluttergpt.refactorCode",
+        "title": "FlutterGPT: Refactor"
+      },
+      {
+        "command": "fluttergpt.debugErrors",
+        "title": "FlutterGPT: Debug Errors"
       }
+    ]
+  },
+  "menus": {
+    "editor/context": [
+        {
+          "command": "fluttergpt.createWidget",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+            "command": "fluttergpt.refactorCode",
+            "when": "editorHasSelection && resourceLangId == 'dart'",
+            "group": "fluttergpt-menu-group@2"
+        },
+        {
+          "command": "fluttergpt.debugErrors",
+          "group": "navigation"
+        }
     ]
   },
   "scripts": {

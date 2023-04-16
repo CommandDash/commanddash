@@ -5,3 +5,8 @@ export function extractDartCode(widgetCode: string): string {
     }
     return dartCode;
 }
+
+export function extractExplanation(widgetCode: string): string {
+    let explanation: string = widgetCode.split("```")[0] || widgetCode;
+    return explanation;
+}
