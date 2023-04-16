@@ -43,7 +43,7 @@
         "title": "FlutterGPT Refactor: Fix Errors"
       },
       {
-        "command": "fluttergpt.createRespoClassFromPostman",
+        "command": "fluttergpt.createRepoClassFromPostman",
         "title": "FlutterGPT Create: API Repository from Postman JSON"
       }
     ]

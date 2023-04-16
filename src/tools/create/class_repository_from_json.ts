@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode} from '../../utilities/code-processing';
 
-export async function createRespoClassFromPostman(openAIRepo: OpenAIRepository) {
+export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository) {
     try {
         let description = "placeholder-json";
         await vscode.window.withProgress({
