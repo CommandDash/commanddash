@@ -32,13 +32,12 @@ export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository) {
             if(description === "placeholder") {
                 return;
             }
-
-            const result = await openAIRepo.getCompletion([{
-                role: 'system',
-                content: ''
-            }, {
+            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+            prompt +=  `Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`;
+            
+            const result = await openAIRepo.getCompletion([ {
                 'role': 'user',
-                'content': `You are an expert flutter developer, Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`
+                'content': prompt
             }]);
 
             clearInterval(progressInterval);

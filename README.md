@@ -2,28 +2,22 @@
 
 FlutterGPT is an experiment to create a coding assistant catering needs specific to Flutter Engineers.
 
-We're starting with features to
-1. Create
-    - widgets from description
-    - classes and methods just from a blueprint.
-2. Refactor
-    - code with language instructions.
-    - and fix runtime errors directly by sending the error description.
-3. Explain
-    - and get simple explanations of complex functions. 
-
-    with a vision to build a supercharged, free to use coding assistant built for and by Flutter Engineers.
+We're starting with simple features to create, refactor and debug with a vision to build a supercharged, free to use coding assistant built for and by Flutter Engineers.
 
 We only use GPT3.5 because it's fast, highly accurate, cheap and is available to all. 
+
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Create 
+a. Widget from Description
+b. Model Class from JSON (Freezed, JsonSerializable with copywith function)
+c. Repository Class from Postman Json
+c. Complete Code from BluePrint
 
-For example if there is an image subfolder under your extension project workspace:
+### Refactor
+a. Anything with Instructions
+b. Fix Errors
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 ## Requirements
 1. You'll need an [OpenAI account](https://platform.openai.com) with a valid API key.
