@@ -6,6 +6,9 @@
   "engines": {
     "vscode": "^1.77.0"
   },
+  "repository": {
+    "url": "https://github.com/Welltested-AI/fluttergpt"
+  },
   "categories": [
     "Other"
   ],
