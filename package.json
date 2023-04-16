@@ -24,16 +24,21 @@
     "commands": [
       {
         "command": "fluttergpt.createWidget",
-        "title": "FlutterGPT: Create Widget"
+        "title": "FlutterGPT Create: Widget from Description"
+      },
+      {
+        "command": "fluttergpt.createModelClass",
+        "title": "FlutterGPT Create: Model Class from JSON"
       },
       {
         "command": "fluttergpt.refactorCode",
-        "title": "FlutterGPT: Refactor"
+        "title": "FlutterGPT Refactor: From Instructions"
       },
       {
         "command": "fluttergpt.debugErrors",
-        "title": "FlutterGPT: Debug Errors"
+        "title": "FlutterGPT Refactor: Fix Errors"
       }
+      
     ]
   },
   "menus": {

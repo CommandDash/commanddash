@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from './repository/openai-repository';
 import {extractDartCode} from './utilities/code-processing';
 import {refactorCode} from './tools/refactor_from_instructions';
+import {createModelClass} from './tools/create/class_model_from_json';
 import {debugErrors} from './tools/debug_errors';
 import { open } from 'fs';
 // This method is called when your extension is activated
@@ -74,6 +75,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     let debugErrorsDisposable = vscode.commands.registerCommand('fluttergpt.debugErrors', async () => debugErrors(openAIRepo));
     context.subscriptions.push(debugErrorsDisposable);
+
+    let disposableModelClass = vscode.commands.registerCommand("fluttergpt.createModelClass", async () => createModelClass(openAIRepo));
+    context.subscriptions.push(disposableModelClass);
 }
 
 

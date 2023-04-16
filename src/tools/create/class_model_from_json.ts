@@ -11,18 +11,21 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
       placeHolder: "Paste your JSON structure here",
       password: false,
       ignoreFocusOut: false,
-      validateInput: undefined,
+      validateInput: (value: string) => {
+        try {
+          JSON.parse(value);
+          return null;
+        } catch (e: any) {
+          return e.message;
+        }
+      },
     });
     if (!jsonStructure) {
       return;
     }
 
-    const useFreezed = await vscode.window.showQuickPick(["Yes", "No"], {
-      placeHolder: "Use Freezed library?",
-    });
-
-    const useJsonSerializable = await vscode.window.showQuickPick(["Yes", "No"], {
-      placeHolder: "Use JsonSerializable library?",
+    const library = await vscode.window.showQuickPick(["None", "Freezed", "JsonSerializable"], {
+      placeHolder: "Select a library",
     });
 
     const includeHelpers = await vscode.window.showQuickPick(["Yes", "No"], {
@@ -44,20 +47,22 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
           const increment = progressPercentage - prevProgressPercentage;
           progress.report({ increment });
         }, 200);
+        let prompt = `You're a Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
+        prompt += `Create a Flutter model class, keeping null safety in mind for from the following JSON structure: ${jsonStructure}.`;
+
+        if(library!=='None') {
+          prompt+= `Use ${library}`;
+        }
+        if(includeHelpers==='Yes'){
+          prompt+= `Make sure toJson, fromJson, and copyWith methods are included.`;
+        }
+        prompt+= `Output the model class  code in a single block.`;
 
         const result = await openAIRepo.getCompletion([
           {
-            role: "system",
-            content: "",
-          },
-          {
             role: "user",
-            content: `Create a Flutter model class from the following JSON structure: ${jsonStructure}. Use Freezed: ${
-              useFreezed === "Yes"
-            }. Use JsonSerializable: ${
-              useJsonSerializable === "Yes"
-            }. Include toJson, fromJson, and copyWith methods: ${includeHelpers === "Yes"}.`,
-          },
+            content: prompt
+          }
         ]);
         clearInterval(progressInterval);
         progress.report({ increment: 100 });
