@@ -55,12 +55,14 @@ export class OpenAIRepository {
           data: request
       };
       try{
+        console.debug(`Making request to gpt: ${JSON.stringify(request)}`);
         const response: ChatCompletionResponse = await makeHttpRequest<ChatCompletionResponse>(config);
+        console.debug(`Response from from gpt: ${JSON.stringify(response)}`);
         if (!response.choices || response.choices.length === 0) {
             throw new Error('API response was empty or missing "choices" field');
         }
-        const widgetCode = response.choices[0].message.content.trim();
-        return widgetCode;
+        const trimmedResponse = response.choices[0].message.content.trim();
+        return trimmedResponse;
       } catch (error){
         throw new Error('Failed to get completion from API: ' +  error);
       }
