@@ -1,7 +1,7 @@
 {
   "name": "fluttergpt",
-  "displayName": "fluttergpt",
-  "description": "Your AI assistant for Flutter Development",
+  "displayName": "FlutterGPT: A Supercharged Development Experiment",
+  "description": "Use ChatGPT right inside your IDE to create, refactor and debug Flutter code.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.77.0"
@@ -9,15 +9,29 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "flutter",
+    "dart",
+    "chatgpt",
+    "openai",
+    "gpt3",
+    "copilot",
+    "ai",
+    "create",
+    "debug",
+    "refactor",
+    "widgets"
+  ],
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
+      "title": "FlutterGPT",
+      "type": "object",
       "properties": {
         "fluttergpt.apiKey": {
           "type": "string",
-          "default": "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",
-          "description": "OpenAI API Key"
+          "markdownDescription": "API key from [OpenAI](https://platform.openai.com/account/api-keys)"
         }
       }
     },
@@ -42,8 +56,6 @@
         "command": "fluttergpt.fixErrors",
         "title": "FlutterGPT Refactor: Fix Errors"
       }
-    
-      
     ]
   },
   "menus": {

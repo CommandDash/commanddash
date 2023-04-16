@@ -1,7 +1,20 @@
 # fluttergpt README
 
-This is the README for your extension "fluttergpt". After writing up a brief description, we recommend including the following sections.
+FlutterGPT is an experiment to create a coding assistant catering needs specific to Flutter Engineers.
 
+We're starting with features to
+1. Create
+    - widgets from description
+    - classes and methods just from a blueprint.
+2. Refactor
+    - code with language instructions.
+    - and fix runtime errors directly by sending the error description.
+3. Explain
+    - and get simple explanations of complex functions. 
+
+    with a vision to build a supercharged, free to use coding assistant built for and by Flutter Engineers.
+
+We only use GPT3.5 because it's fast, highly accurate, cheap and is available to all. 
 ## Features
 
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
@@ -13,19 +26,13 @@ For example if there is an image subfolder under your extension project workspac
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 ## Requirements
+1. You'll need an [OpenAI account](https://platform.openai.com) with a valid API key.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Post Installation
 
-## Extension Settings
+After installing the extensions, please visit your VSCode setttings, search for `fluttergpt.apiKey` and paste the OPENAI API Key.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Please Note: Using OpenAI APIs will incur charges. From our observations, running 300 create widget from description costs only 1$.
 
 ## Known Issues
 
@@ -46,26 +53,3 @@ Fixed issue #.
 ### 1.1.0
 
 Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
