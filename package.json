@@ -1,8 +1,10 @@
 {
   "name": "fluttergpt",
-  "displayName": "FlutterGPT: A Supercharged Development Experiment",
+  "displayName": "FlutterGPT: Supercharged Dev Experiment",
   "description": "Use ChatGPT right inside your IDE to create, refactor and debug Flutter code.",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "publisher": "WelltestedAI",
+  "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.77.0"
   },
