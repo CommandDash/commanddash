@@ -56,7 +56,7 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
             } else {
                 promptContent += `The full code context is:\n\n${fullCode}\n\n`;
             }
-            promptContent += `First mention the possible explanation of the error and then output the fixed code in a single code block.`;
+            promptContent += `Output the fixed code in a single code block.`;
 
             const result = await openAIRepo.getCompletion([ {
                 'role': 'user',
