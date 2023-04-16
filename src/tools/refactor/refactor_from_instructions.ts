@@ -36,9 +36,13 @@ export async function refactorCode(openAIRepo: OpenAIRepository) {
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
+            let prompt=`You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
+            prompt+=`Refactor the following Flutter code based on the instructions: ${instructions}\n\nCode:\n${selectedCode}\n\n`;
+            prompt+=`Output code in a single block`;
+            
             const result = await openAIRepo.getCompletion([{
                 'role': 'user',
-                'content': `You're an expert Flutter/Dart coding assistant. Refactor the following Flutter code based on the instructions: ${instructions}\n\nCode:\n${selectedCode}`
+                'content': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });

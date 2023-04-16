@@ -48,16 +48,15 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-
-            let promptContent = `Follow the instructoins carefully and to the letter. You're a Flutter/Dart debugging expert. You first mention the possible explanation of the error and then output the fixing code in a single code block.`;
-            promptContent += `\n\nHere's a piece of Flutter code with ${errorType} errors:\n\n${selectedCode}\n\n`;
+    
+            let promptContent = `Follow the instructions carefully and to the letter. You're a Flutter/Dart debugging expert.\n\n`;
+            promptContent += `Here's a piece of Flutter code with ${errorType} errors:\n\n${selectedCode}\n\n`;
             if (errorsDescription) {
                 promptContent += `The errors are: ${errorsDescription}\n\n`;
             } else {
                 promptContent += `The full code context is:\n\n${fullCode}\n\n`;
             }
-
-            promptContent += `Please fix the code.`;
+            promptContent += `First mention the possible explanation of the error and then output the fixed code in a single code block.`;
 
             const result = await openAIRepo.getCompletion([ {
                 'role': 'user',

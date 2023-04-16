@@ -16,7 +16,8 @@ export async function createCodeFromBlueprint(openAIRepo: OpenAIRepository) {
     }
 
     try {
-        const prompt = `You're a Flutter/Dart coding assistant. Follow user's instruction carefully and to the letter\n\nCreate Flutter/Dart code for the following blueprint: ${blueprint}. Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code in a single block.`;
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        prompt+= `Create Flutter/Dart code for the following blueprint: ${blueprint}. Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code in a single block.`;
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",

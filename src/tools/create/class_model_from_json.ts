@@ -47,7 +47,7 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
           const increment = progressPercentage - prevProgressPercentage;
           progress.report({ increment });
         }, 200);
-        let prompt = `You're a Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
         prompt += `Create a Flutter model class, keeping null safety in mind for from the following JSON structure: ${jsonStructure}.`;
 
         if(library!=='None') {
@@ -56,7 +56,7 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
         if(includeHelpers==='Yes'){
           prompt+= `Make sure toJson, fromJson, and copyWith methods are included.`;
         }
-        prompt+= `Output the model class  code in a single block.`;
+        prompt+= `Output the model class code in a single block.`;
 
         const result = await openAIRepo.getCompletion([
           {

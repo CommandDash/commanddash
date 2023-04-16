@@ -21,12 +21,12 @@ export async function createWidgetFromDescription(openAIRepo: OpenAIRepository) 
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
+            let prompt=`You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+            prompt+=`Create a Flutter Widget from the following description: ${description}.\n`;
+            prompt+=`Output code in a single block`;
             const result = await openAIRepo.getCompletion([{
-                role: 'system',
-                content: ''
-            }, {
                 'role': 'user',
-                'content': `Create a Flutter Widget from the following description: ${description}`
+                'content': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
