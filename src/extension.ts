@@ -7,6 +7,7 @@ import {refactorCode} from './tools/refactor/refactor_from_instructions';
 import {createModelClass} from './tools/create/class_model_from_json';
 import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
+import { createRespoClassFromPostman } from './tools/create/class_repository_from_json';
 import { open } from 'fs';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -35,7 +36,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     let fixErrorsDisposable = vscode.commands.registerCommand('fluttergpt.fixErrors', async () => fixErrors(openAIRepo));
     context.subscriptions.push(fixErrorsDisposable);
-   
+
+    let createRespoClassFromPostmanDisposable = vscode.commands.registerCommand('fluttergpt.createRespoClassFromPostman', () => createRespoClassFromPostman(openAIRepo));
+    context.subscriptions.push(createRespoClassFromPostmanDisposable);
 }
 
 

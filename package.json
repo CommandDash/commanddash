@@ -41,9 +41,11 @@
       {
         "command": "fluttergpt.fixErrors",
         "title": "FlutterGPT Refactor: Fix Errors"
+      },
+      {
+        "command": "fluttergpt.createRespoClassFromPostman",
+        "title": "FlutterGPT Create: API Repository from Postman JSON"
       }
-    
-      
     ]
   },
   "menus": {
