@@ -31,13 +31,17 @@ interface ChatCompletionResponse {
   }
 
 export class OpenAIRepository {
-    private apiKey: string;
+    private apiKey?: string;
   
-    constructor(apiKey: string) {
+    constructor(apiKey: string | undefined) {
       this.apiKey = apiKey;
     }
   
     public async getCompletion(prompt: { role: string, content: string }[]): Promise<string> {
+
+      if(!this.apiKey) {
+        throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
+      }
     
       const request: ChatCompletionRequest = {
           model: 'gpt-3.5-turbo',

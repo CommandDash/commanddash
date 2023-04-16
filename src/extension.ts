@@ -17,9 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "fluttergpt" is now active!');
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
-    if(!apiKey){
-        return ;
-    }
+
     const openAIRepo = new OpenAIRepository(apiKey);
 
     let createWidgetDisposable = vscode.commands.registerCommand('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo));
