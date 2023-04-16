@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../repository/openai-repository';
-import {extractDartCode} from '../utilities/code-processing';
+import { OpenAIRepository } from '../../repository/openai-repository';
+import {extractDartCode} from '../../utilities/code-processing';
 
 export async function refactorCode(openAIRepo: OpenAIRepository) {
     try {

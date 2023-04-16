@@ -31,13 +31,18 @@
         "title": "FlutterGPT Create: Model Class from JSON"
       },
       {
+        "command": "fluttergpt.createCodeFromBlueprint",
+        "title": "FlutterGPT Create: Code from Blueprint"
+      },
+      {
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },
       {
-        "command": "fluttergpt.debugErrors",
+        "command": "fluttergpt.fixErrors",
         "title": "FlutterGPT Refactor: Fix Errors"
       }
+    
       
     ]
   },
@@ -54,7 +59,7 @@
             "group": "fluttergpt-menu-group@2"
         },
         {
-          "command": "fluttergpt.debugErrors",
+          "command": "fluttergpt.fixErrors",
           "group": "navigation"
         }
     ]

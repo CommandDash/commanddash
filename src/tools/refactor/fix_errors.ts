@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../repository/openai-repository';
-import {extractDartCode, extractExplanation} from '../utilities/code-processing';
+import { OpenAIRepository } from '../../repository/openai-repository';
+import {extractDartCode, extractExplanation} from '../../utilities/code-processing';
 
-export async function debugErrors(openAIRepo: OpenAIRepository, errorType: 'runtime' | 'compile-time' = 'runtime') {
+export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtime' | 'compile-time' = 'runtime') {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor');

@@ -2,10 +2,11 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { OpenAIRepository } from './repository/openai-repository';
-import {extractDartCode} from './utilities/code-processing';
-import {refactorCode} from './tools/refactor_from_instructions';
+import {createWidgetFromDescription} from './tools/create/widget_from_description';
+import {refactorCode} from './tools/refactor/refactor_from_instructions';
 import {createModelClass} from './tools/create/class_model_from_json';
-import {debugErrors} from './tools/debug_errors';
+import {fixErrors} from './tools/refactor/fix_errors';
+import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { open } from 'fs';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -20,64 +21,21 @@ export function activate(context: vscode.ExtensionContext) {
     }
     const openAIRepo = new OpenAIRepository(apiKey);
 
-    let disposable = vscode.commands.registerCommand('fluttergpt.createWidget', async () => {
-        try {
-            const description = await vscode.window.showInputBox({ prompt: "Enter widget description" });
-            if (!description) {
-                return;
-            }
-    
-            // Show notification
-            vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Creating Widget",
-                cancellable: false
-            }, async (progress) => {
-                let progressPercentage = 0;
-                let prevProgressPercentage = 0;
-                const progressInterval = setInterval(() => {
-                    prevProgressPercentage = progressPercentage;
-                    progressPercentage = (progressPercentage + 10) % 100;
-                    const increment = progressPercentage - prevProgressPercentage;
-                    progress.report({ increment });
-                }, 200);
-                const result = await openAIRepo.getCompletion([{
-                    role: 'system',
-                    content: ''
-                }, {
-                    'role': 'user',
-                    'content': `Create a Flutter Widget from the following description: ${description}`
-                }]);
-                clearInterval(progressInterval);
-                progress.report({ increment: 100 });
-    
-                const dartCode = extractDartCode(result);
-                const editor = vscode.window.activeTextEditor;
-                if (editor) {
-                    editor.edit((editBuilder) => {
-                        const position = editor.selection.active;
-                        editBuilder.insert(position, dartCode);
-                    });
-                    vscode.window.showInformationMessage('Widget created successfully!');
-                } else {
-                    vscode.window.showErrorMessage('No active editor');
-                }
-            });
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to create widget: ${error}`);
-        }
-    });
+    let createWidgetDisposable = vscode.commands.registerCommand('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo));
+	context.subscriptions.push(createWidgetDisposable);
 
-	context.subscriptions.push(disposable);
+    let createCodeDisposable = vscode.commands.registerCommand('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo));
+    context.subscriptions.push(createCodeDisposable);
 
+    let createModelClassDisposable = vscode.commands.registerCommand("fluttergpt.createModelClass", async () => createModelClass(openAIRepo));
+    context.subscriptions.push(createModelClassDisposable);
+    
     let refactorDisposable = vscode.commands.registerCommand('fluttergpt.refactorCode',()=> refactorCode(openAIRepo));
     context.subscriptions.push(refactorDisposable);
 
-    let debugErrorsDisposable = vscode.commands.registerCommand('fluttergpt.debugErrors', async () => debugErrors(openAIRepo));
-    context.subscriptions.push(debugErrorsDisposable);
-
-    let disposableModelClass = vscode.commands.registerCommand("fluttergpt.createModelClass", async () => createModelClass(openAIRepo));
-    context.subscriptions.push(disposableModelClass);
+    let fixErrorsDisposable = vscode.commands.registerCommand('fluttergpt.fixErrors', async () => fixErrors(openAIRepo));
+    context.subscriptions.push(fixErrorsDisposable);
+   
 }
 
 
