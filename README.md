@@ -9,18 +9,22 @@ We only use GPT3.5 because it's fast, highly accurate, cheap, and is available t
 ## Features
 
 ### Create 
-a. Widget from Description
-b. Model Class from JSON (Freezed, JsonSerializable with copywith function)
-c. Repository Class from Postman Json
-d. Complete Code from BluePrint
+<ol type='a'>
+<li>Widget from Description</li>
+<li>Model Class from JSON (Freezed, JsonSerializable with copywith function)</li>
+<li>Repository Class from Postman Json</li>
+<li>Complete Code from BluePrint</li>
+</ol>
 
-<img src="media/create.png" alt="Adding Code using FlutterGPT" width="500"/>
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Adding Code using FlutterGPT" width="500"/>
 
 ### Refactor
-a. Anything with Instructions
-b. Fix Errors
+<ol type='a'>
+<li>Anything with Instructions</li>
+<li>Fix Errors</li>
+</ol>
 
-<img src="media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
 
 
 ## Requirements
