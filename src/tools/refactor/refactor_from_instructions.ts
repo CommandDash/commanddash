@@ -23,7 +23,7 @@ export async function refactorCode(openAIRepo: OpenAIRepository) {
             return;
         }
 
-        vscode.window.withProgress({
+        await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Refactoring Code",
             cancellable: false

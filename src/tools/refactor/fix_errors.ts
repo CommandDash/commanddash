@@ -35,7 +35,7 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
     const fullCode = editor.document.getText();
 
     try {
-        vscode.window.withProgress({
+        await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Debugging Errors",
             cancellable: false

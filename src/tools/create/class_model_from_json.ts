@@ -32,7 +32,7 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
       placeHolder: "Include toJson, fromJson, and copyWith methods?",
     });
 
-    vscode.window.withProgress(
+    await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: "Creating Model Class",

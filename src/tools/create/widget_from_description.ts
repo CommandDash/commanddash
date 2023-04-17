@@ -8,7 +8,7 @@ export async function createWidgetFromDescription(openAIRepo: OpenAIRepository) 
         if (!description) {
             return;
         }
-        vscode.window.withProgress({
+        await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Widget",
             cancellable: false
