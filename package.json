@@ -68,19 +68,18 @@
     ],
     "menus": {
       "editor/context": [
-          {
-              "command": "fluttergpt.refactorCode",
-              "when": "editorHasSelection && resourceLangId == 'dart'",
-              "group": "fluttergpt-menu-group@1"
-          },
-          {
-            "command": "fluttergpt.fixErrors",
-            "group": "fluttergpt-menu-group@1"
-          }
+        {
+          "command": "fluttergpt.refactorCode",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.fixErrors",
+          "group": "fluttergpt-menu-group@1"
+        }
       ]
     }
   },
-  
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
