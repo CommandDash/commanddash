@@ -43,7 +43,7 @@ Please Note: Using OpenAI APIs will incur charges. From our observations, runnin
 - `FlutterGPT Create: Widget from Description`: Creates a Flutter Widget from description. Be as specific as you like.
 - `FlutterGPT Create: Model Class from JSON`: Create model classes from JSON with null safety in mind. You can also choose to generate Freezed or JsonSerializable modules
 - `FlutterGPT Create: API Repository from Postman JSON`: Convert your postman JSON into API Repoitory
-- `FlutterGPT Create: Code from Blueprint`: Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecutre of your choice.
+- `FlutterGPT Create: Code from Blueprint`: Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
 - `FlutterGPT Refactor: From Instructions`: Refactor widgets and logic both with this command.
 - `FlutterGPT Refactor: Fix Errors`: Pass your runtime errors and get fixed code back.
 
