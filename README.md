@@ -38,20 +38,20 @@ Create flutter widgets based on the description you provide. Be as specific as y
 #### Model Class from JSON
 Create model classes from JSON with null safety in mind. You can also choose to generate Freezed or JsonSerializable modules
 
-`FlutterGPT Create: Model Class from JSON`
+command: `FlutterGPT Create: Model Class from JSON`
 
 
 #### Repository Class from Postman Json
 
 Convert you postman collection exports json to API repository class
 
-`FlutterGPT Create: API Repository from Postman JSON`
+command: `FlutterGPT Create: API Repository from Postman JSON`
 
 #### Complete Code from BluePrint
 
 Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
 
-`FlutterGPT Create: Code from Blueprint`
+command: `FlutterGPT Create: Code from Blueprint`
 
 
 ### 🛠️ Refactor
@@ -63,19 +63,19 @@ Get complete code from a blueprint of a class or function with the behaviour of 
 #### From Instruction
 Refactor widgets and logic both with this command.
 
-`FlutterGPT Refactor: From Instructions`
+command: `FlutterGPT Refactor: From Instructions`
 
 #### Fix Errors
 Pass your runtime errors and get fixed code back.
 
-`FlutterGPT Refactor: Fix Errors`
+command: `FlutterGPT Refactor: Fix Errors`
 
 ## Requirements
 1. You'll need an [OpenAI account](https://platform.openai.com) with a valid API key. For more information on obtaining an API key, please visit the [OpenAI API documentation](https://platform.openai.com/docs/).
 
 ## Getting Started
 
-1. After installing the extensions, please visit your VSCode setttings, search for `fluttergpt.apiKey` and paste the (OPENAI API Key)[https://platform.openai.com/account/api-keys].
+1. After installing the extensions, please visit your VSCode setttings, search for `fluttergpt.apiKey` and paste the [OPENAI API Key](https://platform.openai.com/account/api-keys).
 
 2. To get started, select any piece of your dart code, open VSCode command pallete and search for `FlutterGPT`. You'll see all available commands. Details below.
 
