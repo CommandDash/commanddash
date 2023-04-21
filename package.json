@@ -68,17 +68,55 @@
     ],
     "menus": {
       "editor/context": [
-          {
-              "command": "fluttergpt.refactorCode",
-              "when": "editorHasSelection && resourceLangId == 'dart'",
-              "group": "fluttergpt-menu-group@1"
-          },
-          {
-            "command": "fluttergpt.fixErrors",
-            "group": "fluttergpt-menu-group@1"
-          }
+        {
+          "submenu": "fluttergpt.refactorMenu",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "submenu": "fluttergpt.createMenu",
+          "group": "fluttergpt-menu-group@1"
+        }
+      ],
+      "fluttergpt.refactorMenu": [
+        {
+          "command": "fluttergpt.refactorCode",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.fixErrors",
+          "group": "fluttergpt-menu-group@1"
+        }
+      ],
+      "fluttergpt.createMenu": [
+        {
+          "command": "fluttergpt.createWidget",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createModelClass",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createCodeFromBlueprint",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createRepoClassFromPostman",
+          "group": "fluttergpt-menu-group@1"
+        }
       ]
-    }
+    },
+    "submenus": [
+      {
+        "id": "fluttergpt.createMenu",
+        "label": "FlutterGPT Create"
+      },
+      {
+        "id": "fluttergpt.refactorMenu",
+        "label": "FlutterGPT Refactor"
+      }
+    ]
   },
   
   "scripts": {
