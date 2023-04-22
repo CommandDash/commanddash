@@ -2,10 +2,10 @@ FlutterGPT Roadmap
 ---------------
 
 This document is designed to be a living record of the current and projected
-priorities for the Appium project. It is, of course, always subject to change
+priorities for the fluttergpt project. It is, of course, always subject to change
 and exists solely to give the community an idea of where we're going. The
-roadmap is set by the Appium core team. If you have feature suggestions for
-Appium, please submit a [GitHub issue](https://github.com/Welltested-AI/fluttergpt/issues)
+roadmap is set by the fluttergpt core team. If you have feature suggestions for
+fluttergpt, please submit a [GitHub issue](https://github.com/Welltested-AI/fluttergpt/issues)
 and, if of sufficient size and approved by the team, it will be added here. If
 you have concerns about the roadmap, you can e-mail the devs at
 `team@welltested.ai` or raise a GitHub issue. Note that
