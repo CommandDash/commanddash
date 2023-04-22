@@ -95,6 +95,10 @@ First version of FlutterGPT!
 
 We welcome contributions from the community. If you'd like to contribute to the project, report issues, or suggest new features, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file or reach out to us through team@welltested.ai.
 
+### Roadmap
+
+Interested in where FlutterGPT is heading in the future? Check out the [Roadmap](ROADMAP.md)
+
 ## License
 
 FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE file](LICENSE) for more information.
