@@ -23,23 +23,12 @@ export function activate(context: vscode.ExtensionContext) {
         if (affected) openAIRepo = initOpenAI();
     })
 
-    let createWidgetDisposable = vscode.commands.registerCommand('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo));
-	context.subscriptions.push(createWidgetDisposable);
-
-    let createCodeDisposable = vscode.commands.registerCommand('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo));
-    context.subscriptions.push(createCodeDisposable);
-
-    let createModelClassDisposable = vscode.commands.registerCommand("fluttergpt.createModelClass", async () => createModelClass(openAIRepo));
-    context.subscriptions.push(createModelClassDisposable);
-    
-    let refactorDisposable = vscode.commands.registerCommand('fluttergpt.refactorCode',()=> refactorCode(openAIRepo));
-    context.subscriptions.push(refactorDisposable);
-
-    let fixErrorsDisposable = vscode.commands.registerCommand('fluttergpt.fixErrors', async () => fixErrors(openAIRepo));
-    context.subscriptions.push(fixErrorsDisposable);
-
-    let createRepoClassFromPostmanDisposable = vscode.commands.registerCommand('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo));
-    context.subscriptions.push(createRepoClassFromPostmanDisposable);
+    customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo), context);
+    customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo), context);
+    customPush("fluttergpt.createModelClass", async () => createModelClass(openAIRepo), context);
+    customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo), context);
+    customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
+    customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
 }
 
 function initOpenAI(): OpenAIRepository {
@@ -47,6 +36,14 @@ function initOpenAI(): OpenAIRepository {
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
     return new OpenAIRepository(apiKey);
+}
+
+function customPush(name: string, handler: (...args: any[]) => any, context: vscode.ExtensionContext): void {
+    let baseCommand = vscode.commands.registerCommand(name, handler);
+    context.subscriptions.push(baseCommand);
+
+    let menuCommand = vscode.commands.registerCommand(name + ".menu", handler);
+    context.subscriptions.push(menuCommand);
 }
 
 
