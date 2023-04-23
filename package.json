@@ -28,7 +28,7 @@
     "widgets"
   ],
   "activationEvents": [],
-  "main": "./out/extension.js",
+  "main": "./src/extension.ts",
   "contributes": {
     "configuration": {
       "title": "FlutterGPT",
