@@ -115,7 +115,7 @@
         },
         {
           "command": "fluttergpt.fixErrors.menu",
-          "group": "fluttergpt-menu-group@1"
+          "group": "fluttergpt-menu-group@2"
         }
       ],
       "fluttergpt.createMenu": [
@@ -125,15 +125,15 @@
         },
         {
           "command": "fluttergpt.createModelClass.menu",
-          "group": "fluttergpt-menu-group@1"
+          "group": "fluttergpt-menu-group@2"
         },
         {
           "command": "fluttergpt.createCodeFromBlueprint.menu",
-          "group": "fluttergpt-menu-group@1"
+          "group": "fluttergpt-menu-group@3"
         },
         {
           "command": "fluttergpt.createRepoClassFromPostman.menu",
-          "group": "fluttergpt-menu-group@1"
+          "group": "fluttergpt-menu-group@4"
         }
       ]
     },
