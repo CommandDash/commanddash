@@ -18,7 +18,7 @@ export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository) {
                 progress.report({ increment });
             }, 200);
 
-            let description = "placeholder"
+            let description = "placeholder";
             const editor = vscode.window.activeTextEditor;
             if (editor) {
                 const document = editor.document;

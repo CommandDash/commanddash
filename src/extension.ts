@@ -20,8 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.onDidChangeConfiguration(event => {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
-        if (affected) openAIRepo = initOpenAI();
-    })
+        if (affected) { openAIRepo = initOpenAI(); }
+    });
 
     customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo), context);
     customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo), context);
