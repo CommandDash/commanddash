@@ -26,7 +26,7 @@ We only use GPT3.5 because it's fast, highly accurate, cheap, and is available t
 
 ### 🪄 Create
 
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/readme_refactor/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Creating Code using FlutterGPT" width="500"/>
 
 #### Widget from Description
 Create flutter widgets based on the description you provide. Be as specific as you like.
