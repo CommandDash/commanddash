@@ -24,7 +24,7 @@ We only use GPT3.5 because it's fast, highly accurate, cheap, and is available t
 <li>Fix Errors</li>
 </ol>
 
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/readme_refactor/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
 
 
 ## Requirements
