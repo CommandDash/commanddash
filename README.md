@@ -81,24 +81,21 @@ command: `FlutterGPT Refactor: Fix Errors`
 
 Please Note: Using OpenAI APIs will incur charges. From our observations, running 500 create widget from description costs only 1$.
 
-## Known Issues
-
-This is the beta version and can be unstable. 
-
-## Release Notes
-
-### 1.0.0
-
-First version of FlutterGPT! 
 
 ## Contributing
 
-We welcome contributions from the community. If you'd like to contribute to the project, report issues, or suggest new features, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file or reach out to us through team@welltested.ai.
+We welcome contributions from the Flutter community to help improve FlutterGPT. You can contribute to the project by reporting issues, suggesting new features and taking up next tasks from the [ROADMAP.md](ROADMAP.md). To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file. You can also reach out to us at team@welltested.ai if you have any questions or feedback.
 
-### Roadmap
+### Ways to contribute
 
-Interested in where FlutterGPT is heading in the future? Check out the [Roadmap](ROADMAP.md)
+- **File feature requests**: If you have an idea for a new feature that'll make your development life easier, please file a feature request on our [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+- **Fix existing issues**: You can help us by fixing any existing issues in the project. Check out our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) to find out what needs to be done.
+- **Pick up approved features**: You can also contribute by picking up approved features from our [Roadmap](ROADMAP.md).
 
-## License
+## Roadmap
 
-FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE file](LICENSE) for more information.
+To get a sense of direction of where we're heading, please check out our [Roadmap](ROADMAP.md).
+
+## Known Issues
+
+This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.

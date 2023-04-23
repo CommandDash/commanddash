@@ -8,7 +8,7 @@ While there are no special coding guidelines for FlutterGPT, we ask that you kee
 
 ## Tools and Technologies
 
-FlutterGPT is built using TypeScript and uses OPENAI's ChatGPT3.5 APIs. Familiarity with these technologies is helpful, but not required.
+FlutterGPT is built using TypeScript and uses OPENAI's GPT3.5 APIs. Familiarity with these technologies is helpful, but not required. We use ChatGPT to write a lot of code for the plugin and encourage contributors to do so too! 
 
 ## Submitting a Contribution
 
