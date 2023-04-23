@@ -81,7 +81,6 @@ command: `FlutterGPT Refactor: Fix Errors`
 
 Please Note: Using OpenAI APIs will incur charges. From our observations, running 500 create widget from description costs only 1$.
 
-
 ## Contributing
 
 We welcome contributions from the Flutter community to help improve FlutterGPT. You can contribute to the project by reporting issues, suggesting new features and taking up next tasks from the [ROADMAP.md](ROADMAP.md). To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file. You can also reach out to us at team@welltested.ai if you have any questions or feedback.
@@ -99,3 +98,16 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 ## Known Issues
 
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
+
+## Release Notes
+
+### 0.0.5
+Refactors and UX improvements
+
+### 0.0.4
+
+First version of FlutterGPT! 
+
+## License
+
+FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE file](LICENSE) for more information.
