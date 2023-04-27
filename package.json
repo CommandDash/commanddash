@@ -103,7 +103,12 @@
         "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
         "title": "Create Responsive Widget from Code",
         "when": "false"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromDescription",
+        "title": "[FlutterGPT] Responsive Widget from Description"
       }
+
     ],
     "menus": {
       "editor/context": [
@@ -114,6 +119,13 @@
         {
           "submenu": "fluttergpt.createMenu",
           "group": "fluttergpt-menu-group@1"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "fluttergpt.createResponsiveWidgetFromDescription",
+          "group": "fluttergpt-menu-group@1",
+          "description": "[FlutterGPT] Responsive Widget from Description"
         }
       ],
       "fluttergpt.refactorMenu": [
@@ -148,6 +160,7 @@
           "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
           "group": "fluttergpt-menu-group@5"
         }
+        
       ]
     },
     "submenus": [

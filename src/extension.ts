@@ -6,6 +6,7 @@ import {createWidgetFromDescription} from './tools/create/widget_from_descriptio
 import {refactorCode} from './tools/refactor/refactor_from_instructions';
 import {createModelClass} from './tools/create/class_model_from_json';
 import {createResponsiveWidgetFromCode} from './tools/create/responsive_widget_from_code';
+import {createResponsiveWidgetFromDescription} from './tools/create/responsive_widget_from_description';
 import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
@@ -31,6 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
     customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo), context);
+    customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
+    
+
 }
 
 function initOpenAI(): OpenAIRepository {
@@ -46,6 +50,13 @@ function customPush(name: string, handler: (...args: any[]) => any, context: vsc
 
     let menuCommand = vscode.commands.registerCommand(name + ".menu", handler);
     context.subscriptions.push(menuCommand);
+}
+
+function customUriPush(name: string,openAIRepo: OpenAIRepository, context: vscode.ExtensionContext):void{
+    const command=vscode.commands.registerCommand(name, async (uri: vscode.Uri) => {
+        await createResponsiveWidgetFromDescription(openAIRepo,uri);
+    });
+    context.subscriptions.push(command);
 }
 
 
