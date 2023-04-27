@@ -97,11 +97,11 @@
       },
       {
         "command": "fluttergpt.createResponsiveWidgetFromCode",
-        "title": "FlutterGPT Create: Create responsive widget from code"
+        "title": "FlutterGPT Create: Create Responsive Widget from Code"
       },
       {
         "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
-        "title": "Create responsive widget from code",
+        "title": "Create Responsive Widget from Code",
         "when": "false"
       }
     ],

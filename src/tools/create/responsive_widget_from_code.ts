@@ -13,7 +13,7 @@ export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepositor
 
     const blueprint = editor.document.getText(editor.selection);
     if (!blueprint) {
-        vscode.window.showErrorMessage('No blueprint selected');
+        vscode.window.showErrorMessage('No Code selected');
         return;
     }
 
