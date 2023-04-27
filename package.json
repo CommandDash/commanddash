@@ -94,6 +94,15 @@
         "command": "fluttergpt.fixErrors.menu",
         "title": "Fix Errors",
         "when": "false"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromCode",
+        "title": "FlutterGPT Create: Create responsive widget from code"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
+        "title": "Create responsive widget from code",
+        "when": "false"
       }
     ],
     "menus": {
@@ -134,6 +143,10 @@
         {
           "command": "fluttergpt.createRepoClassFromPostman.menu",
           "group": "fluttergpt-menu-group@4"
+        },
+        {
+          "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
+          "group": "fluttergpt-menu-group@5"
         }
       ]
     },

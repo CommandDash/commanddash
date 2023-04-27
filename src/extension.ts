@@ -5,6 +5,7 @@ import { OpenAIRepository } from './repository/openai-repository';
 import {createWidgetFromDescription} from './tools/create/widget_from_description';
 import {refactorCode} from './tools/refactor/refactor_from_instructions';
 import {createModelClass} from './tools/create/class_model_from_json';
+import {createResponsiveWidgetFromCode} from './tools/create/responsive_widget_from_code';
 import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
@@ -20,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.onDidChangeConfiguration(event => {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
-        if (affected) { openAIRepo = initOpenAI(); }
+        if (affected) { openAIRepo = initOpenAI();}
     });
 
     customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo), context);
@@ -29,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
+    customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo), context);
 }
 
 function initOpenAI(): OpenAIRepository {
