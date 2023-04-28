@@ -112,8 +112,7 @@ async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepositor
         prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is website compatible.
         change the class or widget name to ${modifiedName}.use responsive sizing and add Web to the widget name at the end. 
         Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code 
-        in a single block. The widget dimension should increase and decrease as the width of the screen changes.
-        use relative sizing. bound the size to a upper limit so that the widet does not get too big.`;
+        in a single block.`;
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",
@@ -156,8 +155,7 @@ async function generateTabletCode(selectedText: string, openAIRepo: OpenAIReposi
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
         prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is table compatible.
         change the class or widget name to ${modifiedName}. use responsive sizing. Closely analyze the blueprint, 
-        see if any state management or architecture is specified and output complete functioning code in a single block.
-        The widget dimension should increase and decrease as the width of the screen changes.use relative sizing.`;
+        see if any state management or architecture is specified and output complete functioning code in a single block.`;
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",
