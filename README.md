@@ -79,6 +79,16 @@ command: `FlutterGPT Refactor: Fix Errors`
 
 Please Note: Using OpenAI APIs will incur charges. From our observations, running 500 create widget from description costs only 1$.
 
+## FAQs
+1. **How safe and secure is it to use, and can you explain why?**
+- FlutterGPT communicates directly with the SSL-encrypted OpenAI APIs, which are protected by SOC2 Compliance. Additionally, any data sent to OpenAI via the APIs is not used for training, ensuring complete privacy and security. Therefore, it is completely safe to use for personal or company projects.
+
+2. **Do I need to pay to use FlutterGPT?**
+- FlutterGPT is an open-source and free-to-use project. However, you will need to use OpenAI APIs, which are paid. You can start with a free $5 credit, which equates to approximately 2500 create widget requests. After that, you pay on a usage basis. For more information on OpenAI pricing, please refer to their website: [https://openai.com/pricing](https://openai.com/pricing)
+
+3. **I am an Android Studio user. Can I use FlutterGPT?**
+- FlutterGPT is available for IntelliJ-based IDEs and can be downloaded from the plugin marketplace. Please follow this link: [https://plugins.jetbrains.com/plugin/21568-fluttergpt]
+
 ## Contributing
 
 We welcome contributions from the Flutter community to help improve FlutterGPT. You can contribute to the project by reporting issues, suggesting new features and taking up next tasks from the [ROADMAP.md](ROADMAP.md). To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file. You can also reach out to us at team@welltested.ai if you have any questions or feedback.
