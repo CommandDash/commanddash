@@ -97,6 +97,12 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
+## Running Locally for Contribution
+1. Clone the repository.
+2. Run `npm install`
+3. Use the `Run Extension` command from launch.json for running the extension.
+4. Ensure you've specified the OPENAI secret key in the settings.
+
 ## Release Notes
 
 ### 0.0.5
