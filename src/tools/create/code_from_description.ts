@@ -10,47 +10,7 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository) {
             return;
         }
 
-        const maxWords = 2500;
-
-        const cursorLine = editor.selection.active.line;
-        let lineAbove = cursorLine - 1;
-        let lineBelow = cursorLine + 1;
-        let aboveWordCounter = 0;
-        let belowWordCounter = 0;
-
-        let iterationCounter = 0;
-        while (iterationCounter < 1024) {
-            let outOfAboveLines = lineAbove < 0;
-            let outOfBelowLines = lineBelow >= editor.document.lineCount;
-            if (outOfAboveLines && outOfBelowLines) {
-                break;
-            }
-
-            if (!outOfAboveLines) {
-                aboveWordCounter += editor.document.lineAt(lineAbove).text.split(' ').length;
-                if (aboveWordCounter + belowWordCounter > maxWords) { break; }
-            }
-
-            if (!outOfBelowLines) {
-                belowWordCounter += editor.document.lineAt(lineBelow).text.split(' ').length;
-                if (aboveWordCounter + belowWordCounter > maxWords) { break; }
-            }
-
-            lineAbove--;
-            lineBelow++;
-            iterationCounter++;
-        }
-
-        if (lineAbove < 0) { lineAbove = 0; }
-        if (lineBelow >= editor.document.lineCount) { lineBelow = editor.document.lineCount-1; }
-
-        var aboveText = editor.document.getText(new vscode.Range(lineAbove, 0, cursorLine+1, 0));
-        var belowText = editor.document.getText(new vscode.Range(cursorLine+1, 0, lineBelow, 0));
-
-        // write aboveLine to console
-        console.log(aboveText);
-        console.log(belowText);
-
+        var { aboveText, belowText, cursorLine } = getCodeAroundCursor(editor);
 
         const instructions = await vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
         if (!instructions) {
@@ -102,5 +62,45 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository) {
         });
     } catch (error) {
         vscode.window.showErrorMessage(`Failed to generate code: ${error}`);
+    }
+
+    function getCodeAroundCursor(editor: vscode.TextEditor) {
+        const maxWords = 2500;
+
+        const cursorLine = editor.selection.active.line;
+        let lineAbove = cursorLine - 1;
+        let lineBelow = cursorLine + 1;
+        let aboveWordCounter = 0;
+        let belowWordCounter = 0;
+
+        let iterationCounter = 0;
+        while (iterationCounter < 1024) {
+            let outOfAboveLines = lineAbove < 0;
+            let outOfBelowLines = lineBelow >= editor.document.lineCount;
+            if (outOfAboveLines && outOfBelowLines) {
+                break;
+            }
+
+            if (!outOfAboveLines) {
+                aboveWordCounter += editor.document.lineAt(lineAbove).text.split(' ').length;
+                if (aboveWordCounter + belowWordCounter > maxWords) { break; }
+            }
+
+            if (!outOfBelowLines) {
+                belowWordCounter += editor.document.lineAt(lineBelow).text.split(' ').length;
+                if (aboveWordCounter + belowWordCounter > maxWords) { break; }
+            }
+
+            lineAbove--;
+            lineBelow++;
+            iterationCounter++;
+        }
+
+        if (lineAbove < 0) { lineAbove = 0; }
+        if (lineBelow >= editor.document.lineCount) { lineBelow = editor.document.lineCount - 1; }
+
+        var aboveText = editor.document.getText(new vscode.Range(lineAbove, 0, cursorLine + 1, 0));
+        var belowText = editor.document.getText(new vscode.Range(cursorLine + 1, 0, lineBelow, 0));
+        return { aboveText, belowText, cursorLine };
     }
 }
