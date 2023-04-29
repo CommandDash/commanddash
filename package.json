@@ -78,6 +78,15 @@
         "when": "false"
       },
       {
+        "command": "fluttergpt.createCodeFromDescription",
+        "title": "FlutterGPT Create: From Description"
+      },
+      {
+        "command": "fluttergpt.createCodeFromDescription.menu",
+        "title": "From Description",
+        "when": "false"
+      },
+      {
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },

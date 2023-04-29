@@ -9,6 +9,7 @@ import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
 import { open } from 'fs';
+import { createCodeFromDescription } from './tools/create/code_from_description';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -26,6 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo), context);
     customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo), context);
     customPush("fluttergpt.createModelClass", async () => createModelClass(openAIRepo), context);
+    customPush('fluttergpt.createCodeFromDescription',() => createCodeFromDescription(openAIRepo), context);
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
