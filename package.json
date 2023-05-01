@@ -78,6 +78,19 @@
         "when": "false"
       },
       {
+        "command": "fluttergpt.createResponsiveWidgetFromCode",
+        "title": "FlutterGPT Create: Web and Tablet Counterparts"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
+        "title": "Web and Tablet Counterparts",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromDescription",
+        "title": "FlutterGPT Create: Responsive Widget from Description"
+      },
+      {
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },
@@ -94,21 +107,7 @@
         "command": "fluttergpt.fixErrors.menu",
         "title": "Fix Errors",
         "when": "false"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromCode",
-        "title": "FlutterGPT Create: Create Responsive Widget from Code"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
-        "title": "Create Responsive Widget from Code",
-        "when": "false"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromDescription",
-        "title": "[FlutterGPT] Responsive Widget from Description"
       }
-
     ],
     "menus": {
       "editor/context": [
@@ -125,7 +124,7 @@
         {
           "command": "fluttergpt.createResponsiveWidgetFromDescription",
           "group": "fluttergpt-menu-group@1",
-          "description": "[FlutterGPT] Responsive Widget from Description"
+          "description": "FlutterGPT Create: Responsive Widget from Description"
         }
       ],
       "fluttergpt.refactorMenu": [
