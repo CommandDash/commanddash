@@ -30,7 +30,7 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository) {
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            let prompt = `You're an expert Flutter developer. Follow the instructions carefully and to the letter.\n\n`;
+            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
             prompt += `Create a valid Dart code block based on the following instructions:\n${instructions}\n\n`;
             prompt += `To give you more context, here's `;
             if (aboveText.length > 0) {
