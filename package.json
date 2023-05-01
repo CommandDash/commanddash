@@ -78,6 +78,19 @@
         "when": "false"
       },
       {
+        "command": "fluttergpt.createResponsiveWidgetFromCode",
+        "title": "FlutterGPT Create: Web and Tablet Counterparts"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
+        "title": "Web and Tablet Counterparts",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createResponsiveWidgetFromDescription",
+        "title": "FlutterGPT Create: Responsive Widget from Description"
+      },
+      {
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },
@@ -107,6 +120,13 @@
           "group": "fluttergpt-menu-group@1"
         }
       ],
+      "explorer/context": [
+        {
+          "command": "fluttergpt.createResponsiveWidgetFromDescription",
+          "group": "fluttergpt-menu-group@1",
+          "description": "FlutterGPT Create: Responsive Widget from Description"
+        }
+      ],
       "fluttergpt.refactorMenu": [
         {
           "command": "fluttergpt.refactorCode.menu",
@@ -134,7 +154,12 @@
         {
           "command": "fluttergpt.createRepoClassFromPostman.menu",
           "group": "fluttergpt-menu-group@4"
+        },
+        {
+          "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
+          "group": "fluttergpt-menu-group@5"
         }
+        
       ]
     },
     "submenus": [
