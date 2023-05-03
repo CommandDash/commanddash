@@ -78,6 +78,15 @@
         "when": "false"
       },
       {
+        "command": "fluttergpt.createCodeFromDescription",
+        "title": "FlutterGPT Create: From Description"
+      },
+      {
+        "command": "fluttergpt.createCodeFromDescription.menu",
+        "title": "From Description",
+        "when": "false"
+      },
+      {
         "command": "fluttergpt.createResponsiveWidgetFromCode",
         "title": "FlutterGPT Create: Web and Tablet Counterparts"
       },
@@ -91,6 +100,7 @@
         "title": "FlutterGPT Create: Responsive Widget from Description"
       },
       {
+
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },
