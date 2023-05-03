@@ -23,34 +23,41 @@ We only use GPT3.5 because it's fast, highly accurate, cheap, and is available t
 
 ## Features
 
-
 ### 🪄 Create
 
 <img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Creating Code using FlutterGPT" width="500"/>
 
-#### Widget from Description
+#### 1. **Widget from Description**
+
 Create flutter widgets based on the description you provide. Be as specific as you like.
 
 `FlutterGPT Create: Widget from Description`
 
-#### Model Class from JSON
+#### 2. **Model Class from JSON**
+
 Create model classes from JSON with null safety in mind. You can also choose to generate Freezed or JsonSerializable modules
 
 command: `FlutterGPT Create: Model Class from JSON`
 
-
-#### Repository Class from Postman Json
+#### 3. **Repository Class from Postman Json**
 
 Convert you postman collection exports json to API repository class
 
 command: `FlutterGPT Create: API Repository from Postman JSON`
 
-#### Complete Code from BluePrint
+#### 4. **Complete Code from BluePrint**
 
 Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
 
 command: `FlutterGPT Create: Code from Blueprint`
 
+#### 5. **Create Responsive Widget from Code**
+
+Create responsive widgets from code. Write the mobile code and let the AI do the rest. i.e create the tablet and web code.
+
+#### 6. **Create Responsive Widget from description**
+
+Create responsive widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
 
 ### 🛠️ Refactor
 
@@ -59,16 +66,19 @@ command: `FlutterGPT Create: Code from Blueprint`
 </p>
 
 #### From Instruction
+
 Refactor widgets and logic both with this command.
 
 command: `FlutterGPT Refactor: From Instructions`
 
 #### Fix Errors
+
 Pass your runtime errors and get fixed code back.
 
 command: `FlutterGPT Refactor: Fix Errors`
 
 ## Requirements
+
 1. You'll need an [OpenAI account](https://platform.openai.com) with a valid API key. For more information on obtaining an API key, please visit the [OpenAI API documentation](https://platform.openai.com/docs/).
 
 ## Getting Started
@@ -78,16 +88,6 @@ command: `FlutterGPT Refactor: Fix Errors`
 2. To get started, select any piece of your dart code, open VSCode command pallete and search for `FlutterGPT`. You'll see all available commands. Details below.
 
 Please Note: Using OpenAI APIs will incur charges. From our observations, running 500 create widget from description costs only 1$.
-
-## FAQs
-1. **How safe and secure is it to use, and can you explain why?**
-- FlutterGPT communicates directly with the SSL-encrypted OpenAI APIs, which are protected by SOC2 Compliance. Additionally, any data sent to OpenAI via the APIs is not used for training, ensuring complete privacy and security. Therefore, it is completely safe to use for personal or company projects.
-
-2. **Do I need to pay to use FlutterGPT?**
-- FlutterGPT is an open-source and free-to-use project. However, you will need to use OpenAI APIs, which are paid. You can start with a free $5 credit, which equates to approximately 2500 create widget requests. After that, you pay on a usage basis. For more information on OpenAI pricing, please refer to their website: [https://openai.com/pricing](https://openai.com/pricing)
-
-3. **I am an Android Studio user. Can I use FlutterGPT?**
-- FlutterGPT is available for IntelliJ-based IDEs and can be downloaded from the plugin marketplace. Please follow this link: [https://plugins.jetbrains.com/plugin/21568-fluttergpt]
 
 ## Contributing
 
@@ -107,20 +107,15 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
-## Running Locally for Contribution
-1. Clone the repository.
-2. Run `npm install`
-3. Use the `Run Extension` command from launch.json for running the extension.
-4. Ensure you've specified the OPENAI secret key in the settings.
-
 ## Release Notes
 
 ### 0.0.5
+
 Refactors and UX improvements
 
 ### 0.0.4
 
-First version of FlutterGPT! 
+First version of FlutterGPT!
 
 ## License
 
