@@ -5,10 +5,13 @@ import { OpenAIRepository } from './repository/openai-repository';
 import {createWidgetFromDescription} from './tools/create/widget_from_description';
 import {refactorCode} from './tools/refactor/refactor_from_instructions';
 import {createModelClass} from './tools/create/class_model_from_json';
+import {createResponsiveWidgetFromCode} from './tools/create/responsive_widget_from_code';
+import {createResponsiveWidgetFromDescription} from './tools/create/responsive_widget_from_description';
 import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
 import { open } from 'fs';
+import { createCodeFromDescription } from './tools/create/code_from_description';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -20,15 +23,20 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.onDidChangeConfiguration(event => {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
-        if (affected) { openAIRepo = initOpenAI(); }
+        if (affected) { openAIRepo = initOpenAI();}
     });
 
     customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo), context);
     customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo), context);
     customPush("fluttergpt.createModelClass", async () => createModelClass(openAIRepo), context);
+    customPush('fluttergpt.createCodeFromDescription',() => createCodeFromDescription(openAIRepo), context);
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
+    customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo), context);
+    customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
+    
+
 }
 
 function initOpenAI(): OpenAIRepository {
@@ -44,6 +52,13 @@ function customPush(name: string, handler: (...args: any[]) => any, context: vsc
 
     let menuCommand = vscode.commands.registerCommand(name + ".menu", handler);
     context.subscriptions.push(menuCommand);
+}
+
+function customUriPush(name: string,openAIRepo: OpenAIRepository, context: vscode.ExtensionContext):void{
+    const command=vscode.commands.registerCommand(name, async (uri: vscode.Uri) => {
+        await createResponsiveWidgetFromDescription(openAIRepo,uri);
+    });
+    context.subscriptions.push(command);
 }
 
 
