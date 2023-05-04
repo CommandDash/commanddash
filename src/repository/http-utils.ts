@@ -6,7 +6,7 @@ export async function makeHttpRequest<T>(config: AxiosRequestConfig): Promise<T>
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw new Error(`Error: ${error.response?.data.error.code} received with status code {${error.response?.status}}.\nMessage: ${error.response?.data.error.message}\nPlease check https://platform.openai.com/docs/guides/error-codes/api-errors for more information.`);
+            throw new Error(`Error: ${error.response?.data.error.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data.error.message}`);
         } else {
             throw new Error(`Failed to make HTTP request: ${error}`);
         };

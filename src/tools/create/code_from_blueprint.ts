@@ -47,7 +47,11 @@ export async function createCodeFromBlueprint(openAIRepo: OpenAIRepository) {
             vscode.window.showInformationMessage('Code added successfully!');
         });
 
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to add code: ${error}`);
+    } catch (error: Error | unknown) {
+        if(error instanceof Error){
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to create code: ${error}`);
+        }
     }
 }

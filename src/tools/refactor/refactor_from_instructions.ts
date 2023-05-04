@@ -53,7 +53,12 @@ export async function refactorCode(openAIRepo: OpenAIRepository) {
             });
             vscode.window.showInformationMessage('Code refactored successfully!');
         });
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to refactor code: ${error}`);
+    } catch (error: Error | unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to refactor code: ${error}`);
+        }
+        return '';
     }
 }

@@ -72,7 +72,12 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
             });
             vscode.window.showInformationMessage(explanation);
         });
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to fix code: ${error}`);
+    } catch (error: Error | unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to fix code: ${error}`);
+        }
+        return '';
     }
 }

@@ -67,8 +67,8 @@ export class OpenAIRepository {
         }
         const trimmedResponse = response.choices[0].message.content.trim();
         return trimmedResponse;
-      } catch (error){
-        throw new Error('Failed to get completion from API: ' +  error);
+      } catch (error: Error | any){
+        throw error;
       }
     }
   }

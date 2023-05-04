@@ -60,8 +60,12 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository) {
             });
             vscode.window.showInformationMessage('Code created successfully!');
         });
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to generate code: ${error}`);
+    } catch (error: Error | unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to generate code: ${error}`);
+        }
     }
 
     function getCodeAroundCursor(editor: vscode.TextEditor) {

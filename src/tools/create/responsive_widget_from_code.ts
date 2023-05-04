@@ -86,8 +86,12 @@ async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepositor
             return dartCode;
         }
 
-    } catch (error) {
-        vscode.window.showErrorMessage(`Error generating web code: ${error}`);
+    } catch (error: Error | unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to create web code: ${error}`);
+        }
         return '';
     }
 }
@@ -130,8 +134,12 @@ async function generateTabletCode(selectedText: string, openAIRepo: OpenAIReposi
             return dartCode;
         }
 
-    } catch (error) {
-        vscode.window.showErrorMessage(`Error generating web code: ${error}`);
+    } catch (error: Error | unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to create tablet code: ${error}`);
+        }
         return '';
     }
 }
