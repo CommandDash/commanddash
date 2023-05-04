@@ -145,6 +145,7 @@
         },
         {
           "command": "fluttergpt.fixErrors.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@2"
         }
       ],

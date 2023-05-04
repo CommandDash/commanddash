@@ -80,7 +80,13 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
         }
       }
     );
-  } catch (error) {
-    vscode.window.showErrorMessage(`Failed to create model class: ${error}`);
+    
+  } catch (error: Error | unknown) {
+    if(error instanceof Error){
+        vscode.window.showErrorMessage(`${error.message}`);
+    } else {
+        vscode.window.showErrorMessage(`Failed to create model class ${error}`);
+    }
   }
+  
 }

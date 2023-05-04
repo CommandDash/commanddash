@@ -43,7 +43,12 @@ export async function createWidgetFromDescription(openAIRepo: OpenAIRepository) 
                 vscode.window.showErrorMessage('No active editor');
             }
         });
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to create widget: ${error}`);
+    } catch (error: Error | unknown) {
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Error creating widget: ${error}`);
+        }
+        return '';
     }
 }
