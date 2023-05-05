@@ -55,6 +55,8 @@ command: `FlutterGPT Create: Code from Blueprint`
 
 Create Web and Tablet widgets from mobile code. Write the mobile code and let the AI do the rest. i.e create the tablet and web code.
 
+command: `FlutterGPT Create: Web and Tablet Counterparts`
+
 #### 6. **Create Web and Tablet Counterpart from description**
 
 Create Mobile, Web and Tablet widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
