@@ -61,6 +61,8 @@ command: `FlutterGPT Create: Web and Tablet Counterparts`
 
 Create Mobile, Web and Tablet widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
 
+command: `FlutterGPT Create: Mobile, Web and Tablet widget from description`
+
 ### 🛠️ Refactor
 
 <p align="center">
