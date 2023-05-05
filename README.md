@@ -51,13 +51,13 @@ Get complete code from a blueprint of a class or function with the behaviour of 
 
 command: `FlutterGPT Create: Code from Blueprint`
 
-#### 5. **Create Responsive Widget from Code**
+#### 5. **Create Web and Tablet Counterparts**
 
-Create responsive widgets from code. Write the mobile code and let the AI do the rest. i.e create the tablet and web code.
+Create Web and Tablet widgets from mobile code. Write the mobile code and let the AI do the rest. i.e create the tablet and web code.
 
-#### 6. **Create Responsive Widget from description**
+#### 6. **Create Web and Tablet Counterpart from description**
 
-Create responsive widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
+Create Mobile, Web and Tablet widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
 
 ### 🛠️ Refactor
 
