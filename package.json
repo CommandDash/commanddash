@@ -78,6 +78,15 @@
         "when": "false"
       },
       {
+        "command": "fluttergpt.createCodeFromDescription",
+        "title": "FlutterGPT Create: From Description"
+      },
+      {
+        "command": "fluttergpt.createCodeFromDescription.menu",
+        "title": "From Description",
+        "when": "false"
+      },
+      {
         "command": "fluttergpt.createResponsiveWidgetFromCode",
         "title": "FlutterGPT Create: Web and Tablet Counterparts"
       },
@@ -91,6 +100,7 @@
         "title": "FlutterGPT Create: Responsive Widget from Description"
       },
       {
+
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },
@@ -135,6 +145,7 @@
         },
         {
           "command": "fluttergpt.fixErrors.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@2"
         }
       ],
@@ -184,18 +195,18 @@
   "devDependencies": {
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
-    "@types/node": "16.x",
+    "@types/node": "18.x",
     "@types/vscode": "^1.77.0",
-    "@typescript-eslint/eslint-plugin": "^5.56.0",
-    "@typescript-eslint/parser": "^5.56.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
     "@vscode/test-electron": "^2.3.0",
-    "eslint": "^8.36.0",
-    "glob": "^8.1.0",
+    "eslint": "^8.39.0",
+    "glob": "^10.2.2",
     "mocha": "^10.2.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
-    "axios": "^1.3.5",
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3"
   }
 }
