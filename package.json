@@ -40,7 +40,23 @@
         }
       }
     },
+    "views": {
+      "explorer": [
+          {
+              "id": "fluttergpt.References",
+              "name": "FlutterGPT References"
+          }
+      ]
+    },
     "commands": [
+      {
+        "command": "fluttergpt.selectReference",
+        "title": "FlutterGPT: Select Reference"
+      },
+      {
+        "command": "fluttergpt.addReference",
+        "title": "FlutterGPT: Add reference"
+      },
       {
         "command": "fluttergpt.createWidget",
         "title": "FlutterGPT Create: Widget from Description"
@@ -207,6 +223,8 @@
   },
   "dependencies": {
     "axios": "^1.4.0",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "fs-extra": "^10.0.0"
+    
   }
 }

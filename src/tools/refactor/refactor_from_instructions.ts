@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode} from '../../utilities/code-processing';
 
-export async function refactorCode(openAIRepo: OpenAIRepository) {
+export async function refactorCode(openAIRepo: OpenAIRepository, addReference: boolean = false) {
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
