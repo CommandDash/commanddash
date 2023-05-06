@@ -44,8 +44,12 @@
       {
         "command": "fluttergpt.addReference",
         "when": "editorHasSelection && resourceLangId == 'dart'",
-        "title": "FlutterGPT: Add reference"
-
+        "title": "Add to Reference"
+      },
+      {
+        "command": "fluttergpt.addReference.menu",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "title": "Flutter GPT: Add to Reference"
       },
       {
         "command": "fluttergpt.createWidget",
@@ -129,10 +133,15 @@
       "editor/context": [
         {
           "submenu": "fluttergpt.refactorMenu",
-          "group": "fluttergpt-menu-group@1"
+          "group": "fluttergpt-menu-group@2"
         },
         {
           "submenu": "fluttergpt.createMenu",
+          "group": "fluttergpt-menu-group@3"
+        },
+        {
+          "command": "fluttergpt.addReference.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
         }
       ],

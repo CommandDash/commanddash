@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractExplanation} from '../../utilities/code-processing';
+import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtime' | 'compile-time' = 'runtime') {
+export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtime' | 'compile-time' = 'runtime', globalState: vscode.Memento) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor');
@@ -49,18 +50,25 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
                 progress.report({ increment });
             }, 200);
     
-            let promptContent = `Follow the instructions carefully and to the letter. You're a Flutter/Dart debugging expert.\n\n`;
-            promptContent += `Here's a piece of Flutter code with ${errorType} errors:\n\n${selectedCode}\n\n`;
+            let prompt = `Follow the instructions carefully and to the letter. You're a Flutter/Dart debugging expert.\n\n`;
+            prompt += `Here's a piece of Flutter code with ${errorType} errors:\n\n${selectedCode}\n\n`;
             if (errorsDescription) {
-                promptContent += `The errors are: ${errorsDescription}\n\n`;
+                prompt += `The errors are: ${errorsDescription}\n\n`;
             } else {
-                promptContent += `The full code context is:\n\n${fullCode}\n\n`;
+                prompt += `The full code context is:\n\n${fullCode}\n\n`;
             }
-            promptContent += `Output the fixed code in a single code block.`;
+            let referenceEditor = getReferenceEditor(globalState);
+            if(referenceEditor!==undefined){
+              const referenceText = extractReferenceTextFromEditor(referenceEditor);
+              if(referenceText!==''){
+                  prompt+=`Some references that might help: \n${referenceText}\n`;
+              }
+            }
+            prompt += `Output the fixed code in a single code block.`;
 
             const result = await openAIRepo.getCompletion([ {
                 'role': 'user',
-                'content': promptContent
+                'content': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });

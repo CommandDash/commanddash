@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode} from '../../utilities/code-processing';
+import {extractDartCode, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function createWidgetFromDescription(openAIRepo: OpenAIRepository) {
+export async function createWidgetFromDescription(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
     try {
         const description = await vscode.window.showInputBox({ prompt: "Enter widget description" });
         if (!description) {
@@ -22,6 +23,13 @@ export async function createWidgetFromDescription(openAIRepo: OpenAIRepository) 
                 progress.report({ increment });
             }, 200);
             let prompt=`You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+            let referenceEditor = getReferenceEditor(globalState);
+            if(referenceEditor!==undefined){
+            const referenceText = extractReferenceTextFromEditor(referenceEditor);
+            if(referenceText!==''){
+                prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+            }
+            }
             prompt+=`Create a Flutter Widget from the following description: ${description}.\n`;
             prompt+=`Output code in a single block`;
             const result = await openAIRepo.getCompletion([{
