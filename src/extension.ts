@@ -11,9 +11,7 @@ import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
 import { addAsReference } from './tools/reference/add_reference';
-import { open } from 'fs';
 import { createCodeFromDescription } from './tools/create/code_from_description';
-import { ReferenceProvider } from './tools/reference/reference_provider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -28,18 +26,6 @@ export function activate(context: vscode.ExtensionContext) {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
         if (affected) { openAIRepo = initOpenAI();}
     });
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-    if (!workspaceFolder) {
-        throw new Error('No workspace folders found.');
-    }
-    const referenceFolderPath = path.join(workspaceFolder.uri.fsPath, '.fluttergpt_references');
-    if (!fs.existsSync(referenceFolderPath)) {
-    fs.mkdirSync(referenceFolderPath, { recursive: true });
-    }
-    const referenceProvider = new ReferenceProvider(referenceFolderPath);
-    const referenceView = vscode.window.createTreeView('fluttergpt.References', {
-    treeDataProvider: referenceProvider,
-    });
 
     customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo), context);
     customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo), context);
@@ -49,41 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
     customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo), context);
-    customPush('fluttergpt.selectReference', ()=> addAsReference(context.globalState, referenceFolderPath), context);
+    customPush('fluttergpt.selectReference', ()=> addAsReference(context.globalState), context);
     customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
-    
-    let referenceEditor: vscode.TextEditor | undefined;
-
-
-    // const disposable1 = vscode.commands.registerCommand('fluttergpt.selectReference', () => {
-    // vscode.workspace.openTextDocument({ content: '', language: 'dart' }).then((doc) => {
-    //     vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two, preview: false }).then((editor) => {
-    //     referenceEditor = editor;   
-    //     });
-    // });
-    // });
-
-    // const disposable2 = vscode.commands.registerCommand('fluttergpt.addReference', async () => {
-    //     const editor = vscode.window.activeTextEditor;
-    //     if(!editor) {
-    //         vscode.window.showErrorMessage('Please open a file first.');
-    //         return;
-    //     }
-    //     const referenceContent = editor.document.getText(editor.selection);
-
-    //     if (referenceEditor) {
-    //         const position = referenceEditor.selection.active;
-    //         const snippet = new vscode.SnippetString(
-    //         `Reference: ${editor.document.fileName}\n\`\`\`dart\n${referenceContent.toString()}\n\`\`\`\n`
-    //         );
-    //         referenceEditor.insertSnippet(snippet, position);
-    //     } else {
-    //         vscode.window.showErrorMessage('Please open the reference editor using "FlutterGPT: Select Reference" command first.');
-    //     }
-    // });
-    
-    //   context.subscriptions.push(disposable1);
-    //   context.subscriptions.push(disposable2);
 }
 
 function initOpenAI(): OpenAIRepository {
@@ -110,6 +63,4 @@ function customUriPush(name: string,openAIRepo: OpenAIRepository, context: vscod
 
 
 // This method is called when your extension is deactivated
-export function deactivate() {
-    
-}
+export function deactivate() {}

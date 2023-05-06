@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 
-export async function addAsReference(globalState: vscode.Memento, referenceFolderPath: string) {
+
+export async function addAsReference(globalState: vscode.Memento) {
     
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -23,9 +22,6 @@ export async function addAsReference(globalState: vscode.Memento, referenceFolde
     }
   
     if (!referenceEditor) {
-    const referenceFileName = `Reference_${Date.now()}.dart`;
-    const referenceFilePath = path.join(referenceFolderPath, referenceFileName);
-    fs.writeFileSync(referenceFilePath, '');
       const doc = await vscode.workspace.openTextDocument({ content: '', language: 'dart' });
       referenceEditor = await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two, preview: false });
   
