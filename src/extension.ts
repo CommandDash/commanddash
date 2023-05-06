@@ -31,11 +31,11 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo), context);
     customPush("fluttergpt.createModelClass", async () => createModelClass(openAIRepo), context);
     customPush('fluttergpt.createCodeFromDescription',() => createCodeFromDescription(openAIRepo), context);
-    customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo), context);
+    customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo, context.globalState), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
     customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo), context);
-    customPush('fluttergpt.selectReference', ()=> addAsReference(context.globalState), context);
+    customPush('fluttergpt.addReference', ()=> addAsReference(context.globalState), context);
     customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
 }
 

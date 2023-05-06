@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-
+import { getReferenceEditor } from '../../utilities/state-objects';
 
 export async function addAsReference(globalState: vscode.Memento) {
     
@@ -12,14 +12,8 @@ export async function addAsReference(globalState: vscode.Memento) {
     const referenceContent = editor.document.getText(editor.selection);
   
     let referenceEditor: vscode.TextEditor | undefined;
-  
-    // Retrieve the reference editor from the global state
-    const referenceEditorId = globalState.get<string>('referenceEditorId');
-    if (referenceEditorId) {
-      referenceEditor = vscode.window.visibleTextEditors.find(
-        (editor) => editor.document.uri.toString() === referenceEditorId
-      );
-    }
+
+    referenceEditor = getReferenceEditor(globalState);
   
     if (!referenceEditor) {
       const doc = await vscode.workspace.openTextDocument({ content: '', language: 'dart' });
@@ -32,7 +26,7 @@ export async function addAsReference(globalState: vscode.Memento) {
     if (referenceEditor) {
         const position = referenceEditor.selection.active;
         const snippet = new vscode.SnippetString(
-        `Reference: ${editor.document.fileName}\n\`\`\`dart\n${referenceContent.toString()}\n\`\`\`\n`
+        `File path: ${editor.document.fileName}\n\`\`\`dart\n${referenceContent.toString()}\n\`\`\`\n`
         );
         referenceEditor.insertSnippet(snippet, position);
         // Focus back on the original editor

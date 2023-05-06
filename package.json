@@ -40,22 +40,12 @@
         }
       }
     },
-    "views": {
-      "explorer": [
-          {
-              "id": "fluttergpt.References",
-              "name": "FlutterGPT References"
-          }
-      ]
-    },
     "commands": [
       {
-        "command": "fluttergpt.selectReference",
-        "title": "FlutterGPT: Select Reference"
-      },
-      {
         "command": "fluttergpt.addReference",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
         "title": "FlutterGPT: Add reference"
+
       },
       {
         "command": "fluttergpt.createWidget",
