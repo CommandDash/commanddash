@@ -30,7 +30,6 @@ export async function addToReference(globalState: vscode.Memento) {
     if (workspaceFolders && workspaceFolders.length > 0) {
       const workspaceRoot = workspaceFolders[0].uri.fsPath;
       relativePath = path.relative(workspaceRoot, editor.document.fileName);
-      vscode.window.showInformationMessage(`Relative file path: ${relativePath}`);
     }
     const snippet = new vscode.SnippetString(
     `${relativePath}:\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`

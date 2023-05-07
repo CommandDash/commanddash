@@ -145,6 +145,9 @@ This is the beta version and can be unstable. Please check our [issues board](ht
 
 ## Release Notes
 
+### 0.0.7
+- Removed Debug Information Window
+
 ### 0.0.6
 
 - Add to Reference
