@@ -61,7 +61,7 @@ command: `FlutterGPT Create: Web and Tablet Counterparts`
 
 Create Mobile, Web and Tablet widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
 
-command: `FlutterGPT Create: Mobile, Web and Tablet widget from description`
+command: `FlutterGPT Create: Mobile, Web and Tablet Widget From Description`
 
 ### 🛠️ Refactor
 
@@ -80,6 +80,19 @@ command: `FlutterGPT Refactor: From Instructions`
 Pass your runtime errors and get fixed code back.
 
 command: `FlutterGPT Refactor: Fix Errors`
+
+
+### 📝 Add to Reference
+
+LLM's work great when provided with references along with the instructions. FlutterGPT users can now add any piece of code or customized descriptions as reference and they'll be passed to model for any command being used.
+
+**Practical usecases:**
+
+1. Having widgets follow a state management and use a view model already defined in your code.
+
+2. Use snippets as a reference while refactoring large part of projects to use the same style and structure.
+
+3. In, `codeFromBluePrint` to generate full-fledged classes taking state management, architecture and style as reference from an existing class.
 
 ## Requirements
 
@@ -131,6 +144,16 @@ This is the beta version and can be unstable. Please check our [issues board](ht
 
 
 ## Release Notes
+
+### 0.0.6
+
+- Add to Reference
+- Create:
+	- Web and Tablet Counterparts
+	- Mobile, Web and Tablet Widget From Description
+- Refactor:
+	- Optimize
+
 
 ### 0.0.5
 

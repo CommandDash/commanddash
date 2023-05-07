@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "FlutterGPT: Supercharged Dev Experiment",
   "description": "Use ChatGPT right inside your IDE to create, refactor and debug Flutter code.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -209,7 +209,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.x",
-    "@types/vscode": "^1.78.0",
+    "@types/vscode": "^1.77.0",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "@vscode/test-electron": "^2.3.0",
