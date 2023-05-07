@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode} from '../../utilities/code-processing';
+import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function refactorCode(openAIRepo: OpenAIRepository) {
+export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -36,7 +37,15 @@ export async function refactorCode(openAIRepo: OpenAIRepository) {
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
+
+            let referenceEditor = getReferenceEditor(globalState);
             let prompt=`You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
+            if(referenceEditor!==undefined){
+                const referenceText = extractReferenceTextFromEditor(referenceEditor);
+                if(referenceText!==''){
+                    prompt+=`Here are user shared context/references: \n${referenceText}\n\n. Anaylze these well and use them to refactor the code.\n\n`;
+                }
+            }
             prompt+=`Refactor the following Flutter code based on the instructions: ${instructions}\n\nCode:\n${selectedCode}\n\n`;
             prompt+=`Output code in a single block`;
             

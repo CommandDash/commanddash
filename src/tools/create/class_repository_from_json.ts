@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode} from '../../utilities/code-processing';
+import {extractDartCode, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository) {
+export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -32,7 +33,15 @@ export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository) {
             if(description === "placeholder") {
                 return;
             }
-            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;        
+            let referenceEditor = getReferenceEditor(globalState);
+            if(referenceEditor!==undefined){
+              const referenceText = extractReferenceTextFromEditor(referenceEditor);
+              if(referenceText!==''){
+                  prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+              }
+            }
+
             prompt +=  `Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`;
             
             const result = await openAIRepo.getCompletion([ {

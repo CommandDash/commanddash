@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import { extractDartCode } from '../../utilities/code-processing';
+import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function createCodeFromDescription(openAIRepo: OpenAIRepository) {
+export async function createCodeFromDescription(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -31,6 +32,13 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository) {
                 progress.report({ increment });
             }, 200);
             let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+            let referenceEditor = getReferenceEditor(globalState);
+            if(referenceEditor!==undefined){
+            const referenceText = extractReferenceTextFromEditor(referenceEditor);
+            if(referenceText!==''){
+                prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+            }
+            }
             prompt += `Create a valid Dart code block based on the following instructions:\n${instructions}\n\n`;
             prompt += `To give you more context, here's `;
             if (aboveText.length > 0) {

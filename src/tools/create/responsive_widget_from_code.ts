@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import { extractDartCode, extractExplanation } from '../../utilities/code-processing';
+import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import * as fs from 'fs';
 import * as path from 'path';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepository) {
+export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor');
@@ -26,6 +27,11 @@ export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepositor
         vscode.window.showErrorMessage('No widget name provided.');
         return;
     }
+    let referenceText = '';
+    let referenceEditor = getReferenceEditor(globalState);
+    if(referenceEditor!==undefined){
+        referenceText = extractReferenceTextFromEditor(referenceEditor);
+    }
     const webFileName = `${toSnakeCase(enteredWidgetName)}_web.dart`;
     const tabletFileName = `${toSnakeCase(enteredWidgetName)}_tablet.dart`;
     const selectorFileName = `${toSnakeCase(enteredWidgetName)}.dart`;
@@ -36,8 +42,8 @@ export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepositor
     const selectorFilePath = path.join(folderPath, selectorFileName);
 
     // Generate responsive code for web and tablet
-    const webCode = await generateWebCode(blueprint, openAIRepo, enteredWidgetName);
-    const tabletCode = await generateTabletCode(blueprint, openAIRepo, enteredWidgetName);
+    const webCode = await generateWebCode(blueprint, openAIRepo, enteredWidgetName, referenceText);
+    const tabletCode = await generateTabletCode(blueprint, openAIRepo, enteredWidgetName, referenceText);
     const selectorCode = generateSelectorCode(enteredWidgetName);
 
 
@@ -49,11 +55,14 @@ export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepositor
     vscode.window.showInformationMessage(`Files ${webFileName} and ${tabletFileName} created successfully.`);
 }
 
-async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: String): Promise<string> {
+async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: String, referenceText: string): Promise<string> {
     try {
         const modifiedName = toPascalCase(widgetName + "Web");
         var dartCode = "";
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        if(referenceText!==''){
+            prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+        }
         prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is website compatible.
         change the class or widget name to ${modifiedName}.use responsive sizing and add Web to the widget name at the end. 
         Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code 
@@ -97,15 +106,17 @@ async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepositor
 }
 
 
-async function generateTabletCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: String): Promise<string> {
+async function generateTabletCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: String, referenceText: string): Promise<string> {
     try {
         const modifiedName = toPascalCase(widgetName + "Tablet");
         var dartCode = "";
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-        prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is table compatible.
+        if(referenceText!==''){
+            prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+        }
+        prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is tablet compatible.
         change the class or widget name to ${modifiedName}. use responsive sizing. Closely analyze the blueprint, 
-        see if any state management or architecture is specified and output complete functioning code in a single block.
-        The widget dimension should increase and decrease as the width of the screen changes.use relative sizing.`;
+        see if any state management or architecture is specified and output complete functioning code in a single block.`;
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",

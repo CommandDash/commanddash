@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractExplanation} from '../../utilities/code-processing';
+import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function createCodeFromBlueprint(openAIRepo: OpenAIRepository) {
+export async function createCodeFromBlueprint(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor');
@@ -17,7 +18,14 @@ export async function createCodeFromBlueprint(openAIRepo: OpenAIRepository) {
 
     try {
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-        prompt+= `Create Flutter/Dart code for the following blueprint: ${blueprint}. Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code in a single block.`;
+        let referenceEditor = getReferenceEditor(globalState);
+        if(referenceEditor!==undefined){
+          const referenceText = extractReferenceTextFromEditor(referenceEditor);
+          if(referenceText!==''){
+              prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+          }
+        }
+        prompt+= `Create Flutter/Dart code for the following blueprint: \n===${blueprint}\n===. Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code in a single block.`;
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",
