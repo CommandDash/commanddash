@@ -40,7 +40,25 @@
         }
       }
     },
+    "keybindings": [
+      {
+        "command": "fluttergpt.addToReference.menu",
+        "key": "ctrl+R",
+        "mac": "cmd+R",
+        "when": "editorHasSelection && resourceLangId == 'dart'"
+      }
+    ],
     "commands": [
+      {
+        "command": "fluttergpt.addToReference",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "title": "FlutterGPT: Add to Reference"
+      },
+      {
+        "command": "fluttergpt.addToReference.menu",
+        "title": "Add to Reference",
+        "when": "false"
+      },
       {
         "command": "fluttergpt.createWidget",
         "title": "FlutterGPT Create: Widget from Description"
@@ -79,11 +97,11 @@
       },
       {
         "command": "fluttergpt.createCodeFromDescription",
-        "title": "FlutterGPT Create: From Description"
+        "title": "FlutterGPT Create: Code From Description"
       },
       {
         "command": "fluttergpt.createCodeFromDescription.menu",
-        "title": "From Description",
+        "title": "Code From Description",
         "when": "false"
       },
       {
@@ -132,10 +150,15 @@
       "editor/context": [
         {
           "submenu": "fluttergpt.refactorMenu",
-          "group": "fluttergpt-menu-group@1"
+          "group": "fluttergpt-menu-group@2"
         },
         {
           "submenu": "fluttergpt.createMenu",
+          "group": "fluttergpt-menu-group@3"
+        },
+        {
+          "command": "fluttergpt.addToReference.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
         }
       ],
@@ -165,24 +188,29 @@
       ],
       "fluttergpt.createMenu": [
         {
-          "command": "fluttergpt.createWidget.menu",
+          "command": "fluttergpt.createCodeFromBlueprint.menu",
           "group": "fluttergpt-menu-group@1"
         },
         {
-          "command": "fluttergpt.createModelClass.menu",
+          "command": "fluttergpt.createCodeFromDescription.menu",
+          "title": "From Description",
           "group": "fluttergpt-menu-group@2"
         },
         {
-          "command": "fluttergpt.createCodeFromBlueprint.menu",
+          "command": "fluttergpt.createWidget.menu",
           "group": "fluttergpt-menu-group@3"
         },
         {
-          "command": "fluttergpt.createRepoClassFromPostman.menu",
+          "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
           "group": "fluttergpt-menu-group@4"
         },
         {
-          "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
+          "command": "fluttergpt.createModelClass.menu",
           "group": "fluttergpt-menu-group@5"
+        },
+        {
+          "command": "fluttergpt.createRepoClassFromPostman.menu",
+          "group": "fluttergpt-menu-group@6"
         }
       ]
     },
@@ -221,5 +249,6 @@
   "dependencies": {
     "axios": "^1.4.0",
     "dotenv": "^16.0.3"
+    
   }
 }

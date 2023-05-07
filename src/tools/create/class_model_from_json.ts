@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractExplanation} from '../../utilities/code-processing';
+import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { getReferenceEditor } from '../../utilities/state-objects';
 
-export async function createModelClass(openAIRepo: OpenAIRepository) {
+export async function createModelClass(openAIRepo: OpenAIRepository, globalState: vscode.Memento ) {
   try {
     const jsonStructure = await vscode.window.showInputBox({
       prompt: "Enter JSON structure",
@@ -48,6 +49,13 @@ export async function createModelClass(openAIRepo: OpenAIRepository) {
           progress.report({ increment });
         }, 200);
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        let referenceEditor = getReferenceEditor(globalState);
+        if(referenceEditor!==undefined){
+          const referenceText = extractReferenceTextFromEditor(referenceEditor);
+          if(referenceText!==''){
+              prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+          }
+        }
         prompt += `Create a Flutter model class, keeping null safety in mind for from the following JSON structure: ${jsonStructure}.`;
 
         if(library!=='None') {
