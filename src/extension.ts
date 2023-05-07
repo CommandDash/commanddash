@@ -10,9 +10,9 @@ import {createResponsiveWidgetFromDescription} from './tools/create/responsive_w
 import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
-import { open } from 'fs';
 import { createCodeFromDescription } from './tools/create/code_from_description';
-import { optimizeCode } from './tools/optimize/optimize_code';
+import { optimizeCode } from './tools/refactor/optimize_code';
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {

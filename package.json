@@ -117,10 +117,15 @@
         "command": "fluttergpt.fixErrors.menu",
         "title": "Fix Errors",
         "when": "false"
-      }
+      },
       {
         "command": "fluttergpt.optimizeCode",
-        "title": "FlutterGPT Optimize: Optimize Selected Code"
+        "title": "FlutterGPT Refactor: Optimize"
+      },
+      {
+        "command": "fluttergpt.optimizeCode.menu",
+        "title": "Optimize",
+        "when": "false"
       }
     ],
     "menus": {
@@ -151,7 +156,7 @@
           "command": "fluttergpt.fixErrors.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@2"
-        }
+        },
         {
           "command": "fluttergpt.optimizeCode.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
@@ -178,11 +183,6 @@
         {
           "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
           "group": "fluttergpt-menu-group@5"
-        }
-        {
-          "command": "fluttergpt.optimizeCode.menu",
-          "title": "Optimize Selected Code",
-          "when": "false"
         }
       ]
     },

@@ -51,15 +51,11 @@ export async function optimizeCode(openAIRepo: OpenAIRepository) {
             vscode.window.showInformationMessage(explanation);
         });
     } catch (error: Error | unknown) {
-        handleError(error);
+        if (error instanceof Error) {
+            vscode.window.showErrorMessage(`${error.message}`);
+        } else {
+            vscode.window.showErrorMessage(`Failed to fix code: ${error}`);
+        }
+        return '';
     }
-}
-
-function handleError(error: Error | unknown): void {
-    if (error instanceof Error) {
-        vscode.window.showErrorMessage(`${error.message}`);
-    } else {
-        vscode.window.showErrorMessage(`Failed to optimize code: ${error}`);
-    }
-    return '';
 }
