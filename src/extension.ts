@@ -12,6 +12,7 @@ import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
 import { open } from 'fs';
 import { createCodeFromDescription } from './tools/create/code_from_description';
+import { optimizeCode } from './tools/optimize/optimize_code';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -32,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.createCodeFromDescription',() => createCodeFromDescription(openAIRepo), context);
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo), context);
+    customPush('fluttergpt.optimizeCode', async () => optimizeCode(openAIRepo), context);
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo), context);
     customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo), context);
     customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
