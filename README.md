@@ -68,6 +68,19 @@ Pass your runtime errors and get fixed code back.
 
 command: `FlutterGPT Refactor: Fix Errors`
 
+
+### Add to Reference
+
+LLM's work great when provided with references along with the instructions. FlutterGPT users can now add any piece of code or customized descriptions as reference and they'll be passed to model for any command being used.
+
+**Practical usecases:**
+
+1. Having widgets follow a state management and use a view model already defined in your code.
+
+2. Use snippets as a reference while refactoring large part of projects to use the same style and structure.
+
+3. In, `codeFromBluePrint` to generate full-fledged classes taking state management, architecture and style as reference from an existing class.
+
 ## Requirements
 1. You'll need an [OpenAI account](https://platform.openai.com) with a valid API key. For more information on obtaining an API key, please visit the [OpenAI API documentation](https://platform.openai.com/docs/).
 
