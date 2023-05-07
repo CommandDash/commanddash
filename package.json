@@ -97,7 +97,7 @@
       },
       {
         "command": "fluttergpt.createResponsiveWidgetFromDescription",
-        "title": "FlutterGPT Create: Mobile, Web and Tablet widget from description"
+        "title": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
       },
       {
 
@@ -134,7 +134,7 @@
         {
           "command": "fluttergpt.createResponsiveWidgetFromDescription",
           "group": "fluttergpt-menu-group@1",
-          "description":  "FlutterGPT Create: Mobile, Web and Tablet widget from description"
+          "description":  "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
         }
       ],
       "fluttergpt.refactorMenu": [
