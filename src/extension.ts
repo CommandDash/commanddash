@@ -10,7 +10,7 @@ import {createResponsiveWidgetFromDescription} from './tools/create/responsive_w
 import {fixErrors} from './tools/refactor/fix_errors';
 import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
-import { addAsReference } from './tools/reference/add_reference';
+import { addToReference } from './tools/reference/add_reference';
 import { createCodeFromDescription } from './tools/create/code_from_description';
 
 // This method is called when your extension is activated
@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
         if (affected) { openAIRepo = initOpenAI();}
     });
-    customPush('fluttergpt.addReference', ()=> addAsReference(context.globalState), context);
+    customPush('fluttergpt.addToReference', ()=> addToReference(context.globalState), context);
     customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(openAIRepo, context.globalState), context);
     customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(openAIRepo, context.globalState), context);
     customPush("fluttergpt.createModelClass", async () => createModelClass(openAIRepo, context.globalState), context);
