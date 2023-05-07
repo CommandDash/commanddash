@@ -22,16 +22,27 @@ export async function createWidgetFromDescription(openAIRepo: OpenAIRepository, 
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            let prompt=`You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+            let prompt=`You're a Flutter/Dart coding assistant. You'll be asked to generate the code of a widget from description.\n\n`;
+            prompt+=`Proceed step by step:\n`;
+            let stepIndex = 1;
             let referenceEditor = getReferenceEditor(globalState);
             if(referenceEditor!==undefined){
             const referenceText = extractReferenceTextFromEditor(referenceEditor);
             if(referenceText!==''){
-                prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+                prompt+=`${stepIndex}. Analyze these reference and context to understand the code writing style, theming and or dependencies that might come handy while generating the next widget.`;
+                prompt+=`\n${referenceText}\n`;
+                stepIndex++;
+                prompt+= `${stepIndex}. Using the reference and contexts analyzed previously, generate a widget for description: ${description}.\n`;
+                stepIndex++;
             }
+            } else {
+                prompt+=`${stepIndex}. Create a Flutter Widget from the following description: ${description}.\n`;
+                stepIndex++;
             }
-            prompt+=`Create a Flutter Widget from the following description: ${description}.\n`;
-            prompt+=`Output code in a single block`;
+            prompt+=`${stepIndex}. Output code in a single block`;
+            stepIndex++;
+            console.debug(prompt);
+            
             const result = await openAIRepo.getCompletion([{
                 'role': 'user',
                 'content': prompt
