@@ -29,7 +29,7 @@ export async function createWidgetFromDescription(openAIRepo: OpenAIRepository, 
             if(referenceEditor!==undefined){
             const referenceText = extractReferenceTextFromEditor(referenceEditor);
             if(referenceText!==''){
-                prompt+=`${stepIndex}. Analyze these reference and context to understand the code writing style, theming and or dependencies that might come handy while generating the next widget.`;
+                prompt+=`${stepIndex}. Analyze these reference and context to understand the code writing style, theming, state management and or dependencies that might come handy while generating the next widget.`;
                 prompt+=`\n${referenceText}\n`;
                 stepIndex++;
                 prompt+= `${stepIndex}. Using the reference and contexts analyzed previously, generate a widget for description: ${description}.\n`;

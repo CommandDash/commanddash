@@ -114,10 +114,9 @@ async function generateTabletCode(selectedText: string, openAIRepo: OpenAIReposi
         if(referenceText!==''){
             prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
         }
-        prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is table compatible.
+        prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is tablet compatible.
         change the class or widget name to ${modifiedName}. use responsive sizing. Closely analyze the blueprint, 
-        see if any state management or architecture is specified and output complete functioning code in a single block.
-        The widget dimension should increase and decrease as the width of the screen changes.use relative sizing.`;
+        see if any state management or architecture is specified and output complete functioning code in a single block.`;
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",
