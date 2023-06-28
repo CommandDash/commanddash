@@ -244,7 +244,7 @@
     "eslint": "^8.39.0",
     "glob": "^10.2.2",
     "mocha": "^10.2.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.5"
   },
   "dependencies": {
     "axios": "^1.4.0",
