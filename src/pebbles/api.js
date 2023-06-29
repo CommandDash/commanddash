@@ -1,7 +1,6 @@
 var API_URL = ""; 
 
 window.addEventListener('message', handleMessage);
-window.addEventListener('keys', handleMessage);
 
 function handleMessage(event) {
   const data = event.data;
@@ -190,7 +189,7 @@ function buildSearchResults(results) {
 }
 
 async function fetchPebbles(page = 1, per_page = 2) {
-  const url = `${API_URL}${window.api.get_pebbles}?page=${page}&per_page=${per_page}`;
+  const url = `${API_URL}${window.api["get_pebbles"]}?page=${page}&per_page=${per_page}`;
   const response = await fetchWithToken(url, {},);
 
   if (response.ok) {
@@ -203,7 +202,7 @@ async function fetchPebbles(page = 1, per_page = 2) {
 } 
 
 async function fetchPebbleFullCode(pk) {
-  const url = `${API_URL}${window.api.get_code}?pk=${pk}`;
+  const url = `${API_URL}${window.api["get_code"]}?pk=${pk}`;
   const response = await fetchWithToken(url,{},);
 
   if (response.ok) {
@@ -216,7 +215,7 @@ async function fetchPebbleFullCode(pk) {
 }
 
 async function addPebbleRequest(data) {
-  const url = `${API_URL}${window.api.new_pebble}`;
+  const url = `${API_URL}${window.api["new_pebble"]}`;
   const embeddings = await createEmbeddings(data.code);
   data.embeddings = embeddings;
 
@@ -248,7 +247,7 @@ searchBar.addEventListener("submit", (e) => {
 
 
 async function searchTopPebbles(query){
-  const url = `${API_URL}${window.api.search_pebbles}`;
+  const url = `${API_URL}${window.api["search_pebbles"]}`;
   const options = {
     method: "POST",
     body: JSON.stringify({
@@ -269,7 +268,7 @@ async function searchTopPebbles(query){
 }
 
 async function addToFavorites(pebble_id){
-  const url = `${API_URL}${window.api.favorite_pebble}`;
+  const url = `${API_URL}${window.api["favorite_pebble"]}`;
   const searchQuery = document.getElementById("searchBar").value;
   const options = {
     method: "POST",
@@ -296,7 +295,7 @@ async function addToFavorites(pebble_id){
 
 // get my snippets
 async function getMySnippets(){
-  const url = `${API_URL}${window.api.my_pebbles}`;
+  const url = `${API_URL}${window.api["my_pebbles"]}`;
   const options = {
     method: "GET",
   };
@@ -339,7 +338,7 @@ async function addMySnippetsToHtml(){
       // downloads and favorties with icons and numbers
       '<span style="float: right;">' +
       '<span style="font-size: big;"> 📋 ' +
-      pebble.downloads +
+      pebble.usage_count +
       "</span>" +
       "</span>" + 
       "<pre class='code-preview' id='code-preview-" +
