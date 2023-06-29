@@ -1,308 +1,360 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <!-- <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; connect-src 'self' http://localhost:5000; style-src 'unsafe-inline'; script-src 'unsafe-inline' vscode-webview:;"
-    /> -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; connect-src 'self' http://localhost:5000; img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  script-src 'unsafe-inline' vscode-resource: https: http:;"
-    />
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' vscode-webview:;"> -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';"> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        padding: 16px;
-      }
-
-      input[type="search"] {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #454545;
-        border-radius: 4px;
-        background-color: #252526;
-        color: #d4d4d4;
-      }
-
-      #tabs {
-        display: flex;
-        margin: 8px 0;
-      }
-
-      button {
-        flex: 1;
-        padding: 8px;
-        margin-right: 8px;
-        background-color: #3c3c3c;
-        border: none;
-        border-radius: 4px;
-        color: #d4d4d4;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      button:last-child {
-        margin-right: 0;
-      }
-
-      .resultBox {
-        background-color: #2d2d2d;
-        padding: 16px;
-        border-radius: 4px;
-        margin-bottom: 16px;
-      }
-
-      .resultBox > p {
-        margin: 8px 0;
-      }
-
-      .resultBox > button {
-        margin-right: 8px;
-      }
-
-      .resultBox > button:last-child {
-        margin-right: 0;
-      }
-
-      .code-preview {
-        max-height: 100px;
-        overflow: hidden;
-        white-space: pre-wrap;
-        transition: max-height 0.4s ease;
-        background: #1e1e1e;
-        padding: 10px;
-        border-radius: 4px;
-        font-family: "Courier New", monospace;
-        font-size: 0.9rem;
-        color: #d4d4d4;
-        position: relative;
-      }
-
-      .code-preview.expanded {
-        max-height: unset;
-        overflow: auto;
-      }
-
-      .show-more {
-        display: inline-block;
-        text-align: center;
-        padding: 4px 12px;
-        padding: 8px;
-        margin-right: 8px;
-        background-color: #3c3c3c;
-        border: none;
-        border-radius: 4px;
-        color: #d4d4d4;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      .show-more:hover {
-        color: #63a8ff;
-      }
-      .code-preview:before {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 30px;
-        background-image: linear-gradient(
-          rgba(30, 30, 30, 0),
-          rgba(30, 30, 30, 1)
-        );
-        opacity: 0;
-        transition: opacity 0.4s ease;
-      }
-
-      .code-preview:not(.expanded):before {
-        opacity: 1;
-      }
-      .loader {
-        border: 16px solid #f3f3f3;
-        border-top: 16px solid #1be081; 
-        border-radius: 50%;
-        width: 25px;
-        height: 25px;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <span>
-        <!-- welltested in bright green color -->
-        <!-- <h1 style="color: rgb(134, 255, 134)">WelltestedAI</h1> -->
-        <h1>Pebbles</h1>
-      </span>
-    </header>
-    <span>
-      <input
-        type="search"
-        id="searchBar"
-        placeholder="Search for code snippets",
-        style="width: 95%;"
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <!-- <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'none'; connect-src 'self' http://localhost:5000; style-src 'unsafe-inline'; script-src 'unsafe-inline' vscode-webview:;"
+      /> -->
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'none'; connect-src 'self' http://localhost:5000; img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  script-src 'unsafe-inline' vscode-resource: https: http:;"
       />
-      <!-- search button -->
-      <button onclick="displayResults()">Search</button>
-    </span>
-    <div id="tabs">
-      <button id="browseTab" onclick="switchTab('searchResults')">Browse</button>
-      <button id="favoritesTab" onclick="switchTab('favoritesTabContent')">Favorites</button>
-      <button id="mySnippetsTab" onclick="switchTab('mySnippetsTabContent')">My Snippets</button>
-    </div>
-    <div id="searchResults"></div>
-    <div id="favoritesTabContent" style=display:none></div>
-    <div id="mySnippetsTabContent" style=display:none>
-    </div>
-    <script>
-      function switchTab(tabId) {
-        var tabs = ["searchResults", "favoritesTabContent", "mySnippetsTabContent"];
-        for (var i = 0; i < tabs.length; i++) {
-          if (tabs[i] === tabId) {
-            document.getElementById(tabs[i]).style.display = "inline";
-          } else {
-            document.getElementById(tabs[i]).style.display = "none";
+      <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' vscode-webview:;"> -->
+      <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';"> -->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+          background-color: #1e1e1e;
+          color: #d4d4d4;
+          padding: 16px;
+        }
+
+        input[type="search"] {
+          /* width: 100%; */
+          flex: 3;
+          padding: 8px;
+          border: 1px solid #454545;
+          border-radius: 4px;
+          background-color: #252526;
+          color: #d4d4d4;
+        }
+
+        #tabs {
+          display: flex;
+          margin: 8px 0;
+        }
+
+        button {
+          flex: 1;
+          padding: 8px;
+          margin-right: 8px;
+          background-color: #3c3c3c;
+          border: none;
+          border-radius: 4px;
+          color: #d4d4d4;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        button:last-child {
+          margin-right: 0;
+        }
+
+        .resultBox {
+          background-color: #2d2d2d;
+          padding: 16px;
+          border-radius: 4px;
+          margin-bottom: 16px;
+        }
+
+        .resultBox > p {
+          margin: 8px 0;
+        }
+
+        .resultBox > button {
+          margin-right: 8px;
+        }
+
+        .resultBox > button:last-child {
+          margin-right: 0;
+        }
+
+        .code-preview {
+          max-height: 100px;
+          overflow: hidden;
+          white-space: pre-wrap;
+          transition: max-height 0.4s ease;
+          background: #1e1e1e;
+          padding: 10px;
+          border-radius: 4px;
+          font-family: "Courier New", monospace;
+          font-size: 0.9rem;
+          color: #d4d4d4;
+          position: relative;
+        }
+
+        .code-preview.expanded {
+          max-height: unset;
+          overflow: auto;
+        }
+
+        .show-more {
+          display: inline-block;
+          text-align: center;
+          padding: 4px 12px;
+          padding: 8px;
+          margin-right: 8px;
+          background-color: #3c3c3c;
+          border: none;
+          border-radius: 4px;
+          color: #d4d4d4;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .show-more:hover {
+          color: #63a8ff;
+        }
+        .code-preview:before {
+          content: "";
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 30px;
+          background-image: linear-gradient(
+            rgba(30, 30, 30, 0),
+            rgba(30, 30, 30, 1)
+          );
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+
+        .code-preview:not(.expanded):before {
+          opacity: 1;
+        }
+              
+        .loader {
+          position: relative;
+          height: 2px;
+          overflow: hidden;
+          background-color: #eeeeee; /* Add a softer colored background */
+        }
+
+        .loader:before {
+          content: " ";
+          display: block;
+          position: absolute;
+          left: -50%;
+          width: 50%;
+          height: 2px;
+          background-color: #1be081;
+          animation: loading 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                left: -50%;
+            }
+            50%, 100% {
+                left: 100%;
+            }
+        }
+      </style>
+    </head>
+    <body>
+      <header>
+        <span>
+          <!-- welltested in bright green color -->
+          <!-- <h1 style="color: rgb(134, 255, 134)">WelltestedAI</h1> -->
+          <h1>Pebbles</h1>
+        </span>
+      </header>
+      <span style="display: flex;">
+        <input
+          type="search"
+          id="searchBar"
+          placeholder="Search for code snippets",
+          
+        />
+        <!-- padding -->
+        <span style="width: 8px;"></span>
+        <!-- search button -->
+        <button onclick="displayResults()">Search</button>
+      </span>
+      <div id="tabs">
+        <button id="browseTab" onclick="switchTab('searchResults')">Browse</button>
+        <button id="favoritesTab" onclick="switchTab('favoritesTabContent')">Favorites</button>
+        <button id="mySnippetsTab" onclick="switchTab('mySnippetsTabContent')">My Snippets</button>
+      </div>
+      <div id="searchResults"></div>
+      <div id="favoritesTabContent" style=display:none></div>
+      <div id="mySnippetsTabContent" style=display:none>
+      </div>
+      <script>
+        function switchTab(tabId) {
+          var tabs = ["searchResults", "favoritesTabContent", "mySnippetsTabContent"];
+          for (var i = 0; i < tabs.length; i++) {
+            if (tabs[i] === tabId) {
+              document.getElementById(tabs[i]).style.display = "inline";
+            } else {
+              document.getElementById(tabs[i]).style.display = "none";
+            }
           }
         }
-      }
-    </script>
-    <script>
-      const vscode = acquireVsCodeApi();
-     
-    </script>
-    <script src="%API_JS_URI%"></script>
-    <script>
-      const searchResults = document.getElementById("searchResults");
+      </script>
+      <script>
+        const vscode = acquireVsCodeApi();
+      
+      </script>
+      <script src="%API_JS_URI%"></script>
+      <script>
+        const searchResults = document.getElementById("searchResults");
 
-      async function displayResults() {
-        searchResults.innerHTML = ""; // Clear any previous results
-        // show a loading spinner
-        searchResults.innerHTML =
-          '<div class="loader"></div>';
-        const query = document.getElementById("searchBar").value;
-        const results = await searchTopPebbles(query);
-        searchResults.innerHTML = ""; // Clear the loading spinner
+        async function displayResults() {
+          searchResults.innerHTML = ""; // Clear any previous results
+          // show a loading spinner
+          searchResults.innerHTML =
+            '<div class="loader"></div>';
+          const query = document.getElementById("searchBar").value;
+          const results = await searchTopPebbles(query);
+          searchResults.innerHTML = ""; // Clear the loading spinner
 
-        results.forEach((pebble) => {
-          const resultBox = document.createElement("div");
-          const codePreview = pebble.preview;
-          resultBox.classList.add("resultBox");
-          resultBox.innerHTML =
-            '<span><h3 style="display: inline;">' +
-            pebble.pebble_name +
-            '</h3> by: <span style="font-size: smaller;">' +
-            pebble.publisher +
-            "</span></span>" +
-            // downloads and favorties with icons and numbers
-            '<span style="float: right;">' +
-            '<span style="font-size: big;"> 📋 ' +
-            pebble.downloads +
-            "</span>" +
-            "</span>" +
-            "<br>" +
-            pebble.pk +
-            "<br>"+
-            "<pre class='code-preview' id='code-preview-" +
-            pebble.pk +
-            "'>" +
-            codePreview +
-            "</pre>" +
-            "<p class='show-more' id='show-more-" +
-            pebble.pk +
-            "'>Show more</p>" +
-            "<p>Description: " +
-            pebble.description +
-            "</p>" +
-            `<button onclick="selectedCode('${pebble.pk}', false)">Add to Code</button>` +
-            `<button onclick="selectedCode('${pebble.pk}', true)">Customize</button>` +
-            // '<button  onclick="selectedCode(' +
-            // pebble.pk +
-            // ',false)"   >Add to Code</button>' +
-            // '<button onclick="selectedCode(' +
-            // pebble.pk +
-            // ',true)"   >Customize</button>' +
-            `<button onclick="addToFavorites('${pebble.pk}')"" >❤️ 1456</button>`;
-          searchResults.appendChild(resultBox);
-          document
-            .getElementById("show-more-" + pebble.pk)
-            .addEventListener("click", async function () {
-              const codePreviewElement = document.getElementById(
-                "code-preview-" + pebble.pk
-              );
-              codePreviewElement.classList.contains("expanded")
-                ? ""
-                : await showCodeWithLoader(pebble.pk, codePreviewElement);
-              codePreviewElement.classList.toggle("expanded");
-              this.innerText = codePreviewElement.classList.contains("expanded")
-                ? "Show less"
-                : "Show more";
+          results.forEach((pebble) => {
+            const resultBox = document.createElement("div");
+            const codePreview = pebble.preview;
+            resultBox.classList.add("resultBox");
+            resultBox.innerHTML =
+              '<span><h3 style="display: inline;">' +
+              pebble.pebble_name +
+              '</h3> by: <span style="font-size: smaller;">' +
+              pebble.publisher+
+              "</span></span>" +
+              // downloads and favorties with icons and numbers
+              '<span style="float: right;">' +
+              '<span style="font-size: big;"> 📋 ' +
+              pebble.usage_count +
+              "</span>" +
+              "</span>" +
+              "<br>" +
+              "<pre class='code-preview' id='code-preview-" +
+              pebble.pk +
+              "'>" +
+              codePreview +
+              "</pre>" +
+              "<p class='show-more' id='show-more-" +
+              pebble.pk +
+              "'>Show more</p>" +
+              "<p>Description: " +
+              pebble.description +
+              "</p>" +
+              `<button onclick="selectedCode('${pebble.pk}', false)">Add to Code</button>` +
+              `<button onclick="selectedCode('${pebble.pk}', true)">Customize</button>` +
+              // '<button  onclick="selectedCode(' +
+              // pebble.pk +
+              // ',false)"   >Add to Code</button>' +
+              // '<button onclick="selectedCode(' +
+              // pebble.pk +
+              // ',true)"   >Customize</button>' +
+              `<button onclick="addToFavorites('${pebble.pk}')"" >❤️ 1456</button>`;
+            searchResults.appendChild(resultBox);
+            document
+              .getElementById("show-more-" + pebble.pk)
+              .addEventListener("click", async function () {
+                const codePreviewElement = document.getElementById(
+                  "code-preview-" + pebble.pk
+                );
+                codePreviewElement.classList.contains("expanded")
+                  ? ""
+                  : await showCodeWithLoader(pebble.pk, codePreviewElement);
+                codePreviewElement.classList.toggle("expanded");
+                this.innerText = codePreviewElement.classList.contains("expanded")
+                  ? "Show less"
+                  : "Show more";
+              });
+          });
+        }
+        // pass selected to vscode
+      async  function selectedCode(code, customize) {
+          await showCodeWithLoader(code, document.getElementById("code-preview-" + code));
+          
+          const fullCode = document.getElementById("code-preview-" + code).innerText;
+          // get data ready for (data.code,data.pebble_id,data.search_query_pk,data.customization_prompt,data.project_name);
+          const data = {
+            code: fullCode,
+            pebble_id:code ,
+            search_query_pk: window.searchQueryPk,
+            customization_prompt: '',
+            project_name: window.projectName,
+          }
+
+          if (customize) {
+            const confirmButton = document.createElement('button');
+            confirmButton.id = 'confirmButton-' + code;
+            confirmButton.innerText  = 'Confirm';
+
+            const userInput = document.createElement('input');
+            userInput.type = 'text';
+            userInput.id = 'userInput-' + code;
+            userInput.style.flex = '3';
+            userInput.style.padding = '8px';
+            userInput.style.borderRadius = '4px';
+            userInput.style.marginRight = '16px';  
+            userInput.style.backgroundColor = '#252526';
+            userInput.style.color = '#d4d4d4';
+            userInput.placeholder = 'Enter refactor instructions';
+
+            const wrapperElement = document.createElement('div');
+            wrapperElement.style.display = 'flex';
+            wrapperElement.style.marginTop = '16px';
+            wrapperElement.appendChild(userInput);
+            wrapperElement.appendChild(confirmButton);
+
+            const currentElement = document.getElementById('show-more-' + code);
+            currentElement.insertAdjacentElement('afterend', wrapperElement);
+            
+            document.getElementById('confirmButton-' + code).addEventListener('click', async function() {
+                const textBoxValue = (document.getElementById('userInput-' + code) ).value;
+                data.customization_prompt = textBoxValue;
+                vscode.postMessage({
+                  command: 'customize',
+                  code: data,
+                });
             });
-        });
-      }
-      // pass selected to vscode
-    async  function selectedCode(code, customize) {
-        await showCodeWithLoader(code, document.getElementById("code-preview-" + code));
-        
-        const fullCode = document.getElementById("code-preview-" + code).innerText;
-        // get data ready for (data.code,data.pebble_id,data.search_query_pk,data.customization_prompt,data.project_name);
-        const data = {
-          code: fullCode,
-          pebble_id:code ,
-          search_query_pk: window.searchQueryPk,
-          customization_prompt: '',
-          project_name: window.projectName,
+
+          } else {
+            vscode.postMessage({
+              command: "add",
+              code: data,
+            });
+          }
         }
 
-        if (customize) {
-          vscode.postMessage({
-            command: "customize",
-            code: data,
-          });
-        } else {
-          vscode.postMessage({
-            command: "add",
-            code: data,
-          });
+        async function showCodeWithLoader(id, codePreviewElement) {
+          // Display the loader
+          const loader =
+            '<div class="loader" id="loader-' +
+            id +
+            '"></div>';
+            
+            const show_more = document
+              .getElementById("show-more-" + id)
+          // add loader above the show more button
+          show_more.insertAdjacentHTML("beforebegin", loader);
+          
+          
+          // Fetch the complete code using the API
+          const completeCode = await fetchPebbleFullCode(id);
+
+          // remove the loader
+          show_more.previousSibling.remove();
+
+          // Remove the loader and show the retrieved code
+          codePreviewElement.innerHTML = completeCode;
         }
-      }
-
-      async function showCodeWithLoader(id, codePreviewElement) {
-        // Display the loader
-        const loader =
-          '<div class="loader" style="display: inline-block;" id="loader-' +
-          id +
-          '"></div>';
-        codePreviewElement.innerHTML = loader;
-        
-        // Fetch the complete code using the API
-        const completeCode = await fetchPebbleFullCode(id);
-
-        // Remove the loader and show the retrieved code
-        codePreviewElement.innerHTML = completeCode;
-      }
-    </script>
-    
-    
+      </script>
+      
+      
 
 
-    <script>
-      const favortiesTabContent = document.getElementById("favoritesTabContent");
-      // get favorites from api
+      <script>
+        const favortiesTabContent = document.getElementById("favoritesTabContent");
+        // get favorites from api
 
 
-    </script>
-  </body>
-</html>
+      </script>
+    </body>
+  </html>

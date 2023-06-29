@@ -12,6 +12,8 @@ function handleMessage(event) {
     window.api = data.env;
 
     API_URL = window.api["HOST"];
+  loadNextPage();
+
   }
 }
 
@@ -84,7 +86,11 @@ const perPage = 2;
 
 // add listener to browse button
 const browseButton = document.getElementById("browseTab");
-browseButton.addEventListener("click", loadNextPage);
+browseButton.addEventListener("click", ()=>{
+  const searchResults = document.getElementById("searchResults");
+  searchResults.innerHTML="";
+  loadNextPage();
+});
 
 async function loadNextPage() {
   const searchResults = document.getElementById("searchResults");
@@ -108,12 +114,10 @@ async function loadNextPage() {
         // downloads and favorties with icons and numbers
         '<span style="float: right;">' +
         '<span style="font-size: big;"> 📋 ' +
-        pebble.downloads +
+        pebble.usage_count +
         "</span>" +
         "</span>" +
         "<br>" +
-        pebble.pk +
-        "<br>"+
         "<pre class='code-preview' id='code-preview-" +
         pebble.pk +
         "'>" +
@@ -177,7 +181,7 @@ function buildSearchResults(results) {
         <h3 style="display: inline;">${res.pebble_name}</h3> by: <span style="font-size: smaller;">${res.publisher}</span>
       </span>
       <span style="float: right;">
-        <span style="font-size: big;"> 📋 ${res.downloads}</span>
+        <span style="font-size: big;"> 📋 ${res.usage_count}</span>
       </span>
       <pre class="code-preview" id="code-preview-${res.pk}">${res.preview}</pre>
       <p class="show-more" id="show-more-${res.pk}">Show more</p>
@@ -192,7 +196,7 @@ async function fetchPebbles(page = 1, per_page = 2) {
   const url = `${API_URL}${window.api["get_pebbles"]}?page=${page}&per_page=${per_page}`;
   const response = await fetchWithToken(url, {},);
 
-  if (response.ok) {
+  if (response.status === 200) {
     const results = await response.json();
     return results.data;
   } else {
@@ -360,6 +364,7 @@ async function addMySnippetsToHtml(){
       // '<button onclick="selectedCode(' +
       // pebble.pk +
       // ',true)"   >Customize</button>' +
+      `<button >❤️ 1456</button>`;
      
     mySnippetsDiv.appendChild(resultBox);
     document

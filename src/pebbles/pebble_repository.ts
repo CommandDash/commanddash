@@ -106,14 +106,14 @@ async function getProjectName(){
 
 async function customizeCode(data: { code: string; pebble_id: string; search_query_pk: string; customization_prompt: string; project_name: string; },openAIRepo:OpenAIRepository,context:vscode.ExtensionContext){
     // show text field to ask for instructions
-    const instructions =await  vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
-    if(!instructions){
-        return;
-    }
-    data.customization_prompt=instructions;
+    // const instructions =await  vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
+    // if(!instructions){
+    //     return;
+    // }
+    // data.customization_prompt=instructions;
     // send instructions to openAI
     let prompt = "Change the following code according to given instructions. Give out just the modified code. Avoid any text other than the code. Give out the code in a single codeblock.";
-    prompt +="\n\n Code:\n```dart\n"+data.code+"\n```\n\nInstructions:\n"+instructions+"\n\nModified Code:";
+    prompt +="\n\n Code:\n```dart\n"+data.code+"\n```\n\nInstructions:\n"+data.customization_prompt+"\n\nModified Code:";
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: "Creating Code",
