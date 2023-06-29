@@ -13,15 +13,43 @@ import { createRepoClassFromPostman } from './tools/create/class_repository_from
 import { addToReference } from './tools/reference/add_reference';
 import { createCodeFromDescription } from './tools/create/code_from_description';
 import { optimizeCode } from './tools/refactor/optimize_code';
+import { showPebblePanel, savePebblePanel } from './pebbles/pebble_repository';
+import { makeHttpRequest } from './repository/http-utils';
+import * as dotenv from 'dotenv';
+import path = require('path');
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+
 export function activate(context: vscode.ExtensionContext) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "fluttergpt" is now active!');
+ 
+	console.log('Congratulations, "fluttergpt" is now active!');
+      dotenv.config({ path: path.join(__dirname, '../.env') })
 
+    console.log(process.env["HOST"]);
     let openAIRepo = initOpenAI();
+    promptGithubLogin();
+    context.subscriptions.push(
+        vscode.window.registerUriHandler({
+            handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
+                console.log(uri);
+                if(uri.path===process.env["success_path"]!){
+                    const query=uri.query.split('&');   
+                    const access_token=query[0].split('=')[1];
+                    const refresh_token=query[1].split('=')[1];
+                 Promise.all([
+                        context.globalState.update('access_token',access_token),
+                        context.globalState.update('refresh_token',refresh_token)
+                  ]).then(()=>{
+                    // show success message
+                    vscode.window.showInformationMessage('Successfully logged in to FlutterGPT');
+                  })
+                    
+
+                    
+                }
+            },
+        })
+      );
+      
 
     vscode.workspace.onDidChangeConfiguration(event => {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
@@ -38,6 +66,23 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo, context.globalState), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo, 'runtime', context.globalState), context);
     customPush('fluttergpt.optimizeCode', async () => optimizeCode(openAIRepo, context.globalState), context);
+    customPush('fluttergpt.showPebblePanel', () => showPebblePanel(context,openAIRepo), context);
+    customPush('fluttergpt.savePebblePanel', () => savePebblePanel(openAIRepo,context), context);
+}
+
+export function promptGithubLogin(): void {
+    vscode.window.showInformationMessage('Please login to Github to use this feature', 'Login').then(async selection => {
+        if (selection === 'Login') {
+            try {
+                const url = process.env["HOST"]!+process.env["github_oauth"]!;
+                const github_oauth_url = await makeHttpRequest<{github_oauth_url:string}>({url:url});
+                vscode.env.openExternal(vscode.Uri.parse(github_oauth_url.github_oauth_url));
+            } catch (error) {
+                vscode.window.showErrorMessage('Error logging in to fluttergpt');
+            }
+        }
+    });
+
 }
 
 function initOpenAI(): OpenAIRepository {
@@ -64,4 +109,6 @@ function customUriPush(name: string,openAIRepo: OpenAIRepository, context: vscod
 
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+    console.log("Fluttergpt deactivated");   
+}

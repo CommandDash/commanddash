@@ -27,9 +27,14 @@
     "refactor",
     "widgets"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:dart"
+  ],
   "main": "./out/extension.js",
   "contributes": {
+    "extensionKind": [
+      "ui"
+    ],
     "configuration": {
       "title": "FlutterGPT",
       "type": "object",
@@ -53,6 +58,14 @@
         "command": "fluttergpt.addToReference",
         "when": "editorHasSelection && resourceLangId == 'dart'",
         "title": "FlutterGPT: Add to Reference"
+      },
+      {
+        "command": "fluttergpt.showPebblePanel",
+        "title": "Show HTML Panel"
+      },
+      {
+        "command": "fluttergpt.savePebblePanel",
+        "title": "Save as Pebble"
       },
       {
         "command": "fluttergpt.addToReference.menu",
@@ -118,7 +131,6 @@
         "title": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
       },
       {
-
         "command": "fluttergpt.refactorCode",
         "title": "FlutterGPT Refactor: From Instructions"
       },
@@ -160,13 +172,18 @@
           "command": "fluttergpt.addToReference.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.savePebblePanel",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@1"
         }
       ],
       "explorer/context": [
         {
           "command": "fluttergpt.createResponsiveWidgetFromDescription",
           "group": "fluttergpt-menu-group@1",
-          "description":  "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
+          "description": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
         }
       ],
       "fluttergpt.refactorMenu": [
@@ -235,6 +252,7 @@
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
+    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.x",
     "@types/vscode": "^1.77.0",
@@ -248,7 +266,7 @@
   },
   "dependencies": {
     "axios": "^1.4.0",
-    "dotenv": "^16.0.3"
-    
+    "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0"
   }
 }

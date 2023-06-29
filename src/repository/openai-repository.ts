@@ -71,4 +71,33 @@ export class OpenAIRepository {
         throw error;
       }
     }
+
+
+    public async getEmbeddings(text: string): Promise<number[]> {
+      if(!this.apiKey) {
+        throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
+      }
+      const request = {
+        input: text,
+        model: 'text-embedding-ada-002'
+      };
+      const config = {
+          method: 'post',
+          url: 'https://api.openai.com/v1/embeddings',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.apiKey}`
+          },
+          data: request
+      };
+      try{
+        console.debug(`Making request to get embeddings: ${JSON.stringify(request)}`);
+        const response = await makeHttpRequest<number[]>(config);
+        console.debug(`Response from get embeddings: ${JSON.stringify(response)}`);
+        return response;
+      } catch (error: Error | any){
+        throw error;
+      }
+    }
+
   }
