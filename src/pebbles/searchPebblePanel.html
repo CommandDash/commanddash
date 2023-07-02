@@ -249,7 +249,11 @@
               // '<button onclick="selectedCode(' +
               // pebble.pk +
               // ',true)"   >Customize</button>' +
-              `<button onclick="addToFavorites('${pebble.pk}')"" >❤️ 1456</button>`;
+              `<button id = "favorite-${pebble.pk}" onclick="addToFavorites('${pebble.pk}')" ${
+                pebble.favorited ? "disabled" : ""
+              }>
+                ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
+              </button>`;
             searchResults.appendChild(resultBox);
             document
               .getElementById("show-more-" + pebble.pk)

@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log(process.env["HOST"]);
     let openAIRepo = initOpenAI();
-    promptGithubLogin();
+    promptGithubLogin(context);
     context.subscriptions.push(
         vscode.window.registerUriHandler({
             handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
@@ -41,12 +41,10 @@ export function activate(context: vscode.ExtensionContext) {
                   ]).then(()=>{
                     // show success message
                     vscode.window.showInformationMessage('Successfully logged in to FlutterGPT');
-                  })
-                    
-
-                    
+                    vscode.window.showWarningMessage('Please reopen any open panels to use FlutterGPT');
+                    });
                 }
-            },
+            }
         })
       );
       
@@ -70,7 +68,11 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.savePebblePanel', () => savePebblePanel(openAIRepo,context), context);
 }
 
-export function promptGithubLogin(): void {
+export function promptGithubLogin(context:vscode.ExtensionContext): void {
+    const refresh_token = context.globalState.get<string>('refresh_token');
+    if (refresh_token) {
+        return;
+    }
     vscode.window.showInformationMessage('Please login to Github to use this feature', 'Login').then(async selection => {
         if (selection === 'Login') {
             try {

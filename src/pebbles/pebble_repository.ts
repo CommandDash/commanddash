@@ -212,7 +212,7 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
         path.join(context.extensionPath, 'src', 'pebbles', 'api.js')
       ));
     panel.webview.onDidReceiveMessage(
-        message => {
+        async message => {
           switch (message.command) {
             case 'saveAccessToken':
                 context.globalState.update('access_token',message.access_token);
@@ -226,8 +226,18 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
                 return;
             case 'auth':
                 panel.dispose();
-                promptGithubLogin();
-                vscode.window.showInformationMessage("Please login to save pebble");
+                const refresh_token = context.globalState.get('refresh_token');
+                if(refresh_token){
+                    panel.webview.postMessage({
+                        type:'keys',
+                        keys:await getConfigs(context),
+                        env: envConfig
+                    });
+                }
+                else{
+                promptGithubLogin(context);
+                vscode.window.showInformationMessage("Please login to use pebbles");
+                }
                 return;
             
           }

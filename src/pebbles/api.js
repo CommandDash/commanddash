@@ -137,7 +137,11 @@ async function loadNextPage() {
         // '<button onclick="selectedCode(' +
         // pebble.pk +
         // ',true)"   >Customize</button>' +
-        `<button onclick="addToFavorites('${pebble.pk}')"" >❤️ 1456</button>`;
+        `<button id = "favorite-${pebble.pk}" onclick="addToFavorites('${pebble.pk}')" ${
+          pebble.favorited ? "disabled" : ""
+        }>
+          ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
+        </button>`;
       searchResults.appendChild(resultBox);
       document
         .getElementById("show-more-" + pebble.pk)
@@ -272,11 +276,14 @@ async function searchTopPebbles(query){
 }
 
 async function addToFavorites(pebble_id){
+  console.log(`adding to favorites ${pebble_id}`);
   const url = `${API_URL}${window.api["favorite_pebble"]}`;
-  const searchQuery = document.getElementById("searchBar").value;
+  
   const options = {
     method: "POST",
-    body: JSON.stringify({pebble_id: pebble_id, query: searchQuery})
+    body: JSON.stringify({pebble_id: pebble_id, 
+      search_query_pk: window.searchQueryPk,
+    })
   };
   const response = await fetchWithToken(url,options);
 
@@ -286,7 +293,11 @@ async function addToFavorites(pebble_id){
       command: "addToFavoritesSuccess",
       message: result.message,
     });
-    return result.data;
+    // update the button and count
+    const button = document.getElementById("favorite-"+pebble_id);
+    button.innerText = "❤️ " + result.favorite_count;
+    button.disabled = true;
+    return result;
   } else {
     const error = await response.json();
     vscode.postMessage({
@@ -296,6 +307,97 @@ async function addToFavorites(pebble_id){
     throw new Error(error.message);
   }
 }
+
+
+async function getFavorites(){
+  const url = `${API_URL}${window.api["my_favorites"]}`;
+  const options = {
+    method: "GET",
+  };
+  const response = await fetchWithToken(url,options);
+
+  if (response.ok) {
+    const result = await response.json();
+    return result;
+  } else {
+    const error = await response.json();
+    throw new Error(error.message);
+  }
+}
+
+// add listeners to favorites button
+const favoritesButton = document.getElementById("favoritesTab");
+favoritesButton.addEventListener("click", (e) => {
+  addFavoritesToHtml();
+});
+
+async function addFavoritesToHtml(){
+  const favoritesDiv = document.getElementById("favoritesTabContent");
+  favoritesDiv.innerHTML = "";
+  favoritesDiv.innerHTML = "<div class='loader'></div>";
+  const favorites = await getFavorites();
+  favoritesDiv.innerHTML = "";
+  favorites.forEach((pebble) => {
+    const resultBox = document.createElement("div");
+    const codePreview = pebble.preview;
+    resultBox.classList.add("resultBox");
+    resultBox.innerHTML =
+
+      '<span><h3 style="display: inline;">' +
+      pebble.pebble_name +
+      '</h3> by: <span style="font-size: smaller;">' +
+      pebble.publisher +
+      "</span></span>" +
+      // downloads and favorties with icons and numbers
+      '<span style="float: right;">' +
+      '<span style="font-size: big;"> 📋 ' +
+      pebble.usage_count +
+      "</span>" +
+      "</span>" +
+      "<br>" +
+      "<pre class='code-preview' id='code-preview-" +
+      pebble.pk +
+      "'>" +
+      codePreview +
+      "</pre>" +
+      "<p class='show-more' id='show-more-" +
+      pebble.pk +
+      "'>Show more</p>" +
+      "<p>Description: " +
+      pebble.description +
+      "</p>" +
+      `<button onclick="selectedCode('${pebble.pk}', false)">Add to Code</button>` +
+      `<button onclick="selectedCode('${pebble.pk}', true)">Customize</button>` +
+      // '<button  onclick="selectedCode(' +
+      // pebble.pk +
+      // ',false)"   >Add to Code</button>' +
+      // '<button onclick="selectedCode(' +
+      // pebble.pk +
+      // ',true)"   >Customize</button>' +
+      `<button id = "favorite-${pebble.pk}" onclick="addToFavorites('${pebble.pk}')" ${
+        pebble.favorited ? "disabled" : ""
+      }>
+        ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
+      </button>`;
+    favoritesDiv.appendChild(resultBox);
+    document
+      .getElementById("show-more-" + pebble.pk)
+      .addEventListener("click", async function () {
+        const codePreviewElement = document.getElementById(
+          "code-preview-" + pebble.pk
+        );
+        codePreviewElement.classList.contains("expanded")
+          ? ""
+          : await showCodeWithLoader(pebble.pk, codePreviewElement);
+        codePreviewElement.classList.toggle("expanded");
+        this.innerText = codePreviewElement.classList.contains("expanded")
+          ? "Show less"
+          : "Show more";
+      });
+  });
+}
+
+
 
 // get my snippets
 async function getMySnippets(){
@@ -364,7 +466,9 @@ async function addMySnippetsToHtml(){
       // '<button onclick="selectedCode(' +
       // pebble.pk +
       // ',true)"   >Customize</button>' +
-      `<button >❤️ 1456</button>`;
+      `<button id = "favorite-${pebble.pk}" 'disabled' }>
+      ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
+    </button>`;
      
     mySnippetsDiv.appendChild(resultBox);
     document
