@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
@@ -17,16 +18,17 @@ import { showPebblePanel, savePebblePanel } from './pebbles/pebble_repository';
 import { makeHttpRequest } from './repository/http-utils';
 import * as dotenv from 'dotenv';
 import path = require('path');
+import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 
 
 export function activate(context: vscode.ExtensionContext) {
  
 	console.log('Congratulations, "fluttergpt" is now active!');
-      dotenv.config({ path: path.join(__dirname, '../.env') })
-
+    dotenv.config({ path: path.join(__dirname, '../.env') });
+    let pebblePanelWebViewProvider: PebblePanelViewProvider;
+     let pebbleView: vscode.Disposable;
     console.log(process.env["HOST"]);
     let openAIRepo = initOpenAI();
-    promptGithubLogin(context);
     context.subscriptions.push(
         vscode.window.registerUriHandler({
             handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
@@ -42,13 +44,26 @@ export function activate(context: vscode.ExtensionContext) {
                     // show success message
                     vscode.window.showInformationMessage('Successfully logged in to FlutterGPT');
                     vscode.window.showWarningMessage('Please reopen any open panels to use FlutterGPT');
+                    pebblePanelWebViewProvider.refresh();
+               
+                    }).catch((error)=>{
+                        vscode.window.showErrorMessage('Error logging in to FlutterGPT');
+
                     });
                 }
             }
         })
       );
       
+    pebblePanelWebViewProvider = new PebblePanelViewProvider( context.extensionUri, context, openAIRepo);
+    
+      pebbleView = vscode.window.registerWebviewViewProvider(
+        "fluttergpt.pebblePanel",
+        pebblePanelWebViewProvider,
+    );
 
+    context.subscriptions.push(pebbleView);
+      
     vscode.workspace.onDidChangeConfiguration(event => {
         let affected = event.affectsConfiguration("fluttergpt.apiKey");
         if (affected) { openAIRepo = initOpenAI();}

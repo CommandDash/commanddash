@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'none'; connect-src 'self' http://127.0.0.1:5000 https://github.com;
+          img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  
+          frame-src 'self' https://github.com http://127.0.0.1:5000; 
+          script-src 'unsafe-inline' vscode-resource: https: http:;"
+      />
+    <title>Auth Page</title>
+    <style>
+        body {
+            background-color: #24292e;
+            color: #fff;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+
+        
+
+        #auth-container {
+            width: 300px;
+            margin: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            text-align: center;
+            background-color: #2f363d;
+            border-radius: 4px;
+        }
+
+        #auth-container h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }
+
+        #auth-container h2 {
+            margin-bottom: 1.5em;
+        }
+
+        #btn-github {
+            background-color: #007ACC;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Flutter Pebbles</h1>
+
+    <div id="auth-container">
+        <h2>Login with Github</h2>
+        <button id="btn-github">Sign in with Github</button>
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        const btnGithub = document.getElementById('btn-github');
+        btnGithub.addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'login'
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -35,6 +35,25 @@
     "extensionKind": [
       "ui"
     ],
+    "viewsContainers": {
+      "activitybar": [
+          {
+              "id": "webview",
+              "title": "FlutterGPT",
+              "icon": "./media/icon.png"
+          }
+      ]
+  },
+  "views": {
+      "webview": [
+          {
+              "type": "webview",
+              "id": "fluttergpt.pebblePanel",
+              "name": "Pebble Panel",
+              "icon": "media/icon.png"
+          }
+      ]
+  },
     "configuration": {
       "title": "FlutterGPT",
       "type": "object",

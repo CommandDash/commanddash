@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 var API_URL = ""; 
 
 window.addEventListener('message', handleMessage);
 
 function handleMessage(event) {
   const data = event.data;
+  console.log("message received", data);
   if(data.type === 'keys'){
     window.accessToken = data.keys.access_token;
     window.refreshToken = data.keys.refresh_token;
@@ -19,6 +21,9 @@ function handleMessage(event) {
 
 
 async function fetchWithToken(url, options = {}) {
+
+  console.log("Making request to ", url, "with options", options);
+  console.log("access token", window.accessToken);
   
   if ( !window.refreshToken) {
     vscode.postMessage({
@@ -37,6 +42,7 @@ async function fetchWithToken(url, options = {}) {
   options.headers.set("Authorization", `Bearer ${window.accessToken}`);
 
   const response = await fetch(url, options);
+  console.log("response", response);
 
   if (response.status === 401) {
     console.log("access token expired, trying to refresh it");
@@ -94,12 +100,12 @@ browseButton.addEventListener("click", ()=>{
 
 async function loadNextPage() {
   const searchResults = document.getElementById("searchResults");
-  const loaderDiv = document.createElement('div')
+  const loaderDiv = document.createElement('div');
   loaderDiv.className = 'loader';
   searchResults.appendChild(loaderDiv);
   
   try {
-    const results = await fetchPebbles(currentPage, perPage)
+    const results = await fetchPebbles(currentPage, perPage);
     loaderDiv.remove();
     results.forEach((pebble) => {
       const resultBox = document.createElement("div");
@@ -108,9 +114,8 @@ async function loadNextPage() {
       resultBox.innerHTML =
         '<span><h3 style="display: inline;">' +
         pebble.pebble_name +
-        '</h3> by: <span style="font-size: smaller;">' +
-        pebble.publisher +
-        "</span></span>" +
+        '</h3>'+
+         
         // downloads and favorties with icons and numbers
         '<span style="float: right;">' +
         '<span style="font-size: big;"> 📋 ' +
@@ -141,7 +146,9 @@ async function loadNextPage() {
           pebble.favorited ? "disabled" : ""
         }>
           ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-        </button>`;
+        </button>`   +    
+        `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
+
       searchResults.appendChild(resultBox);
       document
         .getElementById("show-more-" + pebble.pk)
@@ -182,7 +189,7 @@ function buildSearchResults(results) {
   return results.map(res => `
     <div class="resultBox">
       <span>
-        <h3 style="display: inline;">${res.pebble_name}</h3> by: <span style="font-size: smaller;">${res.publisher}</span>
+        <h3 style="display: inline;">${res.pebble_name}</h3> 
       </span>
       <span style="float: right;">
         <span style="font-size: big;"> 📋 ${res.usage_count}</span>
@@ -192,6 +199,7 @@ function buildSearchResults(results) {
       <p>Description: ${res.description}</p>
       <button onclick="selectedCode('${res.pk}', false)">Add to Code</button>
       <button onclick="selectedCode('${res.pk}', true)">Customize</button>
+      <div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>
     </div>
   `).join('');
 }
@@ -345,9 +353,8 @@ async function addFavoritesToHtml(){
 
       '<span><h3 style="display: inline;">' +
       pebble.pebble_name +
-      '</h3> by: <span style="font-size: smaller;">' +
-      pebble.publisher +
-      "</span></span>" +
+      '</h3>'
+        +
       // downloads and favorties with icons and numbers
       '<span style="float: right;">' +
       '<span style="font-size: big;"> 📋 ' +
@@ -378,7 +385,9 @@ async function addFavoritesToHtml(){
         pebble.favorited ? "disabled" : ""
       }>
         ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-      </button>`;
+      </button>`+ 
+      `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
+    
     favoritesDiv.appendChild(resultBox);
     document
       .getElementById("show-more-" + pebble.pk)
@@ -438,9 +447,8 @@ async function addMySnippetsToHtml(){
     resultBox.innerHTML =
       '<span><h3 style="display: inline;">' +
       pebble.pebble_name +
-      '</h3> by: <span style="font-size: smaller;">' +
-      pebble.publisher +
-      "</span></span>" +
+      '</h3>'
+     +
       // downloads and favorties with icons and numbers
       '<span style="float: right;">' +
       '<span style="font-size: big;"> 📋 ' +
@@ -468,7 +476,9 @@ async function addMySnippetsToHtml(){
       // ',true)"   >Customize</button>' +
       `<button id = "favorite-${pebble.pk}" 'disabled' }>
       ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-    </button>`;
+    </button>`+ 
+    `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
+  
      
     mySnippetsDiv.appendChild(resultBox);
     document

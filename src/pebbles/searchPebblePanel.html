@@ -8,7 +8,7 @@
       /> -->
       <meta
         http-equiv="Content-Security-Policy"
-        content="default-src 'none'; connect-src 'self' http://localhost:5000; img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  script-src 'unsafe-inline' vscode-resource: https: http:;"
+        content="default-src 'none'; connect-src 'self' http://127.0.0.1:5000; img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  script-src 'unsafe-inline' vscode-resource: https: http:;"
       />
       <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' vscode-webview:;"> -->
       <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';"> -->
@@ -202,6 +202,12 @@
       </script>
       <script src="%API_JS_URI%"></script>
       <script>
+        function openGithub(publisher) {
+          vscode.postMessage({
+            command: 'openGithub',
+            publisher: publisher
+          })
+        }
         const searchResults = document.getElementById("searchResults");
 
         async function displayResults() {
@@ -253,7 +259,8 @@
                 pebble.favorited ? "disabled" : ""
               }>
                 ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-              </button>`;
+              </button>`+ 
+              `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
             searchResults.appendChild(resultBox);
             document
               .getElementById("show-more-" + pebble.pk)
@@ -271,6 +278,8 @@
               });
           });
         }
+     
+
         // pass selected to vscode
       async  function selectedCode(code, customize) {
           await showCodeWithLoader(code, document.getElementById("code-preview-" + code));
@@ -286,6 +295,9 @@
           }
 
           if (customize) {
+            if(document.getElementById('userInput-' + code) && document.getElementById('confirmButton-' + code)) {
+              return;
+            }
             const confirmButton = document.createElement('button');
             confirmButton.id = 'confirmButton-' + code;
             confirmButton.innerText  = 'Confirm';
