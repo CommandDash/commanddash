@@ -50,7 +50,8 @@ export async function showPebblePanel(context:vscode.ExtensionContext,openAIRepo
       // read html file ./searchPebblePanel.html
         const html = fs.readFileSync(context.asAbsolutePath('./src/pebbles/searchPebblePanel.html'), 'utf8');
       
-        const htmlWithScript = html.replace('%API_JS_URI%', apiJsUri.toString());
+        var htmlWithScript = html.replace('%API_JS_URI%', apiJsUri.toString());
+        htmlWithScript = htmlWithScript.replace('%%HOST%%', process.env["HOST"]!);
         panel.webview.html = htmlWithScript;
 
         //get access and refresh tokens from configs
@@ -253,6 +254,7 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
    
    
         let htmlWithScript = html.replace('%API_JS_URI%', apiJsUri.toString());
+        htmlWithScript = htmlWithScript.replace('%HOST%', process.env["HOST"]!);
         htmlWithScript = htmlWithScript.replace('%DESCRIPTION%', description.toString());
         htmlWithScript = htmlWithScript.replace('%CODE%', selectedText.toString());
         htmlWithScript = htmlWithScript.replace('%CODE%', selectedText.toString());

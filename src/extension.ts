@@ -43,7 +43,6 @@ export function activate(context: vscode.ExtensionContext) {
                   ]).then(()=>{
                     // show success message
                     vscode.window.showInformationMessage('Successfully logged in to FlutterGPT');
-                    vscode.window.showWarningMessage('Please reopen any open panels to use FlutterGPT');
                     pebblePanelWebViewProvider.refresh();
                
                     }).catch((error)=>{

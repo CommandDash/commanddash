@@ -31,7 +31,8 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
                 path.join(this.context.extensionPath, 'src', 'pebbles', 'api.js')
             ));
             const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'searchPebblePanel.html'), 'utf8');
-            const htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
+            var htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
+            htmlWithScript= htmlWithScript.replace('%HOST%', process.env["HOST"]!);
             this._view!.webview.html = htmlWithScript;
             console.log('resolveWebviewView done');
         }
@@ -93,11 +94,23 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
                             const github_oauth_url = await makeHttpRequest<{github_oauth_url:string}>({url:url});
                             vscode.env.openExternal(vscode.Uri.parse(github_oauth_url.github_oauth_url));
                         } catch (error) {
-                            vscode.window.showErrorMessage('Error logging in to fluttergpt');
+                            vscode.window.showErrorMessage('Error logging in to fluttergpt', );
                         }
                         return;
                     case 'openGithub':
                         vscode.env.openExternal(vscode.Uri.parse("https://www.github.com/"+message.publisher));
+                        return;
+                    case 'getKeys':
+                        this._view!.webview.postMessage({
+                            type:'keys',
+                            keys: await this.getConfigs(this.context),
+                            env: process.env
+                        });
+                        return;
+                    case 'logout':
+                        this.context.globalState.update('refresh_token',undefined);
+                        this.context.globalState.update('access_token',undefined);
+                        this.refresh();
                 }
             },
             undefined,
@@ -113,7 +126,8 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
            
         }else{
             const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'searchPebblePanel.html'), 'utf8');
-            const htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
+            var htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
+            htmlWithScript = htmlWithScript.replace('%HOST%', process.env["HOST"]!);
             webviewView.webview.html = htmlWithScript;
             console.log('resolveWebviewView done');
         }
@@ -206,18 +220,21 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
         context:vscode.ExtensionContext,
         ){
            
-        vscode.env.clipboard.writeText(code);
-        vscode.window.showInformationMessage("Code copied to clipboard");
+        
+        
+        // add code to the cursor position
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+        const selection = editor.selection;
+        const currentDocument = editor.document;
+        editor.edit(editBuilder => {
+            editBuilder.replace(selection, code);
+        });
+
          
-        const document = await vscode.workspace.openTextDocument({
-            content: code,
-            language: 'dart',
-        });
-        await vscode.window.showTextDocument(document, {
-            preview: false,
-            viewColumn: vscode.ViewColumn.Beside,
-            
-        });
+       
         this.addPebbleUsage(pebble_id,search_query_pk,customization_prompt,project_name,context);
     
     }

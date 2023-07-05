@@ -93,6 +93,7 @@ const perPage = 2;
 // add listener to browse button
 const browseButton = document.getElementById("browseTab");
 browseButton.addEventListener("click", ()=>{
+  currentPage = 1;
   const searchResults = document.getElementById("searchResults");
   searchResults.innerHTML="";
   loadNextPage();
@@ -111,48 +112,13 @@ async function loadNextPage() {
       const resultBox = document.createElement("div");
       const codePreview = pebble.preview;
       resultBox.classList.add("resultBox");
-      resultBox.innerHTML =
-        '<span><h3 style="display: inline;">' +
-        pebble.pebble_name +
-        '</h3>'+
-         
-        // downloads and favorties with icons and numbers
-        '<span style="float: right;">' +
-        '<span style="font-size: big;"> 📋 ' +
-        pebble.usage_count +
-        "</span>" +
-        "</span>" +
-        "<br>" +
-        "<pre class='code-preview' id='code-preview-" +
-        pebble.pk +
-        "'>" +
-        codePreview +
-        "</pre>" +
-        "<p class='show-more' id='show-more-" +
-        pebble.pk +
-        "'>Show more</p>" +
-        "<p>Description: " +
-        pebble.description +
-        "</p>" +
-        `<button onclick="selectedCode('${pebble.pk}', false)">Add to Code</button>` +
-        `<button onclick="selectedCode('${pebble.pk}', true)">Customize</button>` +
-        // '<button  onclick="selectedCode(' +
-        // pebble.pk +
-        // ',false)"   >Add to Code</button>' +
-        // '<button onclick="selectedCode(' +
-        // pebble.pk +
-        // ',true)"   >Customize</button>' +
-        `<button id = "favorite-${pebble.pk}" onclick="addToFavorites('${pebble.pk}')" ${
-          pebble.favorited ? "disabled" : ""
-        }>
-          ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-        </button>`   +    
-        `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
-
+      resultBox.innerHTML = renderPebble(pebble);
+       
       searchResults.appendChild(resultBox);
       document
         .getElementById("show-more-" + pebble.pk)
         .addEventListener("click", async function () {
+          console.log("show more clicked");
           const codePreviewElement = document.getElementById(
             "code-preview-" + pebble.pk
           );
@@ -160,9 +126,8 @@ async function loadNextPage() {
             ? ""
             : await showCodeWithLoader(pebble.pk, codePreviewElement);
           codePreviewElement.classList.toggle("expanded");
-          this.innerText = codePreviewElement.classList.contains("expanded")
-            ? "Show less"
-            : "Show more";
+          this.style.transform = codePreviewElement.classList.contains("expanded")?
+            "rotate(180deg)": "rotate(0deg)";
         });
     });
     // increment page
@@ -184,25 +149,7 @@ async function loadNextPage() {
   }
 }
  
-
-function buildSearchResults(results) {
-  return results.map(res => `
-    <div class="resultBox">
-      <span>
-        <h3 style="display: inline;">${res.pebble_name}</h3> 
-      </span>
-      <span style="float: right;">
-        <span style="font-size: big;"> 📋 ${res.usage_count}</span>
-      </span>
-      <pre class="code-preview" id="code-preview-${res.pk}">${res.preview}</pre>
-      <p class="show-more" id="show-more-${res.pk}">Show more</p>
-      <p>Description: ${res.description}</p>
-      <button onclick="selectedCode('${res.pk}', false)">Add to Code</button>
-      <button onclick="selectedCode('${res.pk}', true)">Customize</button>
-      <div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>
-    </div>
-  `).join('');
-}
+ 
 
 async function fetchPebbles(page = 1, per_page = 2) {
   const url = `${API_URL}${window.api["get_pebbles"]}?page=${page}&per_page=${per_page}`;
@@ -349,45 +296,8 @@ async function addFavoritesToHtml(){
     const resultBox = document.createElement("div");
     const codePreview = pebble.preview;
     resultBox.classList.add("resultBox");
-    resultBox.innerHTML =
-
-      '<span><h3 style="display: inline;">' +
-      pebble.pebble_name +
-      '</h3>'
-        +
-      // downloads and favorties with icons and numbers
-      '<span style="float: right;">' +
-      '<span style="font-size: big;"> 📋 ' +
-      pebble.usage_count +
-      "</span>" +
-      "</span>" +
-      "<br>" +
-      "<pre class='code-preview' id='code-preview-" +
-      pebble.pk +
-      "'>" +
-      codePreview +
-      "</pre>" +
-      "<p class='show-more' id='show-more-" +
-      pebble.pk +
-      "'>Show more</p>" +
-      "<p>Description: " +
-      pebble.description +
-      "</p>" +
-      `<button onclick="selectedCode('${pebble.pk}', false)">Add to Code</button>` +
-      `<button onclick="selectedCode('${pebble.pk}', true)">Customize</button>` +
-      // '<button  onclick="selectedCode(' +
-      // pebble.pk +
-      // ',false)"   >Add to Code</button>' +
-      // '<button onclick="selectedCode(' +
-      // pebble.pk +
-      // ',true)"   >Customize</button>' +
-      `<button id = "favorite-${pebble.pk}" onclick="addToFavorites('${pebble.pk}')" ${
-        pebble.favorited ? "disabled" : ""
-      }>
-        ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-      </button>`+ 
-      `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
-    
+    resultBox.innerHTML = renderPebble(pebble);
+ 
     favoritesDiv.appendChild(resultBox);
     document
       .getElementById("show-more-" + pebble.pk)
@@ -399,9 +309,8 @@ async function addFavoritesToHtml(){
           ? ""
           : await showCodeWithLoader(pebble.pk, codePreviewElement);
         codePreviewElement.classList.toggle("expanded");
-        this.innerText = codePreviewElement.classList.contains("expanded")
-          ? "Show less"
-          : "Show more";
+        this.style.transform = codePreviewElement.classList.contains("expanded")?
+            "rotate(180deg)": "rotate(0deg)";
       });
   });
 }
@@ -444,42 +353,7 @@ async function addMySnippetsToHtml(){
     const resultBox = document.createElement("div");
     const codePreview = pebble.preview;
     resultBox.classList.add("resultBox");
-    resultBox.innerHTML =
-      '<span><h3 style="display: inline;">' +
-      pebble.pebble_name +
-      '</h3>'
-     +
-      // downloads and favorties with icons and numbers
-      '<span style="float: right;">' +
-      '<span style="font-size: big;"> 📋 ' +
-      pebble.usage_count +
-      "</span>" +
-      "</span>" + 
-      "<pre class='code-preview' id='code-preview-" +
-      pebble.pk +
-      "'>" +
-      codePreview +
-      "</pre>" +
-      "<p class='show-more' id='show-more-" +
-      pebble.pk +
-      "'>Show more</p>" +
-      "<p>Description: " +
-      pebble.description +
-      "</p>" +
-      `<button onclick="selectedCode('${pebble.pk}', false)">Add to Code</button>` +
-      `<button onclick="selectedCode('${pebble.pk}', true)">Customize</button>` +
-      // '<button  onclick="selectedCode(' +
-      // pebble.pk +
-      // ',false)"   >Add to Code</button>' +
-      // '<button onclick="selectedCode(' +
-      // pebble.pk +
-      // ',true)"   >Customize</button>' +
-      `<button id = "favorite-${pebble.pk}" 'disabled' }>
-      ${ pebble.favorited ? '❤️' : '🤍'} ${pebble.favorite_count}
-    </button>`+ 
-    `<div style="text-align:right;"><button onclick="openGithub('${pebble.publisher}')" style="background: none!important; border: none; padding: 0!important; font-family: arial, sans-serif; color: #069; text-decoration: underline; cursor: pointer;">by: ${pebble.publisher}</button></div>`;
-  
-     
+    resultBox.innerHTML =renderPebble(pebble);
     mySnippetsDiv.appendChild(resultBox);
     document
       .getElementById("show-more-" + pebble.pk)
@@ -487,26 +361,62 @@ async function addMySnippetsToHtml(){
         const codePreviewElement = document.getElementById(
           "code-preview-" + pebble.pk
         );
-        // codePreviewElement.classList.contains("expanded")
-        //   ? ""
-        //   : await showCodeWithLoader(pebble.pk, codePreviewElement);
-        codePreviewElement.classList.toggle("expanded");
+       codePreviewElement.classList.toggle("expanded");
         if(codePreviewElement.classList.contains("expanded")){
           codePreviewElement.innerHTML = pebble.code;
         }
         else{
           codePreviewElement.innerHTML = codePreview;
         }
-        this.innerText = codePreviewElement.classList.contains("expanded")
-          ? "Show less"
-          : "Show more";
+        this.style.transform = codePreviewElement.classList.contains("expanded")?
+        "rotate(180deg)": "rotate(0deg)";
       });
   });
 
 }
 
+function renderPebble(pebble) {
+  
+  
+  var headerPart = `
+      <span>
+      <h3 style="display: inline;">${pebble.pebble_name}</h3>
+      <span style="float: right;">`;
+headerPart +=pebble.usage_count==0?``: `
+          <span style="font-size: big;"> 📋 ${pebble.usage_count}</span>`;
+headerPart +=`
+      </span>
+      </span>`;
 
+      const descriptionPart = `
+      <br>
+      <pre class='code-preview' id='code-preview-${pebble.pk}'>${pebble.preview}</pre>
+      <p class='show-more' id='show-more-${pebble.pk}'>&#x25BC</p>
+          <p>Description: ${pebble.description}</p>`;
 
+  const linkStyle = 'style="background: none;font-weight: normal; border: none; padding: 10px; font-family: arial,  sans-serif; cursor: pointer; align: center;"';
+  const customButtonAndAction = (buttonInnerHTML, isCustomizeButton=false) => `
+      <button  onclick="selectedCode('${pebble.pk}', ${isCustomizeButton})">${buttonInnerHTML}</button>`;
+  
+  const favoriteButton = `
+      <button class="favorite" id="favorite-${pebble.pk}" onclick="addToFavorites('${pebble.pk}')" ${(pebble.favorited ? "disabled" : "")}>
+      ${(pebble.favorited ? '❤️' : '🤍')} ${pebble.favorite_count}
+      </button>`;
+  
+  const publisherButton = `
+      <button ${linkStyle} onclick="openGithub('${pebble.publisher}')" style="text-decoration: underline; float: right;">${pebble.publisher}</button>`;
+
+  const buttonPart = `
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+      ${customButtonAndAction("Add to Code")}
+      ${customButtonAndAction("Customize", true)}
+      ${favoriteButton}
+      ${publisherButton}
+      </div>`;
+
+  return `${headerPart}${descriptionPart}${buttonPart}`;
+}
+ 
 
 
 
