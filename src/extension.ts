@@ -24,6 +24,7 @@ import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 export function activate(context: vscode.ExtensionContext) {
  
 	console.log('Congratulations, "fluttergpt" is now active!');
+   
     dotenv.config({ path: path.join(__dirname, '../.env') });
     let pebblePanelWebViewProvider: PebblePanelViewProvider;
      let pebbleView: vscode.Disposable;

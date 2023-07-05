@@ -21,9 +21,7 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     public async refresh() {
           const refresh_token = this.context.globalState.get('refresh_token');
         if(refresh_token === undefined){
-            const authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'auth_page.html'), 'utf8');
-            const url = process.env["HOST"]!+process.env["github_oauth"]!;
-            const authPageHtmlWithUrl = authPageHtml.replace('%GITHUB_LOGIN_URL%', url);
+            var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'auth_page.html'), 'utf8');
             this._view!.webview.html = authPageHtml;
            
         }else{
@@ -119,9 +117,7 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
 
         const refresh_token = this.context.globalState.get('refresh_token');
         if(refresh_token === undefined){
-            const authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'auth_page.html'), 'utf8');
-            const url = process.env["HOST"]!+process.env["github_oauth"]!;
-            const authPageHtmlWithUrl = authPageHtml.replace('%GITHUB_LOGIN_URL%', url);
+            var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'auth_page.html'), 'utf8');
             webviewView.webview.html = authPageHtml;
            
         }else{
@@ -247,15 +243,15 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     projectName: string,
     context:vscode.ExtensionContext
   ): Promise<any> {
-    const params = new URLSearchParams({
+    const params =    {
       pebble_id: pebbleId,
       search_query_pk: searchQueryPk,
       customization_prompt: customizationPrompt,
       project_name: projectName
-    }).toString();
+    } ;
     const config = {
         method: 'post',
-        url: process.env["pebble_used"],
+        url: process.env["HOST"]!+process.env["pebble_used"],
         data: params,
     };
     const response = await makeAuthorizedHttpRequest(config,context);
