@@ -21,14 +21,14 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     public async refresh() {
           const refresh_token = this.context.globalState.get('refresh_token');
         if(refresh_token === undefined){
-            var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'auth_page.html'), 'utf8');
+            var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'auth_page.html'), 'utf8');
             this._view!.webview.html = authPageHtml;
            
         }else{
             const apiJsUri = this._view!.webview.asWebviewUri(vscode.Uri.file(
-                path.join(this.context.extensionPath, 'src', 'pebbles', 'api.js')
+                path.join(this.context.extensionPath, 'assets', 'pebbles', 'api.js')
             ));
-            const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'searchPebblePanel.html'), 'utf8');
+            const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'searchPebblePanel.html'), 'utf8');
             var htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
             htmlWithScript= htmlWithScript.replace('%HOST%', process.env["HOST"]!);
             this._view!.webview.html = htmlWithScript;
@@ -59,12 +59,12 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.joinPath(this.extensionPath, 'src', 'pebbles')
+                vscode.Uri.joinPath(this.extensionPath, 'assets', 'pebbles')
             ]
         };
 
         const apiJsUri = webviewView.webview.asWebviewUri(vscode.Uri.file(
-            path.join(this.context.extensionPath, 'src', 'pebbles', 'api.js')
+            path.join(this.context.extensionPath, 'assets', 'pebbles', 'api.js')
         ));
         console.log(apiJsUri);
         webviewView.webview.onDidReceiveMessage(
@@ -117,11 +117,11 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
 
         const refresh_token = this.context.globalState.get('refresh_token');
         if(refresh_token === undefined){
-            var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'auth_page.html'), 'utf8');
+            var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'auth_page.html'), 'utf8');
             webviewView.webview.html = authPageHtml;
            
         }else{
-            const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'src', 'pebbles', 'searchPebblePanel.html'), 'utf8');
+            const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'searchPebblePanel.html'), 'utf8');
             var htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
             htmlWithScript = htmlWithScript.replace('%HOST%', process.env["HOST"]!);
             webviewView.webview.html = htmlWithScript;

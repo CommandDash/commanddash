@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "FlutterGPT: Supercharged Dev Experiment",
   "description": "Use ChatGPT right inside your IDE to create, refactor and debug Flutter code.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -77,10 +77,6 @@
         "command": "fluttergpt.addToReference",
         "when": "editorHasSelection && resourceLangId == 'dart'",
         "title": "FlutterGPT: Add to Reference"
-      },
-      {
-        "command": "fluttergpt.showPebblePanel",
-        "title": "Show HTML Panel"
       },
       {
         "command": "fluttergpt.savePebblePanel",

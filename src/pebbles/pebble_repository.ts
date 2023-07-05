@@ -17,10 +17,10 @@ export async function showPebblePanel(context:vscode.ExtensionContext,openAIRepo
     );
     panel.webview.options = {
         enableScripts: true,
-        localResourceRoots: [vscode.Uri.joinPath(context.extension.extensionUri, 'src', 'pebbles')],
+        localResourceRoots: [vscode.Uri.joinPath(context.extension.extensionUri, 'assets', 'pebbles')],
     };
     const apiJsUri = panel.webview.asWebviewUri(vscode.Uri.file(
-        path.join(context.extensionPath, 'src', 'pebbles', 'api.js')
+        path.join(context.extensionPath, 'assets', 'pebbles', 'api.js')
       ));
     panel.webview.onDidReceiveMessage(
         message => {
@@ -48,7 +48,10 @@ export async function showPebblePanel(context:vscode.ExtensionContext,openAIRepo
       );
     
       // read html file ./searchPebblePanel.html
-        const html = fs.readFileSync(context.asAbsolutePath('./src/pebbles/searchPebblePanel.html'), 'utf8');
+      let htmlPath = vscode.Uri.file(
+        path.join(context.extensionPath, 'assets', 'pebbles', 'searchPebblePanel.html')
+    );
+        const html = fs.readFileSync(htmlPath.fsPath, 'utf8');
       
         var htmlWithScript = html.replace('%API_JS_URI%', apiJsUri.toString());
         htmlWithScript = htmlWithScript.replace('%%HOST%%', process.env["HOST"]!);
@@ -207,10 +210,10 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
     );
     panel.webview.options = {
         enableScripts: true,
-        localResourceRoots: [vscode.Uri.joinPath(context.extension.extensionUri, 'src', 'pebbles')],
+        localResourceRoots: [vscode.Uri.joinPath(context.extension.extensionUri, 'assets', 'pebbles')],
     };
     const apiJsUri = panel.webview.asWebviewUri(vscode.Uri.file(
-        path.join(context.extensionPath, 'src', 'pebbles', 'api.js')
+        path.join(context.extensionPath, 'assets', 'pebbles', 'api.js')
       ));
     panel.webview.onDidReceiveMessage(
         async message => {
@@ -246,8 +249,10 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
         undefined,
         context.subscriptions
       );
-    
-        const html = fs.readFileSync(context.asAbsolutePath('./src/pebbles/savePebblePanel.html'), 'utf8');
+      let htmlPath = vscode.Uri.file(
+        path.join(context.extensionPath, 'assets', 'pebbles', 'savePebblePanel.html')
+    );
+        const html = fs.readFileSync(htmlPath.fsPath, 'utf8');
         //get access and refresh tokens from configs
         const access_token = context.globalState.get('access_token');
         const refresh_token = context.globalState.get('refresh_token');
