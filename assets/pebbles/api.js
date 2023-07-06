@@ -19,6 +19,15 @@ function handleMessage(event) {
   }
 }
 
+setTimeout(() => {
+  if(!window.api){
+    vscode.postMessage({
+      command: "getKeys",
+      message: "User not authenticated. Please login.",
+    });
+  }
+}, 500);
+
 
 async function fetchWithToken(url, options = {}) {
 
@@ -382,7 +391,7 @@ function renderPebble(pebble) {
       <span>
       <h3 style="display: inline;">${pebble.pebble_name}</h3>
       <span style="float: right;">`;
-headerPart +=pebble.usage_count==0?``: `
+headerPart +=pebble.usage_count===0?``: `
           <span style="font-size: big;"> 📋 ${pebble.usage_count}</span>`;
 headerPart +=`
       </span>

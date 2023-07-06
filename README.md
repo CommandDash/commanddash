@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img height=200px src="https://storage.googleapis.com/cms-storage-bucket/0dbfcc7a59cd1cf16282.png" alt="Flutter-logo"></a>
+ <img height=200px src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/feature/pebble/media/icon.png" alt="Flutter-logo"></a>
 </p>
 <h1 align="center">FlutterGPT</h1>
 <div align="center">
