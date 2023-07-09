@@ -37,23 +37,23 @@
     ],
     "viewsContainers": {
       "activitybar": [
-          {
-              "id": "webview",
-              "title": "FlutterGPT",
-              "icon": "./media/icon.png"
-          }
+        {
+          "id": "webview",
+          "title": "FlutterGPT",
+          "icon": "./media/icon.png"
+        }
       ]
-  },
-  "views": {
+    },
+    "views": {
       "webview": [
-          {
-              "type": "webview",
-              "id": "fluttergpt.pebblePanel",
-              "name": "Pebble Panel",
-              "icon": "media/icon.png"
-          }
+        {
+          "type": "webview",
+          "id": "fluttergpt.pebblePanel",
+          "name": "Pebble Panel",
+          "icon": "media/icon.png"
+        }
       ]
-  },
+    },
     "configuration": {
       "title": "FlutterGPT",
       "type": "object",
@@ -280,6 +280,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
     "js-yaml": "^4.1.0"

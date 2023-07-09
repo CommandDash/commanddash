@@ -16,6 +16,7 @@ import { createCodeFromDescription } from './tools/create/code_from_description'
 import { optimizeCode } from './tools/refactor/optimize_code';
 import { showPebblePanel, savePebblePanel } from './pebbles/pebble_repository';
 import { makeHttpRequest } from './repository/http-utils';
+import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
@@ -24,8 +25,10 @@ import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 export function activate(context: vscode.ExtensionContext) {
  
 	console.log('Congratulations, "fluttergpt" is now active!');
-   
+    
     dotenv.config({ path: path.join(__dirname, '../.env') });
+    activateTelemetry(context);
+    logEvent('activated');
     let pebblePanelWebViewProvider: PebblePanelViewProvider;
      let pebbleView: vscode.Disposable;
     console.log(process.env["HOST"]);
