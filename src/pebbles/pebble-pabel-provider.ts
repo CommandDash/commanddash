@@ -7,6 +7,9 @@ import { OpenAIRepository } from '../repository/openai-repository';
 import { extractDartCode } from '../utilities/code-processing';
 import { promptGithubLogin } from '../extension'
 import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-utils';
+import TelemetryReporter from '@vscode/extension-telemetry';
+import { logEvent } from '../utilities/telemetry-reporter';
+import { get } from 'http';
 
 export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     
@@ -55,6 +58,8 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     ) {
         console.log('resolveWebviewView');
         this._view = webviewView;
+        // log open pebble panel event with user details
+        logEvent('openPebblePanel', {'type':'pebbles', "loggedIn": (this.context.globalState.get('refresh_token')!==undefined).toString()  });
 
         webviewView.webview.options = {
             enableScripts: true,
@@ -88,6 +93,7 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
                         return;
                     case 'login':
                         try {
+                            logEvent('login-clicked',{"from":"pebble-panel"});
                             const url = process.env["HOST"]!+process.env["github_oauth"]!;
                             const github_oauth_url = await makeHttpRequest<{github_oauth_url:string}>({url:url});
                             vscode.env.openExternal(vscode.Uri.parse(github_oauth_url.github_oauth_url));
@@ -114,30 +120,49 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
             undefined,
             this.context.subscriptions
         );
-
+        var projectName;
+        try {
+              projectName =await this.getProjectName();
+        } catch (error) {
+            
+        }
         const refresh_token = this.context.globalState.get('refresh_token');
         if(refresh_token === undefined){
             var authPageHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'auth_page.html'), 'utf8');
             webviewView.webview.html = authPageHtml;
            
         }else{
-            const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'searchPebblePanel.html'), 'utf8');
-            var htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
-            htmlWithScript = htmlWithScript.replace('%HOST%', process.env["HOST"]!);
-            webviewView.webview.html = htmlWithScript;
-            console.log('resolveWebviewView done');
+            if(projectName === undefined){
+                // show not a flutter project in html
+                var notFlutterProjectHtml = `<html>
+                <body>
+                <h1>Not a Flutter Project</h1>
+                    <p>Pebbles only works with Flutter projects. Please open a Flutter project to use Pebbles.</p>
+                    </body>
+                    </html>`;
+                webviewView.webview.html = notFlutterProjectHtml;
+            }
+            else{
+                const searchPanelHtml = fs.readFileSync( path.join(this.context.extensionPath, 'assets', 'pebbles', 'searchPebblePanel.html'), 'utf8');
+                var htmlWithScript = searchPanelHtml.replace('%API_JS_URI%', apiJsUri.toString());
+                htmlWithScript = htmlWithScript.replace('%HOST%', process.env["HOST"]!);
+                webviewView.webview.html = htmlWithScript;
+                console.log('resolveWebviewView done');
+            }
+        
         }
 
 
        
         const envConfig = process.env;
         
-
+        if(projectName !== undefined){
         this._view.webview.postMessage({
             type:'keys',
             keys: await this.getConfigs(this.context),
             env: envConfig
         });
+        }
         this._view = webviewView;
     }
 
@@ -165,6 +190,9 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
           }
           
           const pubspecPath = vscode.workspace.workspaceFolders[0].uri.fsPath + '/pubspec.yaml';
+            if (!fs.existsSync(pubspecPath)) {
+                 throw new Error('No pubspec.yaml found');
+            }
           type Pubspec = {
             dependencies: Record<string, unknown>;
             // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -196,19 +224,32 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            const result = await openAIRepo.getCompletion([{
-                'role': 'user',
-                'content': prompt
-            }]);
-            clearInterval(progressInterval);
-            progress.report({ increment: 100 });
-    
-            const dartCode = extractDartCode(result);
-            this.copyCode(dartCode,data.pebble_id,data.search_query_pk,data.customization_prompt,data.project_name,context);
-        });
+            try {
+                const result = await openAIRepo.getCompletion([{
+                    'role': 'user',
+                    'content': prompt
+                }]);
+                clearInterval(progressInterval);
+                progress.report({ increment: 100 });
+        
+                const dartCode = extractDartCode(result);
+                this.copyCode(dartCode,data.pebble_id,data.search_query_pk,data.customization_prompt,data.project_name,context);
+           
+            } catch (error) {
+                logEvent('pebble-customization-failed', {
+                    'type':'pebbles',
+                    'pebble_id': data.pebble_id,
+                    'search_query_pk': data.search_query_pk,
+                    'customization_prompt': data.customization_prompt,
+                    'project_name': data.project_name,
+                    'error': `${error}`,
+                });
+                vscode.window.showErrorMessage('Failed to customize code');
+            }
+            });
     }
     
-    public async   copyCode(code:string,
+    public async copyCode(code:string,
         pebble_id:string,
         search_query_pk:string,
         customization_prompt:string,
@@ -216,7 +257,14 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
         context:vscode.ExtensionContext,
         ){
            
-        
+        logEvent('pebble-used', {
+                'type':'pebbles',
+                'customized':(customization_prompt !== undefined).toString(),
+                'pebble_id': pebble_id, 
+                'search_query_pk': search_query_pk, 
+                'customization_prompt': customization_prompt,
+                'project_name': project_name
+               },);
         
         // add code to the cursor position
         const editor = vscode.window.activeTextEditor;

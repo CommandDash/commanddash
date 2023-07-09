@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
-import { event } from 'firebase-functions/v1/analytics';
 import { log } from 'console';
 
 // the application insights key (also known as instrumentation key)
-const key = '<key>';
+const key = 'ceae95d5-839b-4691-8b42-ad54f8095b6d';
 
 // telemetry reporter
 let reporter: TelemetryReporter;
@@ -19,6 +18,6 @@ export function activateTelemetry(context: vscode.ExtensionContext) {
    context.subscriptions.push(reporter);
 }
 
-export function logEvent(eventName: string){
-    reporter.sendTelemetryEvent(eventName, { 'stringProp': 'some string' }, { 'numericMeasure': 123 });
+export function logEvent(eventName: string, properties?: { [key: string]: string; }, measures?: { [key: string]: number; }){
+    reporter.sendTelemetryEvent(eventName, properties, measures);
 }

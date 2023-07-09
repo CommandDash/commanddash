@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function createCodeFromDescription(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+    logEvent('create-code-from-description', { 'type': "create" });
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {

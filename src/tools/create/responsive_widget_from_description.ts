@@ -4,9 +4,11 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import * as fs from 'fs';
 import * as path from 'path';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 
 export async function createResponsiveWidgetFromDescription(openAIRepo: OpenAIRepository,uri: vscode.Uri, globalState: vscode.Memento) {
+    logEvent('create-responsive-widget-from-description', { 'type': "create" });
     //get the selected folder
     const cwd = uri.fsPath;
     

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
 import { OpenAIRepository } from '../repository/openai-repository';
 import { extractDartCode } from '../utilities/code-processing';
@@ -5,70 +6,10 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml'; 
 import path = require('path');
 import {promptGithubLogin} from '../extension'
-import { makeAuthorizedHttpRequest } from '../repository/http-utils';
+import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-utils';
+import { logEvent } from '../utilities/telemetry-reporter';
 
-
-export async function showPebblePanel(context:vscode.ExtensionContext,openAIRepo:OpenAIRepository): Promise<void> {
-    const panel = vscode.window.createWebviewPanel(
-        'pebblePanel',
-        'Pebble Panel',
-        vscode.ViewColumn.Beside,
-        {}
-    );
-    panel.webview.options = {
-        enableScripts: true,
-        localResourceRoots: [vscode.Uri.joinPath(context.extension.extensionUri, 'assets', 'pebbles')],
-    };
-    const apiJsUri = panel.webview.asWebviewUri(vscode.Uri.file(
-        path.join(context.extensionPath, 'assets', 'pebbles', 'api.js')
-      ));
-    panel.webview.onDidReceiveMessage(
-        message => {
-          switch (message.command) {
-            case 'customize':
-                customizeCode(message.code,openAIRepo,context);
-              return;
-            case 'add':
-                const data = message.code;
-                copyCode(data.code,data.pebble_id,data.search_query_pk,data.customization_prompt,data.project_name,context);
-              return;
-            case 'saveAccessToken':
-                context.globalState.update('access_token',message.access_token);
-                return;
-            case 'savePebbleSuccess':
-                vscode.window.showInformationMessage("Pebble saved successfully");
-                return;
-            case 'savePebbleError':
-                vscode.window.showErrorMessage(message.message);
-                return;
-          }
-        },
-        undefined,
-        context.subscriptions
-      );
-    
-      // read html file ./searchPebblePanel.html
-      let htmlPath = vscode.Uri.file(
-        path.join(context.extensionPath, 'assets', 'pebbles', 'searchPebblePanel.html')
-    );
-        const html = fs.readFileSync(htmlPath.fsPath, 'utf8');
-      
-        var htmlWithScript = html.replace('%API_JS_URI%', apiJsUri.toString());
-        htmlWithScript = htmlWithScript.replace('%%HOST%%', process.env["HOST"]!);
-        panel.webview.html = htmlWithScript;
-
-        //get access and refresh tokens from configs
-        const access_token = context.globalState.get('access_token');
-        const refresh_token = context.globalState.get<string>('refresh_token');
-        panel.webview.html = htmlWithScript;
-        const envConfig = process.env;
-        
-        panel.webview.postMessage({
-            type:'keys',
-            keys:await getConfigs(context),
-            env: envConfig
-        });
-}
+ 
 
 async function getConfigs(context:vscode.ExtensionContext):Promise<Record<string,unknown>>{
     const access_token = context.globalState.get('access_token');
@@ -106,67 +47,7 @@ async function getProjectName(){
 
 }
 
-
-
-async function customizeCode(data: { code: string; pebble_id: string; search_query_pk: string; customization_prompt: string; project_name: string; },openAIRepo:OpenAIRepository,context:vscode.ExtensionContext){
-    // show text field to ask for instructions
-    // const instructions =await  vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
-    // if(!instructions){
-    //     return;
-    // }
-    // data.customization_prompt=instructions;
-    // send instructions to openAI
-    let prompt = "Change the following code according to given instructions. Give out just the modified code. Avoid any text other than the code. Give out the code in a single codeblock.";
-    prompt +="\n\n Code:\n```dart\n"+data.code+"\n```\n\nInstructions:\n"+data.customization_prompt+"\n\nModified Code:";
-    await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: "Creating Code",
-        cancellable: false
-    }, async (progress) => {
-        let progressPercentage = 0;
-        let prevProgressPercentage = 0;
-        const progressInterval = setInterval(() => {
-            prevProgressPercentage = progressPercentage;
-            progressPercentage = (progressPercentage + 10) % 100;
-            const increment = progressPercentage - prevProgressPercentage;
-            progress.report({ increment });
-        }, 200);
-        const result = await openAIRepo.getCompletion([{
-            'role': 'user',
-            'content': prompt
-        }]);
-        clearInterval(progressInterval);
-        progress.report({ increment: 100 });
-
-        const dartCode = extractDartCode(result);
-        copyCode(dartCode,data.pebble_id,data.search_query_pk,data.customization_prompt,data.project_name,context);
-    });
-}
-
-async function copyCode(code:string,
-    pebble_id:string,
-    search_query_pk:string,
-    customization_prompt:string,
-    project_name:string,
-    context:vscode.ExtensionContext,
-    ){
-       
-    vscode.env.clipboard.writeText(code);
-    vscode.window.showInformationMessage("Code copied to clipboard");
-    // show it in a new temporary editor which has a copy button
-    const document = await vscode.workspace.openTextDocument({
-        content: code,
-        language: 'dart',
-    });
-    await vscode.window.showTextDocument(document, {
-        preview: false,
-        viewColumn: vscode.ViewColumn.Beside,
-        
-    });
-    addPebbleUsage(pebble_id,search_query_pk,customization_prompt,project_name,context);
-
-}
-
+  
 export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscode.ExtensionContext): Promise<void> {
     const document = vscode.window.activeTextEditor?.document;
     if (!document) {
@@ -181,25 +62,28 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
     const selectedText = document.getText(selection);
  
     let description ="";
-    await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: "Generating description for code",
-        cancellable: false
-    }, async (progress, token) => {
-        progress.report({ increment:20 });
-
-        try {
-            description = await openAIRepo.getCompletion([
-                {
-                    role: "user",
-                    content: "Generate a 3 line short description for the following code in this format: A code to...:\n```dart\n" + selectedText + "\n```\n\nDescription:"
-                }
-            ]);
-            progress.report({increment:100});
-        } catch (error) {
-            vscode.window.showErrorMessage("failed to generate description for code"+error);
-        }
-    });
+    const ref = context.globalState.get('refresh_token'); 
+    if(ref !== undefined){
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Generating description for code",
+            cancellable: false
+        }, async (progress, token) => {
+            progress.report({ increment:20 });
+    
+            try {
+                description = await openAIRepo.getCompletion([
+                    {
+                        role: "user",
+                        content: "Generate a 3 line short description for the following code in this format: A code to...:\n```dart\n" + selectedText + "\n```\n\nDescription:"
+                    }
+                ]);
+                progress.report({increment:100});
+            } catch (error) {
+                vscode.window.showErrorMessage("failed to generate description for code"+error);
+            }
+        });
+    }
     
 
     const panel = vscode.window.createWebviewPanel(
@@ -222,10 +106,12 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
                 context.globalState.update('access_token',message.access_token);
                 return;
             case 'savePebbleSuccess':
+                logEvent('pebble-saved',{'type':'pebbles'});
                 vscode.window.showInformationMessage("Pebble saved successfully");
                 panel.dispose();
                 return;
             case 'savePebbleError':
+                logEvent('pebble-save-error',{'type':'pebbles'});
                 vscode.window.showErrorMessage("Failed to save pebble");
                 return;
             case 'auth':
@@ -243,6 +129,16 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
                 vscode.window.showInformationMessage("Please login to use pebbles");
                 }
                 return;
+            case 'login':
+                try {
+                    logEvent('login-clicked',{'from':'save-pebble-panel'});
+                    const url = process.env["HOST"]!+process.env["github_oauth"]!;
+                    const github_oauth_url = await makeHttpRequest<{github_oauth_url:string}>({url:url});
+                    vscode.env.openExternal(vscode.Uri.parse(github_oauth_url.github_oauth_url));
+                } catch (error) {
+                    vscode.window.showErrorMessage('Error logging in to fluttergpt', );
+                }
+                return;
             
           }
         },
@@ -256,6 +152,11 @@ export async function savePebblePanel(openAIRepo:OpenAIRepository,context: vscod
         //get access and refresh tokens from configs
         const access_token = context.globalState.get('access_token');
         const refresh_token = context.globalState.get('refresh_token');
+
+        if(refresh_token === undefined){
+            panel.webview.html = fs.readFileSync( path.join(context.extensionPath, 'assets', 'pebbles', 'auth_page.html'), 'utf8');
+            return;
+        }
    
    
         let htmlWithScript = html.replace('%API_JS_URI%', apiJsUri.toString());

@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function createModelClass(openAIRepo: OpenAIRepository, globalState: vscode.Memento ) {
+  logEvent("create-model-class", { 'type': "create" });
   try {
     const jsonStructure = await vscode.window.showInputBox({
       prompt: "Enter JSON structure",

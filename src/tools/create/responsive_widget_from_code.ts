@@ -4,8 +4,10 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import * as fs from 'fs';
 import * as path from 'path';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function createResponsiveWidgetFromCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+    logEvent('create-responsive-widget-from-code', { 'type': "create" });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor');

@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+    logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {

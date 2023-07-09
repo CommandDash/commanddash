@@ -2,8 +2,11 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode, extractReferenceTextFromEditor} from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
+
 
 export async function createWidgetFromDescription(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+    logEvent('create-widget-from-description', { 'type': "create" });
     try {
         const description = await vscode.window.showInputBox({ prompt: "Enter widget description" });
         if (!description) {

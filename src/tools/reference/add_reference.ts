@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import * as path from 'path';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function addToReference(globalState: vscode.Memento) {
+    logEvent('add-to-reference', { 'type': 'reference' });
     
     const editor = vscode.window.activeTextEditor;
     if (!editor) {

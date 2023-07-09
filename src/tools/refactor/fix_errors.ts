@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtime' | 'compile-time' = 'runtime', globalState: vscode.Memento) {
+    logEvent('fix-errors', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage('No active editor');

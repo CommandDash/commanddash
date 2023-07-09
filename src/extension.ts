@@ -14,12 +14,13 @@ import { createRepoClassFromPostman } from './tools/create/class_repository_from
 import { addToReference } from './tools/reference/add_reference';
 import { createCodeFromDescription } from './tools/create/code_from_description';
 import { optimizeCode } from './tools/refactor/optimize_code';
-import { showPebblePanel, savePebblePanel } from './pebbles/pebble_repository';
+import { savePebblePanel } from './pebbles/pebble_repository';
 import { makeHttpRequest } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
+import { ExtensionVersionManager } from './utilities/update-check';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -45,11 +46,13 @@ export function activate(context: vscode.ExtensionContext) {
                         context.globalState.update('access_token',access_token),
                         context.globalState.update('refresh_token',refresh_token)
                   ]).then(()=>{
+                    logEvent('login');
                     // show success message
                     vscode.window.showInformationMessage('Successfully logged in to FlutterGPT');
                     pebblePanelWebViewProvider.refresh();
                
                     }).catch((error)=>{
+                        logEvent('login-failed', {error: error});
                         vscode.window.showErrorMessage('Error logging in to FlutterGPT');
 
                     });
@@ -82,8 +85,9 @@ export function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo, context.globalState), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo, 'runtime', context.globalState), context);
     customPush('fluttergpt.optimizeCode', async () => optimizeCode(openAIRepo, context.globalState), context);
-    customPush('fluttergpt.showPebblePanel', () => showPebblePanel(context,openAIRepo), context);
     customPush('fluttergpt.savePebblePanel', () => savePebblePanel(openAIRepo,context), context);
+    
+    new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
 export function promptGithubLogin(context:vscode.ExtensionContext): void {

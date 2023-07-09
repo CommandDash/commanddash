@@ -27,3 +27,4 @@ demo/
 build/
 dist/
 .env
+user_config.json

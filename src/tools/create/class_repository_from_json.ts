@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 import { OpenAIRepository } from '../../repository/openai-repository';
 import {extractDartCode, extractReferenceTextFromEditor} from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
+import { logEvent } from '../../utilities/telemetry-reporter';
 
 export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+    logEvent('create-repo-class-from-postman', { 'type': "create" });
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
