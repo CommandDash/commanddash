@@ -21,15 +21,37 @@ import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 import { ExtensionVersionManager } from './utilities/update-check';
+import { WellTestedActionProvider } from './providers/welltested_code_actions_provider';
+import { ILspAnalyzer } from './shared/types/LspAnalyzer';
+import { dartCodeExtensionIdentifier } from './shared/types/constants';
 
+export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
-export function activate(context: vscode.ExtensionContext) {
+const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
+
+export async function activate(context: vscode.ExtensionContext) {
  
 	console.log('Congratulations, "fluttergpt" is now active!');
     
     dotenv.config({ path: path.join(__dirname, '../.env') });
     activateTelemetry(context);
     logEvent('activated');
+
+    // Dart-code extenstion stuff
+    const dartExt =  vscode.extensions.getExtension(dartCodeExtensionIdentifier);
+	if (!dartExt) {
+		// This should not happen since the FlutterGPT extension has a dependency on the Dart one
+		// but just in case, we'd like to give a useful error message.
+		throw new Error("The Dart extension is not installed, Flutter extension is unable to activate.");
+	}
+	await dartExt.activate();
+
+	if (!dartExt.exports) {
+		console.error("The Dart extension did not provide an exported API. Maybe it failed to activate or is not the latest version?");
+		return;
+	}
+	const analyzer:ILspAnalyzer = dartExt.exports._privateApi.analyzer;
+
     let pebblePanelWebViewProvider: PebblePanelViewProvider;
      let pebbleView: vscode.Disposable;
     console.log(process.env["HOST"]);
@@ -60,6 +82,11 @@ export function activate(context: vscode.ExtensionContext) {
             }
         })
       );
+
+
+	const wellTestedActionProvider = new WellTestedActionProvider(analyzer, openAIRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, wellTestedActionProvider));
+
       
     pebblePanelWebViewProvider = new PebblePanelViewProvider( context.extensionUri, context, openAIRepo);
     
@@ -84,8 +111,9 @@ export function activate(context: vscode.ExtensionContext) {
     customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
     customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo, context.globalState), context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo, 'runtime', context.globalState), context);
-    customPush('fluttergpt.optimizeCode', async () => optimizeCode(openAIRepo, context.globalState), context);
+    customPush('fluttergpt.optimizeCode', async (range: vscode.Range) => optimizeCode(openAIRepo, context.globalState, range), context);
     customPush('fluttergpt.savePebblePanel', () => savePebblePanel(openAIRepo,context), context);
+    context.subscriptions.push(vscode.commands.registerCommand('fluttergpt.optimizeCode', optimizeCode));
     
     new ExtensionVersionManager(context).isExtensionUpdated();
 }

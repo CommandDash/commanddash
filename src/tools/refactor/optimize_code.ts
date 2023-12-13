@@ -4,7 +4,7 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 
-export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento, range: vscode.Range) {
     logEvent('optimize-code', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -12,10 +12,13 @@ export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vs
         return;
     }
 
-    const selectedCode = editor.document.getText(editor.selection);
+    var selectedCode = editor.document.getText(editor.selection);
+    var replaceRange: vscode.Range | vscode.Position;
+    replaceRange = editor.selection;
     if (!selectedCode) {
-        vscode.window.showErrorMessage('No code selected');
-        return;
+        // if no code is selected, we use the range 
+        selectedCode = editor.document.getText(range);
+        replaceRange = range;
     }
 
     const fullCode = editor.document.getText();
@@ -56,7 +59,7 @@ export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vs
             const optimizedCode = extractDartCode(result);
             const explanation = extractExplanation(result);
             editor.edit((editBuilder) => {
-                editBuilder.replace(editor.selection, optimizedCode);
+                editBuilder.replace(replaceRange, optimizedCode);
             });
             vscode.window.showInformationMessage(explanation);
         });
