@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
-export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtime' | 'compile-time' = 'runtime', globalState: vscode.Memento) {
+export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range) {
     logEvent('fix-errors', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -12,28 +12,16 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
         return;
     }
 
-    const selectedCode = editor.document.getText(editor.selection);
+    var selectedCode = editor.document.getText(editor.selection);
+    var replaceRange: vscode.Range | vscode.Position;
+    replaceRange = editor.selection;
     if (!selectedCode) {
-        vscode.window.showErrorMessage('No code selected');
-        return;
+        // if no code is selected, we use the range 
+        selectedCode = editor.document.getText(range);
+        replaceRange = range;
     }
 
-    let errorsDescription: string | undefined;
-
-    if (errorType === 'runtime') {
-        errorsDescription = await vscode.window.showInputBox({ prompt: "Enter the errors you're facing" });
-        if (!errorsDescription) {
-            return;
-        }
-    } else if (errorType === 'compile-time') {
-        //TODO: implement compile-time errors
-        // const analysisErrors = await analyzeCode(selectedCode);
-        // if (analysisErrors.length === 0) {
-        //     vscode.window.showInformationMessage('No compile-time issues found');
-        //     return;
-        // }
-        // errorsDescription = analysisErrors.map(error => error.message).join('\n');
-    }
+    let errorsDescription = errors.map((e) => e.message).join(', ');
 
     const fullCode = editor.document.getText();
 
@@ -51,26 +39,26 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-    
+
             let prompt = `Follow the instructions carefully and to the letter. You're a Flutter/Dart debugging expert.\n\n`;
-            prompt += `Here's a piece of Flutter code with ${errorType} errors:\n\n${selectedCode}\n\n`;
+            prompt += `Here's a piece of Flutter code with errors:\n\n${selectedCode}\n\n`;
             if (errorsDescription) {
                 prompt += `The errors are: ${errorsDescription}\n\n`;
             } else {
                 prompt += `The full code context is:\n\n${fullCode}\n\n`;
             }
             let referenceEditor = getReferenceEditor(globalState);
-            if(referenceEditor!==undefined){
-              const referenceText = extractReferenceTextFromEditor(referenceEditor);
-              if(referenceText!==''){
-                  prompt+=`Some references that might help: \n${referenceText}\n`;
-              }
+            if (referenceEditor !== undefined) {
+                const referenceText = extractReferenceTextFromEditor(referenceEditor);
+                if (referenceText !== '') {
+                    prompt += `Some references that might help: \n${referenceText}\n`;
+                }
             }
-            prompt += `Output the fixed code in a single code block.`;
+            prompt += `First give a short explanation and then output the fixed code in a single code block.`;
 
-            const result = await openAIRepo.getCompletion([ {
+            const result = await geminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
@@ -78,7 +66,7 @@ export async function fixErrors(openAIRepo: OpenAIRepository, errorType: 'runtim
             const fixedCode = extractDartCode(result);
             const explanation = extractExplanation(result);
             editor.edit((editBuilder) => {
-                editBuilder.replace(editor.selection, fixedCode);
+                editBuilder.replace(replaceRange, fixedCode);
             });
             vscode.window.showInformationMessage(explanation);
         });

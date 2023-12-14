@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
 import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
-export async function createCodeFromDescription(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+export async function createCodeFromDescription(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
     logEvent('create-code-from-description', { 'type': "create" });
     try {
         const editor = vscode.window.activeTextEditor;
@@ -35,11 +35,11 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository, gl
             }, 200);
             let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
             let referenceEditor = getReferenceEditor(globalState);
-            if(referenceEditor!==undefined){
-            const referenceText = extractReferenceTextFromEditor(referenceEditor);
-            if(referenceText!==''){
-                prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
-            }
+            if (referenceEditor !== undefined) {
+                const referenceText = extractReferenceTextFromEditor(referenceEditor);
+                if (referenceText !== '') {
+                    prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
+                }
             }
             prompt += `Create a valid Dart code block based on the following instructions:\n${instructions}\n\n`;
             prompt += `To give you more context, here's `;
@@ -47,14 +47,14 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository, gl
                 prompt += `the code above the line where you're asked to insert the code: \n ${aboveText}\n\n`;
             }
             if (belowText.length > 0) {
-                if (aboveText.length > 0) {prompt += `And here's `;}
+                if (aboveText.length > 0) { prompt += `And here's `; }
                 prompt += `the code below the line where you're asked to insert the code: \n ${belowText}\n\n`;
             }
             prompt += `Should you have any general suggestions, add them as comments before the code block. Inline comments are also welcome`;
 
-            const result = await openAIRepo.getCompletion([{
+            const result = await geminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
 
             clearInterval(progressInterval);
@@ -65,8 +65,8 @@ export async function createCodeFromDescription(openAIRepo: OpenAIRepository, gl
             editor.edit((editBuilder) => {
                 const selection = new vscode.Selection(cursorLine, 0, cursorLine, 0);
                 editBuilder.insert(selection.end, '\n');
-                editBuilder.insert(selection.end, createdCode);                
-                
+                editBuilder.insert(selection.end, createdCode);
+
             });
             vscode.window.showInformationMessage('Code created successfully!');
         });

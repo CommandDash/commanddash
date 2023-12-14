@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
-export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento, range: vscode.Range) {
+export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = vscode.window.activeTextEditor;
@@ -18,6 +18,10 @@ export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vs
         var replaceRange: vscode.Range | vscode.Position;
         replaceRange = editor.selection;
         if (!selectedCode) {
+            if (range === undefined) {
+                vscode.window.showErrorMessage('No code selected');
+                return;
+            }
             // if no code is selected, we use the range 
             selectedCode = editor.document.getText(range);
             replaceRange = range;
@@ -43,19 +47,19 @@ export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vs
             }, 200);
 
             let referenceEditor = getReferenceEditor(globalState);
-            let prompt=`You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
-            if(referenceEditor!==undefined){
+            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
+            if (referenceEditor !== undefined) {
                 const referenceText = extractReferenceTextFromEditor(referenceEditor);
-                if(referenceText!==''){
-                    prompt+=`Here are user shared context/references: \n${referenceText}\n\n. Anaylze these well and use them to refactor the code.\n\n`;
+                if (referenceText !== '') {
+                    prompt += `Here are user shared context/references: \n${referenceText}\n\n. Anaylze these well and use them to refactor the code.\n\n`;
                 }
             }
-            prompt+=`Refactor the following Flutter code based on the instructions: ${instructions}\n\nCode:\n${selectedCode}\n\n`;
-            prompt+=`Output code in a single block`;
-            
-            const result = await openAIRepo.getCompletion([{
+            prompt += `Refactor the following Flutter code based on the instructions: ${instructions}\n\nCode:\n${selectedCode}\n\n`;
+            prompt += `Output code in a single block`;
+
+            const result = await gemini.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });

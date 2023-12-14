@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
-export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+export async function createRepoClassFromPostman(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
     logEvent('create-repo-class-from-postman', { 'type': "create" });
     try {
         await vscode.window.withProgress({
@@ -27,28 +27,28 @@ export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository, g
                 const document = editor.document;
                 try {
                     description = JSON.stringify(JSON.parse(document.getText()));
-                } catch(error) {
+                } catch (error) {
                     vscode.window.showErrorMessage(`File content doesn't seem to be a json`);
                 }
             }
 
-            if(description === "placeholder") {
+            if (description === "placeholder") {
                 return;
             }
-            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;        
+            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
             let referenceEditor = getReferenceEditor(globalState);
-            if(referenceEditor!==undefined){
-              const referenceText = extractReferenceTextFromEditor(referenceEditor);
-              if(referenceText!==''){
-                  prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
-              }
+            if (referenceEditor !== undefined) {
+                const referenceText = extractReferenceTextFromEditor(referenceEditor);
+                if (referenceText !== '') {
+                    prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
+                }
             }
 
-            prompt +=  `Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`;
-            
-            const result = await openAIRepo.getCompletion([ {
+            prompt += `Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`;
+
+            const result = await giminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
 
             clearInterval(progressInterval);
@@ -66,10 +66,10 @@ export async function createRepoClassFromPostman(openAIRepo: OpenAIRepository, g
             }
         });
     } catch (error: Error | unknown) {
-        if(error instanceof Error){
+        if (error instanceof Error) {
             vscode.window.showErrorMessage(`${error.message}`);
         } else {
             vscode.window.showErrorMessage(`Failed to create api service ${error}`);
         }
-      } 
+    }
 }

@@ -51,6 +51,11 @@
           "id": "fluttergpt.pebblePanel",
           "name": "Pebble Panel",
           "icon": "media/icon.png"
+        },
+        {
+          "type": "webview",
+          "id": "fluttergpt.chatView",
+          "name": "Chat View"
         }
       ]
     },
@@ -206,16 +211,6 @@
           "command": "fluttergpt.refactorCode.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
-        },
-        {
-          "command": "fluttergpt.fixErrors.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@2"
-        },
-        {
-          "command": "fluttergpt.optimizeCode.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@3"
         }
       ],
       "fluttergpt.createMenu": [
@@ -231,18 +226,6 @@
         {
           "command": "fluttergpt.createWidget.menu",
           "group": "fluttergpt-menu-group@3"
-        },
-        {
-          "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
-          "group": "fluttergpt-menu-group@4"
-        },
-        {
-          "command": "fluttergpt.createModelClass.menu",
-          "group": "fluttergpt-menu-group@5"
-        },
-        {
-          "command": "fluttergpt.createRepoClassFromPostman.menu",
-          "group": "fluttergpt-menu-group@6"
         }
       ]
     },
@@ -280,6 +263,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.1.1",
     "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",

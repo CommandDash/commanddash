@@ -2,26 +2,26 @@
 import * as vscode from "vscode";
 import { CodeAction } from "vscode";
 import { Outline } from "../shared/types/custom_protocols";
-import { fsPath } from "../shared/utils";
+import { fsPath, isPositionInOutlineRange } from "../shared/utils";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
-import { OpenAIRepository } from "../repository/openai-repository";
- 
+import { GeminiRepository } from "../repository/gemini-repository";
+
 
 export class FluttergptActionProvider implements vscode.CodeActionProvider {
-	constructor( private readonly analyzer: ILspAnalyzer, private readonly aiRepo: OpenAIRepository,private readonly extcontext: vscode.ExtensionContext ) { }
- 
+	constructor(private readonly analyzer: ILspAnalyzer, private readonly aiRepo: GeminiRepository, private readonly extcontext: vscode.ExtensionContext) { }
+
 
 	async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<CodeAction[] | undefined> {
 		// Determine if the cursor is at a function.
-		const functionRange : vscode.Range| undefined = await this.cursorIsAt("METHOD",document, range);
-		const classRange : vscode.Range| undefined = await this.cursorIsAt("CLASS",document, range);
+		const functionRange: vscode.Range | undefined = await this.cursorIsAt("METHOD", document, range);
+		const classRange: vscode.Range | undefined = await this.cursorIsAt("CLASS", document, range);
 
 		// If the cursor is at a function, return the code action.
 		if (functionRange !== undefined) {
 			let functionAction = [];
 			const optimizeFunction = new vscode.CodeAction("Optimize function", vscode.CodeActionKind.Refactor);
 			optimizeFunction.command = {
-				arguments: [this.aiRepo,this.extcontext.globalState,functionRange],
+				arguments: [this.aiRepo, this.extcontext.globalState, functionRange],
 				command: "fluttergpt.optimizeCode",
 				title: "Optimize Function",
 			};
@@ -31,7 +31,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			// refractor code
 			const refactorCode = new vscode.CodeAction("Refactor code", vscode.CodeActionKind.Refactor);
 			refactorCode.command = {
-				arguments: [this.aiRepo,this.extcontext.globalState,functionRange],
+				arguments: [this.aiRepo, this.extcontext.globalState, functionRange],
 				command: "fluttergpt.refactorCode",
 				title: "Refactor code",
 			};
@@ -42,7 +42,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			if (errors) {
 				const fixErrorsAction = new vscode.CodeAction("Fix errors", vscode.CodeActionKind.QuickFix);
 				fixErrorsAction.command = {
-					arguments: [this.analyzer, document, functionRange],
+					arguments: [this.analyzer, errors, this.extcontext.globalState, functionRange],
 					command: "fluttergpt.fixErrors",
 					title: "Fix errors",
 				};
@@ -54,7 +54,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			// TODO: add better implementation for class
 			const optimizeFunction = new vscode.CodeAction("Optimize code", vscode.CodeActionKind.Refactor);
 			optimizeFunction.command = {
-				arguments: [this.aiRepo,this.extcontext.globalState,functionRange],
+				arguments: [this.aiRepo, this.extcontext.globalState, functionRange],
 				command: "fluttergpt.optimizeCode",
 				title: "Optimize Function",
 			};
@@ -65,12 +65,12 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 		return undefined;
 	}
 
-	private async cursorIsAt(type:String,document: vscode.TextDocument, range: vscode.Range): Promise<vscode.Range | undefined> {
-		 
-		const position = vscode.window.activeTextEditor ?. selection.active ;
+	private async cursorIsAt(type: String, document: vscode.TextDocument, range: vscode.Range): Promise<vscode.Range | undefined> {
+
+		const position = vscode.window.activeTextEditor?.selection.active;
 		// adjust the position to the start of the word
 		const wordRange = document.getWordRangeAtPosition(position!)!;
-		if (!wordRange){
+		if (!wordRange) {
 			return undefined;
 		}
 
@@ -78,19 +78,19 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 		const startPosition = wordRange.start;
 		const filePath = fsPath(document.uri);
 		const uri = document.uri.toString();
-		const textDocumentIdentifier = {uri};
+		const textDocumentIdentifier = { uri };
 		const outline = (await this.analyzer.fileTracker.waitForOutline(document));
-		if (outline === undefined){
+		if (outline === undefined) {
 			return undefined;
 		}
 		const outlineSymbols = outline?.children || [];
 
 		const isFunction = (symbol: Outline): boolean => {
-		  console.log(symbol);
-		  return symbol.element.kind === type && this.isPositionInOutlineRange(symbol, startPosition);
+			console.log(symbol);
+			return symbol.element.kind === type && isPositionInOutlineRange(symbol, startPosition);
 		};
 		const checkSymbols = (symbols: Outline[]): vscode.Range | undefined => {
-		  for (const symbol of symbols) {
+			for (const symbol of symbols) {
 				const symbolRange = new vscode.Range(
 					symbol.range.start.line,
 					symbol.range.start.character,
@@ -98,31 +98,20 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 					symbol.range.end.character,
 				);
 				if (isFunction(symbol)) {
-			  	return symbolRange;
+					return symbolRange;
 				}
-				if (symbol.children ){
+				if (symbol.children) {
 					const range = checkSymbols(symbol.children);
-					if (range !== undefined){
+					if (range !== undefined) {
 						return range;
 					}
 				}
-		  }
-		  return undefined;
+			}
+			return undefined;
 		};
 
 		return checkSymbols(outlineSymbols);
-	  }
-	private isPositionInOutlineRange(outline: Outline, position: vscode.Position): boolean {
-		const symbolRange = new vscode.Range(
-			outline.range.start.line,
-			outline.range.start.character,
-			outline.range.end.line,
-			outline.range.end.character,
-		);
-		if (symbolRange.end.line !== 24){
-			console.log("here");
-		}
-		return symbolRange.contains(position);
 	}
+
 
 }

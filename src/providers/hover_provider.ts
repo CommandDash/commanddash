@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
-import { OpenAIRepository } from "../repository/openai-repository";
+import { GeminiRepository } from "../repository/gemini-repository";
+import { getCodeForElementAtRange, getErrorAtPosition } from "../shared/utils";
+import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 
 export class AIHoverProvider implements vscode.HoverProvider {
 
-    constructor(private readonly openaiRepo: OpenAIRepository) {
+    constructor(private readonly aiRepo: GeminiRepository, private readonly analzyer: ILspAnalyzer) {
     }
 
     async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
@@ -11,46 +13,32 @@ export class AIHoverProvider implements vscode.HoverProvider {
         if (!wordRange) {
             return undefined;
         }
-        
+
         const word = document.getText(wordRange);
 
-        const error =  this.getErrorAtPosition(document, position);
-        if(!error){
+        const error = getErrorAtPosition(document, position);
+        if (!error) {
             return undefined;
         }
-        
+
+        const releventCode = await getCodeForElementAtRange(this.analzyer, document, error.range);
+
         // TODO: improve prompt here
-        const prompt: { role: string, content: string }[] = [
-            { role: 'user', content: 'Explain the error i am getting in flutter/dart and possibly provide solution to it. The following is a hover tooltip from vscode: ' + error?.message  },
-        ];
-        
+        const prompt: { role: string, parts: string } =
+            { role: 'user', parts: 'Explain the error i am getting in flutter/dart and possibly provide solution to it.\nRelevent code\n' + '```\n' + releventCode + '\n```\n' + 'The following is a hover tooltip from vscode: ' + error?.message };
+
         try {
-            const hoverText = await this.openaiRepo.getCompletion(prompt);
+            const hoverText = await this.aiRepo.getCompletion([prompt]);
             if (hoverText) {
                 // Create markdown string for nicer formatting
                 const markdown = new vscode.MarkdownString(hoverText);
                 return new vscode.Hover(markdown, wordRange);
             }
         } catch (error) {
-             
+
             console.error('Error fetching hover content from OpenAI:', error);
         }
         return undefined;
     }
-    
-    private getErrorAtPosition(document: vscode.TextDocument, position: vscode.Position): vscode.Diagnostic | undefined {
-        const diagnostics = vscode.languages.getDiagnostics(document.uri);
-    
-         
-        for (const diagnostic of diagnostics) {
-            if (diagnostic.range.contains(position) && diagnostic.severity === vscode.DiagnosticSeverity.Error) {
-                // Return the first error found at the given position
-                return diagnostic;
-            }
-        }
-        
-        // No error was found at this position
-        return undefined;
-    }
+
 }
- 

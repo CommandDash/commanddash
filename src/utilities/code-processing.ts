@@ -13,7 +13,7 @@ export function extractExplanation(widgetCode: string): string {
     return explanation;
 }
 
-export function extractReferenceTextFromEditor(referenceEditor: vscode.TextEditor): string{
+export function extractReferenceTextFromEditor(referenceEditor: vscode.TextEditor): string {
     const selectedCode = referenceEditor.document.getText();
     return selectedCode;
 }

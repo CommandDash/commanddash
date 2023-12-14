@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; img-src {{cspSource}} https:; style-src 'unsafe-inline' {{cspSource}}; script-src {{cspSource}} https: http:;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .code {
+            white-space: pre;
+        }
+
+        p {
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+        }
+
+        /* overrides vscodes style reset, displays as if inside web browser */
+        ul,
+        ol {
+            list-style: initial !important;
+            margin-left: 10px !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-weight: bold !important;
+        }
+    </style>
+</head>
+
+<body>
+    <input class="h-10 w-full text-white bg-stone-700 p-4 text-sm" placeholder="Ask GPT3 something" id="prompt-input" />
+
+    <div id="response" class="pt-4 text-sm">
+    </div>
+
+    <script src="{{scriptUri}}"></script>
+    <script src="{{shadowUri}}"></script>
+</body>
+
+</html>

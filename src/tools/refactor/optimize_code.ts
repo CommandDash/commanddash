@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 
-export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento, range: vscode.Range) {
+export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
     logEvent('optimize-code', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -17,6 +16,10 @@ export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vs
     var replaceRange: vscode.Range | vscode.Position;
     replaceRange = editor.selection;
     if (!selectedCode) {
+        if (range === undefined) {
+            vscode.window.showErrorMessage('No code selected');
+            return;
+        }
         // if no code is selected, we use the range 
         selectedCode = editor.document.getText(range);
         replaceRange = range;
@@ -38,24 +41,24 @@ export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vs
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-    
+
             let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
             prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Subject Code:\n${selectedCode}\n\n`;
             prompt += "Here is the full code for context:\n";
-            prompt += "```"+fullCode+"```";
+            prompt += "```" + fullCode + "```";
             prompt += "\n\n";
             let referenceEditor = getReferenceEditor(globalState);
-            if(referenceEditor!==undefined){
-              const referenceText = extractReferenceTextFromEditor(referenceEditor);
-              if(referenceText!==''){
-                  prompt+=`Some references that might help: \n${referenceText}\n`;
-              }
+            if (referenceEditor !== undefined) {
+                const referenceText = extractReferenceTextFromEditor(referenceEditor);
+                if (referenceText !== '') {
+                    prompt += `Some references that might help: \n${referenceText}\n`;
+                }
             }
             prompt += `Output the optimized code in a single code block.\nOnly give the Subject code not the full code.`;
 
-            const result = await openAIRepo.getCompletion([{
+            const result = await geminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
 
             clearInterval(progressInterval);
