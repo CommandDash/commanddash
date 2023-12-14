@@ -3,6 +3,7 @@ import { OpenAIRepository } from '../../repository/openai-repository';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
 export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento, range: vscode.Range) {
     logEvent('optimize-code', { 'type': 'refractor' });
@@ -39,7 +40,10 @@ export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vs
             }, 200);
     
             let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
-            prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\nCode:\n${selectedCode}\n\n`;
+            prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Subject Code:\n${selectedCode}\n\n`;
+            prompt += "Here is the full code for context:\n";
+            prompt += "```"+fullCode+"```";
+            prompt += "\n\n";
             let referenceEditor = getReferenceEditor(globalState);
             if(referenceEditor!==undefined){
               const referenceText = extractReferenceTextFromEditor(referenceEditor);
@@ -47,12 +51,13 @@ export async function optimizeCode(openAIRepo: OpenAIRepository, globalState: vs
                   prompt+=`Some references that might help: \n${referenceText}\n`;
               }
             }
-            prompt += `Output the optimized code in a single code block.`;
+            prompt += `Output the optimized code in a single code block.\nOnly give the Subject code not the full code.`;
 
             const result = await openAIRepo.getCompletion([{
                 'role': 'user',
                 'content': prompt
             }]);
+
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
 

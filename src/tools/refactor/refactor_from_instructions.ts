@@ -4,7 +4,7 @@ import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} fro
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 
-export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento) {
+export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vscode.Memento, range: vscode.Range) {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = vscode.window.activeTextEditor;
@@ -14,11 +14,13 @@ export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vs
         }
 
         const selection = editor.selection;
-        const selectedCode = editor.document.getText(selection);
-
+        var selectedCode = editor.document.getText(editor.selection);
+        var replaceRange: vscode.Range | vscode.Position;
+        replaceRange = editor.selection;
         if (!selectedCode) {
-            vscode.window.showErrorMessage('No code selected');
-            return;
+            // if no code is selected, we use the range 
+            selectedCode = editor.document.getText(range);
+            replaceRange = range;
         }
 
         const instructions = await vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
@@ -60,7 +62,7 @@ export async function refactorCode(openAIRepo: OpenAIRepository, globalState: vs
 
             const refactoredCode = extractDartCode(result);
             editor.edit((editBuilder) => {
-                editBuilder.replace(selection, refactoredCode);
+                editBuilder.replace(replaceRange, refactoredCode);
             });
             vscode.window.showInformationMessage('Code refactored successfully!');
         });

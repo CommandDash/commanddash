@@ -21,9 +21,10 @@ import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 import { ExtensionVersionManager } from './utilities/update-check';
-import { WellTestedActionProvider } from './providers/welltested_code_actions_provider';
+import { FluttergptActionProvider } from './providers/fluttergpt_code_actions_provider';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
+import { AIHoverProvider } from './providers/hover_provider';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -84,8 +85,11 @@ export async function activate(context: vscode.ExtensionContext) {
       );
 
 
-	const wellTestedActionProvider = new WellTestedActionProvider(analyzer, openAIRepo, context);
+	const wellTestedActionProvider = new FluttergptActionProvider(analyzer, openAIRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, wellTestedActionProvider));
+    
+    const hoverProvider  = new AIHoverProvider(openAIRepo);
+    context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
 
       
     pebblePanelWebViewProvider = new PebblePanelViewProvider( context.extensionUri, context, openAIRepo);
@@ -109,11 +113,11 @@ export async function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.createRepoClassFromPostman', () => createRepoClassFromPostman(openAIRepo, context.globalState), context);
     customPush('fluttergpt.createResponsiveWidgetFromCode', () => createResponsiveWidgetFromCode(openAIRepo, context.globalState), context);
     customUriPush('fluttergpt.createResponsiveWidgetFromDescription', openAIRepo, context);
-    customPush('fluttergpt.refactorCode',() => refactorCode(openAIRepo, context.globalState), context);
+    customPush('fluttergpt.refactorCode' , refactorCode, context);
     customPush('fluttergpt.fixErrors', async () => fixErrors(openAIRepo, 'runtime', context.globalState), context);
-    customPush('fluttergpt.optimizeCode', async (range: vscode.Range) => optimizeCode(openAIRepo, context.globalState, range), context);
+    customPush('fluttergpt.optimizeCode', optimizeCode , context);
     customPush('fluttergpt.savePebblePanel', () => savePebblePanel(openAIRepo,context), context);
-    context.subscriptions.push(vscode.commands.registerCommand('fluttergpt.optimizeCode', optimizeCode));
+    // context.subscriptions.push(vscode.commands.registerCommand('fluttergpt.optimizeCode', optimizeCode));
     
     new ExtensionVersionManager(context).isExtensionUpdated();
 }
@@ -144,7 +148,7 @@ function initOpenAI(): OpenAIRepository {
     return new OpenAIRepository(apiKey);
 }
 
-function customPush(name: string, handler: (...args: any[]) => any, context: vscode.ExtensionContext): void {
+function customPush(name: string, handler: any, context: vscode.ExtensionContext): void {
     let baseCommand = vscode.commands.registerCommand(name, handler);
     context.subscriptions.push(baseCommand);
 
