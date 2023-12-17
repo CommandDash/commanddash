@@ -85,6 +85,20 @@ export function isPositionInOutlineRange(outline: Outline, position: vscode.Posi
 	return symbolRange.contains(position);
 }
 
+export function isPositionInSameLine
+(outline: Outline, position: vscode.Position): boolean {
+	if(outline.element.range===undefined)
+		{return false;}
+	const symbolRange = new vscode.Range(
+		outline.element.range.start.line,
+		outline.element.range.start.character,
+		outline.element.range.start.line,
+		Infinity
+	);
+	return symbolRange.contains(position);
+}
+
+
 export function getErrorAtPosition(document: vscode.TextDocument, position: vscode.Position): vscode.Diagnostic | undefined {
 	const diagnostics = vscode.languages.getDiagnostics(document.uri);
 

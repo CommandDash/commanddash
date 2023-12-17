@@ -24,7 +24,6 @@ import { FluttergptActionProvider } from './providers/fluttergpt_code_actions_pr
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
-import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { GeminiRepository } from './repository/gemini-repository';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };

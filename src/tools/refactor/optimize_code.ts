@@ -3,6 +3,7 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
+import { appendReferences } from '../../utilities/prompt_helpers';
 
 export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
     logEvent('optimize-code', { 'type': 'refractor' });
@@ -42,19 +43,14 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
                 progress.report({ increment });
             }, 200);
 
-            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and to the letter.\n\n`;
+            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output response in the modified format..\n\n`;
             prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Subject Code:\n${selectedCode}\n\n`;
             prompt += "Here is the full code for context:\n";
             prompt += "```" + fullCode + "```";
             prompt += "\n\n";
             let referenceEditor = getReferenceEditor(globalState);
-            if (referenceEditor !== undefined) {
-                const referenceText = extractReferenceTextFromEditor(referenceEditor);
-                if (referenceText !== '') {
-                    prompt += `Some references that might help: \n${referenceText}\n`;
-                }
-            }
-            prompt += `Output the optimized code in a single code block.\nOnly give the Subject code not the full code.`;
+            prompt = appendReferences(referenceEditor, prompt);
+            prompt += `Output the optimized code in a single code block to be replaced over selected code.`;
 
             const result = await geminiRepo.getCompletion([{
                 'role': 'user',

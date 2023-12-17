@@ -20,7 +20,7 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
         selectedCode = editor.document.getText(range);
         replaceRange = range;
     }
-
+    console.log(selectedCode);
     let errorsDescription = errors.map((e) => e.message).join(', ');
 
     const fullCode = editor.document.getText();
