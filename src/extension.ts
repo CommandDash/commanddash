@@ -20,11 +20,12 @@ import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider } from './providers/fluttergpt_code_actions_provider';
+import { FluttergptActionProvider as RefactorCodeActionProvider } from './providers/fluttergpt_code_actions_provider';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
 import { GeminiRepository } from './repository/gemini-repository';
+import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -85,13 +86,11 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
 
-    const wellTestedActionProvider = new FluttergptActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, wellTestedActionProvider));
+    const refactorCodeActionProvider = new RefactorCodeActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorCodeActionProvider));
 
-    const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
-    context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
-
-
+    const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
     pebblePanelWebViewProvider = new PebblePanelViewProvider(context.extensionUri, context, geminiRepo);
 

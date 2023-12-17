@@ -3,6 +3,7 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
+import { appendReferences } from '../../utilities/prompt_helpers';
 
 export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range) {
     logEvent('fix-errors', { 'type': 'refractor' });
@@ -12,17 +13,11 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
         return;
     }
 
-    var selectedCode = editor.document.getText(editor.selection);
-    var replaceRange: vscode.Range | vscode.Position;
-    replaceRange = editor.selection;
-    if (!selectedCode) {
-        // if no code is selected, we use the range 
-        selectedCode = editor.document.getText(range);
-        replaceRange = range;
-    }
+    var selectedCode = editor.document.getText(range);
+    var replaceRange = range;
     console.log(selectedCode);
-    let errorsDescription = errors.map((e) => e.message).join(', ');
-
+    let errorsDescription = errors.map((e) => `Message:${e.message}\nSeverity:${e.severity}`).join('\n');
+    console.log(errorsDescription);
     const fullCode = editor.document.getText();
 
     try {
@@ -47,14 +42,9 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
             } else {
                 prompt += `The full code context is:\n\n${fullCode}\n\n`;
             }
-            let referenceEditor = getReferenceEditor(globalState);
-            if (referenceEditor !== undefined) {
-                const referenceText = extractReferenceTextFromEditor(referenceEditor);
-                if (referenceText !== '') {
-                    prompt += `Some references that might help: \n${referenceText}\n`;
-                }
-            }
-            prompt += `First give a short explanation and then output the fixed code in a single code block.`;
+            prompt = appendReferences(getReferenceEditor(globalState), prompt);
+            
+            prompt += `First give a short explanation and then output the fixed code in a single code block to be replaced over the selected code.`;
 
             const result = await geminiRepo.getCompletion([{
                 'role': 'user',
