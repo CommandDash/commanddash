@@ -19,7 +19,7 @@ export class ErrorCodeActionProvider implements vscode.CodeActionProvider {
 		}
 		let functionAction = [];
         
-        //We current only need some scope for fixing errors since we can only replace range code and not append code anywhere in the file.
+        //We current need some scope for fixing errors since we can only replace range code and not append code anywhere in the file.
 		const manualSelectionRange: vscode.Range | undefined = range.start.line !== range.end.line || range.start.character !== range.end.character? range : undefined;
 		let functionRange: { symbolRange: vscode.Range, symbol: Outline } | undefined = await cursorIsAt("METHOD", this.analyzer, document, vscode.window.activeTextEditor, range, false);
         

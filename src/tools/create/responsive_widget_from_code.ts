@@ -5,7 +5,7 @@ import * as path from 'path';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
-
+//not active currently. to be thought out and revised again.
 export async function createResponsiveWidgetFromCode(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
     logEvent('create-responsive-widget-from-code', { 'type': "create" });
     const editor = vscode.window.activeTextEditor;

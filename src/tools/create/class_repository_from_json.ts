@@ -3,7 +3,7 @@ import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
-
+//not active currently. to be thought out and revised again.
 export async function createRepoClassFromPostman(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
     logEvent('create-repo-class-from-postman', { 'type': "create" });
     try {

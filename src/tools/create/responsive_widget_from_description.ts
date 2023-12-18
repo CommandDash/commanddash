@@ -6,7 +6,7 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 
-
+//not active currently. to be thought out and revised again.
 export async function createResponsiveWidgetFromDescription(giminiRepo: GeminiRepository, uri: vscode.Uri, globalState: vscode.Memento) {
     logEvent('create-responsive-widget-from-description', { 'type': "create" });
     //get the selected folder
