@@ -9,17 +9,27 @@
 [![VScode version](https://img.shields.io/visual-studio-marketplace/v/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview)
 [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 
-<h4>Use ChatGPT right inside your IDE to create, refactor and debug Flutter code</h4>
+<h4> Your Flutter AI Copilot powered with Gemini Code & Vision.</h4>
 </div>
 
 -----------------
-FlutterGPT is an open-source project aimed at creating a coding assistant specifically designed for Flutter Engineers. This assistant helps with creating, refactoring, and debugging code, making the development process more efficient and enjoyable.
+FlutterGPT is an open-source coding assistant specifically designed for Flutter Engineers. The assistant allows you to chat with Gemini inside VSCODE and create, refactor and debug code. 
 
-We're starting with simple features to create, refactor, and debug with a vision to build a supercharged, free-to-use coding assistant built for and by Flutter Engineers.
+###### ✨ Powered by Gemini 
+###### 🤝 Dart Analyzer Inside
+###### 👨🏼‍💻 For and by Flutter Engineers
 
-We only use GPT3.5 because it's fast, highly accurate, cheap, and is available to all.
+Our vision is to make Flutter development faster and developer centric by automating low-level workflows that we as developers work on a daily basis.
 
 -----------------
+## Getting Started
+
+##### 1. Create Free Gemini API Key
+Visit [Makersuite by Google](https://makersuite.google.com/), sign in with you google account and create your free API Key.
+##### 2. Add the key to FlutterGPT
+After installing the extensions, please visit your VSCode setttings, search for `fluttergpt.apiKey` and paste the Gemini API Key.
+##### 3. Run your first command.
+To get started, right-click on your editor in a dart project. Checkout all features below. 🔽
 
 ## Features
 
@@ -94,39 +104,32 @@ LLM's work great when provided with references along with the instructions. Flut
 
 3. In, `codeFromBluePrint` to generate full-fledged classes taking state management, architecture and style as reference from an existing class.
 
-## Requirements
-
-1. You'll need an [OpenAI account](https://platform.openai.com) with a valid API key. For more information on obtaining an API key, please visit the [OpenAI API documentation](https://platform.openai.com/docs/).
-
-## Getting Started
-
-1. After installing the extensions, please visit your VSCode setttings, search for `fluttergpt.apiKey` and paste the [OPENAI API Key](https://platform.openai.com/account/api-keys).
-
-2. To get started, select any piece of your dart code, open VSCode command pallete and search for `FlutterGPT`. You'll see all available commands. Details below.
-
-Please Note: Using OpenAI APIs will incur charges. From our observations, running 500 create widget from description costs only 1$.
-
-
 ## FAQs
 
 1. **How safe and secure is it to use, and can you explain why?**
-- FlutterGPT communicates directly with the SSL-encrypted OpenAI APIs, which are protected by SOC2 Compliance. Additionally, any data sent to OpenAI via the APIs is not used for training, ensuring complete privacy and security. Therefore, it is completely safe to use for personal or company projects.
+- FlutterGPT is powered by Google's  Gemini Models and is secure to use for personal usage or work - [Safety and Security Guidelines](https://blog.google/technology/ai/google-gemini-ai/#responsibility-safety)
 
 2. **Do I need to pay to use FlutterGPT?**
-- FlutterGPT is an open-source and free-to-use project. However, you will need to use OpenAI APIs, which are paid. You can start with a free $5 credit, which equates to approximately 2500 create widget requests. After that, you pay on a usage basis. For more information on OpenAI pricing, please refer to their website: [https://openai.com/pricing](https://openai.com/pricing)
+
+Gemini PRO is currently in early access and is completely free to use for upto 60 requests for minute. Please check the [pricing](https://ai.google.dev/pricing) here.
 
 3. **I am an Android Studio user. Can I use FlutterGPT?**
 - FlutterGPT is available for IntelliJ-based IDEs and can be downloaded from the plugin marketplace. Please follow this link: [https://plugins.jetbrains.com/plugin/21568-fluttergpt]
 
-### Ways to contribute
 
-- **File feature requests**: If you have an idea for a new feature that'll make your development life easier, please file a feature request on our [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
-- **Fix existing issues**: You can help us by fixing any existing issues in the project. Check out our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) to find out what needs to be done.
-- **Pick up approved features**: You can also contribute by picking up approved features from our [Roadmap](ROADMAP.md).
 
 ## Contributing
 
-We welcome contributions from the Flutter community to help improve FlutterGPT. You can contribute to the project by reporting issues, suggesting new features and taking up next tasks from the [ROADMAP.md](ROADMAP.md). To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file. You can also reach out to us at team@welltested.ai if you have any questions or feedback.
+FlutterGPT 💙 community centric and any contribution is most welcome to make it useful for you!
+
+### Ways to contribute
+
+- **File feature requests**: Sugggest new features that'll make your development process easier. File at [Issues Board](https://github.com/Welltested-AI/fluttergpt/issues).
+- **Fix existing issues**: Help us by fixing existing issues in our [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+- **Pick up approved features**: You can also contribute by picking up approved features from our [Roadmap](ROADMAP.md).
+
+
+To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file. You can also reach out to us at `team@welltested.ai` if you have any questions or feedback.
 
 ## Running Locally for Contribution
  1. Clone the repository.
@@ -143,29 +146,11 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes
-
-### 0.0.7
-- Removed Debug Information Window
-
-### 0.0.6
-
-- Add to Reference
-- Create:
-	- Web and Tablet Counterparts
-	- Mobile, Web and Tablet Widget From Description
-- Refactor:
-	- Optimize
-
-
-### 0.0.5
-
-Refactors and UX improvements
-
-### 0.0.4
-
-First version of FlutterGPT!
+## Release Notes: 0.1.0 
+- This is the first pre-release powered by Gemini.
+- Built in Dart analyzer to assist extracting and inserting code.
+- Support for basic create, refactor and debug operations.
 
 ## License
 
-FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE file](LICENSE) for more information.
+FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE](LICENSE) file for more information.
