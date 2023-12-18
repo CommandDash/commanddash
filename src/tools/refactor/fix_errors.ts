@@ -15,9 +15,7 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
 
     var selectedCode = editor.document.getText(range);
     var replaceRange = range;
-    console.log(selectedCode);
     let errorsDescription = errors.map((e) => `Message:${e.message}\nSeverity:${e.severity}`).join('\n');
-    console.log(errorsDescription);
     const fullCode = editor.document.getText();
 
     try {

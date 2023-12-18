@@ -12,11 +12,6 @@ export class ErrorCodeActionProvider implements vscode.CodeActionProvider {
 
 
 	async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<CodeAction[] | undefined> {
-        if (range instanceof vscode.Selection) {
-			console.log(`Selection: ${range.start.line}, ${range.start.character} - ${range.end.line}, ${range.end.character}`);
-		} else {
-			console.log(`Range: ${range.start.line}, ${range.start.character} - ${range.end.line}, ${range.end.character}`);
-		}
 		let functionAction = [];
         
         //We current need some scope for fixing errors since we can only replace range code and not append code anywhere in the file.

@@ -61,7 +61,6 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.window.registerUriHandler({
             handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
-                console.log(uri);
                 if (uri.path === process.env["success_path"]!) {
                     const query = uri.query.split('&');
                     const access_token = query[0].split('=')[1];
@@ -159,5 +158,5 @@ function customPush(name: string, handler: any, context: vscode.ExtensionContext
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-    console.log("Fluttergpt deactivated");
+    console.log("FlutterGPT deactivated");
 }

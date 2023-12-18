@@ -63,7 +63,6 @@ export async function cursorIsAt(type: String, analyzer: ILspAnalyzer, document:
 		const outlineSymbols = outline?.children || [];
 
 		const isRequiredType = (symbol: Outline): boolean => {
-			console.log(symbol);
 			return symbol.element.kind === type && (strict? isPositionInElementDefinitionRange(symbol, startPosition):isPositionInFullOutlineRange(symbol, startPosition));
 		};
 		const checkSymbols = (symbols: Outline[]): { symbolRange: vscode.Range, symbol: Outline } | undefined => {
