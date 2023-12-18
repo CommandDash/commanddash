@@ -20,7 +20,7 @@ import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider as RefactorCodeActionProvider } from './providers/fluttergpt_code_actions_provider';
+import { FluttergptActionProvider as RefactorCodeActionProvider } from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
@@ -113,8 +113,7 @@ export async function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range) => fixErrors(geminiRepo, errors, context.globalState, range), context);
     customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range) => optimizeCode(geminiRepo, context.globalState, range), context);
     customPush('fluttergpt.savePebblePanel', (aiRepo: GeminiRepository, globalState: vscode.Memento) => savePebblePanel(geminiRepo, context), context);
-    // context.subscriptions.push(vscode.commands.registerCommand('fluttergpt.optimizeCode', optimizeCode));
-
+    
     new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
