@@ -29,7 +29,7 @@ export class ErrorCodeActionProvider implements vscode.CodeActionProvider {
 		// quick fix for the function if there are errors
 		const errors = context.diagnostics.filter((d) => d.range.intersection(selectedRange!) !== undefined);
 		if (errors.length>0) {
-			const fixErrorsAction = new vscode.CodeAction("Auto-Fix", vscode.CodeActionKind.QuickFix);
+			const fixErrorsAction = new vscode.CodeAction("✨ Auto-Fix", vscode.CodeActionKind.QuickFix);
 			fixErrorsAction.command = {
 				arguments: [this.analyzer, errors, this.extcontext.globalState, selectedRange],
 				command: "fluttergpt.fixErrors",

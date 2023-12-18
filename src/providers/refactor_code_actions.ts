@@ -19,14 +19,25 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 		const classRange: { symbolRange: vscode.Range, symbol: Outline } | undefined = await cursorIsAt("CLASS", this.analyzer, document, vscode.window.activeTextEditor, range);
 
 		const selectedRange = manualSelectionRange!==undefined? manualSelectionRange: functionRange!==undefined?functionRange.symbolRange: classRange?.symbolRange;
-		const codeActionIndication = manualSelectionRange!==undefined? "Selection":
-		functionRange!==undefined?functionRange.symbol.element.name:classRange?.symbol.element.name;
+		const codeActionIndication = manualSelectionRange!==undefined? "":
+		functionRange!==undefined?` '${functionRange.symbol.element.name}'`:` '${classRange?.symbol.element.name}'`;
 		
 		if (selectedRange !== undefined) {
 
+		// refractor code
+		const refactorCode = new vscode.CodeAction(`✨ Refactor${codeActionIndication}`, vscode.CodeActionKind.RefactorRewrite);
+		refactorCode.isPreferred = true;
+		refactorCode.command = {
+			arguments: [this.aiRepo, this.extcontext.globalState, selectedRange],
+			command: "fluttergpt.refactorCode",
+			title: "Refactor code",
+		};
+		functionAction.push(refactorCode);
+
 		// optimize function
 		const optimizeFunction = new vscode.CodeAction(
-			`Optimize ${codeActionIndication}`, vscode.CodeActionKind.Refactor);
+			`✨ Optimize${codeActionIndication}`, vscode.CodeActionKind.RefactorRewrite);
+		optimizeFunction.isPreferred = true;
 		optimizeFunction.command = {
 			arguments: [this.aiRepo, this.extcontext.globalState, selectedRange],
 			command: "fluttergpt.optimizeCode",
@@ -34,15 +45,6 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 		};
 
 		functionAction.push(optimizeFunction);
-
-		// refractor code
-		const refactorCode = new vscode.CodeAction(`Refactor ${codeActionIndication}`, vscode.CodeActionKind.Refactor);
-		refactorCode.command = {
-			arguments: [this.aiRepo, this.extcontext.globalState, selectedRange],
-			command: "fluttergpt.refactorCode",
-			title: "Refactor code",
-		};
-		functionAction.push(refactorCode);
 
 		return functionAction;
 
