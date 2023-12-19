@@ -113,10 +113,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		try {
 			// Use the stored conversation history for the prompt
 			const response = await this.aiRepo.getCompletion(this._conversationHistory);
-
-			// Uncomment below to use the prompt with the image
-			// const response = await this.aiRepo.generateTextFromImage(`Act as flutter developer expert. ${searchPrompt}`, "/Users/yatendrakumar/desktop/example.jpeg", "image/jpeg");
-
 			this._conversationHistory.push({ role: 'user', parts: searchPrompt });
 			this._conversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
