@@ -18,7 +18,7 @@ import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
 import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider, FluttergptActionProvider as RefactorCodeActionProvider } from './providers/refactor_code_actions';
+import { FluttergptActionProvider as RefactorActionProvider} from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
@@ -55,8 +55,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     let geminiRepo = initGemini();
 
-    const wellTestedActionProvider = new FluttergptActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, wellTestedActionProvider));
+    const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
@@ -71,9 +71,6 @@ export async function activate(context: vscode.ExtensionContext) {
             }
         )
     );
-
-    const refactorCodeActionProvider = new RefactorCodeActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorCodeActionProvider));
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
