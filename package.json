@@ -47,6 +47,11 @@
       "webview": [
         {
           "type": "webview",
+          "id": "fluttergpt.chatView",
+          "name": "Chat View"
+        },
+        {
+          "type": "webview",
           "id": "fluttergpt.pebblePanel",
           "name": "Pebble Panel",
           "icon": "media/icon.png"

@@ -15,9 +15,9 @@
 -----------------
 FlutterGPT is an open-source coding assistant specifically designed for Flutter Engineers. The assistant allows you to chat with Gemini inside VSCODE and create, refactor and debug code. 
 
-###### ✨ Powered by Gemini 
-###### 🤝 Dart Analyzer Inside
-###### 👨🏼‍💻 For and by Flutter Engineers
+##### ✨ Powered by Gemini 
+##### 🤝 Dart Analyzer Inside
+##### 👨🏼‍💻 For and by Flutter Engineers
 
 Our vision is to make Flutter development faster and developer centric by automating low-level workflows that we as developers work on a daily basis.
 
@@ -25,23 +25,60 @@ Our vision is to make Flutter development faster and developer centric by automa
 ## Getting Started
 
 ##### 1. Create Free Gemini API Key
-Visit [Makersuite by Google](https://makersuite.google.com/), sign in with you google account and create your free API Key.
+Visit [Makersuite by Google](https://makersuite.google.com/) and create your free API Key.
 ##### 2. Add the key to FlutterGPT
-After installing the extensions, please visit your VSCode setttings, search for `fluttergpt.apiKey` and paste the Gemini API Key.
+In your VSCODE settings, search for `fluttergpt.apiKey` and paste the API Key.
 ##### 3. Run your first command.
 To get started, right-click on your editor in a dart project. Checkout all features below. 🔽
 
 ## Features
 
+### 🚀 Chat
+Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers.
+
+### ➕ Create
+#### 1. **Widget from Image or Description**
+
+Create flutter widgets based on the description you provide. Be as specific as you like.
+
+Command: `FlutterGPT Create: Widget from Description`
+
+#### 2. **Complete Code from BluePrint**
+
+Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
+
+Command: `FlutterGPT Create: Code from Blueprint`
+
+#### 3. **Complete Code from Description**
+
+Generate complete classes from your description.
+
+Command: `FlutterGPT Create: Code from Description`
+
+
+### 💡 Refactor
+#### 1. **From Instruction**
+
+Refactor widgets and logic both with this command.
+
+Command: `FlutterGPT Refactor: From Instructions`
+
+#### 3. **Optimize Code**
+
+Pass your runtime errors and get fixed code back.
+
+Command: `FlutterGPT Refactor: Optimize`
+
+#### 2. **Fix Errors**
+
+Pass your runtime errors and get fixed code back.
+
+Command: `FlutterGPT Refactor: Fix Errors`
 ### 🪄 Create
 
 <img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Creating Code using FlutterGPT" width="500"/>
 
-#### 1. **Widget from Description**
 
-Create flutter widgets based on the description you provide. Be as specific as you like.
-
-`FlutterGPT Create: Widget from Description`
 
 #### 2. **Model Class from JSON**
 
@@ -95,6 +132,8 @@ command: `FlutterGPT Refactor: Fix Errors`
 ### 📝 Add to Reference
 
 LLM's work great when provided with references along with the instructions. FlutterGPT users can now add any piece of code or customized descriptions as reference and they'll be passed to model for any command being used.
+
+For example, pass UserModel as a reference when generating code for AuthenticationRepository.
 
 **Practical usecases:**
 
