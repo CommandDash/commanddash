@@ -20,12 +20,13 @@ import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider as RefactorCodeActionProvider } from './providers/refactor_code_actions';
+import { FluttergptActionProvider, FluttergptActionProvider as RefactorCodeActionProvider } from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
 import { GeminiRepository } from './repository/gemini-repository';
 import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
+import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -100,13 +101,13 @@ export async function activate(context: vscode.ExtensionContext) {
             }
         )
     );
- 
+
     const refactorCodeActionProvider = new RefactorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorCodeActionProvider));
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
- 
+
 
     pebblePanelWebViewProvider = new PebblePanelViewProvider(context.extensionUri, context, geminiRepo);
 
@@ -129,7 +130,7 @@ export async function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range) => fixErrors(geminiRepo, errors, context.globalState, range), context);
     customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range) => optimizeCode(geminiRepo, context.globalState, range), context);
     customPush('fluttergpt.savePebblePanel', (aiRepo: GeminiRepository, globalState: vscode.Memento) => savePebblePanel(geminiRepo, context), context);
-    
+
     new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
