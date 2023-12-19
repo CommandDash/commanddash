@@ -4,7 +4,6 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
-import { document } from 'firebase-functions/v1/firestore';
 
 export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
@@ -62,12 +61,12 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
                 'parts': brainstormingPrompt
             }]);
             console.log(brainstormingResult);
-            let result:string;
-            let onlyReplaceSelected:boolean = false;
-             // Handle the case when SELECTED_CODE_IS_SUFFICE exists in brainstorming_result
+            let result: string;
+            let onlyReplaceSelected: boolean = false;
+            // Handle the case when SELECTED_CODE_IS_SUFFICE exists in brainstorming_result
             if (brainstormingResult.includes('SELECTED_CODE_IS_SUFFICIENT')) {
-                brainstormingPrompt+=brainstormingResult;
-                brainstormingPrompt+=`\n\nRemember, the higlighted code by user was:
+                brainstormingPrompt += brainstormingResult;
+                brainstormingPrompt += `\n\nRemember, the higlighted code by user was:
                 \`\`\`
                 ${previewCode(selectedCode)}
                 \`\`\`
@@ -80,8 +79,8 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
                 onlyReplaceSelected = true;
             } else if (editor.document.lineCount < 300) {
                 // replace full code if line count is controlled.
-                brainstormingPrompt+=brainstormingResult;
-                brainstormingPrompt+='\n\nOutput the modified code for the full file code.';
+                brainstormingPrompt += brainstormingResult;
+                brainstormingPrompt += '\n\nOutput the modified code for the full file code.';
                 console.log(brainstormingPrompt);
                 result = await gemini.getCompletion([{
                     'role': 'user',
@@ -90,8 +89,8 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
             } else {
                 // TODO: 
                 onlyReplaceSelected = true;
-                brainstormingPrompt+=brainstormingResult;
-                brainstormingPrompt+='\n\nMerge and output all the required inside and outside code modifications in a single block of code.';
+                brainstormingPrompt += brainstormingResult;
+                brainstormingPrompt += '\n\nMerge and output all the required inside and outside code modifications in a single block of code.';
                 console.log(brainstormingPrompt);
                 result = await gemini.getCompletion([{
                     'role': 'user',
@@ -104,16 +103,16 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
             progress.report({ increment: 100 });
 
             const refactoredCode = extractDartCode(result);
-            if (onlyReplaceSelected){
+            if (onlyReplaceSelected) {
                 editor.edit((editBuilder) => {
                     editBuilder.replace(replaceRange, refactoredCode);
                 });
-            }else {
+            } else {
                 const documentRange = new vscode.Range(
                     editor.document.lineAt(0).range.start,
                     editor.document.lineAt(editor.document.lineCount - 1).range.end
                 );
-            
+
                 editor.edit((editBuilder) => {
                     editBuilder.replace(documentRange, refactoredCode);
                 });

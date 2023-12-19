@@ -47,46 +47,46 @@ export async function getCodeForElementAtRange(analyzer: ILspAnalyzer, document:
 export async function cursorIsAt(type: String, analyzer: ILspAnalyzer, document: vscode.TextDocument, activeTextEditor: vscode.TextEditor | undefined, range: vscode.Range, strict: boolean = true): Promise<{ symbolRange: vscode.Range, symbol: Outline } | undefined> {
 
 	const position = activeTextEditor?.selection.active;
-		// adjust the position to the start of the word
-		const wordRange = document.getWordRangeAtPosition(position!)!;
-		if (!wordRange) {
-			return undefined;
-		}
+	// adjust the position to the start of the word
+	const wordRange = document.getWordRangeAtPosition(position!)!;
+	if (!wordRange) {
+		return undefined;
+	}
 
-		// Get the position of the start of the word
-		const startPosition = wordRange.start;
-		const uri = document.uri.toString();
-		const outline = (await analyzer.fileTracker.waitForOutline(document));
-		if (outline === undefined) {
-			return undefined;
-		}
-		const outlineSymbols = outline?.children || [];
+	// Get the position of the start of the word
+	const startPosition = wordRange.start;
+	const uri = document.uri.toString();
+	const outline = (await analyzer.fileTracker.waitForOutline(document));
+	if (outline === undefined) {
+		return undefined;
+	}
+	const outlineSymbols = outline?.children || [];
 
-		const isRequiredType = (symbol: Outline): boolean => {
-			return symbol.element.kind === type && (strict? isPositionInElementDefinitionRange(symbol, startPosition):isPositionInFullOutlineRange(symbol, startPosition));
-		};
-		const checkSymbols = (symbols: Outline[]): { symbolRange: vscode.Range, symbol: Outline } | undefined => {
-			for (const symbol of symbols) {
-				const symbolRange = new vscode.Range(
-					symbol.range.start.line,
-					symbol.range.start.character,
-					symbol.range.end.line,
-					symbol.range.end.character,
-				);
-				if (isRequiredType(symbol)) {
-					return {symbolRange, symbol};
-				}
-				if (symbol.children) {
-					const result = checkSymbols(symbol.children);
-					if (range !== undefined) {
-						return result;
-					}
+	const isRequiredType = (symbol: Outline): boolean => {
+		return symbol.element.kind === type && (strict ? isPositionInElementDefinitionRange(symbol, startPosition) : isPositionInFullOutlineRange(symbol, startPosition));
+	};
+	const checkSymbols = (symbols: Outline[]): { symbolRange: vscode.Range, symbol: Outline } | undefined => {
+		for (const symbol of symbols) {
+			const symbolRange = new vscode.Range(
+				symbol.range.start.line,
+				symbol.range.start.character,
+				symbol.range.end.line,
+				symbol.range.end.character,
+			);
+			if (isRequiredType(symbol)) {
+				return { symbolRange, symbol };
+			}
+			if (symbol.children) {
+				const result = checkSymbols(symbol.children);
+				if (result !== undefined) {
+					return result;
 				}
 			}
-			return undefined;
-		};
+		}
+		return undefined;
+	};
 
-		return checkSymbols(outlineSymbols);
+	return checkSymbols(outlineSymbols);
 }
 
 //if the cursor is anywhere within the full element.
@@ -102,9 +102,8 @@ export function isPositionInFullOutlineRange(outline: Outline, position: vscode.
 //if the cursor is over the name of method or class.
 //for ease, we allow tapping over anywhere in the line.
 export function isPositionInElementDefinitionRange
-(outline: Outline, position: vscode.Position): boolean {
-	if(outline.element.range===undefined)
-		{return false;}
+	(outline: Outline, position: vscode.Position): boolean {
+	if (outline.element.range === undefined) { return false; }
 	const symbolRange = new vscode.Range(
 		outline.element.range.start.line,
 		outline.element.range.start.character,
