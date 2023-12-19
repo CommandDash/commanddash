@@ -36,7 +36,7 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 ### 🚀 Chat
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="https://media.giphy.com/media/eMb9xbLRRQiGBEXd9z/giphy.gif" alt="Refactoring Code using FlutterGPT" width="500"/>
 </p>
 
 Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers.
