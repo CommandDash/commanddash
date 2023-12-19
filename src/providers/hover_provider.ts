@@ -37,7 +37,7 @@ export class AIHoverProvider implements vscode.HoverProvider {
             }
         } catch (error) {
 
-            console.error('Error fetching hover content from OpenAI:', error);
+            console.error('Error fetching hover content from Gemini:', error);
         }
         return undefined;
     }

@@ -135,7 +135,7 @@ To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTIN
  1. Clone the repository.
  2. Run `npm install`
  3. Use the `Run Extension` command from launch.json for running the extension.
- 4. Ensure you've specified the OPENAI secret key in the settings.
+ 4. Ensure you've specified the Gemini API key in the settings.
 
 ## Roadmap
 
