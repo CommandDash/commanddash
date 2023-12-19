@@ -20,12 +20,12 @@ import * as dotenv from 'dotenv';
 import path = require('path');
 import { PebblePanelViewProvider } from './pebbles/pebble-pabel-provider';
 import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider } from './providers/fluttergpt_code_actions_provider';
+import { FluttergptActionProvider as RefactorCodeActionProvider } from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
-import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { GeminiRepository } from './repository/gemini-repository';
+import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -61,7 +61,6 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.window.registerUriHandler({
             handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
-                console.log(uri);
                 if (uri.path === process.env["success_path"]!) {
                     const query = uri.query.split('&');
                     const access_token = query[0].split('=')[1];
@@ -85,7 +84,6 @@ export async function activate(context: vscode.ExtensionContext) {
         })
     );
 
-
     const wellTestedActionProvider = new FluttergptActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, wellTestedActionProvider));
 
@@ -102,6 +100,13 @@ export async function activate(context: vscode.ExtensionContext) {
             }
         )
     );
+ 
+    const refactorCodeActionProvider = new RefactorCodeActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorCodeActionProvider));
+
+    const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
+ 
 
     pebblePanelWebViewProvider = new PebblePanelViewProvider(context.extensionUri, context, geminiRepo);
 
@@ -124,8 +129,7 @@ export async function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range) => fixErrors(geminiRepo, errors, context.globalState, range), context);
     customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range) => optimizeCode(geminiRepo, context.globalState, range), context);
     customPush('fluttergpt.savePebblePanel', (aiRepo: GeminiRepository, globalState: vscode.Memento) => savePebblePanel(geminiRepo, context), context);
-    // context.subscriptions.push(vscode.commands.registerCommand('fluttergpt.optimizeCode', optimizeCode));
-
+    
     new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
@@ -171,5 +175,5 @@ function customPush(name: string, handler: any, context: vscode.ExtensionContext
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-    console.log("Fluttergpt deactivated");
+    console.log("FlutterGPT deactivated");
 }

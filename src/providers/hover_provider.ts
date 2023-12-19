@@ -3,6 +3,7 @@ import { GeminiRepository } from "../repository/gemini-repository";
 import { getCodeForElementAtRange, getErrorAtPosition } from "../shared/utils";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 
+// Not using right now since too many API calls are being made
 export class AIHoverProvider implements vscode.HoverProvider {
 
     constructor(private readonly aiRepo: GeminiRepository, private readonly analzyer: ILspAnalyzer) {

@@ -4,6 +4,7 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 
+//not active currently. to be thought out and revised again.
 export async function createModelClass(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
   logEvent("create-model-class", { 'type': "create" });
   try {

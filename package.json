@@ -1,7 +1,7 @@
 {
   "name": "fluttergpt",
-  "displayName": "FlutterGPT: Supercharged Dev Experiment",
-  "description": "Use ChatGPT right inside your IDE to create, refactor and debug Flutter code.",
+  "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
+  "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
   "version": "0.0.11",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
@@ -17,15 +17,14 @@
   "keywords": [
     "flutter",
     "dart",
-    "chatgpt",
-    "openai",
-    "gpt3",
+    "gemini",
+    "bard",
     "copilot",
+    "gpt",
     "ai",
-    "create",
-    "debug",
-    "refactor",
-    "widgets"
+    "assistant",
+    "chat",
+    "coding"
   ],
   "activationEvents": [
     "onLanguage:dart"
@@ -51,11 +50,6 @@
           "id": "fluttergpt.pebblePanel",
           "name": "Pebble Panel",
           "icon": "media/icon.png"
-        },
-        {
-          "type": "webview",
-          "id": "fluttergpt.chatView",
-          "name": "Chat View"
         }
       ]
     },
@@ -102,30 +96,12 @@
         "when": "false"
       },
       {
-        "command": "fluttergpt.createModelClass",
-        "title": "Model Class from JSON"
-      },
-      {
-        "command": "fluttergpt.createModelClass.menu",
-        "title": "Model Class from JSON",
-        "when": "false"
-      },
-      {
         "command": "fluttergpt.createCodeFromBlueprint",
         "title": "FlutterGPT Create: Code from Blueprint"
       },
       {
         "command": "fluttergpt.createCodeFromBlueprint.menu",
         "title": "Code from Blueprint",
-        "when": "false"
-      },
-      {
-        "command": "fluttergpt.createRepoClassFromPostman",
-        "title": "FlutterGPT Create: API Repository from Postman JSON"
-      },
-      {
-        "command": "fluttergpt.createRepoClassFromPostman.menu",
-        "title": "API Repository from Postman JSON",
         "when": "false"
       },
       {
@@ -136,19 +112,6 @@
         "command": "fluttergpt.createCodeFromDescription.menu",
         "title": "Code From Description",
         "when": "false"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromCode",
-        "title": "FlutterGPT Create: Web and Tablet Counterparts"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
-        "title": "Web and Tablet Counterparts",
-        "when": "false"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromDescription",
-        "title": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
       },
       {
         "command": "fluttergpt.refactorCode",
@@ -181,10 +144,6 @@
     "menus": {
       "editor/context": [
         {
-          "submenu": "fluttergpt.refactorMenu",
-          "group": "fluttergpt-menu-group@2"
-        },
-        {
           "submenu": "fluttergpt.createMenu",
           "group": "fluttergpt-menu-group@3"
         },
@@ -195,20 +154,6 @@
         },
         {
           "command": "fluttergpt.savePebblePanel",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@1"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "fluttergpt.createResponsiveWidgetFromDescription",
-          "group": "fluttergpt-menu-group@1",
-          "description": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
-        }
-      ],
-      "fluttergpt.refactorMenu": [
-        {
-          "command": "fluttergpt.refactorCode.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
         }
@@ -225,6 +170,7 @@
         },
         {
           "command": "fluttergpt.createWidget.menu",
+          "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@3"
         }
       ]
@@ -233,10 +179,6 @@
       {
         "id": "fluttergpt.createMenu",
         "label": "FlutterGPT Create"
-      },
-      {
-        "id": "fluttergpt.refactorMenu",
-        "label": "FlutterGPT Refactor"
       }
     ]
   },
@@ -264,11 +206,10 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.1.1",
+    "vscode-languageclient": "^9.0.1",
     "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
-    "js-yaml": "^4.1.0",
-    "vscode-languageclient": "^9.0.1",
-    "vscode-uri": "^3.0.8"
+    "js-yaml": "^4.1.0"
   }
 }

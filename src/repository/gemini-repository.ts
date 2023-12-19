@@ -19,18 +19,16 @@ export class GeminiRepository {
         const result = await model.generateContent([prompt, ...imageParts]);
         const response = await result.response;
         const text = response.text();
-        console.log(text);
         return text;
     }
 
     public async getCompletion(prompt: { role: string, parts: string }[]): Promise<string> {
-        console.log(prompt);
 
         if (!this.apiKey) {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
         const lastMessage = prompt.pop();
-        const chat = this.genAI.getGenerativeModel({ model: "gemini-pro" }).startChat(
+        const chat = this.genAI.getGenerativeModel({ model: "gemini-pro" , generationConfig: {temperature: 0.0}}).startChat(
             {
                 history: prompt,
             }
@@ -38,7 +36,6 @@ export class GeminiRepository {
         const result = await chat.sendMessage(lastMessage?.parts ?? "");
         const response = result.response;
         const text = response.text();
-        console.log(text);
         return text;
     }
 
