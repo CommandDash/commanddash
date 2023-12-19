@@ -106,7 +106,7 @@ export function isPositionInElementDefinitionRange
 	if (outline.element.range === undefined) { return false; }
 	const symbolRange = new vscode.Range(
 		outline.element.range.start.line,
-		outline.element.range.start.character,
+		0,
 		outline.element.range.start.line,
 		Infinity
 	);
