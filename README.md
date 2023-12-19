@@ -19,7 +19,7 @@ FlutterGPT is an open-source coding assistant specifically designed for Flutter 
 ##### 🤝 Dart Analyzer Inside
 ##### 👨🏼‍💻 For and by Flutter Engineers
 
-Our vision is to make Flutter development faster and developer centric by automating low-level workflows that we as developers work on a daily basis.
+Our vision is to make Flutter development faster and easily adoptable by automating low-level workflows that we as developers work on a daily basis.
 
 -----------------
 ## Getting Started
