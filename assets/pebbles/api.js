@@ -189,6 +189,7 @@ async function fetchPebbleFullCode(pk) {
 async function addPebbleRequest(data) {
   const url = `${API_URL}${window.api["new_pebble"]}`;
   const embeddings = await createEmbeddings(data.code);
+  console.log("embeddings", embeddings);
   data.embeddings = embeddings;
 
   const options = {
@@ -412,8 +413,8 @@ headerPart +=`
       ${(pebble.favorited ? '❤️' : '🤍')} ${pebble.favorite_count}
       </button>`;
   
-  const publisherButton = `
-      <button ${linkStyle} onclick="openGithub('${pebble.publisher}')" style="text-decoration: underline; float: right;">${pebble.publisher}</button>`;
+  const publisherButton = pebble.publisher? `
+      <button ${linkStyle} onclick="openGithub('${pebble.publisher}')" style="text-decoration: underline; float: right;">${pebble.publisher}</button>`:'';
 
   const buttonPart = `
       <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -429,29 +430,32 @@ headerPart +=`
 
 
 
-// openAI create embeddings
+// Gemini create embeddings
 async function createEmbeddings(text){
-  const url = "https://api.openai.com/v1/embeddings";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent?key="+window.openaikey;
   const options = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${window.openaikey}`,
     },
     body: JSON.stringify({
-      input: text,
-      model: 'text-embedding-ada-002'
+      model: "models/embedding-001",
+      content: {
+        parts: [{
+          text: text
+        }]
+      }
     })
   };
   const response = await fetch(url,options);
 
   if (response.ok) {
     const result = await response.json();
-    return result.data[0].embedding;
+    return result.embedding.values;
   }
   else {
     const error = await response.json();
-    throw new Error(error.message);
+    throw new Error(error.error.message);
   }
 }
 

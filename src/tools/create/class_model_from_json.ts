@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
-import {extractDartCode, extractExplanation, extractReferenceTextFromEditor} from '../../utilities/code-processing';
+import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
-export async function createModelClass(openAIRepo: OpenAIRepository, globalState: vscode.Memento ) {
+//not active currently. to be thought out and revised again.
+export async function createModelClass(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
   logEvent("create-model-class", { 'type': "create" });
   try {
     const jsonStructure = await vscode.window.showInputBox({
@@ -52,26 +53,26 @@ export async function createModelClass(openAIRepo: OpenAIRepository, globalState
         }, 200);
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
         let referenceEditor = getReferenceEditor(globalState);
-        if(referenceEditor!==undefined){
+        if (referenceEditor !== undefined) {
           const referenceText = extractReferenceTextFromEditor(referenceEditor);
-          if(referenceText!==''){
-              prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+          if (referenceText !== '') {
+            prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
           }
         }
         prompt += `Create a Flutter model class, keeping null safety in mind for from the following JSON structure: ${jsonStructure}.`;
 
-        if(library!=='None') {
-          prompt+= `Use ${library}`;
+        if (library !== 'None') {
+          prompt += `Use ${library}`;
         }
-        if(includeHelpers==='Yes'){
-          prompt+= `Make sure toJson, fromJson, and copyWith methods are included.`;
+        if (includeHelpers === 'Yes') {
+          prompt += `Make sure toJson, fromJson, and copyWith methods are included.`;
         }
-        prompt+= `Output the model class code in a single block.`;
+        prompt += `Output the model class code in a single block.`;
 
-        const result = await openAIRepo.getCompletion([
+        const result = await giminiRepo.getCompletion([
           {
             role: "user",
-            content: prompt
+            parts: prompt
           }
         ]);
         clearInterval(progressInterval);
@@ -90,13 +91,13 @@ export async function createModelClass(openAIRepo: OpenAIRepository, globalState
         }
       }
     );
-    
+
   } catch (error: Error | unknown) {
-    if(error instanceof Error){
-        vscode.window.showErrorMessage(`${error.message}`);
+    if (error instanceof Error) {
+      vscode.window.showErrorMessage(`${error.message}`);
     } else {
-        vscode.window.showErrorMessage(`Failed to create model class ${error}`);
+      vscode.window.showErrorMessage(`Failed to create model class ${error}`);
     }
   }
-  
+
 }
