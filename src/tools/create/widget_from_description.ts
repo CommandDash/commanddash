@@ -4,10 +4,29 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 
-
 export async function createWidgetFromDescription(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
     logEvent('create-widget-from-description', { 'type': "create" });
     try {
+        var selectedImagePath: string = "";
+        var mimeTypeImage: string = "";
+        const attachImage = await vscode.window.showInformationMessage('Do you want to attach an image?', 'Yes', 'No');
+        if (attachImage === 'Yes') {
+            const imagePath = await vscode.window.showOpenDialog({
+                canSelectFiles: true,
+                canSelectFolders: false,
+                canSelectMany: false,
+                filters: {
+                    Images: ['png', 'jpg', 'jpeg', 'gif', 'bmp']
+                }
+            });
+            if (!imagePath || imagePath.length === 0) {
+                return;
+            }
+            selectedImagePath = imagePath[0].fsPath;
+            mimeTypeImage = imagePath[0].fsPath.split('.').pop()!;
+            console.log(mimeTypeImage);
+        }
+
         const description = await vscode.window.showInputBox({ prompt: "Enter widget description" });
         if (!description) {
             return;
@@ -46,10 +65,17 @@ export async function createWidgetFromDescription(geminiRepo: GeminiRepository, 
             stepIndex++;
             console.debug(prompt);
 
-            const result = await geminiRepo.getCompletion([{
-                'role': 'user',
-                'parts': prompt
-            }]);
+            var result: string = "";
+
+            if (selectedImagePath !== undefined && selectedImagePath.length > 0) {
+                result = await geminiRepo.generateTextFromImage(prompt, selectedImagePath, `image/${mimeTypeImage}`);
+            } else {
+                result = await geminiRepo.getCompletion([{
+                    'role': 'user',
+                    'parts': prompt
+                }]);
+            }
+
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
 
