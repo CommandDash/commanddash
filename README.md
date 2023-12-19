@@ -34,9 +34,17 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 ## Features
 
 ### 🚀 Chat
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+</p>
+
 Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers.
 
-### ➕ Create
+### 💡 Create
+
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Creating Code using FlutterGPT" width="500"/>
+
 #### 1. **Widget from Image or Description**
 
 Create flutter widgets based on the description you provide. Be as specific as you like.
@@ -56,61 +64,7 @@ Generate complete classes from your description.
 Command: `FlutterGPT Create: Code from Description`
 
 
-### 💡 Refactor
-#### 1. **From Instruction**
-
-Refactor widgets and logic both with this command.
-
-Command: `FlutterGPT Refactor: From Instructions`
-
-#### 3. **Optimize Code**
-
-Pass your runtime errors and get fixed code back.
-
-Command: `FlutterGPT Refactor: Optimize`
-
-#### 2. **Fix Errors**
-
-Pass your runtime errors and get fixed code back.
-
-Command: `FlutterGPT Refactor: Fix Errors`
-### 🪄 Create
-
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Creating Code using FlutterGPT" width="500"/>
-
-
-
-#### 2. **Model Class from JSON**
-
-Create model classes from JSON with null safety in mind. You can also choose to generate Freezed or JsonSerializable modules
-
-command: `FlutterGPT Create: Model Class from JSON`
-
-#### 3. **Repository Class from Postman Json**
-
-Convert you postman collection exports json to API repository class
-
-command: `FlutterGPT Create: API Repository from Postman JSON`
-
-#### 4. **Complete Code from BluePrint**
-
-Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
-
-command: `FlutterGPT Create: Code from Blueprint`
-
-#### 5. **Create Web and Tablet Counterparts**
-
-Create Web and Tablet widgets from mobile code. Write the mobile code and let the AI do the rest. i.e create the tablet and web code.
-
-command: `FlutterGPT Create: Web and Tablet Counterparts`
-
-#### 6. **Create Mobile, Web and Tablet Counterpart from description**
-
-Create Mobile, Web and Tablet widgets from description. Select a folder and write the description. The AI will create the code for you. i.e. create the mobile, tablet and web code and a selector file to choose the right code.
-
-command: `FlutterGPT Create: Mobile, Web and Tablet Widget From Description`
-
-### 🛠️ Refactor
+### ✨ Refactor
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
@@ -120,20 +74,23 @@ command: `FlutterGPT Create: Mobile, Web and Tablet Widget From Description`
 
 Refactor widgets and logic both with this command.
 
-command: `FlutterGPT Refactor: From Instructions`
+Command: `FlutterGPT Refactor: From Instructions`
 
-#### 2. **Fix Errors**
+#### 2. **Optimize Code**
 
 Pass your runtime errors and get fixed code back.
 
-command: `FlutterGPT Refactor: Fix Errors`
+Command: `FlutterGPT Refactor: Optimize`
 
+#### 3. **Auto Fix**
+
+Select any method or code with errors, run Auto Fix .
+
+Command: `FlutterGPT Refactor: Fix Errors`
 
 ### 📝 Add to Reference
 
 LLM's work great when provided with references along with the instructions. FlutterGPT users can now add any piece of code or customized descriptions as reference and they'll be passed to model for any command being used.
-
-For example, pass UserModel as a reference when generating code for AuthenticationRepository.
 
 **Practical usecases:**
 
