@@ -34,9 +34,8 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 ## Features
 
 ### 🚀 Chat
-
 <p align="center">
-<img src="https://media.giphy.com/media/eMb9xbLRRQiGBEXd9z/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
+<img src="https://media.giphy.com/media/H9cgkHWk58lHAZrRdN/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
 
 Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers.
