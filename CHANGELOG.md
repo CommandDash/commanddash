@@ -4,6 +4,8 @@ All notable changes to the "fluttergpt" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [0.1.0]
 
-- Initial release
+- This is the first pre-release powered by Gemini.
+- Built in Dart analyzer to assist extracting and inserting code.
+- Support for basic create, refactor and debug operations.

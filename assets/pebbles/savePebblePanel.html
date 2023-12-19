@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta
-    http-equiv="Content-Security-Policy"
-    content="default-src 'none'; connect-src 'self' %HOST% https://api.openai.com; img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  script-src 'unsafe-inline' vscode-resource: https: http:;"
-  />
- 
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; connect-src 'self' %HOST% https://generativelanguage.googleapis.com; img-src vscode-resource: https:; style-src 'unsafe-inline' vscode-resource:;  script-src 'unsafe-inline' vscode-resource: https: http:;" />
+
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -16,7 +15,7 @@
             color: #d4d4d4;
             padding: 16px;
         }
-        
+
         h1 {
             font-size: 24px;
             margin-bottom: 16px;
@@ -34,7 +33,8 @@
             align-self: center;
         }
 
-        input, textarea {
+        input,
+        textarea {
             border: 1px solid #454545;
             border-radius: 4px;
             background-color: #252526;
@@ -88,11 +88,11 @@
             transition: 0.4s;
         }
 
-        input:checked + .slider {
+        input:checked+.slider {
             background-color: #3c3c3c;
         }
 
-        input:checked + .slider:before {
+        input:checked+.slider:before {
             transform: translateX(26px);
         }
 
@@ -107,6 +107,7 @@
             font-weight: bold;
             cursor: pointer;
         }
+
         pre {
             background-color: #2d2d2d;
             border-radius: 4px;
@@ -120,6 +121,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Pebble Details</h1>
     <form>
@@ -140,8 +142,8 @@
     <pre><code><div  id="snippetCode">%CODE%</div></code></pre>
     <script>
         const vscode = acquireVsCodeApi();
-      </script>
-      <script src="%API_JS_URI%"></script>
+    </script>
+    <script src="%API_JS_URI%"></script>
     <script>
         // Send the selectedText to the extension when the form is submitted
         document.querySelector("form").addEventListener("submit", async (e) => {
@@ -150,46 +152,47 @@
             const name = document.getElementById("snippetName").value;
             const description = document.getElementById("snippetDescription").value;
             const isPrivate = document.getElementById("privateSwitch").checked;
-            const codeSnippet = document.getElementById("snippetCode").innerText ;
+            const codeSnippet = document.getElementById("snippetCode").innerText;
 
             console.log(codeSnippet, name, description, isPrivate)
-            
-        //     {
-        // 'type': '...',
-        // 'pebble_name': '...',
-        // 'description': '...',
-        // 'private': true or false,
-        // 'publisher': '...',
-        // 'code': 'Your code...',
-        // }4
-        
-        const data = {
-            'type': 'snippet',
-            'pebble_name': name,
-            'description': description,
-            'private': isPrivate,
-            'code':codeSnippet,
-        }
-        console.log(data);
-        try {
-            await addPebbleRequest(data);
-            // send a message to the extension to show a success message
-            vscode.postMessage({
-                command: 'savePebbleSuccess',
-                text: 'Pebble saved successfully!',
-            });
-            
-        } catch (error) {
-            // send a message to the extension to show an error message
-            vscode.postMessage({
-                command: 'savePebbleError',
-                text: error.message,
-            });
-            throw error;
-            
-        }
-        
+
+            //     {
+            // 'type': '...',
+            // 'pebble_name': '...',
+            // 'description': '...',
+            // 'private': true or false,
+            // 'publisher': '...',
+            // 'code': 'Your code...',
+            // }4
+
+            const data = {
+                'type': 'snippet',
+                'pebble_name': name,
+                'description': description,
+                'private': isPrivate,
+                'code': codeSnippet,
+            }
+            console.log(data);
+            try {
+                await addPebbleRequest(data);
+                // send a message to the extension to show a success message
+                vscode.postMessage({
+                    command: 'savePebbleSuccess',
+                    text: 'Pebble saved successfully!',
+                });
+
+            } catch (error) {
+                // send a message to the extension to show an error message
+                vscode.postMessage({
+                    command: 'savePebbleError',
+                    text: error.message,
+                });
+                throw error;
+
+            }
+
         });
     </script>
 </body>
+
 </html>`

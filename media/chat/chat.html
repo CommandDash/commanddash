@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            justify-content: flex-end;
+            height: 100vh;
+        }
+
+        #chat-container {
+            width: 100%;
+            max-width: 100%;
+            background-color: transparent;
+            padding: 0%;
+            border-radius: 0px;
+            overflow: hidden;
+            overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #2d2d2d;
+            scroll-behavior: smooth;
+        }
+
+        #prompt-input {
+            width: calc(100%);
+            padding: 8px;
+            font-size: 14px;
+            border: none;
+            border-bottom: 1px solid #444;
+            outline: none;
+            color: #ffffff;
+            background-color: #2d2d2d;
+        }
+
+        #response {
+            margin-left: 8px;
+            color: #ffffff;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            /* Light grey */
+            border-top: 5px solid #3498db;
+            /* Blue */
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 2s linear infinite;
+            margin-left: 50%;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .message {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .user-you {
+            background-color: rgba(41, 181, 246, 0.08);
+            padding: 8px;
+            width: auto;
+            max-width: auto;
+            box-sizing: border-box;
+            display: flex;
+            align-items: left;
+        }
+
+        .user-you::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 100%;
+            background-color: #29b6f6;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .user-gemini-pro {
+            background-color: rgba(102, 187, 106, 0.08);
+            padding: 8px;
+            width: auto;
+            max-width: auto;
+            box-sizing: border-box;
+            align-items: left;
+        }
+
+        .user-gemini-pro::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 100%;
+            background-color: #66bb6a;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .user-gemini-pro p {
+            margin-left: 8px;
+            color: #ffffff;
+            white-space: pre-wrap;
+        }
+
+        .user-you p {
+            margin-left: 8px;
+            color: #ffffff;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat-container">
+        <div class="message user-gemini-pro">
+            <p><strong>FlutterGPT:</strong> Hello! I'm flutter/dart expert. Feel free to ask me anything.</p>
+        </div>
+        <!-- Display chat messages -->
+        <div id="dynamic-messages"></div>
+        <!-- Add the loading indicator inside the chat container -->
+        <div id="response" class="pt-4 text-sm">
+        </div>
+
+        <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
+
+        <script src="{{scriptUri}}"></script>
+        <script src="{{shadowUri}}"></script>
+</body>
+
+</html>

@@ -8,7 +8,7 @@ While there are no special coding guidelines for FlutterGPT, we ask that you kee
 
 ## Tools and Technologies
 
-FlutterGPT is built using TypeScript and uses OPENAI's GPT3.5 APIs. Familiarity with these technologies is helpful, but not required. We use ChatGPT to write a lot of code for the plugin and encourage contributors to do so too! 
+FlutterGPT is built using TypeScript and uses Gemini PRO APIs. Familiarity with these technologies is helpful, but not required. We use Gemini/Bard/ChatGPT to write a lot of code for the plugin and encourage contributors to do so too! 
 
 ## Submitting a Contribution
 
@@ -29,10 +29,9 @@ We value the contributions of all our contributors and will mention them in our 
 
 ## License
 
-FlutterGPT is released under the Apache-2.0 license. While we retain all the rights to use, build on, and monetize the source code, we encourage users to build other open-source projects on top of it. However, building a commercial product on top of FlutterGPT is not allowed.
+FlutterGPT is released under the Apache-2.0 license. This allows you to use FlutterGPT for any nearly any purposes you'd like. Read the license details for more information.
 
 ## Documentation
-
 We will create documentation for FlutterGPT in the future. For now, please refer to the README file for information on how to use the extension.
 
 Thank you for your interest in contributing to FlutterGPT! We appreciate your help in making our VS Code extension better for Flutter developers.

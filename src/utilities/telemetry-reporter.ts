@@ -9,7 +9,6 @@ const key = 'ceae95d5-839b-4691-8b42-ad54f8095b6d';
 let reporter: TelemetryReporter;
 
 export function activateTelemetry(context: vscode.ExtensionContext) {
-    console.log('instrumentations key', key);
 
     if (key===undefined) {return null;}
    // create telemetry reporter on extension activation

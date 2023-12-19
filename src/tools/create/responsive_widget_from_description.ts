@@ -1,17 +1,17 @@
 import * as vscode from 'vscode';
-import { OpenAIRepository } from '../../repository/openai-repository';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import * as fs from 'fs';
 import * as path from 'path';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { GeminiRepository } from '../../repository/gemini-repository';
 
-
-export async function createResponsiveWidgetFromDescription(openAIRepo: OpenAIRepository,uri: vscode.Uri, globalState: vscode.Memento) {
+//not active currently. to be thought out and revised again.
+export async function createResponsiveWidgetFromDescription(giminiRepo: GeminiRepository, uri: vscode.Uri, globalState: vscode.Memento) {
     logEvent('create-responsive-widget-from-description', { 'type': "create" });
     //get the selected folder
     const cwd = uri.fsPath;
-    
+
     if (!cwd) {
         vscode.window.showErrorMessage('Please select a folder');
         return;
@@ -39,7 +39,7 @@ export async function createResponsiveWidgetFromDescription(openAIRepo: OpenAIRe
     }
     let referenceText = '';
     let referenceEditor = getReferenceEditor(globalState);
-    if(referenceEditor!==undefined){
+    if (referenceEditor !== undefined) {
         referenceText = extractReferenceTextFromEditor(referenceEditor);
     }
     const mobileFileName = `${toSnakeCase(enteredWidgetName)}_mobile.dart`;
@@ -54,9 +54,9 @@ export async function createResponsiveWidgetFromDescription(openAIRepo: OpenAIRe
     const selectorFilePath = path.join(folderPath, selectorFileName);
 
     // Generate responsive code for web and tablet
-    const mobileCode = await generateMobileCode(enteredDescription, openAIRepo, enteredWidgetName,referenceText);
-    const webCode = await generateWebCode(mobileCode, openAIRepo, enteredWidgetName, referenceText);
-    const tabletCode = await generateTabletCode(mobileCode, openAIRepo, enteredWidgetName, referenceText);
+    const mobileCode = await generateMobileCode(enteredDescription, giminiRepo, enteredWidgetName, referenceText);
+    const webCode = await generateWebCode(mobileCode, giminiRepo, enteredWidgetName, referenceText);
+    const tabletCode = await generateTabletCode(mobileCode, giminiRepo, enteredWidgetName, referenceText);
     const selectorCode = generateSelectorCode(enteredWidgetName);
 
 
@@ -70,13 +70,13 @@ export async function createResponsiveWidgetFromDescription(openAIRepo: OpenAIRe
 }
 
 
-async function generateMobileCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: String, referenceText: string): Promise<string> {
+async function generateMobileCode(selectedText: string, giminiRepo: GeminiRepository, widgetName: String, referenceText: string): Promise<string> {
     try {
         const modifiedName = toPascalCase(widgetName + "Mobile");
         var dartCode = "";
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-        if(referenceText!==''){
-            prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+        if (referenceText !== '') {
+            prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
         }
         prompt += `Create Flutter/Dart code for the the following description: ${selectedText} such that the widget is mobile compatible.
         change the class or widget name to ${modifiedName}. use responsive sizing. Closely analyze the blueprint, 
@@ -95,9 +95,9 @@ async function generateMobileCode(selectedText: string, openAIRepo: OpenAIReposi
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            const result = await openAIRepo.getCompletion([{
+            const result = await giminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
@@ -119,13 +119,13 @@ async function generateMobileCode(selectedText: string, openAIRepo: OpenAIReposi
         return '';
     }
 }
-async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: String, referenceText: string): Promise<string> {
+async function generateWebCode(selectedText: string, giminiRepo: GeminiRepository, widgetName: String, referenceText: string): Promise<string> {
     try {
         const modifiedName = toPascalCase(widgetName + "Web");
         var dartCode = "";
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-        if(referenceText!==''){
-            prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+        if (referenceText !== '') {
+            prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
         }
         prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is website compatible.
         change the class or widget name to ${modifiedName}.use responsive sizing and add Web to the widget name at the end. 
@@ -144,9 +144,9 @@ async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepositor
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            const result = await openAIRepo.getCompletion([{
+            const result = await giminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
@@ -170,13 +170,13 @@ async function generateWebCode(selectedText: string, openAIRepo: OpenAIRepositor
 }
 
 
-async function generateTabletCode(selectedText: string, openAIRepo: OpenAIRepository, widgetName: string, referenceText: string): Promise<string> {
+async function generateTabletCode(selectedText: string, giminiRepo: GeminiRepository, widgetName: string, referenceText: string): Promise<string> {
     try {
         const modifiedName = toPascalCase(widgetName + "Tablet");
         var dartCode = "";
         let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-        if(referenceText!==''){
-            prompt+=`Keeping in mind these references/context:\n${referenceText}\n`;
+        if (referenceText !== '') {
+            prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
         }
         prompt += `Create Flutter/Dart code for the following dart code: ${selectedText} such that the widget is table compatible.
         change the class or widget name to ${modifiedName}. use responsive sizing. Closely analyze the blueprint, 
@@ -194,9 +194,9 @@ async function generateTabletCode(selectedText: string, openAIRepo: OpenAIReposi
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            const result = await openAIRepo.getCompletion([{
+            const result = await giminiRepo.getCompletion([{
                 'role': 'user',
-                'content': prompt
+                'parts': prompt
             }]);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });

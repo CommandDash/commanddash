@@ -1,7 +1,7 @@
 {
   "name": "fluttergpt",
-  "displayName": "FlutterGPT: Supercharged Dev Experiment",
-  "description": "Use ChatGPT right inside your IDE to create, refactor and debug Flutter code.",
+  "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
+  "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
   "version": "0.0.11",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
@@ -17,15 +17,14 @@
   "keywords": [
     "flutter",
     "dart",
-    "chatgpt",
-    "openai",
-    "gpt3",
+    "gemini",
+    "bard",
     "copilot",
+    "gpt",
     "ai",
-    "create",
-    "debug",
-    "refactor",
-    "widgets"
+    "assistant",
+    "chat",
+    "coding"
   ],
   "activationEvents": [
     "onLanguage:dart"
@@ -48,9 +47,8 @@
       "webview": [
         {
           "type": "webview",
-          "id": "fluttergpt.pebblePanel",
-          "name": "Pebble Panel",
-          "icon": "media/icon.png"
+          "id": "fluttergpt.chatView",
+          "name": "Chat View"
         }
       ]
     },
@@ -60,7 +58,7 @@
       "properties": {
         "fluttergpt.apiKey": {
           "type": "string",
-          "markdownDescription": "API key from [OpenAI](https://platform.openai.com/account/api-keys)"
+          "markdownDescription": "Gemini API KEY(https://makersuite.google.com/)"
         }
       }
     },
@@ -79,30 +77,17 @@
         "title": "FlutterGPT: Add to Reference"
       },
       {
-        "command": "fluttergpt.savePebblePanel",
-        "title": "Save as Pebble"
-      },
-      {
         "command": "fluttergpt.addToReference.menu",
         "title": "Add to Reference",
         "when": "false"
       },
       {
         "command": "fluttergpt.createWidget",
-        "title": "FlutterGPT Create: Widget from Description"
+        "title": "FlutterGPT Create: Widget from Image or Description"
       },
       {
         "command": "fluttergpt.createWidget.menu",
-        "title": "Widget from Description",
-        "when": "false"
-      },
-      {
-        "command": "fluttergpt.createModelClass",
-        "title": "Model Class from JSON"
-      },
-      {
-        "command": "fluttergpt.createModelClass.menu",
-        "title": "Model Class from JSON",
+        "title": "Widget from Image or Description",
         "when": "false"
       },
       {
@@ -115,15 +100,6 @@
         "when": "false"
       },
       {
-        "command": "fluttergpt.createRepoClassFromPostman",
-        "title": "FlutterGPT Create: API Repository from Postman JSON"
-      },
-      {
-        "command": "fluttergpt.createRepoClassFromPostman.menu",
-        "title": "API Repository from Postman JSON",
-        "when": "false"
-      },
-      {
         "command": "fluttergpt.createCodeFromDescription",
         "title": "FlutterGPT Create: Code From Description"
       },
@@ -131,19 +107,6 @@
         "command": "fluttergpt.createCodeFromDescription.menu",
         "title": "Code From Description",
         "when": "false"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromCode",
-        "title": "FlutterGPT Create: Web and Tablet Counterparts"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
-        "title": "Web and Tablet Counterparts",
-        "when": "false"
-      },
-      {
-        "command": "fluttergpt.createResponsiveWidgetFromDescription",
-        "title": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
       },
       {
         "command": "fluttergpt.refactorCode",
@@ -176,10 +139,6 @@
     "menus": {
       "editor/context": [
         {
-          "submenu": "fluttergpt.refactorMenu",
-          "group": "fluttergpt-menu-group@2"
-        },
-        {
           "submenu": "fluttergpt.createMenu",
           "group": "fluttergpt-menu-group@3"
         },
@@ -187,35 +146,6 @@
           "command": "fluttergpt.addToReference.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
-        },
-        {
-          "command": "fluttergpt.savePebblePanel",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@1"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "fluttergpt.createResponsiveWidgetFromDescription",
-          "group": "fluttergpt-menu-group@1",
-          "description": "FlutterGPT Create: Mobile, Web and Tablet Widget From Description"
-        }
-      ],
-      "fluttergpt.refactorMenu": [
-        {
-          "command": "fluttergpt.refactorCode.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@1"
-        },
-        {
-          "command": "fluttergpt.fixErrors.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@2"
-        },
-        {
-          "command": "fluttergpt.optimizeCode.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@3"
         }
       ],
       "fluttergpt.createMenu": [
@@ -230,19 +160,8 @@
         },
         {
           "command": "fluttergpt.createWidget.menu",
+          "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@3"
-        },
-        {
-          "command": "fluttergpt.createResponsiveWidgetFromCode.menu",
-          "group": "fluttergpt-menu-group@4"
-        },
-        {
-          "command": "fluttergpt.createModelClass.menu",
-          "group": "fluttergpt-menu-group@5"
-        },
-        {
-          "command": "fluttergpt.createRepoClassFromPostman.menu",
-          "group": "fluttergpt-menu-group@6"
         }
       ]
     },
@@ -250,10 +169,6 @@
       {
         "id": "fluttergpt.createMenu",
         "label": "FlutterGPT Create"
-      },
-      {
-        "id": "fluttergpt.refactorMenu",
-        "label": "FlutterGPT Refactor"
       }
     ]
   },
@@ -280,6 +195,8 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.1.1",
+    "vscode-languageclient": "^9.0.1",
     "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
