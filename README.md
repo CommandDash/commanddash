@@ -47,9 +47,9 @@ Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dar
 
 #### 1. **Widget from Image or Description**
 
-Create flutter widgets based on the description you provide. Be as specific as you like.
+Use Gemini's multimodal capabilities to create widget from a image with added description. 
 
-Command: `FlutterGPT Create: Widget from Description`
+Command: `FlutterGPT Create: Widget from Image or Description`
 
 #### 2. **Complete Code from BluePrint**
 
@@ -107,7 +107,7 @@ LLM's work great when provided with references along with the instructions. Flut
 
 2. **Do I need to pay to use FlutterGPT?**
 
-Gemini PRO is currently in early access and is completely free to use for upto 60 requests for minute. Please check the [pricing](https://ai.google.dev/pricing) here.
+- Gemini PRO is currently in early access and is completely free to use for upto 60 requests for minute. Please check the [pricing](https://ai.google.dev/pricing) here.
 
 3. **I am an Android Studio user. Can I use FlutterGPT?**
 - FlutterGPT is available for IntelliJ-based IDEs and can be downloaded from the plugin marketplace. Please follow this link: [https://plugins.jetbrains.com/plugin/21568-fluttergpt]
@@ -116,11 +116,11 @@ Gemini PRO is currently in early access and is completely free to use for upto 6
 
 ## Contributing
 
-FlutterGPT 💙 community centric and any contribution is most welcome to make it useful for you!
+FlutterGPT 💙 is community centric and any contribution is most welcome to make it useful for you!
 
 ### Ways to contribute
 
-- **File feature requests**: Sugggest new features that'll make your development process easier. File at [Issues Board](https://github.com/Welltested-AI/fluttergpt/issues).
+- **Feature requests**: Sugggest new features that'll make your development process easier. File at [Issues Board](https://github.com/Welltested-AI/fluttergpt/issues).
 - **Fix existing issues**: Help us by fixing existing issues in our [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
 - **Pick up approved features**: You can also contribute by picking up approved features from our [Roadmap](ROADMAP.md).
 
