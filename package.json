@@ -88,11 +88,11 @@
       },
       {
         "command": "fluttergpt.createWidget",
-        "title": "FlutterGPT Create: Widget from Description"
+        "title": "FlutterGPT Create: Widget from Image/Description"
       },
       {
         "command": "fluttergpt.createWidget.menu",
-        "title": "Widget from Description",
+        "title": "Widget from Image/Description",
         "when": "false"
       },
       {

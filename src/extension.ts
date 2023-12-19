@@ -84,12 +84,29 @@ export async function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    const wellTestedActionProvider = new FluttergptActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, wellTestedActionProvider));
 
+    const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
+    context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
+
+    // Create a new FlutterGPTViewProvider instance and register it with the extension's context
+    const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
+    // Register the provider with the extension's context
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(FlutterGPTViewProvider.viewType, chatProvider,
+            {
+                webviewOptions: { retainContextWhenHidden: true },
+            }
+        )
+    );
+ 
     const refactorCodeActionProvider = new RefactorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorCodeActionProvider));
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
+ 
 
     pebblePanelWebViewProvider = new PebblePanelViewProvider(context.extensionUri, context, geminiRepo);
 
