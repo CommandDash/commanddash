@@ -36,14 +36,15 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 ### 🚀 Chat
 
 <p align="center">
-<img src="https://media.giphy.com/media/eMb9xbLRRQiGBEXd9z/giphy.gif" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="https://media.giphy.com/media/eMb9xbLRRQiGBEXd9z/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
 
 Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers.
 
 ### 💡 Create
-
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/create.png" alt="Creating Code using FlutterGPT" width="500"/>
+<p align="center">
+<img src="https://media.giphy.com/media/ytNTZHcMLFYmwbrgcA/giphy.gif" alt="Creating Widget using FlutterGPT" width="500"/>
+</p>
 
 #### 1. **Widget from Image or Description**
 
