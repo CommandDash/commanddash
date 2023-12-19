@@ -5,7 +5,8 @@
 (function () {
 	const vscode = acquireVsCodeApi();
 
-	let response = "";
+	// Define an empty array, which will be loaded through the displayMessages function
+	let conversationHistory = [];
 
 	// Handle mexssages sent from the extension to the webview
 	window.addEventListener("message", (event) => {
@@ -24,10 +25,13 @@
 				document.getElementById("prompt-input").value = message.value;
 				break;
 			}
+			case "displayMessages": {
+				conversationHistory = message.value;
+				displayMessages();
+				break;
+			}
 		}
 	});
-
- 
 
 	function fixCodeBlocks(response) {
 		// Use a regular expression to find all occurrences of the substring in the string
@@ -93,6 +97,46 @@
 		microlight.reset("code");
 
 		// document.getElementById("response").innerHTML = document.getElementById("response").innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+	}
+
+	// Function to display messages in the chat container
+	function displayMessages() {
+
+		const dynamicMessagesContainer = document.getElementById("dynamic-messages");
+		console.log(conversationHistory);
+
+		// Clear existing messages
+		dynamicMessagesContainer.innerHTML = "";
+
+		// Loop through the messages array and create message elements
+		conversationHistory.slice(2, conversationHistory.length).forEach((message, index) => {
+			const messageElement = document.createElement("div");
+			if (message.role === "model") {
+				messageElement.classList.add("message", "user-gemini-pro"); // Change class to "user-gemini-pro"
+				messageElement.innerHTML = `<p><strong>FlutterGPT: </strong>${markdownToPlain(message.parts)}</p>`;
+			} else {
+				messageElement.classList.add("message", "user-you"); // Change class to "user-you"
+				messageElement.innerHTML = `<p><strong>You: </strong>${markdownToPlain(message.parts)}</p>`;
+			}
+			dynamicMessagesContainer.appendChild(messageElement);
+		});
+
+		// Scroll the chat container to the most recent message
+		dynamicMessagesContainer.scrollTop = dynamicMessagesContainer.scrollHeight;
+	}
+
+
+	function markdownToPlain(input) {
+		const converter = new showdown.Converter({
+			omitExtraWLInCodeBlocks: true,
+			simplifiedAutoLink: true,
+			excludeTrailingPunctuationFromURLs: true,
+			literalMidWordUnderscores: true,
+			simpleLineBreaks: true,
+		});
+		// response = fixCodeBlocks(input);
+		html = converter.makeHtml(input);
+		return html;
 	}
 
 	// Listen for keyup events on the prompt input element

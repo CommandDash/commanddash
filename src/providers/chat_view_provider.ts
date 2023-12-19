@@ -57,54 +57,78 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview,) {
-
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
-		var chatHtml = fs.readFileSync(path.join(this.context.extensionPath, 'media', 'chat', 'chat.html'), 'utf8');
+		const chatHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'chat.html');
+		const chatHtml = fs.readFileSync(chatHtmlPath.fsPath, 'utf8');
 		const showdownUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'scripts', 'showdown.min.js'));
 
 		// Modify your Content-Security-Policy
 		const cspSource = webview.cspSource;
 		const contentSecurityPolicy = `
-		default-src 'none';
-		connect-src 'self' https://api.openai.com;
-		img-src ${cspSource} https:;
-		style-src 'unsafe-inline' ${cspSource};
-		script-src 'unsafe-inline' ${cspSource} https: http:;
+			default-src 'none';
+			connect-src 'self' https://api.openai.com;
+			img-src ${cspSource} https:;
+			style-src 'unsafe-inline' ${cspSource};
+			script-src 'unsafe-inline' ${cspSource} https: http:;
 		`;
-		chatHtml = chatHtml.replace(/{{cspSource}}/g, cspSource)
+
+		const updatedChatHtml = chatHtml
+			.replace(/{{cspSource}}/g, cspSource)
 			.replace(/{{scriptUri}}/g, scriptUri.toString())
-			.replace(/{{shadowUri}}/g, showdownUri.toString())
-			;
-		return chatHtml;
+			.replace(/{{shadowUri}}/g, showdownUri.toString());
+
+		return updatedChatHtml;
 	}
+
+
+	private _conversationHistory: Array<{ role: string, parts: string }> = [];
 
 	private async getResponse(prompt: string) {
 		if (!this._view) {
 			await vscode.commands.executeCommand('fluttergpt.chatView.focus');
+
 		} else {
 			this._view?.show?.(true);
 		}
-		let response = '';
+
 		const selection = vscode.window.activeTextEditor?.selection;
 		const selectedText = vscode.window.activeTextEditor?.document.getText(selection);
 		let searchPrompt = this.createPrompt(prompt, selectedText);
-		this._view?.webview.postMessage({ type: 'setPrompt', value: searchPrompt });
-		this._view?.webview.postMessage({ type: 'addResponse', value: '...' });
-		this._currentMessageNumber++;
-		try {
-			const prompt = [
-				{ role: 'model', parts: "You are a flutter/dart development expert.\n\n" },
-				{ role: 'user', parts: searchPrompt }];
-			response = await this.aiRepo.getCompletion(prompt);
-			this._view?.webview.postMessage({ type: 'addResponse', value: response });
 
-
-		} catch (error) {
-			console.log(error);
-			response = 'Sorry, I could not find a response. Please try again.';
+		// Initialize conversation history if it's the first time
+		if (this._conversationHistory.length === 0) {
+			this._conversationHistory.push(
+				{ role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code.\n\n" },
+				{ role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. How can I help you?\n\n" }
+			);
 		}
 
+		// Append the current user prompt to the conversation history
+		this._conversationHistory.push({ role: 'user', parts: searchPrompt });
+		this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
+
+		this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
+		this._view?.webview.postMessage({ type: 'addResponse', value: 'loading...' });
+
+		try {
+			// Use the stored conversation history for the prompt
+			const response = await this.aiRepo.getCompletion(this._conversationHistory);
+
+			// Uncomment below to use the prompt with the image
+			// const response = await this.aiRepo.generateTextFromImage(`Act as flutter developer expert. ${searchPrompt}`, "/Users/yatendrakumar/desktop/example.jpeg", "image/jpeg");
+
+			this._conversationHistory.push({ role: 'user', parts: searchPrompt });
+			this._conversationHistory.push({ role: 'model', parts: response });
+			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
+			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
+
+		} catch (error) {
+			console.error(error);
+			const response = 'Sorry, I could not find a response. Please try again.';
+			this._view?.webview.postMessage({ type: 'addResponse', value: response });
+		}
 	}
+
 
 	private createPrompt(prompt: string, selectedText: string | undefined) {
 		let searchPrompt = prompt;
