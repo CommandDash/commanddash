@@ -49,12 +49,6 @@
           "type": "webview",
           "id": "fluttergpt.chatView",
           "name": "Chat View"
-        },
-        {
-          "type": "webview",
-          "id": "fluttergpt.pebblePanel",
-          "name": "Pebble Panel",
-          "icon": "media/icon.png"
         }
       ]
     },
@@ -81,10 +75,6 @@
         "command": "fluttergpt.addToReference",
         "when": "editorHasSelection && resourceLangId == 'dart'",
         "title": "FlutterGPT: Add to Reference"
-      },
-      {
-        "command": "fluttergpt.savePebblePanel",
-        "title": "Save as Pebble"
       },
       {
         "command": "fluttergpt.addToReference.menu",
@@ -154,11 +144,6 @@
         },
         {
           "command": "fluttergpt.addToReference.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@1"
-        },
-        {
-          "command": "fluttergpt.savePebblePanel",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
         }
