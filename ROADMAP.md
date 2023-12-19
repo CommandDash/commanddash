@@ -17,19 +17,22 @@ exists to outline large-scale future plans for fluttergpt.
 
 | Project | Description |
 |---------|-------------|
-|Integrating dart analyzer|We want to integrate dart analyzer into our extension so as build on top of elements/errors etc provided by the analyzer|
+
 
 ## Upcoming Projects (in rough order of priority)
 
 | Project | Description |
 |---------|-------------|
-|Reference generation|Chatgpt performs the best when we provide it with examples/samples, we want to integrate this workflow into our commands|
+
 
 ## Projects Under Consideration (unplanned and unprioritized)
-
+| Project | Description |
+|---------|-------------|
 
 ## Completed Roadmap Projects
 
 | Project | Description |
 |---------|-------------|
 |Base command and setup|We have successfully launched vscode extension with basic set of commands to supercharge flutter dev experiment|
+|Integrating dart analyzer|We want to integrate dart analyzer into our extension so as build on top of elements/errors etc provided by the analyzer|
+|Reference generation|Chatgpt performs the best when we provide it with examples/samples, we want to integrate this workflow into our commands|

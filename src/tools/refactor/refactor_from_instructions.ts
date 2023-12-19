@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
-import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
+import { extractDartCode, previewCode } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
+import { document } from 'firebase-functions/v1/firestore';
 
 export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
@@ -47,22 +48,76 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
             }, 200);
 
             let referenceEditor = getReferenceEditor(globalState);
-            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output response in the modified format.\n\n`;
-            prompt += `Modify the following Flutter code based on the user instructions: ${instructions}\n\nHighlighted Code:\n${selectedCode}\n\nFull Code:\n${editor.document.getText()}\n\n`;
-            prompt = appendReferences(referenceEditor, prompt);
-            prompt += `Output the modified code in a single code block to be replaced over selected code.\n\n`;
-
-            const result = await gemini.getCompletion([{
+            let brainstormingPrompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output the response in the mentioned format.\n\n`;
+            brainstormingPrompt += `Modify the following Flutter code based on the user instructions: ${instructions}\n\nHIGHLIGHTED CODE BY USER:\n${selectedCode}\n\nFull File Code:\n${editor.document.getText()}\n\n`;
+            brainstormingPrompt = appendReferences(referenceEditor, brainstormingPrompt);
+            brainstormingPrompt += `Without writing any code, first brainstorm the following: 
+            1. What does the user want to accomplish.  
+            2. How do you plan to achieve that?
+            3. Do we just need to replace existing highlighted code by user or insert some new snippets as well? (don't write code yet)
+            4. Based on all above, if the modifications are only to be made in the user highligted code. OUTPUT: SELECTED_CODE_IS_SUFFICIENT or if we need to make insert or replace code in other parts of file, output OUTSIDE_AMENDS_REQUIRED`;
+            console.log(brainstormingPrompt);
+            const brainstormingResult = await gemini.getCompletion([{
                 'role': 'user',
-                'parts': prompt
+                'parts': brainstormingPrompt
             }]);
+            console.log(brainstormingResult);
+            let result:string;
+            let onlyReplaceSelected:boolean = false;
+             // Handle the case when SELECTED_CODE_IS_SUFFICE exists in brainstorming_result
+            if (brainstormingResult.includes('SELECTED_CODE_IS_SUFFICIENT')) {
+                brainstormingPrompt+=brainstormingResult;
+                brainstormingPrompt+=`\n\nRemember, the higlighted code by user was:
+                \`\`\`
+                ${previewCode(selectedCode)}
+                \`\`\`
+                Now, Output the updated code replacement for the code highlighted by the user. The updated code will be pasted directly into the IDE in place of the highlighted code so make sure you cover the correct the entire highlighted code.`;
+                console.log(brainstormingPrompt);
+                result = await gemini.getCompletion([{
+                    'role': 'user',
+                    'parts': brainstormingPrompt
+                }]);
+                onlyReplaceSelected = true;
+            } else if (editor.document.lineCount < 300) {
+                // replace full code if line count is controlled.
+                brainstormingPrompt+=brainstormingResult;
+                brainstormingPrompt+='\n\nOutput the modified code for the full file code.';
+                console.log(brainstormingPrompt);
+                result = await gemini.getCompletion([{
+                    'role': 'user',
+                    'parts': brainstormingPrompt
+                }]);
+            } else {
+                // TODO: 
+                onlyReplaceSelected = true;
+                brainstormingPrompt+=brainstormingResult;
+                brainstormingPrompt+='\n\nMerge and output all the required inside and outside code modifications in a single block of code.';
+                console.log(brainstormingPrompt);
+                result = await gemini.getCompletion([{
+                    'role': 'user',
+                    'parts': brainstormingPrompt
+                }]);
+            }
+
+            console.log(result);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
 
             const refactoredCode = extractDartCode(result);
-            editor.edit((editBuilder) => {
-                editBuilder.replace(replaceRange, refactoredCode);
-            });
+            if (onlyReplaceSelected){
+                editor.edit((editBuilder) => {
+                    editBuilder.replace(replaceRange, refactoredCode);
+                });
+            }else {
+                const documentRange = new vscode.Range(
+                    editor.document.lineAt(0).range.start,
+                    editor.document.lineAt(editor.document.lineCount - 1).range.end
+                );
+            
+                editor.edit((editBuilder) => {
+                    editBuilder.replace(documentRange, refactoredCode);
+                });
+            }
             vscode.window.showInformationMessage('Code refactored successfully!');
         });
     } catch (error: Error | unknown) {

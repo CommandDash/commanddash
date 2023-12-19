@@ -58,7 +58,7 @@
       "properties": {
         "fluttergpt.apiKey": {
           "type": "string",
-          "markdownDescription": "API key from [OpenAI](https://platform.openai.com/account/api-keys)"
+          "markdownDescription": "Gemini API KEY(https://makersuite.google.com/)"
         }
       }
     },

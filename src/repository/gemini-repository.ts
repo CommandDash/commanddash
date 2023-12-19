@@ -28,7 +28,7 @@ export class GeminiRepository {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
         const lastMessage = prompt.pop();
-        const chat = this.genAI.getGenerativeModel({ model: "gemini-pro" , generationConfig: {temperature: 0.0}}).startChat(
+        const chat = this.genAI.getGenerativeModel({ model: "gemini-pro" , generationConfig: {temperature: 0.0, topP: 0.2}}).startChat(
             {
                 history: prompt,
             }
