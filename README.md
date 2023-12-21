@@ -142,8 +142,8 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes: 0.1.0 
-- This is the first pre-release powered by Gemini.
+## Release Notes: 0.2.0 
+- This is the first release powered by Gemini.
 - Built in Dart analyzer to assist extracting and inserting code.
 - Support for basic create, refactor and debug operations.
 
