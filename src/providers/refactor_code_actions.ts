@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { CodeAction } from "vscode";
 import { Outline } from "../shared/types/custom_protocols";
-import { cursorIsAt, getContextualCode } from "../shared/utils";
+import { cursorIsAt } from "../shared/utils";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { GeminiRepository } from "../repository/gemini-repository";
 

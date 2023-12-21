@@ -4,8 +4,8 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
-import { getContextualCode } from '../../shared/utils';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
+import { ContextualCodeProvider } from '../../utilities/contextual-code';
 
 export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, analyzer: ILspAnalyzer) {
     logEvent('fix-errors', { 'type': 'refractor' });
@@ -35,7 +35,7 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
                 progress.report({ increment });
             }, 200);
 
-            const contextualCode = await getContextualCode(editor.document, replaceRange, analyzer);
+            const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer);
 
             let prompt = `Follow the instructions carefully and to the letter. You're a Flutter/Dart debugging expert.\n\n`;
             prompt += `Here's a piece of Flutter code with errors:\n\n${selectedCode}\n\n`;

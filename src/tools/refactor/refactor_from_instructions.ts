@@ -4,8 +4,8 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
-import { getContextualCode } from '../../shared/utils';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
+import { ContextualCodeProvider } from '../../utilities/contextual-code';
 
 export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer) {
     logEvent('refactor-code', { 'type': 'refractor' });
@@ -48,7 +48,7 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
                 progress.report({ increment });
             }, 200);
 
-            let contextualCode = await getContextualCode(editor.document, replaceRange, analyzer);
+            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer);
 
             let referenceEditor = getReferenceEditor(globalState);
             let brainstormingPrompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output the response in the mentioned format.\n\n`;

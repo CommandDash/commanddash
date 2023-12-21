@@ -4,8 +4,8 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
-import { getContextualCode } from '../../shared/utils';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
+import { ContextualCodeProvider } from '../../utilities/contextual-code';
 
 export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer) {
     logEvent('optimize-code', { 'type': 'refractor' });
@@ -44,7 +44,8 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            let contextualCode = await getContextualCode(editor.document, replaceRange, analyzer);
+
+            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer);
 
             let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output response in the modified format..\n\n`;
             prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Subject Code:\n${selectedCode}\n\n`;
