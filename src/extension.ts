@@ -18,7 +18,7 @@ import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
 import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider as RefactorActionProvider} from './providers/refactor_code_actions';
+import { FluttergptActionProvider as RefactorActionProvider } from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { AIHoverProvider } from './providers/hover_provider';
@@ -31,6 +31,21 @@ export const DART_MODE: vscode.DocumentFilter & { language: string } = { languag
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
+
+    // Check if the Gemini API key is set
+    const config = vscode.workspace.getConfiguration('fluttergpt');
+    const apiKey = config.get<string>('apiKey');
+    if (!apiKey || isOldOpenAIKey(apiKey)) {
+        // Prompt the user to update their settings
+        vscode.window.showErrorMessage(
+            'Please update your API key to Gemini in the settings.',
+            'Open Settings'
+        ).then(selection => {
+            if (selection === 'Open Settings') {
+                vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+            }
+        });
+    }
 
     console.log('Congratulations, "fluttergpt" is now active!');
 
@@ -90,6 +105,28 @@ export async function activate(context: vscode.ExtensionContext) {
     new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
+function isOldOpenAIKey(apiKey: string): boolean {
+    // Define the logic to determine if the apiKey is an old OpenAI key
+    // For example, if old keys start with "sk-", you could use:
+    return apiKey.startsWith('sk-');
+}
+
+async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {
+    const config = vscode.workspace.getConfiguration('fluttergpt');
+    const apiKey = config.get<string>('apiKey');
+    if (!apiKey || isOldOpenAIKey(apiKey)) {
+        const selection = await vscode.window.showInformationMessage(
+            'Please update your API key to Gemini in the settings.',
+            'Open Settings'
+        );
+        if (selection === 'Open Settings') {
+            vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+        }
+        return false; // API key is not set or is old, operation should not continue
+    }
+    return true; // API key is set and is a Gemini key, operation can continue
+}
+
 export function promptGithubLogin(context: vscode.ExtensionContext): void {
     const refresh_token = context.globalState.get<string>('refresh_token');
     if (refresh_token) {
@@ -120,11 +157,21 @@ function initGemini(): GeminiRepository {
 }
 
 
-function customPush(name: string, handler: any, context: vscode.ExtensionContext): void {
-    let baseCommand = vscode.commands.registerCommand(name, handler);
+function customPush(name: string, handler: (...args: any[]) => any, context: vscode.ExtensionContext): void {
+    let baseCommand = vscode.commands.registerCommand(name, async (...args: any[]) => {
+        const apiKeyValid = await checkApiKeyAndPrompt(context);
+        if (apiKeyValid) {
+            handler(...args);
+        }
+    });
     context.subscriptions.push(baseCommand);
 
-    let menuCommand = vscode.commands.registerCommand(name + ".menu", handler);
+    let menuCommand = vscode.commands.registerCommand(name + ".menu", async (...args: any[]) => {
+        const apiKeyValid = await checkApiKeyAndPrompt(context);
+        if (apiKeyValid) {
+            handler(...args);
+        }
+    });
     context.subscriptions.push(menuCommand);
 }
 
