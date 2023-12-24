@@ -10,10 +10,13 @@ body:
     id: version
     attributes:
       label: What version are you using?
-      description: Please specify the package names and versions ![Check this](https://imgur.com/a/MoTRn56).
+      description: Please specify the package names and versions. Check below!
       placeholder: "package - version"
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: "![Version Image](https://imgur.com/a/MoTRn56)"
   - type: textarea
     id: what-happened
     attributes:
