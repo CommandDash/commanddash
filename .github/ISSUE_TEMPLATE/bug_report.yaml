@@ -16,7 +16,7 @@ body:
       required: true
   - type: markdown
     attributes:
-      value: '<img src="https://i.imgur.com/No2CBoS.png" width="40%">'
+      value: '<img src="https://i.imgur.com/No2CBoS.png" width="40%" style="border-radius: 10px;">'
   - type: textarea
     id: what-happened
     attributes:
