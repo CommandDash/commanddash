@@ -10,8 +10,8 @@ body:
     id: version
     attributes:
       label: What version are you using?
-      description: Please specify the package names and versions.
-      placeholder: "package - version\n![package version](https://imgur.com/a/MoTRn56)"
+      description: Please specify the package names and versions ![Check this](https://imgur.com/a/MoTRn56).
+      placeholder: "package - version"
     validations:
       required: true
   - type: textarea
