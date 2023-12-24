@@ -10,8 +10,8 @@ body:
     id: version
     attributes:
       label: What version are you using?
-      description: Please specify the package names and versions. Check below!
-      placeholder: "package - version"
+      description: Please specify the names and versions. Check below!
+      placeholder: "Eg. v0.2.0"
     validations:
       required: true
   - type: markdown
