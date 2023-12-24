@@ -10,8 +10,8 @@ body:
     id: version
     attributes:
       label: What version are you using?
-      description: Please specify the package names and versions. You can embed an image using markdown syntax if needed.
-      placeholder: "package - version\n![package version](https://ibb.co/CmGsFzP)"
+      description: Please specify the package names and versions.
+      placeholder: "package - version\n![package version](https://imgur.com/a/MoTRn56)"
     validations:
       required: true
   - type: textarea
