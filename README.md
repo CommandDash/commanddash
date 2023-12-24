@@ -125,7 +125,11 @@ FlutterGPT 💙 is community centric and any contribution is most welcome to mak
 - **Pick up approved features**: You can also contribute by picking up approved features from our [Roadmap](ROADMAP.md).
 
 
-To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file. You can also reach out to us at `team@welltested.ai` if you have any questions or feedback.
+To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+## Community
+
+We have friendly mentors and a supportive community ready to guide you every step of the way [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA)
 
 ## Running Locally for Contribution
  1. Clone the repository.
