@@ -108,7 +108,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
 
 		this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
-		this._view?.webview.postMessage({ type: 'addResponse', value: 'loading...' });
+		this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
 
 		try {
 			// Use the stored conversation history for the prompt
@@ -122,6 +122,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			console.error(error);
 			const response = 'Sorry, I could not find a response. Please try again.';
 			this._view?.webview.postMessage({ type: 'addResponse', value: response });
+		}finally{
+			this._view?.webview.postMessage({type: 'hideLoadingIndicator'})
 		}
 	}
 
