@@ -7,6 +7,7 @@
 
 	// Define an empty array, which will be loaded through the displayMessages function
 	let conversationHistory = [];
+	let loadingIndicator = document.getElementById('loader');
 
 	// Handle mexssages sent from the extension to the webview
 	window.addEventListener("message", (event) => {
@@ -30,6 +31,12 @@
 				displayMessages();
 				break;
 			}
+			case 'showLoadingIndicator':
+				loadingIndicator.style.display = 'block';
+				break;
+			case 'hideLoadingIndicator':
+				loadingIndicator.style.display = 'none';
+				break;
 		}
 	});
 
