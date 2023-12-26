@@ -27,7 +27,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			const refactorCode = new vscode.CodeAction(`✨ Refactor${codeActionIndication}`, vscode.CodeActionKind.RefactorRewrite);
 			refactorCode.isPreferred = true;
 			refactorCode.command = {
-				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer],
+				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
 				command: "fluttergpt.refactorCode",
 				title: "Refactor code",
 			};
@@ -38,7 +38,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 				`✨ Optimize${codeActionIndication}`, vscode.CodeActionKind.RefactorRewrite);
 			optimizeFunction.isPreferred = true;
 			optimizeFunction.command = {
-				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer],
+				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
 				command: "fluttergpt.optimizeCode",
 				title: "Optimize Function",
 			};

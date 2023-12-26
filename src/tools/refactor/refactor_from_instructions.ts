@@ -7,7 +7,7 @@ import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 
-export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer) {
+export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = vscode.window.activeTextEditor;
@@ -48,7 +48,7 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
                 progress.report({ increment });
             }, 200);
 
-            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer);
+            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer, elementname);
 
             let referenceEditor = getReferenceEditor(globalState);
             let brainstormingPrompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output the response in the mentioned format.\n\n`;

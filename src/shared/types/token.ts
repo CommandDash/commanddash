@@ -7,4 +7,5 @@ export type Token = {
     tokenModifiers: number;
     name: string;
     code: string | undefined;
+    path: string;
 };

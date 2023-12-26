@@ -8,15 +8,9 @@ import { getCodeForRange, isPositionInElementDefinitionRange } from '../shared/u
 import { Token } from '../shared/types/token';
 export class ContextualCodeProvider {
 
-    public async getContextualCode(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer): Promise<string | undefined> {
+    public async getContextualCode(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<string | undefined> {
         const checkSymbols = (symbols: Outline[]): Outline | undefined => {
             for (const symbol of symbols) {
-                const symbolRange = new vscode.Range(
-                    symbol.range.start.line,
-                    symbol.range.start.character,
-                    symbol.range.end.line,
-                    symbol.range.end.character,
-                );
                 if (isPositionInElementDefinitionRange(symbol, range.start)) {
                     return symbol;
                 }
@@ -29,33 +23,48 @@ export class ContextualCodeProvider {
             }
             return undefined;
         };
-        const outline = await analyzer.fileTracker.waitForOutline(document);
 
-        if (outline === undefined) {
-            return undefined;
-        }
-        const outlineSymbols = outline?.children || [];
-        // parse the outline to get all top level symbols
-        const symbol = checkSymbols(outlineSymbols);
-        if (symbol === undefined) {
-            return undefined;
+        // get the target symbol if the elementname is not provided. This is the case when the user selects a range of code.
+        // The elementName is used to avoid adding target symbol in the contextual code.
+        if (elementname === undefined) {
+            const outline = await analyzer.fileTracker.waitForOutline(document);
+
+            if (outline === undefined) {
+                return undefined;
+            }
+            const outlineSymbols = outline?.children || [];
+            // parse the outline to get all top level symbols
+            const symbol = checkSymbols(outlineSymbols);
+            if (symbol !== undefined) {
+                elementname = symbol.element.name;
+            }
         }
         const docTokens = await this.getDocumentTokens(document, analyzer, range);
 
-        const uniqueSymbols = docTokens
-            .filter(contextualSymbol => contextualSymbol.tokenType !== undefined && ["Class", "Method", "ENUM"].includes(contextualSymbol.tokenType))
-            .filter(contextualSymbol => contextualSymbol.name !== symbol.element.name)
-            .reduce((map, contextualSymbol) => {
-                if (contextualSymbol.code) {
-                    map.set(contextualSymbol.name, contextualSymbol.code);
-                }
-                return map;
-            }, new Map<string, string>());
 
+        const tokensByFilePath = docTokens.reduce((map, contextualSymbol) => {
+            if (contextualSymbol.tokenType !== undefined &&
+                ["Class", "Method", "ENUM"].includes(contextualSymbol.tokenType) &&
+                contextualSymbol.name !== elementname &&
+                contextualSymbol.code) {
+
+                const filePath = contextualSymbol.path;
+                if (!map.has(filePath)) {
+                    map.set(filePath, []);
+                }
+                map.get(filePath)!.push(contextualSymbol);
+            }
+            return map;
+        }, new Map<string, Token[]>());
+
+        // Iterate over the new Map to construct the desired string
         let code: string = "";
-        for (const [key, value] of uniqueSymbols) {
-            const symbolCode = "```dart\n" + value + "\n```";
-            code += symbolCode + "\n";
+        for (const [filePath, tokens] of tokensByFilePath) {
+            code += `file path: ${filePath}\n`;
+            for (const token of tokens) {
+                const symbolCode = "```dart\n" + token.code + "\n```";
+                code += symbolCode + "\n";
+            }
         }
         return code;
     }
@@ -126,6 +135,7 @@ export class ContextualCodeProvider {
                                 length: length,
                                 tokenModifiers: tokenModifiers,
                                 code: code,
+                                path: uri.fsPath.replace(workspaceFolder.uri.fsPath, "")
                             });
                         }
                     }
