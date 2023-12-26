@@ -197,7 +197,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.1.1",
     "vscode-languageclient": "^9.0.1",
-    "@vscode/extension-telemetry": "^0.8.1",
+    "@vscode/extension-telemetry": "^0.9.2",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
     "js-yaml": "^4.1.0"
