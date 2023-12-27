@@ -43,6 +43,22 @@
             background-color: #2d2d2d;
         }
 
+        #snackbar {
+            display: none;
+            position: absolute;
+            top: 86%; 
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #FFA500; /* Orange color for warning */
+            color: #ffffff;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            width: calc(100% - 18px); 
+            z-index: 100; 
+        }
+
         #response {
             margin-left: 8px;
             color: #ffffff;
@@ -76,6 +92,14 @@
             }
         }
 
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
+
+        #snackbar.show {
+            animation: fadeInOut 3s ease; 
+        }
 
         .message {
             margin-bottom: 16px;
@@ -149,6 +173,7 @@
         <div id="response" class="pt-4 text-sm">
         </div>
 
+        <div id="snackbar">Please type something before pressing Enter.</div>
         <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
 
         <script src="{{scriptUri}}"></script>
