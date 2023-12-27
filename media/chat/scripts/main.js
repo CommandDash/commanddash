@@ -151,10 +151,41 @@
 		console.log(this.value);
 		// If the key that was pressed was the Enter key
 		if (e.key === "Enter") {
-			vscode.postMessage({
-				type: "prompt",
-				value: this.value,
-			});
+			const promptInputValue = this.value.trim();
+
+			// If the input is empty or contains only whitespaces, show the snackbar
+			if(promptInputValue === "") {
+				showSnackbar();
+			} else {
+				// Otherwise, send a message to VSCode with the trimmed input value
+				vscode.postMessage({
+					type: "prompt",
+					value: promptInputValue,
+				});
+			}
 		}
 	});
+
+	// Function to introduce a delay using a Promise
+	function delay(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	// Async function to show the snackbar with a fade-in and fade-out effect
+	async function showSnackbar() {
+		const snackbar = document.getElementById("snackbar");
+
+		// Display the snackbar
+		snackbar.style.display = "block";
+		snackbar.classList.add("show");
+
+		// Wait for 3 seconds
+		await delay(3000);
+
+		// Hide the snackbar
+		snackbar.classList.remove("show");
+
+		// Completely hide the snackbar
+		snackbar.style.display = "none";
+	}
 })();
