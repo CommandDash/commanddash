@@ -298,7 +298,7 @@
       }
       const searchResults = document.getElementById("searchResults");
       document.getElementById("searchBar").addEventListener("keyup", function (event) {
-        if (event.keyCode === 13) {
+        if (event.key === "Enter") {
           event.preventDefault();
           displayResults();
         }
