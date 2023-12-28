@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         body {
@@ -46,10 +47,12 @@
         #snackbar {
             display: none;
             position: absolute;
+            align-items: center;
+            justify-content: center;
             top: 86%; 
             left: 50%;
             transform: translateX(-50%);
-            background-color: #FFA500; /* Orange color for warning */
+            background-color: #ffcc00; /* Orange color for warning */
             color: #ffffff;
             text-align: center;
             padding: 10px;
@@ -57,6 +60,10 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             width: calc(100% - 18px); 
             z-index: 100; 
+        }
+
+        #snackbar i {
+            margin-right: 5px;
         }
 
         #response {
@@ -173,7 +180,9 @@
         <div id="response" class="pt-4 text-sm">
         </div>
 
-        <div id="snackbar">Please type something before pressing Enter.</div>
+        <div id="snackbar">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ffffff;"></i> No input text found
+        </div>
         <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
 
         <script src="{{scriptUri}}"></script>

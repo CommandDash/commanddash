@@ -176,7 +176,7 @@
 		const snackbar = document.getElementById("snackbar");
 
 		// Display the snackbar
-		snackbar.style.display = "block";
+		snackbar.style.display = "flex";
 		snackbar.classList.add("show");
 
 		// Wait for 3 seconds
