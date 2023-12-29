@@ -157,4 +157,16 @@
 			});
 		}
 	});
+
+	// Listen for keypress events on the prompt input element
+	document.getElementById("prompt-input").addEventListener("keypress", function (e) {
+		console.log(this.value);
+		// If the key that was pressed was the '/' key
+		if (e.key === '/') {
+			vscode.postMessage({
+				type: "prompt",
+				value: this.value,
+			});
+		}
+	});
 })();
