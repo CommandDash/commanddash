@@ -9,7 +9,6 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
             margin: 0;
             padding: 0;
             display: flex;
@@ -39,13 +38,13 @@
             border: none;
             border-bottom: 1px solid #444;
             outline: none;
-            color: #ffffff;
-            background-color: #2d2d2d;
+            background-color: var(--vscode-input-background);
+            border-color: var(--vscode-input-border);
+            color: var(--vscode-input-foreground);
         }
 
         #response {
             margin-left: 8px;
-            color: #ffffff;
         }
 
         .loader {
@@ -53,8 +52,8 @@
             height: 8px;
             left: 16px;
             border-radius: 50%;
-            background-color: #fff;
-            box-shadow: 32px 0 #fff, -32px 0 #fff;
+            background-color: var(--vscode-progressBar-background);
+            box-shadow: 32px 0 var(--vscode-progressBar-background), -32px 0 var(--vscode-progressBar-background);
             position: relative;
             animation: flash 0.5s ease-out infinite alternate;
         }
@@ -62,17 +61,17 @@
         @keyframes flash {
             0% {
                 background-color: #FFF2;
-                box-shadow: 16px 0 #FFF2, -16px 0 #FFF;
+                box-shadow: 16px 0 #FFF2, -16px 0 var(--vscode-progressBar-background);
             }
 
             50% {
-                background-color: #FFF;
+                background-color: var(--vscode-progressBar-background);
                 box-shadow: 16px 0 #FFF2, -16px 0 #FFF2;
             }
 
             100% {
                 background-color: #FFF2;
-                box-shadow: 16px 0 #FFF, -16px 0 #FFF2;
+                box-shadow: 16px 0 var(--vscode-progressBar-background), -16px 0 #FFF2;
             }
         }
 
@@ -125,13 +124,11 @@
 
         .user-gemini-pro p {
             margin-left: 8px;
-            color: #ffffff;
             white-space: pre-wrap;
         }
 
         .user-you p {
             margin-left: 8px;
-            color: #ffffff;
             white-space: pre-wrap;
         }
     </style>
