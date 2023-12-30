@@ -144,7 +144,7 @@
 	document.getElementById("prompt-input").addEventListener("keyup", function (e) {
 		console.log(this.value);
 		// If the key that was pressed was the Enter key
-		if (e.keyCode === 13) {
+		if (e.key === "Enter") {
 			vscode.postMessage({
 				type: "prompt",
 				value: this.value,
