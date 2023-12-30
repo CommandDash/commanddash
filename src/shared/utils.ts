@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import { GeminiRepository } from '../repository/gemini-repository';
 import { ILspAnalyzer } from './types/LspAnalyzer';
 import { Outline } from './types/custom_protocols';
+import { SemanticTokensRegistrationType, SemanticTokensProviderShape, SymbolKind } from 'vscode-languageclient';
 
 export async function getCodeForElementAtRange(analyzer: ILspAnalyzer, document: vscode.TextDocument, range: vscode.Range): Promise<string | undefined> {
 	const outline = (await analyzer.fileTracker.waitForOutline(document));
@@ -126,5 +127,32 @@ export function getErrorAtPosition(document: vscode.TextDocument, position: vsco
 	}
 
 	// No error was found at this position
+	return undefined;
+}
+
+
+export async function getCodeForRange(uri: vscode.Uri, range: vscode.Range): Promise<string | undefined> {
+	// ! is there a better way to do this?
+	const fileCode = await vscode.workspace.fs.readFile(uri);
+	if (fileCode) {
+		const code = Buffer.from(fileCode).toString('utf-8');
+		// Extract the code for the range
+		const lines = code.split(/\r?\n/g);
+		const startLine = range.start.line;
+		const endLine = range.end.line;
+		const startChar = range.start.character;
+		const endChar = range.end.character;
+		let fullcode = "";
+		if (startLine === endLine) {
+			fullcode = lines[startLine].substring(startChar, endChar);
+		} else {
+			fullcode = lines[startLine].substring(startChar);
+			for (let i = startLine + 1; i < endLine; i++) {
+				fullcode += lines[i];
+			}
+			fullcode += lines[endLine].substring(0, endChar);
+		}
+		return fullcode;
+	}
 	return undefined;
 }

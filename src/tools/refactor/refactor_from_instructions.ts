@@ -4,8 +4,10 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
+import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
+import { ContextualCodeProvider } from '../../utilities/contextual-code';
 
-export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
+export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = vscode.window.activeTextEditor;
@@ -15,7 +17,7 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
         }
 
         var selectedCode = editor.document.getText(editor.selection);
-        var replaceRange: vscode.Range | vscode.Position;
+        var replaceRange: vscode.Range;
         replaceRange = editor.selection;
         if (!selectedCode) {
             if (range === undefined) {
@@ -46,10 +48,15 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
                 progress.report({ increment });
             }, 200);
 
+            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer, elementname);
+
             let referenceEditor = getReferenceEditor(globalState);
             let brainstormingPrompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output the response in the mentioned format.\n\n`;
             brainstormingPrompt += `Modify the following Flutter code based on the user instructions: ${instructions}\n\nHIGHLIGHTED CODE BY USER:\n${selectedCode}\n\nFull File Code:\n${editor.document.getText()}\n\n`;
             brainstormingPrompt = appendReferences(referenceEditor, brainstormingPrompt);
+            if (contextualCode) {
+                brainstormingPrompt += `\n\nHere are the definitions of the symbols used in the code\n${contextualCode}\n\n`;
+            }
             brainstormingPrompt += `Without writing any code, first brainstorm the following: 
             1. What does the user want to accomplish.  
             2. How do you plan to achieve that?
