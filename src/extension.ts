@@ -17,7 +17,7 @@ import { makeHttpRequest } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
-import { ExtensionVersionManager } from './utilities/update-check';
+// import { ExtensionVersionManager } from './utilities/update-check';
 import { FluttergptActionProvider as RefactorActionProvider } from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
@@ -25,12 +25,15 @@ import { AIHoverProvider } from './providers/hover_provider';
 import { GeminiRepository } from './repository/gemini-repository';
 import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
+import { UpdateManager } from './utilities/update-manager';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
+    //Check for update on activation of extension
+     new UpdateManager(context).checkForUpdate();
 
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
@@ -102,7 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), context);
     customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), context);
 
-    new ExtensionVersionManager(context).isExtensionUpdated();
+   // new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
 function isOldOpenAIKey(apiKey: string): boolean {
