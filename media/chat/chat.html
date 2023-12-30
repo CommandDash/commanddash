@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-dart.min.js"></script>
 
     <style>
         body {
@@ -143,8 +147,7 @@
         <div id="dynamic-messages"></div>
         <!-- Add the loading indicator inside the chat container -->
         <span class="loader" id="loader" style="display: none;"></span>
-        <div id="response" class="pt-4 text-sm">
-        </div>
+        <div id="response" class="pt-4 text-sm"></div>
 
         <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
 

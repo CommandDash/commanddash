@@ -63,47 +63,41 @@
 			literalMidWordUnderscores: true,
 			simpleLineBreaks: true,
 		});
+
 		response = fixCodeBlocks(response);
 		html = converter.makeHtml(response);
 		document.getElementById("response").innerHTML = html;
 
 		const preCodeBlocks = document.querySelectorAll("pre code");
-		for (let i = 0; i < preCodeBlocks.length; i++) {
-			preCodeBlocks[i].classList.add(
+		preCodeBlocks.forEach((_preCodeBlock) => {
+			_preCodeBlock.classList.add(
 				"p-2",
 				"my-2",
 				"block",
 				"overflow-x-scroll"
 			);
-		}
+		});
+
+		const preBlocks = document.querySelectorAll("pre");
+		preBlocks.forEach((_preBlock) => {
+			_preBlock.classList.add("language-dart");
+			Prism.highlightElement(_preBlock);
+		});
 
 		const codeBlocks = document.querySelectorAll("code");
-		for (let i = 0; i < codeBlocks.length; i++) {
-			// Check if innertext starts with "Copy code"
-			if (codeBlocks[i].innerText.startsWith("Copy code")) {
-				codeBlocks[i].innerText = codeBlocks[i].innerText.replace("Copy code", "");
+		codeBlocks.forEach((_codeBlock) => {
+			if (_codeBlock.innerText.startsWith("Copy code")) {
+				_codeBlock.innerText = _codeBlock.innerText.replace("Copy code", "");
 			}
-
-			codeBlocks[i].classList.add("inline-flex", "max-w-full", "overflow-hidden", "rounded-sm", "cursor-pointer");
-
-			codeBlocks[i].addEventListener("click", function (e) {
+			_codeBlock.classList.add("inline-flex", "max-w-full", "overflow-hidden", "rounded-sm", "cursor-pointer", "language-dart");
+			_codeBlock.addEventListener("click", function (e) {
 				e.preventDefault();
 				vscode.postMessage({
 					type: "codeSelected",
 					value: this.innerText,
 				});
 			});
-
-			const d = document.createElement("div");
-			d.innerHTML = codeBlocks[i].innerHTML;
-			codeBlocks[i].innerHTML = null;
-			codeBlocks[i].appendChild(d);
-			d.classList.add("code");
-		}
-
-		microlight.reset("code");
-
-		// document.getElementById("response").innerHTML = document.getElementById("response").innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+		});
 	}
 
 	// Function to display messages in the chat container
