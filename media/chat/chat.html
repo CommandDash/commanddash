@@ -153,7 +153,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 20px rgba(#404040, 0.15);
             position: absolute;
-            top: 80%;
+            top: 70%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
@@ -165,6 +165,8 @@
             display: block;
             width: 100%;
             padding: 8px;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
         #slash-command-item {
@@ -209,8 +211,10 @@
         <!-- Add Slash Command Menu -->
         <div id="slash-command-menu">
             <ul id="slash-command-list">
+                <li id="slash-command-item"><button id="slash-command-button">Fix</button></li>
                 <li id="slash-command-item"><button id="slash-command-button">Describe</button></li>
-                <li id="slash-command-item"><button id="slash-command-button">Improve</button></li>
+                <li id="slash-command-item"><button id="slash-command-button">Refactor</button></li>
+                <li id="slash-command-item"><button id="slash-command-button">Explain</button></li>
                 <!-- Add more commands as needed -->
             </ul>
         </div>

@@ -184,8 +184,13 @@
 	// Add event listeners for command selection
 	const commandList = document.getElementById("slash-command-list");
 	commandList.addEventListener("click", function (e) {
-		const selectedCommand = e.target.dataset.command;
+		const selectedCommand = e.target.innerText.trim();
 		if (selectedCommand) {
+			// Update the prompt input with the selected command
+			const promptValue = `${selectedCommand}: `;
+			updatePromptInput(promptValue);
+
+			// Send the selected command to the extension
 			vscode.postMessage({
 				type: "slashCommand",
 				value: selectedCommand,
@@ -194,6 +199,11 @@
 		// Hide the menu after selecting a command
 		hideSlashCommandMenu();
 	});
+
+	// Function to update the prompt input value
+	function updatePromptInput(value) {
+		promptInput.value = value;
+	}
 
 	// Close the menu if the user clicks outside of it
 	document.addEventListener("click", function (e) {
