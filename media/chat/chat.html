@@ -134,6 +134,61 @@
             color: #ffffff;
             white-space: pre-wrap;
         }
+
+        *,
+        *:after,
+        *:before {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg-primary-offset: #d8dbdf;
+            --color-bg-secondary: #fff;
+        }
+
+        #slash-command-menu {
+            display: none;
+            flex-direction: column;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(#404040, 0.15);
+            position: absolute;
+            top: 80%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 86%;
+        }
+
+        #slash-command-list {
+            margin: 0;
+            display: block;
+            width: 100%;
+            padding: 8px;
+        }
+
+        #slash-command-item {
+            position: relative;
+        }
+
+        #slash-command-button {
+            font: inherit;
+            border: 0;
+            padding: 8px 8px;
+            padding-right: 36px;
+            width: 100%;
+            border-radius: 8px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            color: #000;
+            position: relative;
+            background-color: var(--color-bg-secondary);
+
+            &:hover {
+                background-color: var(--color-bg-primary-offset);
+            }
+        }
     </style>
 </head>
 
@@ -149,7 +204,16 @@
         <div id="response" class="pt-4 text-sm">
         </div>
 
-        <input class="w-full text-gray-700 p-2" placeholder="Type / for commands..." id="prompt-input"/>
+        <input class="w-full text-gray-700 p-2" placeholder="Type / for commands..." id="prompt-input" />
+
+        <!-- Add Slash Command Menu -->
+        <div id="slash-command-menu">
+            <ul id="slash-command-list">
+                <li id="slash-command-item"><button id="slash-command-button">Describe</button></li>
+                <li id="slash-command-item"><button id="slash-command-button">Improve</button></li>
+                <!-- Add more commands as needed -->
+            </ul>
+        </div>
 
         <script src="{{scriptUri}}"></script>
         <script src="{{shadowUri}}"></script>

@@ -146,8 +146,11 @@
 		return html;
 	}
 
+	const promptInput = document.getElementById("prompt-input");
+	const menu = document.getElementById("slash-command-menu");
+
 	// Listen for keyup events on the prompt input element
-	document.getElementById("prompt-input").addEventListener("keyup", function (e) {
+	promptInput.addEventListener("keyup", function (e) {
 		console.log(this.value);
 		// If the key that was pressed was the Enter key
 		if (e.keyCode === 13) {
@@ -159,14 +162,52 @@
 	});
 
 	// Listen for keypress events on the prompt input element
-	document.getElementById("prompt-input").addEventListener("keypress", function (e) {
-		console.log(this.value);
-		// If the key that was pressed was the '/' key
+	promptInput.addEventListener("keypress", function (e) {
 		if (e.key === '/') {
-			vscode.postMessage({
-				type: "prompt",
-				value: this.value,
-			});
+			// Show slash command menu
+			showSlashCommandMenu();
 		}
 	});
+
+	// Function to show the slash command menu
+	function showSlashCommandMenu() {
+		menu.style.display = "flex";
+		menu.classList.add("show");
+	}
+
+	// Function to hide the slash command menu
+	function hideSlashCommandMenu() {
+		menu.classList.remove("show");
+		menu.style.display = "none";
+	}
+
+	// Add event listeners for command selection
+	const commandList = document.getElementById("slash-command-list");
+	commandList.addEventListener("click", function (e) {
+		const selectedCommand = e.target.dataset.command;
+		if (selectedCommand) {
+			vscode.postMessage({
+				type: "slashCommand",
+				value: selectedCommand,
+			});
+		}
+		// Hide the menu after selecting a command
+		hideSlashCommandMenu();
+	});
+
+	// Close the menu if the user clicks outside of it
+	document.addEventListener("click", function (e) {
+		if (!e.target.matches('#prompt-input') && !e.target.matches('#slash-command-menu')) {
+			hideSlashCommandMenu();
+		}
+	});
+
+	promptInput.addEventListener("input", function (e) {
+		// Check if the input is empty after backspacing
+		if (e.inputType === 'deleteContentBackward') {
+			// Hide the menu after backspacing
+			hideSlashCommandMenu();
+		}
+	});
+
 })();
