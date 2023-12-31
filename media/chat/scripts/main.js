@@ -155,7 +155,7 @@
 
 			// If the input is empty or contains only whitespaces, show the snackbar
 			if(promptInputValue === "") {
-				showSnackbar();
+				showToast();
 			} else {
 				// Otherwise, send a message to VSCode with the trimmed input value
 				vscode.postMessage({
@@ -171,21 +171,17 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
-	// Async function to show the snackbar with a fade-in and fade-out effect
-	async function showSnackbar() {
-		const snackbar = document.getElementById("snackbar");
+	// Async Function to show the toast
+	async function showToast() {
+		const toastContainer = document.getElementById('toast-container');
 
-		// Display the snackbar
-		snackbar.style.display = "flex";
-		snackbar.classList.add("show");
+		// Display the toast 
+		toastContainer.style.display = 'flex';
 
 		// Wait for 3 seconds
 		await delay(3000);
 
-		// Hide the snackbar
-		snackbar.classList.remove("show");
-
-		// Completely hide the snackbar
-		snackbar.style.display = "none";
+		// Completely hide the toast 
+		toastContainer.style.display = 'none';
 	}
 })();
