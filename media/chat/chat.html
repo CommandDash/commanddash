@@ -44,25 +44,25 @@
             background-color: #2d2d2d;
         }
 
-        #snackbar {
+        #toast-container {
             display: none;
             position: absolute;
             align-items: center;
             justify-content: center;
-            top: 86%; 
+            top: 90%;
             left: 50%;
-            transform: translateX(-50%);
-            background-color: #ffcc00; /* Orange color for warning */
+            transform: translateX(-50%) translateY(100%);
+            background-color: #ffcc00; 
             color: #ffffff;
-            text-align: center;
             padding: 10px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             width: calc(100% - 18px); 
-            z-index: 100; 
+            z-index: 100;
+            animation: slideUp 0.5s ease-in-out forwards;
         }
 
-        #snackbar i {
+        #toast-container i {
             margin-right: 5px;
         }
 
@@ -99,13 +99,15 @@
             }
         }
 
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; }
-            10%, 90% { opacity: 1; }
-        }
-
-        #snackbar.show {
-            animation: fadeInOut 3s ease; 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
         }
 
         .message {
@@ -180,7 +182,7 @@
         <div id="response" class="pt-4 text-sm">
         </div>
 
-        <div id="snackbar">
+        <div id="toast-container">
             <i class="fa-solid fa-triangle-exclamation" style="color: #ffffff;"></i> No input text found
         </div>
         <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
