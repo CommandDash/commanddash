@@ -4,8 +4,10 @@ import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
+import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
+import { ContextualCodeProvider } from '../../utilities/contextual-code';
 
-export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined) {
+export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementName: string | undefined) {
     logEvent('optimize-code', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -14,7 +16,7 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
     }
 
     var selectedCode = editor.document.getText(editor.selection);
-    var replaceRange: vscode.Range | vscode.Position;
+    var replaceRange: vscode.Range;
     replaceRange = editor.selection;
     if (!selectedCode) {
         if (range === undefined) {
@@ -43,11 +45,16 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
                 progress.report({ increment });
             }, 200);
 
+            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer, elementName);
+
             let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output response in the modified format..\n\n`;
             prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Subject Code:\n${selectedCode}\n\n`;
             prompt += "Here is the full code for context:\n";
             prompt += "```" + fullCode + "```";
             prompt += "\n\n";
+            if (contextualCode) {
+                prompt += `Here are the definitions of the symbols used in the code\n${contextualCode}\n\n`;
+            }
             let referenceEditor = getReferenceEditor(globalState);
             prompt = appendReferences(referenceEditor, prompt);
             prompt += `Output the optimized code in a single code block to be replaced over selected code.`;
