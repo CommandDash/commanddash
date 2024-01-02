@@ -24,6 +24,7 @@
 			}
 			case "setPrompt": {
 				document.getElementById("prompt-input").value = message.value;
+				setResponse();
 				break;
 			}
 			case "displayMessages": {
@@ -71,10 +72,10 @@
 		const preCodeBlocks = document.querySelectorAll("pre code");
 		preCodeBlocks.forEach((_preCodeBlock) => {
 			_preCodeBlock.classList.add(
-				"p-2",
+				"p-1",
 				"my-2",
 				"block",
-				"overflow-x-scroll"
+				"language-dart"
 			);
 		});
 
