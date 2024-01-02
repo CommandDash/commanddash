@@ -151,10 +151,37 @@
 		console.log(this.value);
 		// If the key that was pressed was the Enter key
 		if (e.key === "Enter") {
-			vscode.postMessage({
-				type: "prompt",
-				value: this.value,
-			});
+			const promptInputValue = this.value.trim();
+
+			// If the input is empty or contains only whitespaces, show the snackbar
+			if(promptInputValue === "") {
+				showToast();
+			} else {
+				// Otherwise, send a message to VSCode with the trimmed input value
+				vscode.postMessage({
+					type: "prompt",
+					value: promptInputValue,
+				});
+			}
 		}
 	});
+
+	// Function to introduce a delay using a Promise
+	function delay(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	// Async Function to show the toast
+	async function showToast() {
+		const toastContainer = document.getElementById('toast-container');
+
+		// Display the toast 
+		toastContainer.style.display = 'flex';
+
+		// Wait for 3 seconds
+		await delay(3000);
+
+		// Completely hide the toast 
+		toastContainer.style.display = 'none';
+	}
 })();

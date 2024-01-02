@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         body {
@@ -43,6 +44,28 @@
             background-color: #2d2d2d;
         }
 
+        #toast-container {
+            display: none;
+            position: absolute;
+            align-items: center;
+            justify-content: center;
+            top: 90%;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            background-color: #ffcc00; 
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            width: calc(100% - 18px); 
+            z-index: 100;
+            animation: slideUp 0.5s ease-in-out forwards;
+        }
+
+        #toast-container i {
+            margin-right: 5px;
+        }
+
         #response {
             margin-left: 8px;
             color: #ffffff;
@@ -76,6 +99,16 @@
             }
         }
 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
 
         .message {
             margin-bottom: 16px;
@@ -149,6 +182,9 @@
         <div id="response" class="pt-4 text-sm">
         </div>
 
+        <div id="toast-container">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ffffff;"></i> No input text found
+        </div>
         <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
 
         <script src="{{scriptUri}}"></script>
