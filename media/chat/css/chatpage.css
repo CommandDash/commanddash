@@ -17,6 +17,7 @@ body {
     border-radius: 0px;
     overflow: hidden;
     overflow: auto;
+    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #444 #2d2d2d;
     scroll-behavior: smooth;
@@ -25,13 +26,16 @@ body {
 #prompt-input {
     width: calc(100%);
     padding: 8px;
-    font-size: 14px;
+    font-size: 1.2em;
     border: none;
     border-bottom: 1px solid #444;
     outline: none;
     background-color: var(--vscode-input-background);
     border-color: var(--vscode-input-border);
     color: var(--vscode-input-foreground);
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
 }
 
 #response {
@@ -114,11 +118,15 @@ body {
 }
 
 .user-gemini-pro p {
-    margin-left: 8px;
+    margin-left: 0px;
     white-space: pre-wrap;
+    line-height: 1.9;
+    font-size: 1.2em;
 }
 
 .user-you p {
-    margin-left: 8px;
+    margin-left: 0px;
     white-space: pre-wrap;
+    line-height: 1.9;
+    font-size: 1.2em;
 }

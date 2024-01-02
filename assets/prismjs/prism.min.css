@@ -1,6 +1,5 @@
 code[class*=language-],
 pre[class*=language-] {
-    color: var(--vscode-debugTokenExpression-name);
     background: 0 0;
     font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     font-size: 1em;
@@ -72,7 +71,7 @@ pre[class*=language-] {
 .token.constant,
 .token.property,
 .token.symbol {
-    color: #f8c555
+    color: #f5b11b
 }
 
 .token.atrule,
