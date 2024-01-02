@@ -68,6 +68,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 							});
 						}
 						break;
+						break;
+					}
+				case "clearChat": 
+					{
+						this.clearConversationHistory();
+						break;
 					}
 			}
 		});
@@ -143,10 +149,16 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		} catch (error) {
 			console.error(error);
 			const response = 'Sorry, I could not find a response. Please try again.';
-			this._view?.webview.postMessage({ type: 'addResponse', value: response });
+			this._conversationHistory.push({ role: 'model', parts: response });
+			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
+			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 		} finally {
 			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
 		}
 	}
 
+
+	private clearConversationHistory() {
+		this._conversationHistory = [];
+	}
 }
