@@ -488,6 +488,16 @@ class Mentionify {
         }
     });
 
+    document.getElementById("clear-chat-button").addEventListener("click", function () {
+		const dynamicMessagesContainer = document.getElementById("dynamic-messages");
+		dynamicMessagesContainer.innerHTML = "";
+		conversationHistory = [];
+
+		vscode.postMessage({
+			type: "clearChat",
+		});
+	});
+
     // Function to introduce a delay using a Promise
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
