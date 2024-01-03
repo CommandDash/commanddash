@@ -32,7 +32,7 @@ export class GeminiRepository {
         let lastMessage = prompt.pop();
         if (lastMessage && isReferenceAdded) {
             const dartFiles = await this.findClosestDartFiles(lastMessage.parts);
-            lastMessage.parts = "Read following code end-to-end and answer following prompt: \n" + "```\n" + dartFiles + "\n```\n\n" + lastMessage.parts;
+            lastMessage.parts = "Read following workspace code end-to-end and answer the prompt initialised by `@workspace` \n" + dartFiles + lastMessage.parts;
         }
         console.log("Prompt: " + lastMessage?.parts);
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
@@ -54,12 +54,14 @@ export class GeminiRepository {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
 
+        // Initialize the embedding model for document retrieval
         const embedding = this.genAI.getGenerativeModel({ model: "embedding-001" });
 
+        // Find all Dart files in the workspace
         const dartFiles = await vscode.workspace.findFiles('lib/**/*.dart');
         console.log("dartFiles: " + dartFiles.concat().toString());
 
-
+        // Read the content of each Dart file
         const fileContents = await Promise.all(dartFiles.map(async (file: any) => {
             const document = await vscode.workspace.openTextDocument(file);
             return document.getText();
@@ -67,6 +69,7 @@ export class GeminiRepository {
 
         console.log("FileContents: " + fileContents.concat().toString());
 
+        // Generate embeddings for each document
         const docEmbeddings = await embedding.batchEmbedContents({
             requests: fileContents.map((text) => ({
                 content: { role: "document", parts: [{ text }] },
@@ -75,20 +78,26 @@ export class GeminiRepository {
             })),
         });
 
+        // Generate embedding for the query
         const queryEmbedding = await embedding.embedContent({
             content: { role: "query", parts: [{ text: query }] },
             taskType: taskType.RETRIEVAL_QUERY
         });
 
+        // Calculate the Euclidean distance between the query embedding and each document embedding
         const distances = docEmbeddings.embeddings.map((embedding, index) => ({
             file: dartFiles[index],
             distance: this.euclideanDistance(embedding.values, queryEmbedding.embedding.values)
         }));
 
-        distances.sort((a, b) => a.distance - b.distance);
-        console.log("Distances: " + distances.toString());
+        // Sort the files by their distance to the query embedding in ascending order
+        distances.sort((a, b) => {
+            console.log("Distances: " + Math.abs(a.distance - b.distance));
+            return Math.abs(a.distance - b.distance);
+        }
+        );
 
-
+        // Construct a string with the closest Dart files and their content
         let resultString = '';
         distances.slice(0, 5).forEach((fileEmbedding, index) => {
             const fileName = fileEmbedding.file.path.split('/').pop();
