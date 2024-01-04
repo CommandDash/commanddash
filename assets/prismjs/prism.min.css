@@ -30,6 +30,7 @@ pre[class*=language-] {
     border: 1px solid;
     border-color: var(--vscode-input-border);
     border-radius: .25rem;
+    overflow: visible;
 }
 
 pre[class*=language-]:hover {

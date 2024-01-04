@@ -37,6 +37,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		// add an event listener for messages received by the webview
 		webviewView.webview.onDidReceiveMessage((data) => {
+			console.log('data', data);
 			switch (data.type) {
 				case "codeSelected":
 					{
@@ -51,6 +52,18 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 				case "prompt":
 					{
 						this.getResponse(data.value);
+						break;
+					}
+
+				case "pasteCode": 
+					{
+						const editor = vscode.window.activeTextEditor;
+						if (editor) {
+							editor.edit((builder) => {
+								builder.insert(editor.selection.active, data.value);
+							});
+						}
+						break;
 					}
 			}
 		});
