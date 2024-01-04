@@ -6,8 +6,12 @@
 const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>`;
 const mergeIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M664-160 440-384v-301L336-581l-57-57 201-201 200 200-57 57-103-103v269l200 200-56 56Zm-368 1-56-56 127-128 57 57-128 127Z"/></svg>`;
 
+const activityBarBackground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-background");
+const activityBarForeground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
+
 (function () {
 	const vscode = acquireVsCodeApi();
+
 
 	// Define an empty array, which will be loaded through the displayMessages function
 	let conversationHistory = [];
@@ -42,6 +46,21 @@ const mergeIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="
 			case 'hideLoadingIndicator':
 				loadingIndicator.style.display = 'none';
 				break;
+			case 'updateTheme': {
+				const preBlocks = document.querySelectorAll("pre");
+				preBlocks.forEach((_preBlock) => {
+					console.log('preBlocks', _preBlock);
+					const iconContainer = _preBlock.querySelectorAll("div");
+					iconContainer.forEach((_iconContainer) => {
+						_iconContainer.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-background");
+						const icon = _iconContainer.querySelectorAll("svg");
+						icon.forEach((_icon) => {
+							_icon.style.fill = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
+						});
+					});
+				});
+				break;
+			}
 		}
 	});
 
@@ -89,11 +108,16 @@ const mergeIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="
 			Prism.highlightElement(_preBlock);
 			
 			const iconContainer = document.createElement("div");
-			iconContainer.classList.add("absolute", "-top-5", "right-2" ,"inline-flex", "flex-row", "bg-white", "h-8", "w-16" ,"z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
+			iconContainer.id = "icon-container";
+			iconContainer.classList.add("absolute", "top-2", "right-2" ,"inline-flex", "flex-row", "bg-white", "h-8", "w-16" ,"z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
+			iconContainer.style.backgroundColor = activityBarBackground;
 
 			const _copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			_copyIcon.innerHTML = copyIcon;
+			_copyIcon.id = "copy-icon";
 			_copyIcon.classList.add("h-7", "w-7", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_copyIcon.style.fill = activityBarForeground;
+			_copyIcon.setAttribute("alt", "Copy");
 			iconContainer.appendChild(_copyIcon);
 
 			_copyIcon.addEventListener("click", () => {
@@ -103,7 +127,10 @@ const mergeIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="
 
 			const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 			_mergeIcon.innerHTML = mergeIcon;
+			_mergeIcon.id = "merge-icon";
 			_mergeIcon.classList.add("h-7", "w-7", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_mergeIcon.style.fill = activityBarForeground;
+			_mergeIcon.setAttribute("alt", "Merge");
 			iconContainer.appendChild(_mergeIcon);
 
 			_mergeIcon.addEventListener("click", () => {

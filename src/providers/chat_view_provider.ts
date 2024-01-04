@@ -67,6 +67,10 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 					}
 			}
 		});
+
+		vscode.window.onDidChangeActiveColorTheme(() => {
+			webviewView.webview.postMessage({type: 'updateTheme'});
+		});
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview,) {
