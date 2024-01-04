@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { ContentEmbedding, GoogleGenerativeAI } from "@google/generative-ai";
 import * as fs from 'fs';
 import * as vscode from "vscode";
 
@@ -32,7 +32,7 @@ export class GeminiRepository {
         let lastMessage = prompt.pop();
         if (lastMessage && isReferenceAdded) {
             const dartFiles = await this.findClosestDartFiles(lastMessage.parts);
-            lastMessage.parts = "Read following workspace code end-to-end and answer the prompt initialised by `@workspace` \n" + dartFiles + lastMessage.parts;
+            lastMessage.parts = "Read following workspace code end-to-end and answer the prompt initialised by `@workspace` \n" + dartFiles + "\n\n" + lastMessage.parts;
         }
         console.log("Prompt: " + lastMessage?.parts);
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
@@ -67,16 +67,29 @@ export class GeminiRepository {
             return document.getText();
         }));
 
-        console.log("FileContents: " + fileContents.concat().toString());
+        console.log("File content length: " + fileContents.length);
 
-        // Generate embeddings for each document
-        const docEmbeddings = await embedding.batchEmbedContents({
-            requests: fileContents.map((text) => ({
-                content: { role: "document", parts: [{ text }] },
-                taskType: taskType.RETRIEVAL_DOCUMENT,
+        // Split the fileContents into chunks of 100 or fewer
+        const chunkSize = 100;
+        const chunks = [];
+        for (let i = 0; i < fileContents.length; i += chunkSize) {
+            chunks.push(fileContents.slice(i, i + chunkSize));
+        }
 
-            })),
-        });
+        console.log("Chunks length: " + chunks.length);
+
+        // Process each chunk to get embeddings
+        let docEmbeddings: { embeddings: ContentEmbedding[] } = { embeddings: [] };
+
+        for (const chunk of chunks) {
+            const batchEmbeddings = await embedding.batchEmbedContents({
+                requests: chunk.map((text) => ({
+                    content: { role: "document", parts: [{ text }] },
+                    taskType: taskType.RETRIEVAL_DOCUMENT,
+                })),
+            });
+            docEmbeddings.embeddings = docEmbeddings.embeddings.concat(batchEmbeddings.embeddings);
+        }
 
         // Generate embedding for the query
         const queryEmbedding = await embedding.embedContent({
@@ -90,12 +103,11 @@ export class GeminiRepository {
             distance: this.euclideanDistance(embedding.values, queryEmbedding.embedding.values)
         }));
 
+        console.log("Distances length: " + distances.length);
+
         // Sort the files by their distance to the query embedding in ascending order
-        distances.sort((a, b) => {
-            console.log("Distances: " + Math.abs(a.distance - b.distance));
-            return Math.abs(a.distance - b.distance);
-        }
-        );
+        distances.sort((a, b) => Math.abs(a.distance - b.distance));
+
 
         // Construct a string with the closest Dart files and their content
         let resultString = '';
