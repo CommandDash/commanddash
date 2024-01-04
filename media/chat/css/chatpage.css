@@ -1,5 +1,4 @@
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     display: flex;
@@ -26,7 +25,6 @@ body {
 #prompt-input {
     width: calc(100%);
     padding: 8px;
-    font-size: 1.2em;
     border: none;
     border-bottom: 1px solid #444;
     outline: none;
@@ -120,13 +118,9 @@ body {
 .user-gemini-pro p {
     margin-left: 0px;
     white-space: pre-wrap;
-    line-height: 1.9;
-    font-size: 1.2em;
 }
 
 .user-you p {
     margin-left: 0px;
     white-space: pre-wrap;
-    line-height: 1.9;
-    font-size: 1.2em;
 }

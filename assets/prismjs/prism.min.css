@@ -2,7 +2,6 @@ code[class*=language-],
 pre[class*=language-] {
     background: 0 0;
     font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-    font-size: 1em;
     text-align: left;
     white-space: pre;
     word-spacing: normal;
@@ -33,9 +32,16 @@ pre[class*=language-] {
     border-radius: .25rem;
 }
 
+pre[class*=language-]:hover {
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid;
+    border-color: var(--vscode-inputOption-activeBorder);
+    border-radius: .25rem;
+}
+
 :not(pre)>code[class*=language-] {
-    padding: .1em;
-    border-radius: .3em;
+    border: 0px solid;
+    font-size: .9em;
 }
 
 .token.block-comment,
