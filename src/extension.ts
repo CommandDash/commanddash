@@ -25,6 +25,7 @@ import { AIHoverProvider } from './providers/hover_provider';
 import { GeminiRepository } from './repository/gemini-repository';
 import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
+import { setupInlineCodeCompletion } from './tools/create/code_completion';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -103,6 +104,8 @@ export async function activate(context: vscode.ExtensionContext) {
     customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range) => optimizeCode(geminiRepo, context.globalState, range), context);
 
     new ExtensionVersionManager(context).isExtensionUpdated();
+
+    setupInlineCodeCompletion(context, geminiRepo);
 }
 
 function isOldOpenAIKey(apiKey: string): boolean {

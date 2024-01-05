@@ -68,6 +68,12 @@
         "key": "ctrl+R",
         "mac": "cmd+R",
         "when": "editorHasSelection && resourceLangId == 'dart'"
+      },
+      {
+        "command": "fluttergpt.inlineCodeCompletion.menu",
+        "key": "ctrl+m",
+        "mac": "cmd+m",
+        "when": "resourceLangId == 'dart'"
       }
     ],
     "commands": [
@@ -78,8 +84,18 @@
       },
       {
         "command": "fluttergpt.addToReference.menu",
-        "title": "Add to Reference",
-        "when": "false"
+        "when": "false",
+        "title": "Add to Reference"
+      },
+      {
+        "command": "fluttergpt.inlineCodeCompletion",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "title": "FlutterGPT: Inline completion magic"
+      },
+      {
+        "command": "fluttergpt.inlineCodeCompletion.menu",
+        "when": "false",
+        "title": "Inline completion magic"
       },
       {
         "command": "fluttergpt.createWidget",

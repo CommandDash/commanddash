@@ -123,7 +123,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			const response = 'Sorry, I could not find a response. Please try again.';
 			this._view?.webview.postMessage({ type: 'addResponse', value: response });
 		}finally{
-			this._view?.webview.postMessage({type: 'hideLoadingIndicator'})
+			this._view?.webview.postMessage({type: 'hideLoadingIndicator'});
 		}
 	}
 
