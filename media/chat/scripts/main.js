@@ -3,8 +3,17 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>`;
-const mergeIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M664-160 440-384v-301L336-581l-57-57 201-201 200 200-57 57-103-103v269l200 200-56 56Zm-368 1-56-56 127-128 57 57-128 127Z"/></svg>`;
+const copyIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M6 6L7.5 4.5H15.621L21 9.879V21L19.5 22.5H7.5L6 21V6ZM19.5 10.5L15 6H7.5V21H19.5V10.5Z" />
+<path clip-rule="evenodd" d="M4.5 1.5L3 3V18L4.5 19.5V3H14.121L12.621 1.5H4.5Z" />
+</svg>
+`;
+const mergeIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M21 1.5L22.5 3V9L21 10.5H9L7.5 9V3L9 1.5H21ZM21 3H9V9H21V3Z" />
+<path clip-rule="evenodd" d="M21 13.5L22.5 15V21L21 22.5H9L7.5 21V15L9 13.5H21ZM21 15H9V21H21V15Z" />
+<path d="M1.5 9.5889L3.92121 12.0101L1.5 14.4313L2.54028 15.471L6 12.0101L2.54028 8.5498L1.5 9.5889Z" />
+</svg>
+`;
 
 const activityBarBackground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-background");
 const activityBarForeground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
@@ -49,7 +58,7 @@ const properties = [
     'MozTabSize',
 ];
 
-const actions = ['workspace', 'vscode'];
+const actions = ['workspace'];
 
 function getCaretCoordinates(element, position) {
     const div = document.createElement('div');
@@ -237,6 +246,7 @@ class Mentionify {
     // Handle mexssages sent from the extension to the webview
     window.addEventListener("message", (event) => {
         const message = event.data;
+        debugger;
         switch (message.type) {
             case "addResponse": {
                 response = message.value;
@@ -370,9 +380,6 @@ class Mentionify {
 
         const codeBlocks = document.querySelectorAll("code");
         codeBlocks.forEach((_codeBlock) => {
-            if (_codeBlock.innerText.startsWith("Copy code")) {
-                _codeBlock.innerText = _codeBlock.innerText.replace("Copy code", "");
-            }
             _codeBlock.classList.add("inline-flex", "max-w-full", "overflow-hidden", "rounded-sm", "cursor-pointer", "language-dart");
             _codeBlock.addEventListener("click", function (e) {
                 e.preventDefault();
@@ -400,7 +407,7 @@ class Mentionify {
                 messageElement.innerHTML = `<p><strong>FlutterGPT: </strong>${markdownToPlain(message.parts)}</p>`;
             } else {
                 messageElement.classList.add("message", "user-you"); // Change class to "user-you"
-                messageElement.innerHTML = `<p><strong>You: </strong>${markdownToPlain(message.parts)}</p>`;
+                messageElement.innerHTML = `<p><strong>You: </strong>${message.parts}</p>`;
             }
             dynamicMessagesContainer.appendChild(messageElement);
         });
@@ -451,22 +458,21 @@ class Mentionify {
     );
 
     // Listen for keyup events on the prompt input element
-    document.getElementById("prompt-input").addEventListener("keydown", function (e) {
+    const promptInput = document.getElementById("prompt-input");
+    promptInput.addEventListener("keydown", function (e) {
         console.log(this.value);
         // If the key that was pressed was the Enter key
         if (e.key === "Enter" && !e.shiftKey && mentionify.menuRef?.hidden) {
-            const promptInputValue = this.value.trim();
+            vscode.postMessage({
+                type: "prompt",
+                value: this.value.trim(),
+            });
+        }
+    });
 
-            // If the input is empty or contains only whitespaces, show the snackbar
-            if (promptInputValue === "") {
-                showToast();
-            } else {
-                // Otherwise, send a message to VSCode with the trimmed input value
-                vscode.postMessage({
-                    type: "prompt",
-                    value: promptInputValue,
-                });
-            }
+    promptInput.addEventListener("keyup", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            promptInput.style.height = "2.3rem";
         }
     });
 
@@ -489,4 +495,3 @@ class Mentionify {
         toastContainer.style.display = 'none';
     }
 })();
-

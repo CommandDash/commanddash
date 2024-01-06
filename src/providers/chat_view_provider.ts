@@ -60,7 +60,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 						const editor = vscode.window.activeTextEditor;
 						if (editor) {
 							editor.edit((builder) => {
-								builder.insert(editor.selection.active, data.value);
+								if (editor.selection.isEmpty) {
+									builder.insert(editor.selection.active, data.value);
+								} else {
+									builder.replace(editor.selection, data.value);
+								}
 							});
 						}
 						break;
@@ -112,20 +116,18 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._view?.show?.(true);
 		}
 
-		const selection = vscode.window.activeTextEditor?.selection;
-		const selectedText = vscode.window.activeTextEditor?.document.getText(selection);
-		let searchPrompt = this.createPrompt(prompt, selectedText);
-
 		// Initialize conversation history if it's the first time
+		// debugger;
 		if (this._conversationHistory.length === 0) {
 			this._conversationHistory.push(
 				{ role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code.\n\n" },
 				{ role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. How can I help you?\n\n" }
 			);
 		}
+		console.debug('conversation history', this._conversationHistory);
 
 		// Append the current user prompt to the conversation history
-		this._conversationHistory.push({ role: 'user', parts: searchPrompt });
+		this._conversationHistory.push({ role: 'user', parts: prompt });
 		this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
 
 		this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
@@ -133,9 +135,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		try {
 			// Use the stored conversation history for the prompt
-			const isWorkspacePresent = searchPrompt.includes('@workspace');
+			const isWorkspacePresent = prompt.includes('@workspace');
 			const response = await this.aiRepo.getCompletion(this._conversationHistory, isWorkspacePresent);
-			this._conversationHistory.push({ role: 'user', parts: searchPrompt });
+			this._conversationHistory.push({ role: 'user', parts: prompt });
 			this._conversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
@@ -149,12 +151,4 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		}
 	}
 
-
-	private createPrompt(prompt: string, selectedText: string | undefined) {
-		let searchPrompt = prompt;
-		if (selectedText) {
-			searchPrompt += "\n```" + selectedText + "```";
-		}
-		return searchPrompt;
-	}
 }
