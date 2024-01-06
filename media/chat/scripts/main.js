@@ -2,8 +2,16 @@
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
+
+const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>`;
+const mergeIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M664-160 440-384v-301L336-581l-57-57 201-201 200 200-57 57-103-103v269l200 200-56 56Zm-368 1-56-56 127-128 57 57-128 127Z"/></svg>`;
+
+const activityBarBackground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-background");
+const activityBarForeground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
+
 (function () {
 	const vscode = acquireVsCodeApi();
+
 
 	// Define an empty array, which will be loaded through the displayMessages function
 	let conversationHistory = [];
@@ -24,6 +32,7 @@
 			}
 			case "setPrompt": {
 				document.getElementById("prompt-input").value = message.value;
+				setResponse();
 				break;
 			}
 			case "displayMessages": {
@@ -37,6 +46,21 @@
 			case 'hideLoadingIndicator':
 				loadingIndicator.style.display = 'none';
 				break;
+			case 'updateTheme': {
+				const preBlocks = document.querySelectorAll("pre");
+				preBlocks.forEach((_preBlock) => {
+					console.log('preBlocks', _preBlock);
+					const iconContainer = _preBlock.querySelectorAll("div");
+					iconContainer.forEach((_iconContainer) => {
+						_iconContainer.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-background");
+						const icon = _iconContainer.querySelectorAll("svg");
+						icon.forEach((_icon) => {
+							_icon.style.fill = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
+						});
+					});
+				});
+				break;
+			}
 		}
 	});
 
@@ -63,47 +87,84 @@
 			literalMidWordUnderscores: true,
 			simpleLineBreaks: true,
 		});
+
 		response = fixCodeBlocks(response);
 		html = converter.makeHtml(response);
 		document.getElementById("response").innerHTML = html;
 
 		const preCodeBlocks = document.querySelectorAll("pre code");
-		for (let i = 0; i < preCodeBlocks.length; i++) {
-			preCodeBlocks[i].classList.add(
-				"p-2",
+		preCodeBlocks.forEach((_preCodeBlock) => {
+			_preCodeBlock.classList.add(
+				"p-1",
 				"my-2",
 				"block",
-				"overflow-x-scroll"
+				"language-dart"
 			);
-		}
+		});
+
+		const preBlocks = document.querySelectorAll("pre");
+		preBlocks.forEach((_preBlock) => {
+			_preBlock.classList.add("language-dart", "relative", "my-5");
+			Prism.highlightElement(_preBlock);
+			
+			const iconContainer = document.createElement("div");
+			iconContainer.id = "icon-container";
+			iconContainer.classList.add("absolute", "top-2", "right-2" ,"inline-flex", "flex-row", "bg-white", "h-8", "w-16" ,"z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
+			iconContainer.style.backgroundColor = activityBarBackground;
+
+			const _copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			_copyIcon.innerHTML = copyIcon;
+			_copyIcon.id = "copy-icon";
+			_copyIcon.classList.add("h-7", "w-7", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_copyIcon.style.fill = activityBarForeground;
+			_copyIcon.setAttribute("alt", "Copy");
+			iconContainer.appendChild(_copyIcon);
+
+			_copyIcon.addEventListener("click", () => {
+				const textToCopy = _preBlock.textContent;
+				navigator.clipboard.writeText(textToCopy);
+			});
+
+			const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			_mergeIcon.innerHTML = mergeIcon;
+			_mergeIcon.id = "merge-icon";
+			_mergeIcon.classList.add("h-7", "w-7", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_mergeIcon.style.fill = activityBarForeground;
+			_mergeIcon.setAttribute("alt", "Merge");
+			iconContainer.appendChild(_mergeIcon);
+
+			_mergeIcon.addEventListener("click", () => {
+				vscode.postMessage({
+					type: "pasteCode",
+					value: _preBlock.textContent,
+				});
+			});
+
+			_preBlock.appendChild(iconContainer);
+
+			_preBlock.addEventListener("mouseenter", () => {
+				iconContainer.style.opacity = 1;
+			});
+
+			_preBlock.addEventListener("mouseleave", () => {
+				iconContainer.style.opacity = 0;
+			});
+		});
 
 		const codeBlocks = document.querySelectorAll("code");
-		for (let i = 0; i < codeBlocks.length; i++) {
-			// Check if innertext starts with "Copy code"
-			if (codeBlocks[i].innerText.startsWith("Copy code")) {
-				codeBlocks[i].innerText = codeBlocks[i].innerText.replace("Copy code", "");
+		codeBlocks.forEach((_codeBlock) => {
+			if (_codeBlock.innerText.startsWith("Copy code")) {
+				_codeBlock.innerText = _codeBlock.innerText.replace("Copy code", "");
 			}
-
-			codeBlocks[i].classList.add("inline-flex", "max-w-full", "overflow-hidden", "rounded-sm", "cursor-pointer");
-
-			codeBlocks[i].addEventListener("click", function (e) {
+			_codeBlock.classList.add("inline-flex", "max-w-full", "overflow-hidden", "rounded-sm", "cursor-pointer", "language-dart");
+			_codeBlock.addEventListener("click", function (e) {
 				e.preventDefault();
 				vscode.postMessage({
 					type: "codeSelected",
 					value: this.innerText,
 				});
 			});
-
-			const d = document.createElement("div");
-			d.innerHTML = codeBlocks[i].innerHTML;
-			codeBlocks[i].innerHTML = null;
-			codeBlocks[i].appendChild(d);
-			d.classList.add("code");
-		}
-
-		microlight.reset("code");
-
-		// document.getElementById("response").innerHTML = document.getElementById("response").innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+		});
 	}
 
 	// Function to display messages in the chat container

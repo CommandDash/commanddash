@@ -5,169 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="{{prismCssUri}}">
+    <link rel="stylesheet" href="{{cssUri}}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-dart.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: left;
-            justify-content: flex-end;
-            height: 100vh;
-        }
-
-        #chat-container {
-            width: 100%;
-            max-width: 100%;
-            background-color: transparent;
-            padding: 0%;
-            border-radius: 0px;
-            overflow: hidden;
-            overflow: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #2d2d2d;
-            scroll-behavior: smooth;
-        }
-
-        #prompt-input {
-            width: calc(100%);
-            padding: 8px;
-            font-size: 14px;
-            border: none;
-            border-bottom: 1px solid #444;
-            outline: none;
-            color: #ffffff;
-            background-color: #2d2d2d;
-        }
-
-        #toast-container {
-            display: none;
-            position: absolute;
-            align-items: center;
-            justify-content: center;
-            top: 90%;
-            left: 50%;
-            transform: translateX(-50%) translateY(100%);
-            background-color: #ffcc00; 
-            color: #ffffff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            width: calc(100% - 18px); 
-            z-index: 100;
-            animation: slideUp 0.5s ease-in-out forwards;
-        }
-
-        #toast-container i {
-            margin-right: 5px;
-        }
-
-        #response {
-            margin-left: 8px;
-            color: #ffffff;
-        }
-
-        .loader {
-            width: 8px;
-            height: 8px;
-            left: 16px;
-            border-radius: 50%;
-            background-color: #fff;
-            box-shadow: 32px 0 #fff, -32px 0 #fff;
-            position: relative;
-            animation: flash 0.5s ease-out infinite alternate;
-        }
-
-        @keyframes flash {
-            0% {
-                background-color: #FFF2;
-                box-shadow: 16px 0 #FFF2, -16px 0 #FFF;
-            }
-
-            50% {
-                background-color: #FFF;
-                box-shadow: 16px 0 #FFF2, -16px 0 #FFF2;
-            }
-
-            100% {
-                background-color: #FFF2;
-                box-shadow: 16px 0 #FFF, -16px 0 #FFF2;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        .message {
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .user-you {
-            background-color: rgba(41, 181, 246, 0.08);
-            padding: 8px;
-            width: auto;
-            max-width: auto;
-            box-sizing: border-box;
-            display: flex;
-            align-items: left;
-        }
-
-        .user-you::before {
-            content: "";
-            display: block;
-            width: 4px;
-            height: 100%;
-            background-color: #29b6f6;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .user-gemini-pro {
-            background-color: rgba(102, 187, 106, 0.08);
-            padding: 8px;
-            width: auto;
-            max-width: auto;
-            box-sizing: border-box;
-            align-items: left;
-        }
-
-        .user-gemini-pro::before {
-            content: "";
-            display: block;
-            width: 4px;
-            height: 100%;
-            background-color: #66bb6a;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .user-gemini-pro p {
-            margin-left: 8px;
-            color: #ffffff;
-            white-space: pre-wrap;
-        }
-
-        .user-you p {
-            margin-left: 8px;
-            color: #ffffff;
-            white-space: pre-wrap;
-        }
-    </style>
 </head>
 
 <body>
@@ -179,12 +22,8 @@
         <div id="dynamic-messages"></div>
         <!-- Add the loading indicator inside the chat container -->
         <span class="loader" id="loader" style="display: none;"></span>
-        <div id="response" class="pt-4 text-sm">
-        </div>
+        <div id="response" class="pt-4 text-sm"></div>
 
-        <div id="toast-container">
-            <i class="fa-solid fa-triangle-exclamation" style="color: #ffffff;"></i> No input text found
-        </div>
         <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
 
         <script src="{{scriptUri}}"></script>

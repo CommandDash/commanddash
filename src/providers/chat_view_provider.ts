@@ -37,6 +37,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		// add an event listener for messages received by the webview
 		webviewView.webview.onDidReceiveMessage((data) => {
+			console.log('data', data);
 			switch (data.type) {
 				case "codeSelected":
 					{
@@ -51,13 +52,31 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 				case "prompt":
 					{
 						this.getResponse(data.value);
+						break;
+					}
+
+				case "pasteCode": 
+					{
+						const editor = vscode.window.activeTextEditor;
+						if (editor) {
+							editor.edit((builder) => {
+								builder.insert(editor.selection.active, data.value);
+							});
+						}
+						break;
 					}
 			}
+		});
+
+		vscode.window.onDidChangeActiveColorTheme(() => {
+			webviewView.webview.postMessage({type: 'updateTheme'});
 		});
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview,) {
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
+		const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "css", "chatpage.css"));
+		const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
 		const chatHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'chat.html');
 		const chatHtml = fs.readFileSync(chatHtmlPath.fsPath, 'utf8');
 		const showdownUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'scripts', 'showdown.min.js'));
@@ -75,7 +94,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		const updatedChatHtml = chatHtml
 			.replace(/{{cspSource}}/g, cspSource)
 			.replace(/{{scriptUri}}/g, scriptUri.toString())
-			.replace(/{{shadowUri}}/g, showdownUri.toString());
+			.replace(/{{shadowUri}}/g, showdownUri.toString())
+			.replace(/{{cssUri}}/g, cssUri.toString())
+			.replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
 		return updatedChatHtml;
 	}
