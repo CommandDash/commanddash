@@ -133,7 +133,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		try {
 			// Use the stored conversation history for the prompt
-			const response = await this.aiRepo.getCompletion(this._conversationHistory);
+			const isWorkspacePresent = searchPrompt.includes('@workspace');
+			const response = await this.aiRepo.getCompletion(this._conversationHistory, isWorkspacePresent);
 			this._conversationHistory.push({ role: 'user', parts: searchPrompt });
 			this._conversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
@@ -143,8 +144,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			console.error(error);
 			const response = 'Sorry, I could not find a response. Please try again.';
 			this._view?.webview.postMessage({ type: 'addResponse', value: response });
-		}finally{
-			this._view?.webview.postMessage({type: 'hideLoadingIndicator'})
+		} finally {
+			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
 		}
 	}
 
