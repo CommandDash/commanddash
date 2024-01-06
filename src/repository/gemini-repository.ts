@@ -78,7 +78,6 @@ export class GeminiRepository {
             const cacheData = JSON.stringify(this.codehashCache);
             const cachePath = this.cacheFilePath;
             await fs.promises.writeFile(cachePath, cacheData, { encoding: 'utf8', mode: 0o600 }); // Sets the file mode to read/write for the owner only
-            console.log("Cache saved successfully.");
         } catch (error) {
             if (error instanceof Error) {
                 handleError(error, 'Failed to save the cache data.');
@@ -135,7 +134,6 @@ export class GeminiRepository {
 
             // Find all Dart files in the workspace
             const dartFiles = await vscode.workspace.findFiles('**/*.dart');
-            console.log("Dart files found: " + dartFiles.length);
 
             // Read the content of each Dart file and compute codehash
             const fileContents = await Promise.all(dartFiles.map(async (file) => {
@@ -152,12 +150,6 @@ export class GeminiRepository {
             // Filter out files that haven't changed since last cache
             const filesToUpdate = fileContents.filter(fileContent => {
                 const cachedEntry = this.codehashCache[fileContent.path];
-                const isCached = !!cachedEntry;
-                if (isCached) {
-                    console.log(`File already cached: ${fileContent.path}`);
-                } else {
-                    console.log(`File going to be cached: ${fileContent.path}`);
-                }
                 return !cachedEntry || cachedEntry.codehash !== fileContent.codehash;
             });
 
@@ -181,7 +173,6 @@ export class GeminiRepository {
                     // Update cache with new embeddings
                     batchEmbeddings.embeddings.forEach((embedding, index) => {
                         const fileContent = batch[index];
-                        console.log(`Embedding updated for file: ${fileContent.path}`);
                         this.codehashCache[fileContent.path] = {
                             codehash: fileContent.codehash,
                             embedding: embedding
