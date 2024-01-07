@@ -34,16 +34,12 @@ export class GeminiRepository {
         return text;
     }
 
-    public async getCompletion(prompt: { role: string, parts: string }[], isReferenceAdded?: boolean): Promise<string> {
+    public async getCompletion(prompt: { role: string, parts: string }[]): Promise<string> {
 
         if (!this.apiKey) {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
         let lastMessage = prompt.pop();
-        if (lastMessage && isReferenceAdded) {
-            const dartFiles = await this.findClosestDartFiles(lastMessage.parts);
-            lastMessage.parts = "You're a vscode extension copilot, you've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following workspace code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps. Here's the code: \n\n" + dartFiles + "\n\n" + lastMessage.parts;
-        }
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
                 history: prompt,
