@@ -138,7 +138,8 @@ export class GeminiRepository {
             // Read the content of each Dart file and compute codehash
             const fileContents = await Promise.all(dartFiles.map(async (file) => {
                 const document = await vscode.workspace.openTextDocument(file);
-                const text = `File name: ${file.path.split('/').pop()}\nFile path: ${file.path}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
+                const relativePath = vscode.workspace.asRelativePath(file, false);
+                const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
                 const codehash = await this.computeCodehash(text);
                 return {
                     text,
