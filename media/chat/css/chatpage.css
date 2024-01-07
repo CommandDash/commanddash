@@ -158,3 +158,12 @@ word-break: break-word;
     background-color: #fafafa;
     border-radius: 7px;
 }
+
+a {
+    color: var(--vscode-textLink-activeForeground);
+}
+
+ul li::before {
+    content: "•";
+    margin-right: 5px;
+}

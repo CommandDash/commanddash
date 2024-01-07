@@ -389,6 +389,14 @@ class Mentionify {
                 });
             });
         });
+
+        const modelResponse = document.querySelectorAll("div.user-gemini-pro");
+        modelResponse.forEach((_modelResponse) => {
+            const pBlocks = _modelResponse.querySelectorAll("p");
+            pBlocks.forEach((_pBlock) => {
+                _pBlock.classList.add("my-3");
+            });
+        });
     }
 
     // Function to display messages in the chat container
@@ -424,6 +432,10 @@ class Mentionify {
             excludeTrailingPunctuationFromURLs: true,
             literalMidWordUnderscores: true,
             simpleLineBreaks: true,
+            openLinksInNewWindow: true, // Add this option to open links in a new window
+            ghCodeBlocks: true, // Enable GitHub-style code blocks (optional for better styling)
+            strikethrough: true, // Enable strikethrough syntax (optional)
+            tasklists: true // Enable task list syntax for checkboxes (optional)
         });
         // response = fixCodeBlocks(input);
         html = converter.makeHtml(input);

@@ -83,7 +83,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
 		const chatHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'chat.html');
 		const chatHtml = fs.readFileSync(chatHtmlPath.fsPath, 'utf8');
-		const showdownUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'scripts', 'showdown.min.js'));
 
 		// Modify your Content-Security-Policy
 		const cspSource = webview.cspSource;
@@ -98,7 +97,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		const updatedChatHtml = chatHtml
 			.replace(/{{cspSource}}/g, cspSource)
 			.replace(/{{scriptUri}}/g, scriptUri.toString())
-			.replace(/{{shadowUri}}/g, showdownUri.toString())
 			.replace(/{{cssUri}}/g, cssUri.toString())
 			.replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
