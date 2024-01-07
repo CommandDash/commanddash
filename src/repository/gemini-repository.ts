@@ -66,7 +66,6 @@ export class GeminiRepository {
     private get cacheFilePath() {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
-            console.debug('hash' + 'no workspace found');
             throw new Error('No workspace folders found.');
         }
         const projectFolder = workspaceFolders[0].uri.fsPath; // Assuming single root workspace
