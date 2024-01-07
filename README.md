@@ -35,10 +35,10 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 
 ### 🚀 Chat
 <p align="center">
-<img src="https://media.giphy.com/media/H9cgkHWk58lHAZrRdN/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
+<img src="https://media.giphy.com/media/T4ZnPW67QbajS5z4nU/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
 
-Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers.
+Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers. Query your workspace using `@workspace` command.
 
 ### 💡 Create
 <p align="center">
@@ -146,10 +146,10 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes: 0.2.0 
-- This is the first release powered by Gemini.
-- Built in Dart analyzer to assist extracting and inserting code.
-- Support for basic create, refactor and debug operations.
+## Release Notes: 0.2.1 
+- Major improvement in chat user experience.
+- Feature to provide workspace as context.
+- Minor bug fixes.
 
 ## License
 
