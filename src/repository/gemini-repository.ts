@@ -66,12 +66,16 @@ export class GeminiRepository {
     private get cacheFilePath() {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
+            console.debug('hash' + 'no workspace found');
             throw new Error('No workspace folders found.');
         }
+        const projectFolder = workspaceFolders[0].uri.fsPath; // Assuming single root workspace
+        const hash = this.computeCodehash(projectFolder); // Hash the path for uniqueness
         // Use os.tmpdir() to get the system's temporary directory
         const tempDir = require('os').tmpdir();
-        return path.join(tempDir, 'flutterGPT', '.codehashCache.json'); // Replace 'yourActualAppName' with your actual app's name
+        return require('path').join(tempDir, 'flutterGPT', `${hash}.codehashCache.json`);
     }
+
 
     // Modify the saveCache method to set file permissions after writing the cache file
     private async saveCache() {
@@ -112,7 +116,7 @@ export class GeminiRepository {
     }
 
     // Compute a codehash for file contents
-    private async computeCodehash(fileContents: string): Promise<string> {
+    private computeCodehash(fileContents: string): string {
         // Normalize the file content by removing whitespace and newlines
         const normalizedContent = fileContents.replace(/\s+/g, '');
         return crypto.createHash('sha256').update(normalizedContent).digest('hex');
@@ -141,7 +145,7 @@ export class GeminiRepository {
                 const document = await vscode.workspace.openTextDocument(file);
                 const relativePath = vscode.workspace.asRelativePath(file, false);
                 const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
-                const codehash = await this.computeCodehash(text);
+                const codehash = this.computeCodehash(text);
                 return {
                     text,
                     path: file.path,
