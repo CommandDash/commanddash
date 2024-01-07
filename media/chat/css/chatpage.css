@@ -25,15 +25,21 @@ body {
 #prompt-input {
     width: calc(100%);
     padding: 8px;
-    border: none;
-    border-bottom: 1px solid #444;
+    border: 1px solid;
+    border-color: var(--vscode-input-border);
     outline: none;
     background-color: var(--vscode-input-background);
-    border-color: var(--vscode-input-border);
     color: var(--vscode-input-foreground);
     position: sticky;
     bottom: 0;
-    z-index: 1;
+    z-index: 11;
+    max-height: 270px;
+    min-height: 2.3rem;
+    height: 2.3rem;
+}
+
+#prompt-input:focus {
+    border: 1px solid var(--vscode-inputOption-activeBorder);
 }
 
 #response {
@@ -115,6 +121,10 @@ body {
     top: 0;
 }
 
+#dynamic-messages {
+word-break: break-word;
+}
+
 .user-gemini-pro p {
     margin-left: 0px;
     white-space: pre-wrap;
@@ -123,4 +133,37 @@ body {
 .user-you p {
     margin-left: 0px;
     white-space: pre-wrap;
+}
+
+.menu {
+    position: absolute;
+    z-index: 12;
+    border-radius: 7px;
+    background-color: var(--vscode-activityBar-background);
+}
+
+.menu-item {
+    cursor: default;
+    padding: .5rem 1rem;
+    border-radius: 7px;
+}
+
+.menu-item.selected {
+    background-color: var(--vscode-activityBar-background);
+    color: var(--vscode-textLink-activeForeground);
+    border-radius: 7px;
+}
+
+.menu-item:hover:not(.selected) {
+    background-color: #fafafa;
+    border-radius: 7px;
+}
+
+a {
+    color: var(--vscode-textLink-activeForeground);
+}
+
+ul li::before {
+    content: "•";
+    margin-right: 5px;
 }

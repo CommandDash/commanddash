@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="{{prismCssUri}}">
     <link rel="stylesheet" href="{{cssUri}}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-dart.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -24,10 +25,10 @@
         <span class="loader" id="loader" style="display: none;"></span>
         <div id="response" class="pt-4 text-sm"></div>
 
-        <input class="w-full text-gray-700 p-2" placeholder="Ask FlutterGPT something" id="prompt-input" />
-
+        <textarea spellcheck="false" placeholder="Ask FlutterGPT something" rows="1" aria-multiline="true" id="prompt-input"></textarea>
+        <div id="menu" class="menu" role="listbox" ></div>
         <script src="{{scriptUri}}"></script>
-        <script src="{{shadowUri}}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 </body>
 
 </html>
