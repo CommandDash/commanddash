@@ -162,6 +162,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._privateConversationHistory.push({ role: 'model', parts: response });
 			this._publicConversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 
 		} catch (error) {
 			console.error(error);
@@ -175,5 +176,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 	private clearConversationHistory() {
 		this._privateConversationHistory = [];
+		this._publicConversationHistory = [];
 	}
 }

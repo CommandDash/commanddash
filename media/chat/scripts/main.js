@@ -3,15 +3,15 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 
-const copyIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path clip-rule="evenodd" d="M6 6L7.5 4.5H15.621L21 9.879V21L19.5 22.5H7.5L6 21V6ZM19.5 10.5L15 6H7.5V21H19.5V10.5Z" />
-<path clip-rule="evenodd" d="M4.5 1.5L3 3V18L4.5 19.5V3H14.121L12.621 1.5H4.5Z" />
+const copyIcon = `<svg width="17" height="17" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg" class="display: inline-flex; justify-content: center; align-items: center;">
+<path clip-rule="evenodd" d="M4.25 4.25L5.3125 3.1875H11.0649L14.875 6.99762V14.875L13.8125 15.9375H5.3125L4.25 14.875V4.25ZM13.8125 7.4375L10.625 4.25H5.3125V14.875H13.8125V7.4375Z" />
+<path clip-rule="evenodd" d="M3.1875 1.0625L2.125 2.125V12.75L3.1875 13.8125V2.125H10.0024L8.93987 1.0625H3.1875Z" />
 </svg>
 `;
-const mergeIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path clip-rule="evenodd" d="M21 1.5L22.5 3V9L21 10.5H9L7.5 9V3L9 1.5H21ZM21 3H9V9H21V3Z" />
-<path clip-rule="evenodd" d="M21 13.5L22.5 15V21L21 22.5H9L7.5 21V15L9 13.5H21ZM21 15H9V21H21V15Z" />
-<path d="M1.5 9.5889L3.92121 12.0101L1.5 14.4313L2.54028 15.471L6 12.0101L2.54028 8.5498L1.5 9.5889Z" />
+const mergeIcon = `<svg width="17" height="17" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M14.875 1.0625L15.9375 2.125V6.375L14.875 7.4375H6.375L5.3125 6.375V2.125L6.375 1.0625H14.875ZM14.875 2.125H6.375V6.375H14.875V2.125Z"/>
+<path clip-rule="evenodd" d="M14.875 9.5625L15.9375 10.625V14.875L14.875 15.9375H6.375L5.3125 14.875V10.625L6.375 9.5625H14.875ZM14.875 10.625H6.375V14.875H14.875V10.625Z"/>
+<path d="M1.0625 6.79267L2.77752 8.50769L1.0625 10.2227L1.79936 10.9592L4.25 8.50769L1.79936 6.05664L1.0625 6.79267Z"/>
 </svg>
 `;
 
@@ -265,6 +265,7 @@ class Mentionify {
 			case "displayMessages": {
 				conversationHistory = message.value;
 				displayMessages();
+				setResponse();
 				break;
 			}
 			case 'showLoadingIndicator':
@@ -320,7 +321,7 @@ class Mentionify {
 			simpleLineBreaks: true,
 		});
 
-		response = fixCodeBlocks(response);
+		// response = fixCodeBlocks(response);
 		html = converter.makeHtml(response);
 		document.getElementById("response").innerHTML = html;
 
@@ -429,6 +430,64 @@ class Mentionify {
 
 		// Scroll the chat container to the most recent message
 		dynamicMessagesContainer.scrollTop = dynamicMessagesContainer.scrollHeight;
+		const preCodeBlocks = document.querySelectorAll("pre code");
+		preCodeBlocks.forEach((_preCodeBlock) => {
+			_preCodeBlock.classList.add(
+				"p-1",
+				"my-2",
+				"block",
+				"language-dart"
+			);
+		});
+
+		const preBlocks = document.querySelectorAll("pre");
+		preBlocks.forEach((_preBlock) => {
+			_preBlock.classList.add("language-dart", "relative", "my-5");
+			Prism.highlightElement(_preBlock);
+
+			const iconContainer = document.createElement("div");
+			iconContainer.id = "icon-container";
+			iconContainer.classList.add("absolute", "top-2", "right-2", "inline-flex", "flex-row", "h-8", "w-16", "z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
+			iconContainer.style.backgroundColor = activityBarBackground;
+
+			const _copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			_copyIcon.innerHTML = copyIcon;
+			_copyIcon.id = "copy-icon";
+			_copyIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_copyIcon.style.fill = activityBarForeground;
+			_copyIcon.setAttribute("alt", "Copy");
+			iconContainer.appendChild(_copyIcon);
+
+			_copyIcon.addEventListener("click", () => {
+				const textToCopy = _preBlock.textContent.trim();
+				navigator.clipboard.writeText(textToCopy);
+			});
+
+			const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			_mergeIcon.innerHTML = mergeIcon;
+			_mergeIcon.id = "merge-icon";
+			_mergeIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_mergeIcon.style.fill = activityBarForeground;
+			_mergeIcon.setAttribute("alt", "Merge");
+			iconContainer.appendChild(_mergeIcon);
+
+			_mergeIcon.addEventListener("click", () => {
+				vscode.postMessage({
+					type: "pasteCode",
+					value: _preBlock.textContent.trim(),
+				});
+			});
+
+			_preBlock.appendChild(iconContainer);
+
+			_preBlock.addEventListener("mouseenter", () => {
+				iconContainer.style.opacity = 1;
+			});
+
+			_preBlock.addEventListener("mouseleave", () => {
+				iconContainer.style.opacity = 0;
+			});
+		});
 	}
 
 
@@ -439,10 +498,6 @@ class Mentionify {
 			excludeTrailingPunctuationFromURLs: true,
 			literalMidWordUnderscores: true,
 			simpleLineBreaks: true,
-			openLinksInNewWindow: true, // Add this option to open links in a new window
-			ghCodeBlocks: true, // Enable GitHub-style code blocks (optional for better styling)
-			strikethrough: true, // Enable strikethrough syntax (optional)
-			tasklists: true // Enable task list syntax for checkboxes (optional)
 		});
 		// response = fixCodeBlocks(input);
 		html = converter.makeHtml(input);
