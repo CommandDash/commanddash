@@ -288,6 +288,11 @@ class Mentionify {
 				});
 				break;
 			}
+			case "displaySnackbar": {
+				response = message.value;
+				showSnackbar(response);
+				break;
+			}
 		}
 	});
 
@@ -393,8 +398,10 @@ class Mentionify {
 		const modelResponse = document.querySelectorAll("div.user-gemini-pro");
 		modelResponse.forEach((_modelResponse) => {
 			const pBlocks = _modelResponse.querySelectorAll("p");
-			pBlocks.forEach((_pBlock) => {
-				_pBlock.classList.add("my-3");
+			pBlocks.forEach((_pBlock, index) => {
+				if (index !== 0) {
+					_pBlock.classList.add("my-3");
+				}
 			});
 		});
 	}
@@ -488,6 +495,16 @@ class Mentionify {
 		}
 	});
 
+	document.getElementById("clear-chat-button").addEventListener("click", function () {
+		const dynamicMessagesContainer = document.getElementById("dynamic-messages");
+		dynamicMessagesContainer.innerHTML = "";
+		conversationHistory = [];
+
+		vscode.postMessage({
+			type: "clearChat",
+		});
+	});
+
 	// Function to introduce a delay using a Promise
 	function delay(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
@@ -503,7 +520,20 @@ class Mentionify {
 		// Wait for 3 seconds
 		await delay(3000);
 
-		// Completely hide the toast 
+		// Completely hide the toast
 		toastContainer.style.display = 'none';
+	}
+
+	async function showSnackbar(errorMessage) {
+		const snackbar = document.getElementById("snackbar");
+		const errorTextNode = document.createTextNode(errorMessage);
+		const iconElement = snackbar.querySelector("i");
+		snackbar.insertBefore(errorTextNode, iconElement.nextSibling);
+		snackbar.style.display = "flex";
+
+		await delay(5000);
+
+		snackbar.removeChild(errorTextNode);
+		snackbar.style.display = "none";
 	}
 })();
