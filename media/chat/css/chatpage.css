@@ -163,7 +163,19 @@ a {
     color: var(--vscode-textLink-activeForeground);
 }
 
+ol li::before,
 ul li::before {
-    content: "•";
     margin-right: 5px;
+}
+
+ol, ul {
+    padding-left: 11px;
+}
+
+ol {
+    list-style-type: decimal;
+}
+
+ul {
+    list-style-type: disc;
 }
