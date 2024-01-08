@@ -398,8 +398,10 @@ class Mentionify {
         const modelResponse = document.querySelectorAll("div.user-gemini-pro");
         modelResponse.forEach((_modelResponse) => {
             const pBlocks = _modelResponse.querySelectorAll("p");
-            pBlocks.forEach((_pBlock) => {
-                _pBlock.classList.add("my-3");
+            pBlocks.forEach((_pBlock, index) => {
+                if (index !== 0) {
+                    _pBlock.classList.add("my-3");
+                }
             });
         });
     }
