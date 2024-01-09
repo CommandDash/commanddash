@@ -5,9 +5,8 @@ import * as crypto from 'crypto';
 import path = require("path");
 
 function handleError(error: Error, userFriendlyMessage: string): never {
-    console.error(error); // Log the detailed error for debugging purposes
-    // Here you could also include logic to log to an external monitoring service
-    throw new Error(userFriendlyMessage); // Throw a user-friendly message
+    console.error(error);
+    throw new Error(userFriendlyMessage);
 }
 
 export class GeminiRepository {
@@ -45,10 +44,20 @@ export class GeminiRepository {
             const dartFiles = await this.findClosestDartFiles(lastMessage.parts, view);
             lastMessage.parts = "You're a vscode extension copilot, you've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following workspace code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps. Here's the code: \n\n" + dartFiles + "\n\n" + lastMessage.parts;
         }
+
+        // Count the tokens in the prompt
+        const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+        const { totalTokens } = await model.countTokens(lastMessage?.parts ?? "");
+        console.log("Total input tokens: " + totalTokens);
+        // Check if the token count exceeds the limit
+        if (totalTokens > 30720) {
+            throw Error('Input prompt exceeds the maximum token limit.');
+        }
+
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
                 history: prompt, generationConfig: {
-                    maxOutputTokens: 4096,
+                    maxOutputTokens: 2048,
                 },
             }
         );
