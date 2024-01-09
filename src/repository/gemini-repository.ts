@@ -42,7 +42,9 @@ export class GeminiRepository {
         let lastMessage = prompt.pop();
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
-                history: prompt,
+                history: prompt, generationConfig: {
+                    maxOutputTokens: 4096,
+                },
             }
         );
         const result = await chat.sendMessage(lastMessage?.parts ?? "");

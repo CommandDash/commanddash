@@ -443,7 +443,8 @@ class Mentionify {
 		const preBlocks = document.querySelectorAll("pre");
 		preBlocks.forEach((_preBlock) => {
 			_preBlock.classList.add("language-dart", "relative", "my-5");
-			Prism.highlightElement(_preBlock);
+			const textToHighlight = _preBlock.textContent.trim();
+			Prism.highlightElement(textToHighlight);
 
 			const iconContainer = document.createElement("div");
 			iconContainer.id = "icon-container";
