@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import path = require('path');
 import { GeminiRepository } from "../repository/gemini-repository";
 
-
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = "fluttergpt.chatView";
 	private _view?: vscode.WebviewView;
@@ -138,6 +137,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		// Check if the prompt includes '@workspace' and handle accordingly
 		try {
+			// Use the stored conversation history for the prompt
+			const isWorkspacePresent = prompt.includes('@workspace');
+			const response = await this.aiRepo.getCompletion(this._conversationHistory, isWorkspacePresent, this._view);
+			this._conversationHistory.push({ role: 'user', parts: prompt });
+			this._conversationHistory.push({ role: 'model', parts: response });
+			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
 			if (prompt.includes('@workspace')) {
 				// Add the full prompt to the private history for completion
 				const dartFiles = await this.aiRepo.findClosestDartFiles(prompt);
@@ -171,6 +176,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 		} finally {
 			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+			this._view?.webview.postMessage({type: 'workspaceLoader', value: false});
 		}
 	}
 
