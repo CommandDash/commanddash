@@ -45,18 +45,18 @@ body {
     position: absolute;
     align-items: center;
     justify-content: center;
-    top: 86%; 
+    top: 86%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #ffcc00; 
+    background-color: #ffcc00;
     color: #ffffff;
     text-align: center;
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    width: calc(100% - 18px); 
-    z-index: 100; 
-    animation: fadeInOut 5s ease; 
+    width: calc(100% - 18px);
+    z-index: 100;
+    animation: fadeInOut 5s ease;
 }
 
 #snackbar i {
@@ -91,12 +91,12 @@ body {
     top: 90%;
     left: 50%;
     transform: translateX(-50%) translateY(100%);
-    background-color: #ffcc00; 
+    background-color: #ffcc00;
     color: #ffffff;
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    width: calc(100% - 18px); 
+    width: calc(100% - 18px);
     z-index: 100;
     animation: slideUp 0.5s ease-in-out forwards;
 }
@@ -107,6 +107,11 @@ body {
 
 #response {
     margin-left: 8px;
+}
+
+.file-path {
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--vscode-editor-foreground);
 }
 
 .loader {
@@ -142,6 +147,7 @@ body {
         opacity: 0;
         transform: translateX(-50%) translateY(100%);
     }
+
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
@@ -149,8 +155,16 @@ body {
 }
 
 @keyframes fadeInOut {
-    0%, 100% { opacity: 0; }
-    10%, 90% { opacity: 1; }
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    10%,
+    90% {
+        opacity: 1;
+    }
 }
 
 .message {
@@ -200,7 +214,7 @@ body {
 }
 
 #dynamic-messages {
-word-break: break-word;
+    word-break: break-word;
 }
 
 #workspace-loader {
@@ -252,7 +266,8 @@ ul li::before {
     margin-right: 5px;
 }
 
-ol, ul {
+ol,
+ul {
     padding-left: 11px;
 }
 
@@ -263,3 +278,32 @@ ol {
 ul {
     list-style-type: disc;
 }
+
+.typing-loader {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    animation: loading 1s linear infinite alternate;
+    margin-bottom: 4px;
+   }
+   
+   @keyframes loading {
+    0% {
+     background-color: var(--vscode-progressBar-background);
+     box-shadow: 
+           8px 0px 0px 0px var(--vscode-editor-foreground), 
+           16px 0px 0px 0px var(--vscode-editor-foreground);
+    }
+    25% {
+     background-color: var(--vscode-editor-foreground);
+     box-shadow: 
+           8px 0px 0px 0px var(--vscode-progressBar-background), 
+           16px 0px 0px 0px var(--vscode-editor-foreground);
+    }
+    75% {
+     background-color: var(--vscode-editor-foreground);
+     box-shadow: 
+           8px 0px 0px 0px var(--vscode-editor-foreground), 
+           16px 0px 0px 0px var(--vscode-progressBar-background);
+    }
+   }

@@ -29,7 +29,7 @@ export class GeminiRepository {
         ];
 
         const result = await model.generateContent([prompt, ...imageParts]);
-        const response = await result.response;
+        const response = result.response;
         const text = response.text();
         return text;
     }
@@ -39,9 +39,6 @@ export class GeminiRepository {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
         let lastMessage = prompt.pop();
-        if (lastMessage && isReferenceAdded) {
-            this.displayWebViewMessage(view, 'workspaceLoader', true);
-        }
 
         // Count the tokens in the prompt
         const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -64,21 +61,13 @@ export class GeminiRepository {
 
         const response = result.response;
         const text = response.text();
-
-        // Creating a result for you
-        if (isReferenceAdded) {
-            this.displayWebViewMessage(view, 'stepLoader', { creatingResultLoader: true });
-            await this.sleep(2000);
-            this.displayWebViewMessage(view, 'workspaceLoader', false);
-            this.displayWebViewMessage(view, 'stepLoaderCompleted', '');
-        }
         return text;
     }
 
     // Cache structure
     private codehashCache: { [filePath: string]: { codehash: string, embedding: ContentEmbedding } } = {};
 
-    private displayWebViewMessage(view?: vscode.WebviewView, type?: string, value?: any) {
+    public displayWebViewMessage(view?: vscode.WebviewView, type?: string, value?: any) {
         view?.webview.postMessage({
             type,
             value
@@ -246,11 +235,13 @@ export class GeminiRepository {
             }
 
             // A list of most relevant file paths
-            const filePaths = distances.slice(0, 5).map(fileEmbedding => fileEmbedding.file.path);
-            console.log("Most relevant file paths:" + filePaths.join(", "));
+            const filePaths = distances.slice(0, 5).map(fileEmbedding => {
+                return fileEmbedding.file.path.split("/").pop();
+            });
+            this.displayWebViewMessage(view, 'stepLoader', { fetchingFileLoader: true, filePaths });
+            console.log("Most relevant file paths:" + filePaths);
 
             // Fetching most relevant files
-            this.displayWebViewMessage(view, 'stepLoader', { fetchingFileLoader: true });
             return resultString.trim();
         } catch (error) {
             console.error("Error finding closest Dart files: ", error);
