@@ -5,9 +5,8 @@ import * as crypto from 'crypto';
 import path = require("path");
 
 function handleError(error: Error, userFriendlyMessage: string): never {
-    console.error(error); // Log the detailed error for debugging purposes
-    // Here you could also include logic to log to an external monitoring service
-    throw new Error(userFriendlyMessage); // Throw a user-friendly message
+    console.error(error);
+    throw new Error(userFriendlyMessage);
 }
 
 export class GeminiRepository {
@@ -40,10 +39,20 @@ export class GeminiRepository {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
         let lastMessage = prompt.pop();
+
+        // Count the tokens in the prompt
+        const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+        const { totalTokens } = await model.countTokens(lastMessage?.parts ?? "");
+        console.log("Total input tokens: " + totalTokens);
+        // Check if the token count exceeds the limit
+        if (totalTokens > 30720) {
+            throw Error('Input prompt exceeds the maximum token limit.');
+        }
+
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
                 history: prompt, generationConfig: {
-                    maxOutputTokens: 4096,
+                    maxOutputTokens: 2048,
                 },
             }
         );
