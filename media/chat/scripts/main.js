@@ -449,29 +449,89 @@ class Mentionify {
     }
 
     // Function to display messages in the chat container
-    function displayMessages() {
-        const dynamicMessagesContainer = document.getElementById("dynamic-messages");
-        console.log(conversationHistory);
+	function displayMessages() {
+		const dynamicMessagesContainer = document.getElementById("dynamic-messages");
+		console.log(conversationHistory);
 
-        // Clear existing messages
-        dynamicMessagesContainer.innerHTML = "";
+		// Clear existing messages
+		dynamicMessagesContainer.innerHTML = "";
 
-        // Loop through the messages array and create message elements
-        conversationHistory.slice(2, conversationHistory.length).forEach((message, index) => {
-            const messageElement = document.createElement("div");
-            if (message.role === "model") {
-                messageElement.classList.add("message", "user-gemini-pro"); // Change class to "user-gemini-pro"
-                messageElement.innerHTML = `<p><strong>FlutterGPT: </strong>${markdownToPlain(message.parts)}</p>`;
-            } else {
-                messageElement.classList.add("message", "user-you"); // Change class to "user-you"
-                messageElement.innerHTML = `<p><strong>You: </strong>${message.parts}</p>`;
-            }
-            dynamicMessagesContainer.appendChild(messageElement);
-        });
+		// Loop through the messages array and create message elements
+		conversationHistory.forEach((message, index) => {
+			const messageElement = document.createElement("div");
+			if (message.role === "model") {
+				messageElement.classList.add("message", "user-gemini-pro"); // Change class to "user-gemini-pro"
+				messageElement.innerHTML = `<p><strong>FlutterGPT: </strong>${markdownToPlain(message.parts)}</p>`;
+			} else {
+				messageElement.classList.add("message", "user-you"); // Change class to "user-you"
+				messageElement.innerHTML = `<p><strong>You: </strong>${message.parts}</p>`;
+			}
+			dynamicMessagesContainer.appendChild(messageElement);
+		});
 
-        // Scroll the chat container to the most recent message
-        dynamicMessagesContainer.scrollTop = dynamicMessagesContainer.scrollHeight;
-    }
+		// Scroll the chat container to the most recent message
+		dynamicMessagesContainer.scrollTop = dynamicMessagesContainer.scrollHeight;
+		const preCodeBlocks = document.querySelectorAll("pre code");
+		preCodeBlocks.forEach((_preCodeBlock) => {
+			_preCodeBlock.classList.add(
+				"p-1",
+				"my-2",
+				"block",
+				"language-dart"
+			);
+		});
+
+		const preBlocks = document.querySelectorAll("pre");
+		preBlocks.forEach((_preBlock) => {
+			_preBlock.classList.add("language-dart", "relative", "my-5");
+			const textToHighlight = _preBlock.textContent.trim();
+			Prism.highlightElement(textToHighlight);
+
+			const iconContainer = document.createElement("div");
+			iconContainer.id = "icon-container";
+			iconContainer.classList.add("absolute", "top-2", "right-2", "inline-flex", "flex-row", "h-8", "w-16", "z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
+			iconContainer.style.backgroundColor = activityBarBackground;
+
+			const _copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			_copyIcon.innerHTML = copyIcon;
+			_copyIcon.id = "copy-icon";
+			_copyIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_copyIcon.style.fill = activityBarForeground;
+			_copyIcon.setAttribute("alt", "Copy");
+			iconContainer.appendChild(_copyIcon);
+
+			_copyIcon.addEventListener("click", () => {
+				const textToCopy = _preBlock.textContent.trim();
+				navigator.clipboard.writeText(textToCopy);
+			});
+
+			const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			_mergeIcon.innerHTML = mergeIcon;
+			_mergeIcon.id = "merge-icon";
+			_mergeIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+			_mergeIcon.style.fill = activityBarForeground;
+			_mergeIcon.setAttribute("alt", "Merge");
+			iconContainer.appendChild(_mergeIcon);
+
+			_mergeIcon.addEventListener("click", () => {
+				vscode.postMessage({
+					type: "pasteCode",
+					value: _preBlock.textContent.trim(),
+				});
+			});
+
+			_preBlock.appendChild(iconContainer);
+
+			_preBlock.addEventListener("mouseenter", () => {
+				iconContainer.style.opacity = 1;
+			});
+
+			_preBlock.addEventListener("mouseleave", () => {
+				iconContainer.style.opacity = 0;
+			});
+		});
+	}
+
 
 
     function markdownToPlain(input) {
