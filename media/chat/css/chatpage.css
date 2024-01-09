@@ -22,6 +22,47 @@ body {
     scroll-behavior: smooth;
 }
 
+#clear-chat-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 4px;
+    opacity: 0.8;
+    cursor: pointer;
+    z-index: 98;
+}
+
+#clear-chat-button i {
+    margin-left: 5px;
+}
+
+#snackbar {
+    display: none;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    top: 86%; 
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffcc00; 
+    color: #ffffff;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: calc(100% - 18px); 
+    z-index: 100; 
+    animation: fadeInOut 5s ease; 
+}
+
+#snackbar i {
+    margin-right: 5px;
+}
+
 #prompt-input {
     width: calc(100%);
     padding: 8px;
@@ -40,6 +81,28 @@ body {
 
 #prompt-input:focus {
     border: 1px solid var(--vscode-inputOption-activeBorder);
+}
+
+#toast-container {
+    display: none;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    top: 90%;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    background-color: #ffcc00; 
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: calc(100% - 18px); 
+    z-index: 100;
+    animation: slideUp 0.5s ease-in-out forwards;
+}
+
+#toast-container i {
+    margin-right: 5px;
 }
 
 #response {
@@ -74,6 +137,21 @@ body {
     }
 }
 
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    10%, 90% { opacity: 1; }
+}
 
 .message {
     margin-bottom: 16px;

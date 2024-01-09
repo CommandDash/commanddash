@@ -16,6 +16,10 @@
 
 <body>
     <div id="chat-container">
+        <button id="clear-chat-button">
+            Clear Chat <i class="fa-solid fa-trash-can" style="color: #ffffff;"></i>
+        </button>
+
         <div class="message user-gemini-pro">
             <p><strong>FlutterGPT:</strong> Hello! I'm flutter/dart expert. Feel free to ask me anything.</p>
         </div>
@@ -24,6 +28,10 @@
         <!-- Add the loading indicator inside the chat container -->
         <span class="loader" id="loader" style="display: none;"></span>
         <div id="response" class="pt-4 text-sm"></div>
+
+        <div id="snackbar">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ffffff;"></i>
+        </div>
 
         <textarea spellcheck="false" placeholder="Ask FlutterGPT something" rows="1" aria-multiline="true" id="prompt-input"></textarea>
         <div id="menu" class="menu" role="listbox" ></div>

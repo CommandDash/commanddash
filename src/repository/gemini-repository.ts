@@ -42,7 +42,7 @@ export class GeminiRepository {
         let lastMessage = prompt.pop();
         if (lastMessage && isReferenceAdded) {
             const dartFiles = await this.findClosestDartFiles(lastMessage.parts);
-            lastMessage.parts = "You're a vscode extension copilot, you've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following workspace code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps. Here's the code: \n\n" + dartFiles + "\n\n" + lastMessage.parts;
+            lastMessage.parts = "You've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following workspace code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps along with file name, path & code. Here's the code: \n\n" + dartFiles + "\n\n" + lastMessage.parts;
         }
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
@@ -68,10 +68,13 @@ export class GeminiRepository {
         if (!workspaceFolders) {
             throw new Error('No workspace folders found.');
         }
+        const projectFolder = workspaceFolders[0].uri.fsPath; // Assuming single root workspace
+        const hash = this.computeCodehash(projectFolder); // Hash the path for uniqueness
         // Use os.tmpdir() to get the system's temporary directory
         const tempDir = require('os').tmpdir();
-        return path.join(tempDir, 'flutterGPT', '.codehashCache.json'); // Replace 'yourActualAppName' with your actual app's name
+        return require('path').join(tempDir, 'flutterGPT', `${hash}.codehashCache.json`);
     }
+
 
     // Modify the saveCache method to set file permissions after writing the cache file
     private async saveCache() {
@@ -112,7 +115,7 @@ export class GeminiRepository {
     }
 
     // Compute a codehash for file contents
-    private async computeCodehash(fileContents: string): Promise<string> {
+    private computeCodehash(fileContents: string): string {
         // Normalize the file content by removing whitespace and newlines
         const normalizedContent = fileContents.replace(/\s+/g, '');
         return crypto.createHash('sha256').update(normalizedContent).digest('hex');
@@ -139,8 +142,9 @@ export class GeminiRepository {
             // Read the content of each Dart file and compute codehash
             const fileContents = await Promise.all(dartFiles.map(async (file) => {
                 const document = await vscode.workspace.openTextDocument(file);
-                const text = `File name: ${file.path.split('/').pop()}\nFile path: ${file.path}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
-                const codehash = await this.computeCodehash(text);
+                const relativePath = vscode.workspace.asRelativePath(file, false);
+                const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
+                const codehash = this.computeCodehash(text);
                 return {
                     text,
                     path: file.path,
