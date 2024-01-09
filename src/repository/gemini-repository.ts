@@ -41,14 +41,13 @@ export class GeminiRepository {
         let lastMessage = prompt.pop();
         if (lastMessage && isReferenceAdded) {
             this.displayWebViewMessage(view, 'workspaceLoader', true);
-            const dartFiles = await this.findClosestDartFiles(lastMessage.parts, view);
-            lastMessage.parts = "You're a vscode extension copilot, you've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following workspace code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps. Here's the code: \n\n" + dartFiles + "\n\n" + lastMessage.parts;
         }
 
         // Count the tokens in the prompt
         const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
         const { totalTokens } = await model.countTokens(lastMessage?.parts ?? "");
         console.log("Total input tokens: " + totalTokens);
+
         // Check if the token count exceeds the limit
         if (totalTokens > 30720) {
             throw Error('Input prompt exceeds the maximum token limit.');
@@ -245,6 +244,10 @@ export class GeminiRepository {
                 const fileContent = fileContents.find(fc => fc.path === fileEmbedding.file.path)?.text;
                 resultString += fileContent;
             }
+
+            // A list of most relevant file paths
+            const filePaths = distances.slice(0, 5).map(fileEmbedding => fileEmbedding.file.path);
+            console.log("Most relevant file paths:" + filePaths.join(", "));
 
             // Fetching most relevant files
             this.displayWebViewMessage(view, 'stepLoader', { fetchingFileLoader: true });
