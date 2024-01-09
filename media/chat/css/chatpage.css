@@ -203,6 +203,12 @@ body {
 word-break: break-word;
 }
 
+#workspace-loader {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    fill: var(--vscode-editor-foreground);
+}
+
 .user-gemini-pro p {
     margin-left: 0px;
     white-space: pre-wrap;

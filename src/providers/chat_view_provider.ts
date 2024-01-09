@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import path = require('path');
 import { GeminiRepository } from "../repository/gemini-repository";
 
-
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = "fluttergpt.chatView";
 	private _view?: vscode.WebviewView;
@@ -127,7 +126,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 				{ role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. How can I help you?\n\n" }
 			);
 		}
-		console.debug('conversation history', this._conversationHistory);
 
 		// Append the current user prompt to the conversation history
 		this._conversationHistory.push({ role: 'user', parts: prompt });
@@ -139,7 +137,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		try {
 			// Use the stored conversation history for the prompt
 			const isWorkspacePresent = prompt.includes('@workspace');
-			const response = await this.aiRepo.getCompletion(this._conversationHistory, isWorkspacePresent);
+			const response = await this.aiRepo.getCompletion(this._conversationHistory, isWorkspacePresent, this._view);
 			this._conversationHistory.push({ role: 'user', parts: prompt });
 			this._conversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
@@ -150,6 +148,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._view?.webview.postMessage({ type: 'displaySnackbar', value: response });
 		} finally {
 			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+			this._view?.webview.postMessage({type: 'workspaceLoader', value: false});
 		}
 	}
 

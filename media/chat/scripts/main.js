@@ -242,11 +242,17 @@ class Mentionify {
     // Define an empty array, which will be loaded through the displayMessages function
     let conversationHistory = [];
     let loadingIndicator = document.getElementById('loader');
+    let workspaceLoader = document.getElementById('workspace-loader');
+    let accessingWorkspaceLoader = document.getElementById('accessing-workspace-loader');
+    let accessingWorkspaceDone = document.getElementById('accessing-workspace-done');
+    let fetchingFileLoader = document.getElementById('fetching-file-loader');
+    let fetchingFileDone = document.getElementById('fetching-file-done');
+    let creatingResultLoader = document.getElementById('creating-result-loader');
+    let creatingResultDone = document.getElementById('creating-result-done');
 
     // Handle mexssages sent from the extension to the webview
     window.addEventListener("message", (event) => {
         const message = event.data;
-        debugger;
         switch (message.type) {
             case "addResponse": {
                 response = message.value;
@@ -293,6 +299,42 @@ class Mentionify {
 				showSnackbar(response);
 				break;
 			}
+            case 'workspaceLoader': {
+                debugger;
+                workspaceLoader.style.display = message.value ? 'flex' : 'none';
+                if (message.value) {
+                    workspaceLoader.classList.remove("animate__slideOutDown");
+                    workspaceLoader.classList.add("animate__slideInUp");
+                } else {
+                    workspaceLoader.classList.remove("animate__slideInUp");
+                    workspaceLoader.classList.add("animate__slideOutDown");
+                }
+                break;
+            }
+            case 'stepLoader': {
+                if (message.value?.accessingWorkspaceLoader) {
+                    accessingWorkspaceLoader.style.display = 'none';
+                    accessingWorkspaceDone.style.display = 'block';
+                }
+                if (message.value?.fetchingFileLoader) {
+                    fetchingFileLoader.style.display = 'none';
+                    fetchingFileDone.style.display = 'block';
+                }
+                if (message.value?.creatingResultLoader) {
+                    creatingResultLoader.style.display = 'none';
+                    creatingResultDone.style.display = 'block';
+                }
+                break;
+            }
+            case 'stepLoaderCompleted': {
+                accessingWorkspaceLoader.style.display = 'block';
+                accessingWorkspaceDone.style.display = 'none';
+                fetchingFileLoader.style.display = 'block';
+                fetchingFileDone.style.display = 'none';
+                creatingResultLoader.style.display = 'block';
+                creatingResultDone.style.display = 'none';
+                break;
+            }
         }
     });
 
