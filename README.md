@@ -146,10 +146,10 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes: 0.2.1 
-- Major improvement in chat user experience.
-- Feature to provide workspace as context.
-- Minor bug fixes.
+## Release Notes: 0.2.2 
+- Major improvement in workspace chat user experience.
+- Feature to provide workspace as context in chat history.
+- Added a clear chat button.
 
 ## License
 

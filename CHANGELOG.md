@@ -4,8 +4,8 @@ All notable changes to the "fluttergpt" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.2.1]
+## [0.2.2]
 
-- Major improvement in chat user experience.
-- Feature to provide workspace as context.
-- Minor bug fixes.
+- Major improvement in workspace chat user experience.
+- Feature to provide workspace as context in chat history.
+- Added a clear chat button.
