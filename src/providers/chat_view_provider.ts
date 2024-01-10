@@ -55,7 +55,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 						break;
 					}
 
-				case "pasteCode": 
+				case "pasteCode":
 					{
 						const editor = vscode.window.activeTextEditor;
 						if (editor) {
@@ -78,7 +78,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		});
 
 		vscode.window.onDidChangeActiveColorTheme(() => {
-			webviewView.webview.postMessage({type: 'updateTheme'});
+			webviewView.webview.postMessage({ type: 'updateTheme' });
 		});
 	}
 
@@ -109,7 +109,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 	}
 
 
-	private _conversationHistory: Array<{ role: string, parts: string }> = [];
+	private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
+	private _privateConversationHistory: Array<{ role: string, parts: string }> = [];
 
 	private async getResponse(prompt: string) {
 		if (!this._view) {
@@ -120,41 +121,67 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		}
 
 		// Initialize conversation history if it's the first time
-		// debugger;
-		if (this._conversationHistory.length === 0) {
-			this._conversationHistory.push(
-				{ role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code.\n\n" },
-				{ role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. How can I help you?\n\n" }
+		if (this._privateConversationHistory.length === 0) {
+			this._privateConversationHistory.push(
+				{ role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response from you must be STRICTLY under 8192 characters. DO NOT MENTION EXTRA DETAILS APART FROMT THE QUERY ASKED BY THE USER.\n\n" },
+				{ role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response of mine will be STRICTLY under 8192 characters. How can I help you?\n\n" }
 			);
 		}
-		console.debug('conversation history', this._conversationHistory);
+		let workspacePrompt = "";
 
-		// Append the current user prompt to the conversation history
-		this._conversationHistory.push({ role: 'user', parts: prompt });
-		this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
+		// Add a simplified version to the public history
+		this._publicConversationHistory.push({ role: 'user', parts: prompt });
 
+		this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
 		this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
-		this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
 
+		// Check if the prompt includes '@workspace' and handle accordingly
 		try {
-			// Use the stored conversation history for the prompt
-			const isWorkspacePresent = prompt.includes('@workspace');
-			const response = await this.aiRepo.getCompletion(this._conversationHistory, isWorkspacePresent);
-			this._conversationHistory.push({ role: 'user', parts: prompt });
-			this._conversationHistory.push({ role: 'model', parts: response });
-			this._view?.webview.postMessage({ type: 'displayMessages', value: this._conversationHistory });
+			if (prompt.includes('@workspace')) {
+				// Add the full prompt to the private history for completion
+				this._view?.webview.postMessage({ type: 'workspaceLoader', value: true });
+				const dartFiles = await this.aiRepo.findClosestDartFiles(prompt, this._view);
+				workspacePrompt = "You've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following files code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps including the file paths, name & code. Here's the code: \n\n" + dartFiles + "\n\n" + prompt;
+				this._privateConversationHistory.push({ role: 'user', parts: workspacePrompt });
+			} else {
+				// Append the current user prompt to the conversation history
+				this._privateConversationHistory.push({ role: 'user', parts: prompt });
+				this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
+			}
+		} catch (error) {
+			console.error("Error processing workspace prompt: ", error);
+		}
+		// Use the stored conversation history for the prompt
+		try {
+			let response = '';
+			if (prompt.includes('@workspace')) {
+				response = await this.aiRepo.getCompletion(this._privateConversationHistory, true, this._view);
+				this._privateConversationHistory.push({ role: 'user', parts: workspacePrompt });
+			} else {
+				response = await this.aiRepo.getCompletion(this._privateConversationHistory);
+				this._privateConversationHistory.push({ role: 'user', parts: prompt });
+				this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
+			}
+			this._privateConversationHistory.push({ role: 'model', parts: response });
+			this._publicConversationHistory.push({ role: 'model', parts: response });
+			this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+			this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
+
 		} catch (error) {
 			console.error(error);
 			const response = error instanceof Error ? error.message : 'An unexpected error occurred.';
 			this._view?.webview.postMessage({ type: 'displaySnackbar', value: response });
+			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 		} finally {
 			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+			this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });
 		}
 	}
 
 
 	private clearConversationHistory() {
-		this._conversationHistory = [];
+		this._privateConversationHistory = [];
+		this._publicConversationHistory = [];
 	}
 }

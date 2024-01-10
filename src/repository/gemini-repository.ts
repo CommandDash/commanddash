@@ -5,14 +5,14 @@ import * as crypto from 'crypto';
 import path = require("path");
 
 function handleError(error: Error, userFriendlyMessage: string): never {
-    console.error(error); // Log the detailed error for debugging purposes
-    // Here you could also include logic to log to an external monitoring service
-    throw new Error(userFriendlyMessage); // Throw a user-friendly message
+    console.error(error);
+    throw new Error(userFriendlyMessage);
 }
 
 export class GeminiRepository {
     private apiKey?: string;
     private genAI: GoogleGenerativeAI;
+    private _view?: vscode.Webview;
 
     constructor(apiKey: string) {
         this.apiKey = apiKey;
@@ -29,37 +29,54 @@ export class GeminiRepository {
         ];
 
         const result = await model.generateContent([prompt, ...imageParts]);
-        const response = await result.response;
+        const response = result.response;
         const text = response.text();
         return text;
     }
 
-    public async getCompletion(prompt: { role: string, parts: string }[], isReferenceAdded?: boolean): Promise<string> {
-
+    public async getCompletion(prompt: { role: string, parts: string }[], isReferenceAdded?: boolean, view?: vscode.WebviewView): Promise<string> {
         if (!this.apiKey) {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }
         let lastMessage = prompt.pop();
-        if (lastMessage && isReferenceAdded) {
-            const dartFiles = await this.findClosestDartFiles(lastMessage.parts);
-            lastMessage.parts = "You've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following workspace code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps along with file name, path & code. Here's the code: \n\n" + dartFiles + "\n\n" + lastMessage.parts;
+
+        // Count the tokens in the prompt
+        const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+        const { totalTokens } = await model.countTokens(lastMessage?.parts ?? "");
+        console.log("Total input tokens: " + totalTokens);
+
+        // Check if the token count exceeds the limit
+        if (totalTokens > 30720) {
+            throw Error('Input prompt exceeds the maximum token limit.');
         }
+
         const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
-                history: prompt,
+                history: prompt, generationConfig: {
+                    maxOutputTokens: 2048,
+                },
             }
         );
         const result = await chat.sendMessage(lastMessage?.parts ?? "");
 
         const response = result.response;
         const text = response.text();
-
-        // Creating a result for you
         return text;
     }
 
     // Cache structure
     private codehashCache: { [filePath: string]: { codehash: string, embedding: ContentEmbedding } } = {};
+
+    public displayWebViewMessage(view?: vscode.WebviewView, type?: string, value?: any) {
+        view?.webview.postMessage({
+            type,
+            value
+        });
+    }
+
+    private async sleep(msec: number) {
+        return new Promise(resolve => setTimeout(resolve, msec));
+    }
 
 
     // Modify the get cacheFilePath getter to point to a more secure location
@@ -122,7 +139,17 @@ export class GeminiRepository {
     }
 
     // Find 5 closest dart files for query
-    public async findClosestDartFiles(query: string): Promise<string> {
+    public async findClosestDartFiles(query: string, view?: vscode.WebviewView): Promise<string> {
+        //start timer
+        let operationCompleted = false;
+        const timeoutPromise = new Promise<void>((resolve) => {
+            setTimeout(() => {
+                if (!operationCompleted) {
+                    this.displayWebViewMessage(view, 'stepLoader', { fetchingFileLoader: true });
+                }
+                resolve();
+            }, 5000);
+        });
         try {
             if (!this.apiKey) {
                 throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
@@ -192,7 +219,7 @@ export class GeminiRepository {
             // Save updated cache
             await this.saveCache();
 
-            //Accessing work structure(it can take a while in first time)
+            operationCompleted = true; // -> fetching most relevant files
 
             // Generate embedding for the query
             const queryEmbedding = await embeddingModel.embedContent({
@@ -216,11 +243,20 @@ export class GeminiRepository {
                 resultString += fileContent;
             }
 
+            // A list of most relevant file paths
+            const filePaths = distances.slice(0, 5).map(fileEmbedding => {
+                return fileEmbedding.file.path.split("/").pop();
+            });
+            this.displayWebViewMessage(view, 'stepLoader', { creatingResultLoader: true, filePaths }); //-> generating results along with file names
+            console.log("Most relevant file paths:" + filePaths);
+
             // Fetching most relevant files
             return resultString.trim();
         } catch (error) {
             console.error("Error finding closest Dart files: ", error);
             throw error; // Rethrow the error to be handled by the caller
+        } finally {
+            await timeoutPromise;
         }
     }
 
