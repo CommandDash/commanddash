@@ -15,6 +15,30 @@ const mergeIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http:/
 </svg>
 `;
 
+const dartIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1896_4)">
+<path d="M2.44739 9.55215L0.395172 7.49993C0.150814 7.2496 0 6.89595 0 6.55185C0 6.3922 0.0899636 6.14236 0.157973 5.99942L2.05222 2.05176L2.44739 9.55215Z" fill="#01579B"/>
+<path d="M9.47344 2.44739L7.42122 0.395172C7.24201 0.214767 6.86879 0 6.55285 0C6.28128 0 6.01473 0.0546463 5.84268 0.157973L2.05371 2.05222L9.47344 2.44739Z" fill="#40C4FF"/>
+<path d="M4.89463 11.9998H9.86864V9.86839L6.15794 8.68359L2.76318 9.86839L4.89463 11.9998Z" fill="#40C4FF"/>
+<path d="M2.05225 8.44705C2.05225 9.08037 2.13171 9.23572 2.4467 9.55238L2.76241 9.86833H9.86858L6.39532 5.92091L2.05225 2.05176V8.44705Z" fill="#29B6F6"/>
+<path d="M8.36879 2.05176H2.05225L9.86858 9.86714H12V4.97259L9.47365 2.44597C9.11857 2.09042 8.80357 2.05176 8.36879 2.05176Z" fill="#01579B"/>
+<path opacity="0.2" d="M2.52644 9.63066C2.21073 9.31399 2.13222 9.00163 2.13222 8.44705V2.13098L2.05371 2.05176V8.44705C2.05371 9.00186 2.05371 9.15554 2.52644 9.63089L2.76292 9.86738L2.52644 9.63066Z" fill="white"/>
+<path opacity="0.2" d="M11.9215 4.89453V9.78908H9.79004L9.86855 9.86854H12V4.97304L11.9215 4.89453Z" fill="#263238"/>
+<path opacity="0.2" d="M9.47344 2.44693C9.08233 2.0551 8.76208 2.05176 8.29007 2.05176H2.05371L2.13222 2.13027H8.29007C8.5256 2.13027 9.12027 2.09065 9.47392 2.44621L9.47344 2.44693Z" fill="white"/>
+<path opacity="0.2" d="M11.9215 4.89455L9.47362 2.44739L7.4214 0.395172C7.24219 0.214767 6.86897 0 6.55303 0C6.28146 0 6.01491 0.0546463 5.84286 0.157973L2.05389 2.05222L0.158689 5.99988C0.0909181 6.14377 0 6.39338 0 6.55231C0 6.89713 0.151769 7.24911 0.394217 7.49967L2.28679 9.37817C2.33715 9.43924 2.39076 9.49755 2.44739 9.55285L2.5259 9.63136L2.76215 9.86784L4.81437 11.9201L4.89287 11.9986H9.86593V9.8676H11.9974V4.97305L11.9215 4.89455Z" fill="url(#paint0_radial_1896_4)"/>
+</g>
+<defs>
+<radialGradient id="paint0_radial_1896_4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(5.99964 5.9994) scale(5.99917)">
+<stop stop-color="white" stop-opacity="0.1"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</radialGradient>
+<clipPath id="clip0_1896_4">
+<rect width="12" height="12" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`;
+
 const activityBarBackground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-background");
 const activityBarForeground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
 
@@ -243,12 +267,8 @@ class Mentionify {
     let conversationHistory = [];
     let loadingIndicator = document.getElementById('loader');
     let workspaceLoader = document.getElementById('workspace-loader');
-    let accessingWorkspaceLoader = document.getElementById('accessing-workspace-loader');
-    let accessingWorkspaceDone = document.getElementById('accessing-workspace-done');
-    let fetchingFileLoader = document.getElementById('fetching-file-loader');
-    let fetchingFileDone = document.getElementById('fetching-file-done');
-    let creatingResultLoader = document.getElementById('creating-result-loader');
-    let creatingResultDone = document.getElementById('creating-result-done');
+    let workspaceLoaderText = document.getElementById('workspace-loader-text');
+    let fileNameContainer = document.getElementById("file-names");
 
     // Handle mexssages sent from the extension to the webview
     window.addEventListener("message", (event) => {
@@ -294,13 +314,12 @@ class Mentionify {
                 });
                 break;
             }
-			case "displaySnackbar": {
-				response = message.value;
-				showSnackbar(response);
-				break;
-			}
+            case "displaySnackbar": {
+                response = message.value;
+                showSnackbar(response);
+                break;
+            }
             case 'workspaceLoader': {
-                debugger;
                 workspaceLoader.style.display = message.value ? 'flex' : 'none';
                 if (message.value) {
                     workspaceLoader.classList.remove("animate__slideOutDown");
@@ -309,30 +328,35 @@ class Mentionify {
                     workspaceLoader.classList.remove("animate__slideInUp");
                     workspaceLoader.classList.add("animate__slideOutDown");
                 }
+                if (!message.value) {
+                    fileNameContainer.innerHTML = '';
+                    workspaceLoaderText.textContent = "Finding the most relevant files";
+                }
                 break;
             }
             case 'stepLoader': {
-                if (message.value?.accessingWorkspaceLoader) {
-                    accessingWorkspaceLoader.style.display = 'none';
-                    accessingWorkspaceDone.style.display = 'block';
-                }
                 if (message.value?.fetchingFileLoader) {
-                    fetchingFileLoader.style.display = 'none';
-                    fetchingFileDone.style.display = 'block';
+                    workspaceLoaderText.textContent = "Finding most relevant files\n(this may take a while for first time)";
+                } else if (message.value?.creatingResultLoader) {
+                    fileNameContainer.style.display = "inline-flex";
+                    workspaceLoaderText.textContent = "Preparing a result";
+                    message.value?.filePaths?.forEach((_filePath) => {
+                        const divBlock = document.createElement("div");
+                        divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
+                        divBlock.id = "divBlock";
+                        const fileNames = document.createElement("span");
+                        const _dartIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        _dartIcon.innerHTML = dartIcon;
+                        _dartIcon.classList.add("h-3", "w-3", "mx-1");
+                        _dartIcon.id = "dartIcon";
+                        fileNames.textContent = _filePath;
+                        fileNames.classList.add("file-path");
+                        fileNames.id = "fileNames";
+                        divBlock.appendChild(_dartIcon);
+                        divBlock.appendChild(fileNames);
+                        fileNameContainer.appendChild(divBlock);
+                    });
                 }
-                if (message.value?.creatingResultLoader) {
-                    creatingResultLoader.style.display = 'none';
-                    creatingResultDone.style.display = 'block';
-                }
-                break;
-            }
-            case 'stepLoaderCompleted': {
-                accessingWorkspaceLoader.style.display = 'block';
-                accessingWorkspaceDone.style.display = 'none';
-                fetchingFileLoader.style.display = 'block';
-                fetchingFileDone.style.display = 'none';
-                creatingResultLoader.style.display = 'block';
-                creatingResultDone.style.display = 'none';
                 break;
             }
         }
@@ -449,88 +473,88 @@ class Mentionify {
     }
 
     // Function to display messages in the chat container
-	function displayMessages() {
-		const dynamicMessagesContainer = document.getElementById("dynamic-messages");
-		console.log(conversationHistory);
+    function displayMessages() {
+        const dynamicMessagesContainer = document.getElementById("dynamic-messages");
+        console.log(conversationHistory);
 
-		// Clear existing messages
-		dynamicMessagesContainer.innerHTML = "";
+        // Clear existing messages
+        dynamicMessagesContainer.innerHTML = "";
 
-		// Loop through the messages array and create message elements
-		conversationHistory.forEach((message, index) => {
-			const messageElement = document.createElement("div");
-			if (message.role === "model") {
-				messageElement.classList.add("message", "user-gemini-pro"); // Change class to "user-gemini-pro"
-				messageElement.innerHTML = `<p><strong>FlutterGPT: </strong>${markdownToPlain(message.parts)}</p>`;
-			} else {
-				messageElement.classList.add("message", "user-you"); // Change class to "user-you"
-				messageElement.innerHTML = `<p><strong>You: </strong>${message.parts}</p>`;
-			}
-			dynamicMessagesContainer.appendChild(messageElement);
-		});
+        // Loop through the messages array and create message elements
+        conversationHistory.forEach((message, index) => {
+            const messageElement = document.createElement("div");
+            if (message.role === "model") {
+                messageElement.classList.add("message", "user-gemini-pro"); // Change class to "user-gemini-pro"
+                messageElement.innerHTML = `<p><strong>FlutterGPT: </strong>${markdownToPlain(message.parts)}</p>`;
+            } else {
+                messageElement.classList.add("message", "user-you"); // Change class to "user-you"
+                messageElement.innerHTML = `<p><strong>You: </strong>${message.parts}</p>`;
+            }
+            dynamicMessagesContainer.appendChild(messageElement);
+        });
 
-		// Scroll the chat container to the most recent message
-		dynamicMessagesContainer.scrollTop = dynamicMessagesContainer.scrollHeight;
-		const preCodeBlocks = document.querySelectorAll("pre code");
-		preCodeBlocks.forEach((_preCodeBlock) => {
-			_preCodeBlock.classList.add(
-				"p-1",
-				"my-2",
-				"block",
-				"language-dart"
-			);
-		});
+        // Scroll the chat container to the most recent message
+        dynamicMessagesContainer.scrollTop = dynamicMessagesContainer.scrollHeight;
+        const preCodeBlocks = document.querySelectorAll("pre code");
+        preCodeBlocks.forEach((_preCodeBlock) => {
+            _preCodeBlock.classList.add(
+                "p-1",
+                "my-2",
+                "block",
+                "language-dart"
+            );
+        });
 
-		const preBlocks = document.querySelectorAll("pre");
-		preBlocks.forEach((_preBlock) => {
-			_preBlock.classList.add("language-dart", "relative", "my-5");
-			const textToHighlight = _preBlock.textContent.trim();
-			Prism.highlightElement(textToHighlight);
+        const preBlocks = document.querySelectorAll("pre");
+        preBlocks.forEach((_preBlock) => {
+            _preBlock.classList.add("language-dart", "relative", "my-5");
+            const textToHighlight = _preBlock.textContent.trim();
+            Prism.highlightElement(textToHighlight);
 
-			const iconContainer = document.createElement("div");
-			iconContainer.id = "icon-container";
-			iconContainer.classList.add("absolute", "top-2", "right-2", "inline-flex", "flex-row", "h-8", "w-16", "z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
-			iconContainer.style.backgroundColor = activityBarBackground;
+            const iconContainer = document.createElement("div");
+            iconContainer.id = "icon-container";
+            iconContainer.classList.add("absolute", "top-2", "right-2", "inline-flex", "flex-row", "h-8", "w-16", "z-10", "justify-center", "items-center", "rounded-md", "opacity-0");
+            iconContainer.style.backgroundColor = activityBarBackground;
 
-			const _copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-			_copyIcon.innerHTML = copyIcon;
-			_copyIcon.id = "copy-icon";
-			_copyIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
-			_copyIcon.style.fill = activityBarForeground;
-			_copyIcon.setAttribute("alt", "Copy");
-			iconContainer.appendChild(_copyIcon);
+            const _copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            _copyIcon.innerHTML = copyIcon;
+            _copyIcon.id = "copy-icon";
+            _copyIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+            _copyIcon.style.fill = activityBarForeground;
+            _copyIcon.setAttribute("alt", "Copy");
+            iconContainer.appendChild(_copyIcon);
 
-			_copyIcon.addEventListener("click", () => {
-				const textToCopy = _preBlock.textContent.trim();
-				navigator.clipboard.writeText(textToCopy);
-			});
+            _copyIcon.addEventListener("click", () => {
+                const textToCopy = _preBlock.textContent.trim();
+                navigator.clipboard.writeText(textToCopy);
+            });
 
-			const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-			_mergeIcon.innerHTML = mergeIcon;
-			_mergeIcon.id = "merge-icon";
-			_mergeIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
-			_mergeIcon.style.fill = activityBarForeground;
-			_mergeIcon.setAttribute("alt", "Merge");
-			iconContainer.appendChild(_mergeIcon);
+            const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            _mergeIcon.innerHTML = mergeIcon;
+            _mergeIcon.id = "merge-icon";
+            _mergeIcon.classList.add("h-6", "w-6", "inline-flex", "justify-center", "items-center", "cursor-pointer");
+            _mergeIcon.style.fill = activityBarForeground;
+            _mergeIcon.setAttribute("alt", "Merge");
+            iconContainer.appendChild(_mergeIcon);
 
-			_mergeIcon.addEventListener("click", () => {
-				vscode.postMessage({
-					type: "pasteCode",
-					value: _preBlock.textContent.trim(),
-				});
-			});
+            _mergeIcon.addEventListener("click", () => {
+                vscode.postMessage({
+                    type: "pasteCode",
+                    value: _preBlock.textContent.trim(),
+                });
+            });
 
-			_preBlock.appendChild(iconContainer);
+            _preBlock.appendChild(iconContainer);
 
-			_preBlock.addEventListener("mouseenter", () => {
-				iconContainer.style.opacity = 1;
-			});
+            _preBlock.addEventListener("mouseenter", () => {
+                iconContainer.style.opacity = 1;
+            });
 
-			_preBlock.addEventListener("mouseleave", () => {
-				iconContainer.style.opacity = 0;
-			});
-		});
-	}
+            _preBlock.addEventListener("mouseleave", () => {
+                iconContainer.style.opacity = 0;
+            });
+        });
+    }
 
 
 
@@ -598,14 +622,14 @@ class Mentionify {
     });
 
     document.getElementById("clear-chat-button").addEventListener("click", function () {
-		const dynamicMessagesContainer = document.getElementById("dynamic-messages");
-		dynamicMessagesContainer.innerHTML = "";
-		conversationHistory = [];
+        const dynamicMessagesContainer = document.getElementById("dynamic-messages");
+        dynamicMessagesContainer.innerHTML = "";
+        conversationHistory = [];
 
-		vscode.postMessage({
-			type: "clearChat",
-		});
-	});
+        vscode.postMessage({
+            type: "clearChat",
+        });
+    });
 
     // Function to introduce a delay using a Promise
     function delay(ms) {
@@ -626,16 +650,16 @@ class Mentionify {
         toastContainer.style.display = 'none';
     }
 
-	async function showSnackbar(errorMessage) {
-		const snackbar = document.getElementById("snackbar");
-		const errorTextNode = document.createTextNode(errorMessage);
-		const iconElement = snackbar.querySelector("i");
-		snackbar.insertBefore(errorTextNode, iconElement.nextSibling);
-		snackbar.style.display = "flex";
+    async function showSnackbar(errorMessage) {
+        const snackbar = document.getElementById("snackbar");
+        const errorTextNode = document.createTextNode(errorMessage);
+        const iconElement = snackbar.querySelector("i");
+        snackbar.insertBefore(errorTextNode, iconElement.nextSibling);
+        snackbar.style.display = "flex";
 
-		await delay(5000);
+        await delay(5000);
 
-		snackbar.removeChild(errorTextNode);
-		snackbar.style.display = "none";
-	}
+        snackbar.removeChild(errorTextNode);
+        snackbar.style.display = "none";
+    }
 })();

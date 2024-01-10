@@ -134,23 +134,23 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
 		this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
-		this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
 
 		// Check if the prompt includes '@workspace' and handle accordingly
 		try {
 			if (prompt.includes('@workspace')) {
 				// Add the full prompt to the private history for completion
-				const dartFiles = await this.aiRepo.findClosestDartFiles(prompt);
+				this._view?.webview.postMessage({ type: 'workspaceLoader', value: true });
+				const dartFiles = await this.aiRepo.findClosestDartFiles(prompt, this._view);
 				workspacePrompt = "You've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following files code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps including the file paths, name & code. Here's the code: \n\n" + dartFiles + "\n\n" + prompt;
 				this._privateConversationHistory.push({ role: 'user', parts: workspacePrompt });
 			} else {
 				// Append the current user prompt to the conversation history
 				this._privateConversationHistory.push({ role: 'user', parts: prompt });
+				this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
 			}
 		} catch (error) {
 			console.error("Error processing workspace prompt: ", error);
 		}
-
 		// Use the stored conversation history for the prompt
 		try {
 			let response = '';
@@ -160,10 +160,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			} else {
 				response = await this.aiRepo.getCompletion(this._privateConversationHistory);
 				this._privateConversationHistory.push({ role: 'user', parts: prompt });
+				this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
 			}
 			this._privateConversationHistory.push({ role: 'model', parts: response });
 			this._publicConversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+			this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 
 		} catch (error) {
@@ -173,6 +175,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 		} finally {
 			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+			this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });
 		}
 	}
 

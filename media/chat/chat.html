@@ -23,60 +23,16 @@
         <!-- Display chat messages -->
         <div id="dynamic-messages"></div>
         <!-- Add the loading indicator inside the chat container -->
-        <span class="loader" id="loader" style="display: none;"></span>
+        <div class="ml-7">
+            <div class="dot-flashing" id="loader"></div>
+        </div>
         
-        <div class="hidden flex-col w-full h-32 animate__animated animate__slideInUp px-2 py-3" id="workspace-loader">
-            <div class="inline-flex flex-row">
-                <!-- loader -->
-                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                    class="animate-spin hidden" id="accessing-workspace-loader">
-                    <path clip-rule="evenodd"
-                        d="M20.8754 10.5001C20.5189 8.40424 19.4322 6.50216 17.8078 5.1307C16.1833 3.75925 14.1259 3.0069 11.9999 3.0069C9.87397 3.0069 7.81659 3.75925 6.19214 5.1307C4.56768 6.50216 3.48097 8.40424 3.12445 10.5001H1.60645C1.96988 8.00293 3.22025 5.72008 5.12879 4.0692C7.03734 2.41831 9.47646 1.50977 11.9999 1.50977C14.5234 1.50977 16.9626 2.41831 18.8711 4.0692C20.7796 5.72008 22.03 8.00293 22.3934 10.5001H20.8754Z"
-                        />
-                </svg>
-                <!-- check -->
-                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                    class="block" id="accessing-workspace-done">
-                    <path clip-rule="evenodd"
-                        d="M21.6464 4.98462L8.94145 19.9846L7.75645 19.9306L2.73145 12.7756L3.95845 11.9146L8.42545 18.2746L20.5019 4.01562L21.6479 4.98462H21.6464Z"
-                        />
-                </svg>
-                <span class="mx-2">Accessing work structure (it can take a while in first time)</span>
+        <div class="hidden flex-col w-full h-48 animate__animated animate__slideInUp px-2 py-3" id="workspace-loader">
+            <div class="inline-flex flex-row items-end px-2">
+                <span id="workspace-loader-text">Finding the most relevant files</span>
+                <div class="typing-loader mx-2"></div>
             </div>
-            <div class="inline-flex flex-row">
-                <!-- loader -->
-                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                    class="animate-spin" id="fetching-file-loader">
-                    <path clip-rule="evenodd"
-                        d="M20.8754 10.5001C20.5189 8.40424 19.4322 6.50216 17.8078 5.1307C16.1833 3.75925 14.1259 3.0069 11.9999 3.0069C9.87397 3.0069 7.81659 3.75925 6.19214 5.1307C4.56768 6.50216 3.48097 8.40424 3.12445 10.5001H1.60645C1.96988 8.00293 3.22025 5.72008 5.12879 4.0692C7.03734 2.41831 9.47646 1.50977 11.9999 1.50977C14.5234 1.50977 16.9626 2.41831 18.8711 4.0692C20.7796 5.72008 22.03 8.00293 22.3934 10.5001H20.8754Z"
-                        />
-                </svg>
-                <!-- check -->
-                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                    class="hidden" id="fetching-file-done">
-                    <path clip-rule="evenodd"
-                        d="M21.6464 4.98462L8.94145 19.9846L7.75645 19.9306L2.73145 12.7756L3.95845 11.9146L8.42545 18.2746L20.5019 4.01562L21.6479 4.98462H21.6464Z"
-                        />
-                </svg>
-                <span class="mx-2">Fetching most relevant files</span>
-            </div>
-            <div class="inline-flex flex-row">
-                <!-- loader -->
-                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                    class="animate-spin" id="creating-result-loader">
-                    <path clip-rule="evenodd"
-                        d="M20.8754 10.5001C20.5189 8.40424 19.4322 6.50216 17.8078 5.1307C16.1833 3.75925 14.1259 3.0069 11.9999 3.0069C9.87397 3.0069 7.81659 3.75925 6.19214 5.1307C4.56768 6.50216 3.48097 8.40424 3.12445 10.5001H1.60645C1.96988 8.00293 3.22025 5.72008 5.12879 4.0692C7.03734 2.41831 9.47646 1.50977 11.9999 1.50977C14.5234 1.50977 16.9626 2.41831 18.8711 4.0692C20.7796 5.72008 22.03 8.00293 22.3934 10.5001H20.8754Z"
-                        />
-                </svg>
-                <!-- check -->
-                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                    class="hidden" id="creating-result-done">
-                    <path clip-rule="evenodd"
-                        d="M21.6464 4.98462L8.94145 19.9846L7.75645 19.9306L2.73145 12.7756L3.95845 11.9146L8.42545 18.2746L20.5019 4.01562L21.6479 4.98462H21.6464Z"
-                        />
-                </svg>
-                <span class="mx-2">Creating a result for you</span>
-            </div>
+            <div class="inline-flex flex-col px-3" id="file-names"></div>
         </div>
         <div id="response" class="pt-4 text-sm"></div>
 
