@@ -166,7 +166,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._publicConversationHistory.push({ role: 'model', parts: response });
 			this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
 			this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
-			this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 
 		} catch (error) {
@@ -176,6 +175,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 		} finally {
 			this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+			this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });
 		}
 	}
 

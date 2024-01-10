@@ -114,33 +114,55 @@ body {
     color: var(--vscode-editor-foreground);
 }
 
-.loader {
-    width: 8px;
-    height: 8px;
-    left: 16px;
-    border-radius: 50%;
-    background-color: var(--vscode-progressBar-background);
-    box-shadow: 32px 0 var(--vscode-progressBar-background), -32px 0 var(--vscode-progressBar-background);
+.dot-flashing {
     position: relative;
-    animation: flash 0.5s ease-out infinite alternate;
-}
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--vscode-progressBar-background);
+    color: var(--vscode-progressBar-background);
+    animation: dot-flashing 1s infinite linear alternate;
+    animation-delay: 0.5s;
+    display: none;
+  }
 
-@keyframes flash {
+  .dot-flashing::before, .dot-flashing::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+  }
+
+  .dot-flashing::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--vscode-progressBar-background);
+    color: var(--vscode-progressBar-background);
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 0s;
+  }
+
+  .dot-flashing::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--vscode-progressBar-background);
+    color: var(--vscode-progressBar-background);
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 1s;
+  }
+  
+  @keyframes dot-flashing {
     0% {
-        background-color: #FFF2;
-        box-shadow: 16px 0 #FFF2, -16px 0 var(--vscode-progressBar-background);
+      background-color: var(--vscode-progressBar-background);
     }
-
-    50% {
-        background-color: var(--vscode-progressBar-background);
-        box-shadow: 16px 0 #FFF2, -16px 0 #FFF2;
+    50%, 100% {
+      background-color: var(--vscode-editor-foreground);
     }
-
-    100% {
-        background-color: #FFF2;
-        box-shadow: 16px 0 var(--vscode-progressBar-background), -16px 0 #FFF2;
-    }
-}
+  }
 
 @keyframes slideUp {
     from {
@@ -285,25 +307,27 @@ ul {
     border-radius: 50%;
     animation: loading 1s linear infinite alternate;
     margin-bottom: 4px;
-   }
-   
-   @keyframes loading {
+}
+
+@keyframes loading {
     0% {
-     background-color: var(--vscode-progressBar-background);
-     box-shadow: 
-           8px 0px 0px 0px var(--vscode-editor-foreground), 
-           16px 0px 0px 0px var(--vscode-editor-foreground);
+        background-color: var(--vscode-progressBar-background);
+        box-shadow:
+            8px 0px 0px 0px var(--vscode-editor-foreground),
+            16px 0px 0px 0px var(--vscode-editor-foreground);
     }
+
     25% {
-     background-color: var(--vscode-editor-foreground);
-     box-shadow: 
-           8px 0px 0px 0px var(--vscode-progressBar-background), 
-           16px 0px 0px 0px var(--vscode-editor-foreground);
+        background-color: var(--vscode-editor-foreground);
+        box-shadow:
+            8px 0px 0px 0px var(--vscode-progressBar-background),
+            16px 0px 0px 0px var(--vscode-editor-foreground);
     }
+
     75% {
-     background-color: var(--vscode-editor-foreground);
-     box-shadow: 
-           8px 0px 0px 0px var(--vscode-editor-foreground), 
-           16px 0px 0px 0px var(--vscode-progressBar-background);
+        background-color: var(--vscode-editor-foreground);
+        box-shadow:
+            8px 0px 0px 0px var(--vscode-editor-foreground),
+            16px 0px 0px 0px var(--vscode-progressBar-background);
     }
-   }
+}

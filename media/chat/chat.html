@@ -23,11 +23,13 @@
         <!-- Display chat messages -->
         <div id="dynamic-messages"></div>
         <!-- Add the loading indicator inside the chat container -->
-        <span class="loader" id="loader" style="display: none;"></span>
+        <div class="ml-7">
+            <div class="dot-flashing" id="loader"></div>
+        </div>
         
-        <div class="hidden flex-col w-full h-40 animate__animated animate__slideInUp px-2 py-3" id="workspace-loader">
+        <div class="hidden flex-col w-full h-48 animate__animated animate__slideInUp px-2 py-3" id="workspace-loader">
             <div class="inline-flex flex-row items-end px-2">
-                <span id="workspace-loader-text"></span>
+                <span id="workspace-loader-text">Accessing work structure (it can take a while in first time)</span>
                 <div class="typing-loader mx-2"></div>
             </div>
             <div class="inline-flex flex-col px-3" id="file-names"></div>
