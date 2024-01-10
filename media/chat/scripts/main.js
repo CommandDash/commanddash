@@ -330,16 +330,16 @@ class Mentionify {
                 }
                 if (!message.value) {
                     fileNameContainer.innerHTML = '';
+                    workspaceLoaderText.textContent = "Finding the most relevant files";
                 }
                 break;
             }
             case 'stepLoader': {
-                debugger;
-                if (message.value?.accessingWorkspaceLoader) {
-                    workspaceLoaderText.textContent = "Accessing work structure (it can take a while in first time)";
-                } else if (message.value?.fetchingFileLoader) {
+                if (message.value?.fetchingFileLoader) {
+                    workspaceLoaderText.textContent = "Finding the most relevant files (this may take some time for the first time or there are changes in the current files)";
+                } else if (message.value?.creatingResultLoader) {
                     fileNameContainer.style.display = "inline-flex";
-                    workspaceLoaderText.textContent = "Fetching most relevant files";
+                    workspaceLoaderText.textContent = "Generating your response";
                     message.value?.filePaths?.forEach((_filePath) => {
                         const divBlock = document.createElement("div");
                         divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
@@ -356,9 +356,6 @@ class Mentionify {
                         divBlock.appendChild(fileNames);
                         fileNameContainer.appendChild(divBlock);
                     });
-                } else if (message.value?.creatingResultLoader) {
-                    fileNameContainer.style.display = "none";
-                    workspaceLoaderText.textContent = "Creating results";
                 }
                 break;
             }
