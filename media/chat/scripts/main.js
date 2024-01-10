@@ -336,10 +336,10 @@ class Mentionify {
             }
             case 'stepLoader': {
                 if (message.value?.fetchingFileLoader) {
-                    workspaceLoaderText.textContent = "Finding the most relevant files (this may take some time for the first time or there are changes in the current files)";
+                    workspaceLoaderText.textContent = "Finding most relevant files\n(this may take a while for first time)";
                 } else if (message.value?.creatingResultLoader) {
                     fileNameContainer.style.display = "inline-flex";
-                    workspaceLoaderText.textContent = "Generating your response";
+                    workspaceLoaderText.textContent = "Preparing a result";
                     message.value?.filePaths?.forEach((_filePath) => {
                         const divBlock = document.createElement("div");
                         divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
