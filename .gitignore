@@ -28,3 +28,9 @@ build/
 dist/
 .env
 user_config.json
+
+
+#Ignore lock files
+
+package-lock.json
+yarn.lock

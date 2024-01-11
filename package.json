@@ -29,6 +29,9 @@
   "activationEvents": [
     "onLanguage:dart"
   ],
+  "extensionDependencies": [
+		"Dart-Code.dart-code"
+	],
   "main": "./out/extension.js",
   "contributes": {
     "extensionKind": [
