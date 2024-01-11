@@ -108,6 +108,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		return updatedChatHtml;
 	}
 
+	
 
 	private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
 	private _privateConversationHistory: Array<{ role: string, parts: string }> = [];

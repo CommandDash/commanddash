@@ -419,7 +419,7 @@ class Mentionify {
             iconContainer.appendChild(_copyIcon);
 
             _copyIcon.addEventListener("click", () => {
-                const textToCopy = _preBlock.textContent;
+                const textToCopy = _preBlock.textContent.trim();
                 navigator.clipboard.writeText(textToCopy);
             });
 
@@ -434,7 +434,7 @@ class Mentionify {
             _mergeIcon.addEventListener("click", () => {
                 vscode.postMessage({
                     type: "pasteCode",
-                    value: _preBlock.textContent,
+                    value: _preBlock.textContent.trim(),
                 });
             });
 
