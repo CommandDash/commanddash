@@ -33,7 +33,7 @@ const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
     //Check for update on activation of extension
-     new UpdateManager(context).checkForUpdate();
+    new UpdateManager(context).checkForUpdate();
 
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
@@ -49,9 +49,7 @@ export async function activate(context: vscode.ExtensionContext) {
             }
         });
     }
-
     console.log('Congratulations, "fluttergpt" is now active!');
-
     dotenv.config({ path: path.join(__dirname, '../.env') });
     activateTelemetry(context);
     logEvent('activated');
@@ -61,24 +59,41 @@ export async function activate(context: vscode.ExtensionContext) {
     if (!dartExt) {
         // This should not happen since the FlutterGPT extension has a dependency on the Dart one
         // but just in case, we'd like to give a useful error message.
-        throw new Error("The Dart extension is not installed, Flutter extension is unable to activate.");
+        vscode.window.showWarningMessage("Kindly install 'Dart' extension to activate FlutterGPT");
     }
-    await dartExt.activate();
+    await dartExt?.activate();
 
-    if (!dartExt.exports) {
+    if (!dartExt?.exports) {
         console.error("The Dart extension did not provide an exported API. Maybe it failed to activate or is not the latest version?");
-        return;
     }
-    const analyzer: ILspAnalyzer = dartExt.exports._privateApi.analyzer;
 
-    let geminiRepo = initGemini();
+    const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
+    try {
+        let geminiRepo = initGemini();
+        initFlutterExtension(context, geminiRepo, analyzer);
+    } catch (error) {
+        console.error(error);
+    } 
+    finally {
+        vscode.workspace.onDidChangeConfiguration(event => {
+            let affected = event.affectsConfiguration("fluttergpt.apiKey");
+            if (affected) {
+                const geminiRepo = initGemini();
+                initFlutterExtension(context, geminiRepo, analyzer);
+            }
+        });
+    }
 
-    const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
+    // new ExtensionVersionManager(context).isExtensionUpdated();
+}
 
-    const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
-    context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
+function isOldOpenAIKey(apiKey: string): boolean {
+    // Define the logic to determine if the apiKey is an old OpenAI key
+    // For example, if old keys start with "sk-", you could use:
+    return apiKey.startsWith('sk-');
+}
 
+function initWebview(context: vscode.ExtensionContext, geminiRepo: GeminiRepository) {
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
     const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
     // Register the provider with the extension's context
@@ -89,29 +104,28 @@ export async function activate(context: vscode.ExtensionContext) {
             }
         )
     );
-
-    const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
-
-    vscode.workspace.onDidChangeConfiguration(event => {
-        let affected = event.affectsConfiguration("fluttergpt.apiKey");
-        if (affected) { geminiRepo = initGemini(); }
-    });
-    customPush('fluttergpt.addToReference', () => addToReference(context.globalState), context);
-    customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(geminiRepo, context.globalState), context);
-    customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(geminiRepo, context.globalState), context);
-    customPush('fluttergpt.createCodeFromDescription', () => createCodeFromDescription(geminiRepo, context.globalState), context);
-    customPush('fluttergpt.refactorCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName), context);
-    customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), context);
-    customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), context);
-
-   // new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
-function isOldOpenAIKey(apiKey: string): boolean {
-    // Define the logic to determine if the apiKey is an old OpenAI key
-    // For example, if old keys start with "sk-", you could use:
-    return apiKey.startsWith('sk-');
+function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer) {
+
+    const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
+        context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
+
+        const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
+        context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
+
+        initWebview(context, geminiRepo);
+
+        const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
+        context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
+
+        customPush('fluttergpt.addToReference', () => addToReference(context.globalState), context);
+        customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(geminiRepo, context.globalState), context);
+        customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(geminiRepo, context.globalState), context);
+        customPush('fluttergpt.createCodeFromDescription', () => createCodeFromDescription(geminiRepo, context.globalState), context);
+        customPush('fluttergpt.refactorCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName), context);
+        customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), context);
+        customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), context);
 }
 
 async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {
