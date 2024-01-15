@@ -122,7 +122,6 @@ FlutterGPT 💙 is community centric and any contribution is most welcome to mak
 
 - **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
 - **Pick up open issues**: Pick up and fix existing issues in [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
-
 - **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://github.com/Welltested-AI/fluttergpt/discussions/182). 
 
 To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file.
