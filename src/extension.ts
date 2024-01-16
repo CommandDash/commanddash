@@ -12,6 +12,7 @@ import { createCodeFromBlueprint } from './tools/create/code_from_blueprint';
 import { createRepoClassFromPostman } from './tools/create/class_repository_from_json';
 import { addToReference } from './tools/reference/add_reference';
 import { createCodeFromDescription } from './tools/create/code_from_description';
+import { createInlineCodeCompletion } from './tools/create/inline_code_completion';
 import { optimizeCode } from './tools/refactor/optimize_code';
 import { makeHttpRequest } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
@@ -123,6 +124,7 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
         customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(geminiRepo, context.globalState), context);
         customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(geminiRepo, context.globalState), context);
         customPush('fluttergpt.createCodeFromDescription', () => createCodeFromDescription(geminiRepo, context.globalState), context);
+        customPush('fluttergpt.createInlineCodeCompletion', () => createInlineCodeCompletion(geminiRepo, context.globalState), context);
         customPush('fluttergpt.refactorCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName), context);
         customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), context);
         customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), context);
