@@ -74,6 +74,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 						this.clearConversationHistory();
 						break;
 					}
+				case "chatWebView": 
+				{
+					webviewView.webview.html = this._getChatWebview(webviewView.webview);
+					break;
+				}
 			}
 		});
 
@@ -82,7 +87,24 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		});
 	}
 
-	private _getHtmlForWebview(webview: vscode.Webview,) {
+	private _getHtmlForWebview(webview: vscode.Webview) {
+		const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
+		const onboardingHtml = fs.readFileSync(onboardingHtmlPath.fsPath, 'utf8');
+		const onboardingCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.css"));
+		const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
+
+		// Modify your Content-Security-Policy
+		const cspSource = webview.cspSource;
+
+		const updatedOnboardingChatHtml = onboardingHtml
+			.replace(/{{cspSource}}/g, cspSource)
+			.replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
+			.replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString());
+
+		return updatedOnboardingChatHtml;
+	}
+
+	private _getChatWebview(webview: vscode.Webview) {
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
 		const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "css", "chatpage.css"));
 		const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
@@ -98,7 +120,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			style-src 'unsafe-inline' ${cspSource};
 			script-src 'unsafe-inline' ${cspSource} https: http:;
 		`;
-
+		
 		const updatedChatHtml = chatHtml
 			.replace(/{{cspSource}}/g, cspSource)
 			.replace(/{{scriptUri}}/g, scriptUri.toString())
@@ -108,7 +130,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		return updatedChatHtml;
 	}
 
-	
+
 
 	private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
 	private _privateConversationHistory: Array<{ role: string, parts: string }> = [];
