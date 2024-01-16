@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import path = require('path');
+import { extractDartCode } from '../../utilities/code-processing';
 
 
 // async function startProcess(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
@@ -93,7 +94,7 @@ async function generateSuggestions() {
                 _conversationHistory.push({ role: "user", parts: prompt });
                 const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
                 console.log(result);
-                return [result];
+                return [extractDartCode(result)];
             }
             else {
                 return [];
