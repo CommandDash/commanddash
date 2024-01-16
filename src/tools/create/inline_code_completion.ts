@@ -34,11 +34,20 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
                 const currentFile = path.relative(workspaceRoot, document.fileName);
                 const lineText = document.lineAt(position.line).text.substring(0, position.character);
                 // const relevantText = extractRelevantText(lineText);
-                const suggestions = await generateSuggestions() ?? [];
+
+                // const suggestions = await generateSuggestions() ?? [];
+                // const suggestions = ['Random response'];
                 // Convert the Gemini response to InlineCompletionItems
+                const suggestions = await new Promise<string[]>((resolve) =>  {
+                    // setTimeout(() => {
+                    //     resolve(['hello \n this is a test string \n\n // comments']);
+                    // }, 1000);
+                    resolve(generateSuggestions());
+                });
+
                 const completionItems = suggestions.map((suggestion) => ({
                     insertText: suggestion,
-                    range: new vscode.Range(position.translate(0, -lineText.length), position),
+                    // range: new vscode.Range(position.translate(0, -lineText.length), position),
                 }));
                 console.log(completionItems);
                 return completionItems;
@@ -76,12 +85,12 @@ export async function createInlineCodeCompletion(geminiRepo: GeminiRepository, g
     });
 }
 
-async function generateSuggestions() {
+async function generateSuggestions():Promise<string[]>  {
     try {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage('No active editor');
-            return;
+            return [];
         }
         const workspaceFolders = vscode.workspace.workspaceFolders;
             if (workspaceFolders && workspaceFolders.length > 0) {
@@ -107,6 +116,7 @@ async function generateSuggestions() {
         } else {
             vscode.window.showErrorMessage(`Failed to generate code: ${error}`);
         }
+        return [];
     }
 }
 
