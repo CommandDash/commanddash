@@ -14,12 +14,19 @@ export class GeminiRepository {
     private genAI: GoogleGenerativeAI;
     private _view?: vscode.Webview;
 
+    private static _instance:GeminiRepository;
+
     constructor(apiKey: string) {
         this.apiKey = apiKey;
         this.genAI = new GoogleGenerativeAI(this.apiKey);
         this.ensureCacheDirExists().catch(error => {
             handleError(error, 'Failed to initialize the cache directory.');
         });
+        GeminiRepository._instance = this;
+    }
+
+    public static getInstance():GeminiRepository {
+        return GeminiRepository._instance;
     }
 
     public async generateTextFromImage(prompt: string, image: string, mimeType: string): Promise<string> {
