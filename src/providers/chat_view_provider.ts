@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
-import path = require('path');
 import { GeminiRepository } from "../repository/gemini-repository";
 
 
@@ -15,6 +14,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		private readonly aiRepo: GeminiRepository,
 	) {
 
+	}
+
+	// Public method to post a message to the webview
+	public postMessageToWebview(message: any): void {
+		if (this._view) {
+			this._view.webview.postMessage(message);
+		}
 	}
 
 	public resolveWebviewView(
@@ -77,6 +83,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			}
 		});
 
+		webviewView.onDidChangeVisibility(() => {
+			if (webviewView.visible && this._view) {
+				this._view?.webview.postMessage({ type: 'focusChatInput' });
+			}
+		});
+
 		vscode.window.onDidChangeActiveColorTheme(() => {
 			webviewView.webview.postMessage({ type: 'updateTheme' });
 		});
@@ -107,8 +119,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 		return updatedChatHtml;
 	}
-
-	
 
 	private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
 	private _privateConversationHistory: Array<{ role: string, parts: string }> = [];

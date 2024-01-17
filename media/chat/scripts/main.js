@@ -357,8 +357,13 @@ class Mentionify {
                         fileNameContainer.appendChild(divBlock);
                     });
                 }
-                break;
             }
+            case 'focusChatInput':
+                {
+                    const chatInput = document.getElementById('prompt-input');
+                    chatInput.focus();
+                    break;
+                }
         }
     });
 
