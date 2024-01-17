@@ -360,7 +360,7 @@ class Mentionify {
             }
             case 'focusChatInput':
                 {
-                    const chatInput = document.getElementById('prompt-input'); // Replace with your actual input element's ID
+                    const chatInput = document.getElementById('prompt-input');
                     chatInput.focus();
                     break;
                 }

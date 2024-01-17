@@ -74,7 +74,7 @@
       },
       {
         "command": "fluttergpt.toggleChat",
-        "key": "ctrl+at+o",
+        "key": "ctrl+alt+o",
         "mac": "cmd+alt+o"
       }
     ],
