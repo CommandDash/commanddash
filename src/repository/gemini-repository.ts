@@ -64,6 +64,33 @@ export class GeminiRepository {
         return text;
     }
 
+    //validate api key by sending 'Test message' as prompt
+    public async validateApiKey(apiKey: string) {
+        try {
+            const _genAI = new GoogleGenerativeAI(apiKey);
+            const model = _genAI.getGenerativeModel({ model: 'gemini-pro' });
+            const result = await model.generateContent('Test message');
+            return result.response.text;
+        } catch (error) {
+            // Check if the error is related to an invalid API key
+            if (this.isApiKeyInvalidError(error)) {
+                throw new Error('API key is not valid. Please pass a valid API key.');
+            } else {
+                // Re-throw other errors
+                throw error;
+            }
+        }
+    }
+
+    // Function to check if the error is related to an invalid API key
+    private isApiKeyInvalidError(error: any): boolean {
+        return (
+            error &&
+            error.message &&
+            error.message.includes('API_KEY_INVALID')
+        );
+    }
+
     // Cache structure
     private codehashCache: { [filePath: string]: { codehash: string, embedding: ContentEmbedding } } = {};
 

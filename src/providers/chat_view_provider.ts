@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from 'fs';
 import path = require('path');
 import { GeminiRepository } from "../repository/gemini-repository";
+import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
@@ -41,12 +42,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			switch (data.type) {
 				case "codeSelected":
 					{
-						const code = data.value;
-						// code = code.replace(/([^\\])(\$)([^{0-9])/g, "$1\\$$$3");
-						const snippet = new vscode.SnippetString();
-						// snippet.appendText(code);
-						// insert the code as a snippet into the active text editor
-						// await vscode.window.activeTextEditor?.insertSnippet(snippet);
 						break;
 					}
 				case "prompt":
@@ -74,11 +69,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 						this.clearConversationHistory();
 						break;
 					}
-				case "chatWebView": 
-				{
-					webviewView.webview.html = this._getChatWebview(webviewView.webview);
-					break;
-				}
+				case "validate":
+					{
+						this._validateApiKey(data.value);
+						this._validateFlutterExtension();
+						break;
+					}
+
 			}
 		});
 
@@ -104,6 +101,25 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		return updatedOnboardingChatHtml;
 	}
 
+	private async _validateApiKey(apiKey: string) {
+		try {
+			await this.aiRepo.validateApiKey(apiKey);
+			this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is valid' });
+		} catch (error) {
+			console.log('gemini api error', error);
+			this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is invalid' });
+		}
+	}
+
+	private async _validateFlutterExtension() {
+		const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
+		if (!dartExt) {
+			this._view?.webview.postMessage({ type: 'dependencyValidation', value: 'All dependencies are not installed' });
+		} else {
+			this._view?.webview.postMessage({ type: 'dependencyValidation', value: 'All dependencies are installed' });
+		}
+	}
+
 	private _getChatWebview(webview: vscode.Webview) {
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
 		const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "css", "chatpage.css"));
@@ -120,7 +136,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 			style-src 'unsafe-inline' ${cspSource};
 			script-src 'unsafe-inline' ${cspSource} https: http:;
 		`;
-		
+
 		const updatedChatHtml = chatHtml
 			.replace(/{{cspSource}}/g, cspSource)
 			.replace(/{{scriptUri}}/g, scriptUri.toString())
@@ -130,15 +146,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		return updatedChatHtml;
 	}
 
-
-
 	private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
 	private _privateConversationHistory: Array<{ role: string, parts: string }> = [];
 
 	private async getResponse(prompt: string) {
 		if (!this._view) {
 			await vscode.commands.executeCommand('fluttergpt.chatView.focus');
-
 		} else {
 			this._view?.show?.(true);
 		}

@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <div class="inline-flex flex-col justify-between h-screen">
+    <div class="h-screen" id="body-container">
         <div class="py-3">
             <span class="text-lg font-bold break-words text-center">Your Open Source Flutter AI Copilot powered with
                 Gemini
@@ -17,27 +17,23 @@
         <div class="border-t-2 border-white py-3">
             <p class="text-lg font-bold mb-5">Let's get started</span>
             <p class="break-words">Step 1. Create and enter <span class="font-bold">Free Gemini Key</span></p>
-            <p class="break-words mb-5">Visit <a class="underline cursor-pointer" href="https://makersuite.google.com/">Markesuite by Google</a> and create
+            <p class="break-words mb-5">Visit <a class="underline cursor-pointer"
+                    href="https://makersuite.google.com/">Markesuite by Google</a> and create
                 your
                 free API key and enter below.</p>
-            <input type="text" id="google_api_key"
+            <input type="text" id="google-api-key-text-input"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2"
                 required>
             <div class="list-section">
-                <ul>
-                    <li>Gemini API Key is valid</li>
-                    <li>All dependency are installed</li>
-                    <li>All permissions looks good</li>
-                </ul>
+                <ul id="validation-list"></ul>
             </div>
         </div>
-        <div class="flex-1 inline-flex">
+        <div class="flex-1 hidden" id="bottom-container">
             <div class="self-end flex-col">
                 <p class="text-lg font-bold mb-5">Let's try out FlutterGPT</p>
                 <p class="mb-5">Let's ask one of the most viewed Flutter question on Stack overflow</p>
-                <div id="response" class="mb-5 my-3">
-                    <!-- 
-                        <div>
+                <!-- <div id="response" class="mb-5 my-3">
+                    <div>
                         <p><strong>You</strong></p>
                         <p
                             class="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2 bg-[#D9D9D9]">
@@ -70,8 +66,8 @@
                             amet odio sit amet nisl interdum ultricies quis vitae augue. Maecenas lectus nulla,
                             condimentum sed rhoncus quis, accumsan pretium nibh. Donec eleifend rhoncus dui, ac tempus
                             mi molestie sed. Sed varius quis quam quis finibus. Cras pretium auctor interdum.</p>
-                    </div> -->
-                </div>
+                    </div>
+                </div> -->
                 <div class="flex flex-row items-start justify-start pr-5 mb-3">
                     <div class="relative inline-flex flex-1 justify-end items-end mr-1">
                         <p class="absolute -top-3">Click the send button.</p>
@@ -97,7 +93,8 @@
                                 class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center ml-2">
                                 /</p>
                         </div>
-                        <button class="absolute top-1/2 right-0 transform -translate-y-1/2 py-2 rounded-md h-full" id="send-chat">
+                        <button class="absolute top-1/2 right-0 transform -translate-y-1/2 py-2 rounded-md h-full"
+                            id="send-chat">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M20 0H0V20H20V0Z" fill="white" fill-opacity="0.01" />
