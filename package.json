@@ -51,7 +51,7 @@
         {
           "type": "webview",
           "id": "fluttergpt.chatView",
-          "name": "Chat View"
+          "name": "Chat"
         }
       ]
     },
@@ -71,6 +71,11 @@
         "key": "ctrl+R",
         "mac": "cmd+R",
         "when": "editorHasSelection && resourceLangId == 'dart'"
+      },
+      {
+        "command": "fluttergpt.toggleChat",
+        "key": "ctrl+at+o",
+        "mac": "cmd+alt+o"
       }
     ],
     "commands": [
@@ -116,27 +121,12 @@
         "title": "FlutterGPT Refactor: From Instructions"
       },
       {
-        "command": "fluttergpt.refactorCode.menu",
-        "title": "From Instructions",
-        "when": "false"
-      },
-      {
         "command": "fluttergpt.fixErrors",
         "title": "FlutterGPT Refactor: Fix Errors"
       },
       {
-        "command": "fluttergpt.fixErrors.menu",
-        "title": "Fix Errors",
-        "when": "false"
-      },
-      {
         "command": "fluttergpt.optimizeCode",
         "title": "FlutterGPT Refactor: Optimize"
-      },
-      {
-        "command": "fluttergpt.optimizeCode.menu",
-        "title": "Optimize",
-        "when": "false"
       }
     ],
     "menus": {
