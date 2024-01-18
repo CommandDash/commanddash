@@ -26,7 +26,7 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
                 const currentFile = path.relative(workspaceRoot, document.fileName);
                 const lineText = document.lineAt(editor.selection.active.line).text.trim();
 
-                vscode.window.showInformationMessage('Generating code, please wait.');
+                vscode.window.showInformationMessage('FlutterGPT: Generating code, please wait.');
 
                 // Convert the Gemini response to InlineCompletionItems
                 const suggestions = await new Promise<string[]>((resolve) => {
@@ -79,13 +79,13 @@ function replaceLineOfCode(line: number, replaceString: string) {
         });
 }
 
-export async function createInlineCodeCompletion(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
+export async function createInlineCodeCompletion(geminiRepo: GeminiRepository) {
     // manual trigger using shortcut ctrl+space
     logEvent('create-inline-code-completion', { 'type': "create" });
     vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         cancellable: false,
-        title: 'FlutterGPT: Generating code'
+        title: 'FlutterGPT: Generating code, please wait.'
     }, async (progress) => {
         const out = await generateSuggestions();
         if (out?.length === 0) {
