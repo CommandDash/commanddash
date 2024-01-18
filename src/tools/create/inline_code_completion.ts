@@ -26,6 +26,8 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
                 const currentFile = path.relative(workspaceRoot, document.fileName);
                 const lineText = document.lineAt(editor.selection.active.line).text.trim();
 
+                vscode.window.showInformationMessage('Generating code, please wait.');
+
                 // Convert the Gemini response to InlineCompletionItems
                 const suggestions = await new Promise<string[]>((resolve) => {
                     resolve(generateSuggestions());
