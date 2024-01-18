@@ -192,7 +192,7 @@ export class GeminiRepository {
                 batches.push(filesToUpdate.slice(i, i + batchSize));
             }
 
-            // Process each chunk to get embeddings
+            // Process each batch to get embeddings
             for (const batch of batches) {
                 try {
                     const batchEmbeddings = await embeddingModel.batchEmbedContents({

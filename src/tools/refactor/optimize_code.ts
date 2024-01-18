@@ -30,6 +30,7 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
 
     const fullCode = editor.document.getText();
 
+
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -68,11 +69,64 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
             progress.report({ increment: 100 });
 
             const optimizedCode = extractDartCode(result);
-            const explanation = extractExplanation(result);
-            editor.edit((editBuilder) => {
-                editBuilder.replace(replaceRange, optimizedCode);
+
+            // Create a temporary file with a .dart extension to show the diff
+            const tempFilePath = editor.document.uri.fsPath.replace(/\.dart$/, '.optimized.dart'); // Replace the existing extension with .optimized.dart
+            const tempFileUri = vscode.Uri.file(tempFilePath);
+            await vscode.workspace.fs.writeFile(tempFileUri, Buffer.from(optimizedCode, 'utf8'));
+
+            // Register an event to delete the temp file when it's closed
+            const closeSubscription = vscode.workspace.onDidCloseTextDocument(async document => {
+                if (document.uri.toString() === tempFileUri.toString()) {
+                    try {
+                        await vscode.workspace.fs.delete(tempFileUri, { recursive: true, useTrash: false });
+                    } catch (error) {
+                        console.error('Failed to delete temporary file:', error);
+                    }
+                    closeSubscription.dispose();
+                }
             });
-            vscode.window.showInformationMessage(explanation);
+
+            // Open the diff view
+            await vscode.commands.executeCommand(
+                "vscode.diff",
+                editor.document.uri,
+                tempFileUri,
+                "Current Code ↔ Optimized Code"
+            );
+
+            let userChoice = await vscode.window.showInformationMessage(
+                'Do you want to merge these changes?',
+                'Yes', 'No'
+            );
+
+            if (userChoice === 'Yes') {
+                // Create a workspace edit to apply the optimized code
+                const workspaceEdit = new vscode.WorkspaceEdit();
+                const documentUri = editor.document.uri;
+                const entireDocumentRange = new vscode.Range(
+                    editor.document.positionAt(0),
+                    editor.document.positionAt(editor.document.getText().length)
+                );
+                workspaceEdit.replace(documentUri, entireDocumentRange, optimizedCode);
+
+                // Apply the workspace edit
+                const success = await vscode.workspace.applyEdit(workspaceEdit);
+                if (!success) {
+                    vscode.window.showErrorMessage('Failed to apply optimized code.');
+                    return;
+                }
+            }
+
+            // Close the diff view
+            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+
+            // Delete the temporary file
+            try {
+                await vscode.workspace.fs.delete(tempFileUri, { recursive: true, useTrash: false });
+            } catch (error) {
+                console.error('Failed to delete temporary file:', error);
+            }
         });
     } catch (error: Error | unknown) {
         if (error instanceof Error) {
