@@ -3,6 +3,9 @@ import { GeminiRepository } from '../../repository/gemini-repository';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import path = require('path');
 import { extractDartCode } from '../../utilities/code-processing';
+import { ContextualCodeProvider } from '../../utilities/contextual-code';
+import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
+import { dartCodeExtensionIdentifier } from '../../shared/types/constants';
 
 let currentInlineCompletionLine: number | undefined;
 
@@ -23,8 +26,6 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
             const workspaceFolders = vscode.workspace.workspaceFolders;
             if (workspaceFolders && workspaceFolders.length > 0 && editor) {
                 const workspaceRoot = workspaceFolders[0].uri.fsPath;
-                const currentFile = path.relative(workspaceRoot, document.fileName);
-                const lineText = document.lineAt(editor.selection.active.line).text.trim();
 
                 vscode.window.showInformationMessage('FlutterGPT: Generating code, please wait.');
 
@@ -42,7 +43,6 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
                 }));
                 console.log(completionItems);
                 currentInlineCompletionLine = editor.selection.active.line;
-                // replaceLineOfCode(editor.selection.active.line, "");
                 return completionItems;
             }
             else {
@@ -89,7 +89,6 @@ export async function createInlineCodeCompletion(geminiRepo: GeminiRepository) {
     }, async (progress) => {
         const out = await generateSuggestions();
         if (out?.length === 0) {
-            vscode.window.showErrorMessage('Could not generate code');
             return;
         }
         const editor = vscode.window.activeTextEditor;
@@ -112,18 +111,25 @@ async function generateSuggestions(): Promise<string[]> {
             const workspaceRoot = workspaceFolders[0].uri.fsPath;
             const currentFile = path.relative(workspaceRoot, editor.document.fileName);
             const currentLineContent = editor.document.lineAt(editor.selection.active.line).text.trim();
-            const relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Filename:" + currentFile + "\n\n" + "Line of code:" + currentLineContent);
-            const prompt = "You've complete access to the flutter codebase. I'll provide you with top 5 relevant file's code as context and your job is do code completion for the line of code I'm providing. Respond with the code completion and inline comments only. Do not add detailed explanations. If you're unable to find answer for the requested prompt, return with a possible prediction of what this line of code might end up be. if you completion inside a widget, only return the relevant completion and not the entire child. Here's the relevant file's code: \n\n" + relevantFiles + "\n\n and here is the line of code that needs completion:" + currentLineContent + "in the file" + currentFile + "at line" + editor.selection.active.line;
+            if (currentLineContent.length === 0) {
+                throw new Error('FlutterGPT: No context to generate code, start writing code to give context.');
+            }
+            const position = editor.selection.active;
+            const fileContent = editor.document.getText();
+            var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Filename:" + currentFile + "\n\n" + "Line of code:" + currentLineContent);
+            const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(editor.selection.active.line).range, getDartAnalyser(), undefined);
+            relevantFiles = relevantFiles + "\n" + contextualCode;
+            const prompt = 'You\'ve complete access to the flutter codebase. I\'ll provide you with relevant file\'s code as context and your job is do code completion for the line of code I\'m providing. Respond with the code completion and inline comments only. Do not add detailed explanations. If you\'re unable to find answer for the requested prompt, return with a possible prediction of what this line of code might end up be. if the completion is inside a widget, only return the relevant completion and not the entire child. Here\'s the relevant files: \n\n' + relevantFiles + '\n\n and here is the content of current file:\n' + fileContent + '. Code completion to be at cursor position: Line ' + (position.line + 1) + ', Character ' + (position.character + 1);
+            
+            console.log(prompt);
             const _conversationHistory: Array<{ role: string; parts: string }> = [];
             _conversationHistory.push({ role: "user", parts: prompt });
             const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
-            console.log(result);
             return [extractDartCode(result)];
         }
         else {
             return [];
         }
-
     }
     catch (error: Error | unknown) {
         if (error instanceof Error) {
@@ -135,3 +141,19 @@ async function generateSuggestions(): Promise<string[]> {
     }
 }
 
+function getDartAnalyser() { // This could be in a wider scope.
+    const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
+    if (!dartExt) {
+        // This should not happen since the FlutterGPT extension has a dependency on the Dart one
+        // but just in case, we'd like to give a useful error message.
+        vscode.window.showWarningMessage("Kindly install 'Dart' extension to activate FlutterGPT");
+    }
+    // Assumption is the dart extension is already activated 
+
+    if (!dartExt?.exports) {
+        console.error("The Dart extension did not provide an exported API. Maybe it failed to activate or is not the latest version?");
+    }
+
+    const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
+    return analyzer;
+}
