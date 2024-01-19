@@ -75,6 +75,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 						this._validateFlutterExtension();
 						break;
 					}
+				case "updateSettings":
+					{
+						vscode.workspace.getConfiguration().update("fluttergpt.apiKey", data.value, vscode.ConfigurationTarget.Global);
+						vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
+                		break;
+					}
 
 			}
 		});
@@ -88,7 +94,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
 		const onboardingHtml = fs.readFileSync(onboardingHtmlPath.fsPath, 'utf8');
 		const onboardingCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.css"));
+		const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
 		const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
+		const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
 
 		// Modify your Content-Security-Policy
 		const cspSource = webview.cspSource;
@@ -96,7 +104,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		const updatedOnboardingChatHtml = onboardingHtml
 			.replace(/{{cspSource}}/g, cspSource)
 			.replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
-			.replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString());
+			.replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
+			.replace(/{{headerImageUri}}/g, headerImageUri.toString())
+			.replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
 		return updatedOnboardingChatHtml;
 	}

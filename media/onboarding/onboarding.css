@@ -15,3 +15,43 @@
     padding-right: 3px;
     margin-top: 3px;
 }
+
+
+.menu {
+    position: absolute;
+    z-index: 99;
+    border-radius: 7px;
+    background-color: var(--vscode-activityBar-background);
+}
+
+.menu-item {
+    cursor: default;
+    padding: .5rem 1rem;
+    border-radius: 7px;
+}
+
+.menu-item.selected {
+    background-color: var(--vscode-activityBar-background);
+    color: var(--vscode-textLink-activeForeground);
+    border-radius: 7px;
+}
+
+.menu-item:hover:not(.selected) {
+    background-color: #fafafa;
+    border-radius: 7px;
+}
+
+
+#header {
+    background-color: var(--vscode-sideBar-background);
+}
+
+#bottom-text-input-container {
+    background-color: var(--vscode-sideBar-background);
+}
+
+p[contenteditable="true"] {
+    outline: none;
+    max-height: 100px;
+    overflow: auto;
+}

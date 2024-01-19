@@ -68,18 +68,23 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
+    
     try {
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
     } catch (error) {
         console.error(error);
-    } 
+    }
     finally {
         vscode.workspace.onDidChangeConfiguration(event => {
             let affected = event.affectsConfiguration("fluttergpt.apiKey");
             if (affected) {
-                const geminiRepo = initGemini();
-                initFlutterExtension(context, geminiRepo, analyzer);
+                try {
+                    const geminiRepo = initGemini();
+                    initFlutterExtension(context, geminiRepo, analyzer);
+                } catch (error) {
+                    console.error(error);
+                }
             }
         });
     }
@@ -109,23 +114,23 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo: GeminiReposit
 function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer) {
 
     const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
-        context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
-        const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
-        context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
+    const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
+    context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
 
-        initWebview(context, geminiRepo);
+    initWebview(context, geminiRepo);
 
-        const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
-        context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
+    const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
-        customPush('fluttergpt.addToReference', () => addToReference(context.globalState), context);
-        customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(geminiRepo, context.globalState), context);
-        customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(geminiRepo, context.globalState), context);
-        customPush('fluttergpt.createCodeFromDescription', () => createCodeFromDescription(geminiRepo, context.globalState), context);
-        customPush('fluttergpt.refactorCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName), context);
-        customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), context);
-        customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), context);
+    customPush('fluttergpt.addToReference', () => addToReference(context.globalState), context);
+    customPush('fluttergpt.createWidget', async () => createWidgetFromDescription(geminiRepo, context.globalState), context);
+    customPush('fluttergpt.createCodeFromBlueprint', () => createCodeFromBlueprint(geminiRepo, context.globalState), context);
+    customPush('fluttergpt.createCodeFromDescription', () => createCodeFromDescription(geminiRepo, context.globalState), context);
+    customPush('fluttergpt.refactorCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName), context);
+    customPush('fluttergpt.fixErrors', (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), context);
+    customPush('fluttergpt.optimizeCode', (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), context);
 }
 
 async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {

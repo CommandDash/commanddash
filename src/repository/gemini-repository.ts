@@ -61,6 +61,7 @@ export class GeminiRepository {
 
         const response = result.response;
         const text = response.text();
+        console.log('gemini response', text);
         return text;
     }
 

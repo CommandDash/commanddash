@@ -5,20 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{onboardingCssUri}}">
+    <link rel="stylesheet" href="{{prismCssUri}}">
 </head>
 
 <body>
-    <div class="h-screen" id="body-container">
-        <div class="py-3">
-            <span class="text-lg font-bold break-words text-center">Your Open Source Flutter AI Copilot powered with
-                Gemini
-                Code & Vision</span>
+    <div class="h-screen flex flex-col" id="body-container">
+        <div class="py-3 sticky top-0 z-[11] inline-flex justify-center items-center flex-col w-full"
+            id="header">
+            <img src="{{headerImageUri}}" class="mb-1" alt="header">
         </div>
-        <div class="border-t-2 border-white py-3">
+
+        <span class="text-lg font-bold break-words text-center mb-3">Your Open Source Flutter AI Copilot powered with
+            Gemini
+            Code & Vision</span>
+        <div class="py-3 border-t border-white my-2" id="google-api-key-header">
             <p class="text-lg font-bold mb-5">Let's get started</span>
             <p class="break-words">Step 1. Create and enter <span class="font-bold">Free Gemini Key</span></p>
             <p class="break-words mb-5">Visit <a class="underline cursor-pointer"
-                    href="https://makersuite.google.com/">Markesuite by Google</a> and create
+                    href="https://makersuite.google.com/app/apikey">Markesuite by Google</a> and create
                 your
                 free API key and enter below.</p>
             <input type="text" id="google-api-key-text-input"
@@ -29,46 +33,14 @@
             </div>
         </div>
         <div class="flex-1 hidden" id="bottom-container">
-            <div class="self-end flex-col">
-                <p class="text-lg font-bold mb-5">Let's try out FlutterGPT</p>
-                <p class="mb-5">Let's ask one of the most viewed Flutter question on Stack overflow</p>
-                <!-- <div id="response" class="mb-5 my-3">
-                    <div>
-                        <p><strong>You</strong></p>
-                        <p
-                            class="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2 bg-[#D9D9D9]">
-                            How to wait for forEach to complete with asynchronous callbacks?</p>
-                    </div>
-                    <div>
-                        <p><strong>FlutterGPT</strong></p>
-                        <p
-                            class="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2 bg-[#D9D9D9]">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ac enim id eros feugiat
-                            congue. Aliquam consequat non massa sit amet faucibus. Praesent vel rutrum lacus. Maecenas
-                            volutpat leo diam, nec lobortis ante tristique id. Nunc metus erat, volutpat id diam at,
-                            suscipit volutpat lectus. Phasellus finibus tortor id pharetra dapibus. Aliquam tincidunt
-                            dui non augue fermentum, vitae aliquet lacus bibendum. Sed ultricies arcu ex, quis congue
-                            sem ultricies vel. Nullam posuere placerat massa, id faucibus metus tristique at. Lorem
-                            ipsum dolor sit amet, consectetur adipiscing elit.
-
-                            Mauris fringilla pulvinar sapien id lacinia. Integer eget justo volutpat, egestas ligula
-                            nec, viverra sapien. Suspendisse pulvinar diam ut dictum suscipit. Etiam laoreet turpis vel
-                            lacus fermentum euismod. Sed eleifend convallis tellus, et cursus est interdum sit amet. Sed
-                            vitae libero vel nunc dignissim cursus eu sit amet eros. Nunc at arcu eleifend, dignissim
-                            tellus id, sagittis nunc. Mauris et porttitor urna, sit amet mattis nisi. Nulla in eros a
-                            dolor eleifend blandit vel id ante. Donec elementum dictum arcu, venenatis tincidunt augue
-                            tincidunt in. Morbi elit felis, commodo id condimentum in, congue nec ante. Mauris nec odio
-                            suscipit, feugiat massa in, tempus elit. Curabitur quis ultricies felis.
-
-                            Cras convallis nibh ut vestibulum auctor. Aenean sagittis, massa eget egestas tincidunt,
-                            lorem eros pharetra libero, a tincidunt diam nisl quis urna. Donec ipsum neque, eleifend non
-                            eros sit amet, rhoncus blandit urna. Aliquam eleifend sed eros mollis faucibus. Vivamus sit
-                            amet odio sit amet nisl interdum ultricies quis vitae augue. Maecenas lectus nulla,
-                            condimentum sed rhoncus quis, accumsan pretium nibh. Donec eleifend rhoncus dui, ac tempus
-                            mi molestie sed. Sed varius quis quam quis finibus. Cras pretium auctor interdum.</p>
-                    </div>
-                </div> -->
-                <div class="flex flex-row items-start justify-start pr-5 mb-3">
+            <div class="self-end flex-col max-w-full">
+                <div class="w-full" id="try-flutter-text">
+                    <p class="text-lg font-bold mb-5">Let's try out FlutterGPT</p>
+                    <p class="mb-5">Let's ask one of the most viewed Flutter question on Stack overflow</p>
+                </div>
+                <div id="response" class="mb-5 my-3 relative"></div>
+                <p class="mb-5 my-3" id="onboarding-text"></p>
+                <div class="flex flex-row items-start justify-start pr-5 mb-3" id="onboarding-arrow-icon">
                     <div class="relative inline-flex flex-1 justify-end items-end mr-1">
                         <p class="absolute -top-3">Click the send button.</p>
                     </div>
@@ -79,32 +51,34 @@
                             fill="white" />
                     </svg>
                 </div>
-                <div
-                    class="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2 bg-[#D9D9D9] sticky pr-6">
-                    <div class="relative">
-                        <p>How to wait for forEach to complete with asynchronous callbacks?</p>
-                        <div id="response"></div>
-                        <div class="inline-flex flex-row mt-2">
-                            <p
-                                class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center">
-                                @
-                            </p>
-                            <p
-                                class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center ml-2">
-                                /</p>
-                        </div>
-                        <button class="absolute top-1/2 right-0 transform -translate-y-1/2 py-2 rounded-md h-full"
-                            id="send-chat">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 0H0V20H20V0Z" fill="white" fill-opacity="0.01" />
-                                <path d="M17.5 2.5L1.66663 8.39096L9.99996 10.0035L12.0855 18.3333L17.5 2.5Z"
-                                    stroke="black" stroke-linejoin="round" />
-                                <path d="M10.0034 10.0035L12.3604 7.64648" stroke="black" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
+                <div id="menu" class="menu" role="listbox"></div>
+                <div class="w-full py-2 sticky bottom-0 z-10" id="bottom-text-input-container">
+                    <div
+                        class="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2 bg-[#D9D9D9] pr-6" id="text-input-container">
+                        <div class="relative">
+                            <p id="text-input"></p>
+                            <div class="inline-flex flex-row mt-2">
+                                <p
+                                    class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center">
+                                    @
+                                </p>
+                                <p
+                                    class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center ml-2">
+                                    /</p>
+                            </div>
+                            <button class="absolute top-1/2 right-0 transform -translate-y-1/2 py-2 rounded-md h-full"
+                                id="send-chat">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 0H0V20H20V0Z" fill="white" fill-opacity="0.01" />
+                                    <path d="M17.5 2.5L1.66663 8.39096L9.99996 10.0035L12.0855 18.3333L17.5 2.5Z"
+                                        stroke="black" stroke-linejoin="round" />
+                                    <path d="M10.0034 10.0035L12.3604 7.64648" stroke="black" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
 
-                        </button>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,6 +86,11 @@
     </div>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{onboardingJsUri}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-dart.min.js"></script>
 </body>
 
 </html>
