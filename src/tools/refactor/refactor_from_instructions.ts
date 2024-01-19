@@ -6,6 +6,7 @@ import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
+import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
 
 export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
@@ -110,20 +111,18 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
             progress.report({ increment: 100 });
 
             const refactoredCode = extractDartCode(result);
-            if (onlyReplaceSelected) {
-                editor.edit((editBuilder) => {
-                    editBuilder.replace(replaceRange, refactoredCode);
-                });
-            } else {
-                const documentRange = new vscode.Range(
-                    editor.document.lineAt(0).range.start,
-                    editor.document.lineAt(editor.document.lineCount - 1).range.end
-                );
+            console.log("Refactored code:", refactoredCode);
+            let documentRefactoredText = editor.document.getText(); // Get the entire document text
 
-                editor.edit((editBuilder) => {
-                    editBuilder.replace(documentRange, refactoredCode);
-                });
+            if (onlyReplaceSelected) {
+                // Modify the documentText string instead of the document directly
+                const startOffset = editor.document.offsetAt(replaceRange.start);
+                const endOffset = editor.document.offsetAt(replaceRange.end);
+                documentRefactoredText = documentRefactoredText.substring(0, startOffset) + refactoredCode + documentRefactoredText.substring(endOffset);
             }
+
+            // Pass the current editor, current document uri and optimized code respectively.
+            await handleDiffViewAndMerge(editor, editor.document.uri, documentRefactoredText);
             vscode.window.showInformationMessage('Code refactored successfully!');
         });
     } catch (error: Error | unknown) {
