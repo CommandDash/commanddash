@@ -74,8 +74,8 @@
       },
       {
         "command": "fluttergpt.createInlineCodeCompletion.menu",
-        "key": "ctrl+space",
-        "mac": "ctrl+space",
+        "key": "ctrl+right",
+        "mac": "cmd+right",
         "when": "resourceLangId == 'dart'"
       },
       {

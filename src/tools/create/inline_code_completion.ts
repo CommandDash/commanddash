@@ -117,11 +117,13 @@ async function generateSuggestions(): Promise<string[]> {
             const position = editor.selection.active;
             const fileContent = editor.document.getText();
             var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Filename:" + currentFile + "\n\n" + "Line of code:" + currentLineContent);
-            const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(editor.selection.active.line).range, getDartAnalyser(), undefined);
-            relevantFiles = relevantFiles + "\n" + contextualCode;
+            const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(editor.selection.active.line).range, getDartAnalyser(), undefined); 
+            if (contextualCode && contextualCode.length > 0) { // contextual code might not be available in all cases. Improvements are planned for contextual code gen.
+                relevantFiles = relevantFiles + "\n" + contextualCode;
+            }
+            
             const prompt = 'You\'ve complete access to the flutter codebase. I\'ll provide you with relevant file\'s code as context and your job is do code completion for the line of code I\'m providing. Respond with the code completion and inline comments only. Do not add detailed explanations. If you\'re unable to find answer for the requested prompt, return with a possible prediction of what this line of code might end up be. if the completion is inside a widget, only return the relevant completion and not the entire child. Here\'s the relevant files: \n\n' + relevantFiles + '\n\n and here is the content of current file:\n' + fileContent + '. Code completion to be at cursor position: Line ' + (position.line + 1) + ', Character ' + (position.character + 1);
             
-            console.log(prompt);
             const _conversationHistory: Array<{ role: string; parts: string }> = [];
             _conversationHistory.push({ role: "user", parts: prompt });
             const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
@@ -149,7 +151,6 @@ function getDartAnalyser() { // This could be in a wider scope.
         vscode.window.showWarningMessage("Kindly install 'Dart' extension to activate FlutterGPT");
     }
     // Assumption is the dart extension is already activated 
-
     if (!dartExt?.exports) {
         console.error("The Dart extension did not provide an exported API. Maybe it failed to activate or is not the latest version?");
     }
