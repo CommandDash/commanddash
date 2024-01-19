@@ -23,10 +23,7 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
                 return;
             }
             const editor = vscode.window.activeTextEditor;
-            const workspaceFolders = vscode.workspace.workspaceFolders;
-            if (workspaceFolders && workspaceFolders.length > 0 && editor) {
-                const workspaceRoot = workspaceFolders[0].uri.fsPath;
-
+            if (editor) {
                 vscode.window.showInformationMessage('FlutterGPT: Generating code, please wait.');
 
                 // Convert the Gemini response to InlineCompletionItems
@@ -45,11 +42,7 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
                 currentInlineCompletionLine = editor.selection.active.line;
                 return completionItems;
             }
-            else {
-                console.log('no completion items');
-                return [];
-            }
-        },
+        }
     }
 );
 
@@ -111,7 +104,7 @@ async function generateSuggestions(): Promise<string[]> {
         const position = editor.selection.active;
         const fileContent = editor.document.getText();
         var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Current file content:" + editor.document.getText() + "\n\n" + "Line of code:" + currentLineContent);
-        const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(editor.selection.active.line).range, getDartAnalyser(), undefined);
+        const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(position.line).range, getDartAnalyser(), undefined);
         if (contextualCode && contextualCode.length > 0) { // contextual code might not be available in all cases. Improvements are planned for contextual code gen.
             relevantFiles = relevantFiles + "\n" + contextualCode;
         }
@@ -127,7 +120,8 @@ async function generateSuggestions(): Promise<string[]> {
         const _conversationHistory: Array<{ role: string; parts: string }> = [];
         _conversationHistory.push({ role: "user", parts: prompt });
         const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
-        return [extractDartCode(result)];
+        let sanitisedCode = sanitizeCompletionCode(fileContent, extractDartCode(result), position.line);
+        return [sanitisedCode ?? ''];
 
     }
     catch (error: Error | unknown) {
@@ -155,3 +149,51 @@ function getDartAnalyser() { // This could be in a wider scope.
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
     return analyzer;
 }
+
+
+function sanitizeCompletionCode(originalContent: string, completionCode: string, lineNumberToReplace: number): string | null {
+    // Split the original content into lines
+    const lines = originalContent.split('\n');
+
+    // Check if the specified line number is within a valid range
+    if (lineNumberToReplace < 0 || lineNumberToReplace >= lines.length) {
+        console.error('Invalid line number.');
+        return null;
+    }
+
+    // Find the start and end indices of the line to be replaced
+    const lineStart = originalContent.indexOf(lines[lineNumberToReplace]);
+    const lineEnd = lineStart + lines[lineNumberToReplace].length;
+
+    // Find the common prefix and suffix
+    let prefix = '';
+    let suffix = '';
+
+    for (let i = 0; i < lines[lineNumberToReplace].length; i++) {
+        const charInOriginal = originalContent[lineStart + i];
+        const charInCompletion = completionCode[i];
+
+        if (charInOriginal === charInCompletion) {
+            prefix += charInCompletion;
+        } else {
+            break;
+        }
+    }
+
+    for (let i = 0; i < lines[lineNumberToReplace].length; i++) {
+        const charInOriginal = originalContent[lineEnd - i - 1];
+        const charInCompletion = completionCode[completionCode.length - i - 1];
+
+        if (charInOriginal === charInCompletion) {
+            suffix = charInCompletion + suffix;
+        } else {
+            break;
+        }
+    }
+
+    // Remove the common prefix and suffix from the completion code
+    const sanitizedCompletionCode = completionCode.substring(prefix.length, completionCode.length - suffix.length);
+
+    return sanitizedCompletionCode;
+}
+
