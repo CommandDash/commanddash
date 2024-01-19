@@ -165,18 +165,13 @@ function sanitizeCompletionCode(originalContent: string, completionCode: string,
     const lineStart = originalContent.indexOf(lines[lineNumberToReplace]);
     const lineEnd = lineStart + lines[lineNumberToReplace].length;
 
-    // Find the common prefix and suffix
-    let prefix = '';
-    let suffix = '';
-
+    let sanitizedCompletionCode = completionCode;
     for (let i = 0; i < lines[lineNumberToReplace].length; i++) {
         const charInOriginal = originalContent[lineStart + i];
         const charInCompletion = completionCode[i];
 
         if (charInOriginal === charInCompletion) {
-            prefix += charInCompletion;
-        } else {
-            break;
+            sanitizedCompletionCode.replace(charInCompletion, '');
         }
     }
 
@@ -185,15 +180,11 @@ function sanitizeCompletionCode(originalContent: string, completionCode: string,
         const charInCompletion = completionCode[completionCode.length - i - 1];
 
         if (charInOriginal === charInCompletion) {
-            suffix = charInCompletion + suffix;
-        } else {
-            break;
+            sanitizedCompletionCode.replace(charInCompletion, '');
         }
     }
 
-    // Remove the common prefix and suffix from the completion code
-    const sanitizedCompletionCode = completionCode.substring(prefix.length, completionCode.length - suffix.length);
-
     return sanitizedCompletionCode;
 }
+
 
