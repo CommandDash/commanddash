@@ -120,7 +120,7 @@ async function generateSuggestions(): Promise<string[]> {
         const _conversationHistory: Array<{ role: string; parts: string }> = [];
         _conversationHistory.push({ role: "user", parts: prompt });
         const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
-        let sanitisedCode = sanitizeCompletionCode(fileContent, extractDartCode(result), position.line);
+        let sanitisedCode = filterSurroundingCode(fileContent, extractDartCode(result), position.line);
         return [sanitisedCode ?? ''];
 
     }
@@ -187,4 +187,66 @@ function sanitizeCompletionCode(originalContent: string, completionCode: string,
     return sanitizedCompletionCode;
 }
 
+export function filterSurroundingCode(orignalContent: string, codeCompletion: string, splitLineNumber: number ):string{
+    const orginalContentLines = orignalContent.split('\n');
+    let codeCompletionLines = codeCompletion.split('\n');
+    
+    const preInsertLines = orginalContentLines.slice(0, splitLineNumber);
+    const afterInsertLines = orginalContentLines.slice(splitLineNumber);
 
+    // for (let i = 0; i < codeCompletionLines.length; i++){
+    const codeCompletionLine = removeWhitespaces(codeCompletionLines[0]);
+    for (let i = preInsertLines.length-1; i > 0; i--){
+        const existingLine = removeWhitespaces(preInsertLines[i]);
+        if (codeCompletionLine===existingLine){
+            let fullMatch = true;
+            for (let j = 1; j < preInsertLines.length-i; j++){
+                const followingCodeCompletionLine = removeWhitespaces(codeCompletionLines[j]);
+                const followingExistingLine = removeWhitespaces(preInsertLines[i+j]);
+                if(followingCodeCompletionLine!==followingExistingLine){
+                    fullMatch = false;
+                    break;
+                }
+            }
+            if (fullMatch){
+                codeCompletionLines = codeCompletionLines.slice(preInsertLines.length-i);
+                break;
+            }
+        }
+    }
+    
+    // Cleanup logic for after lines
+    const lastCodeCompletionLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1]);
+    for (let i = 0; i < afterInsertLines.length; i++) {
+        const existingLine = removeWhitespaces(afterInsertLines[i]);
+        if (lastCodeCompletionLine === existingLine) {
+            let fullMatch = true;
+            for (let j = 1; j < afterInsertLines.length - i; j++) {
+                if (i<j){
+                    fullMatch = false;
+                    break;
+                }
+                const followingCodeCompletionLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1 - j]);
+                const followingExistingLine = removeWhitespaces(afterInsertLines[i - j]);
+                if (followingCodeCompletionLine !== followingExistingLine) {
+                    fullMatch = false;
+                    break;
+                }
+            }
+            if (fullMatch) {
+                codeCompletionLines = codeCompletionLines.slice(0, codeCompletionLines.length - (afterInsertLines.length - i));
+                break;
+            }
+        }
+    }
+
+    // Join the cleaned up code completion lines with the original content lines
+    const result = codeCompletionLines.join('\n');
+
+    console.log(result);
+    return result;
+}
+
+function removeWhitespaces(line: string): string {
+return line.replace(/\s/g, "");
+}
