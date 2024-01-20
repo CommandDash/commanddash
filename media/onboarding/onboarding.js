@@ -28,7 +28,10 @@ const onboardingText = document.getElementById("onboarding-text");
 const onboardingArrowIcon = document.getElementById("onboarding-arrow-icon");
 const tryFlutterText = document.getElementById("try-flutter-text");
 const textinputMenu = document.getElementById("menu");
+const loadingIndicator = document.getElementById('loader');
+const validationLoadingIndicator = document.getElementById('validation-loader');
 
+//initialising variables
 let isApiKeyValid = false;
 let areDependenciesInstalled = false;
 let conversationHistory = [];
@@ -156,59 +159,34 @@ class Mentionify {
         }, 0);
     }
 
-    // selectItem(active) {
-    //     return () => {
-    //         const preMention = this.ref.textContent.substr(0, this.triggerIdx);
-    //         const option = this.options[active];
-    //         const mention = this.replaceFn(option, this.ref.textContent[this.triggerIdx]);
-    //         const postMention = this.ref.textContent.substr(this.ref.selectionStart);
-    //         const newValue = `${preMention}${mention}${postMention}`;
-    //         this.ref.textContent = newValue;
-    //         // Set up the range and selection
-    //         const range = document.createRange();
-    //         const sel = window.getSelection();
-    //         debugger;
-    //         const caretPosition = preMention.length + mention.length;
-
-    //         range.setStart(this.ref.childNodes[0], caretPosition);
-    //         range.setEnd(this.ref.childNodes[0], caretPosition);
-
-    //         // Clear existing selections and add the new range
-    //         sel.removeAllRanges();
-    //         sel.addRange(range);
-    //         this.closeMenu();
-    //         this.ref.focus();
-    //     };
-    // }
-
     selectItem(active) {
         return () => {
             const option = this.options[active];
-    
+
             // Assuming this.ref is a contenteditable element
             const selection = window.getSelection();
             const range = selection.getRangeAt(0);
             const preMention = this.ref.textContent.substring(0, this.triggerIdx);
             const postMention = this.ref.textContent.substring(range.endOffset);
-    
+
             // Replace the mention with the selected option along with '@'
             const mentionNode = document.createTextNode(`@${option}`);
             this.ref.textContent = ''; // Clear existing content
             this.ref.appendChild(document.createTextNode(preMention));
             this.ref.appendChild(mentionNode);
             this.ref.appendChild(document.createTextNode(postMention));
-    
+
             // Move the cursor to the end of the mention
             range.setStart(mentionNode, option.length + 1); // +1 for '@'
             range.collapse(true);
             selection.removeAllRanges();
             selection.addRange(range);
-    
+
             this.closeMenu();
             this.ref.focus();
         };
     }
-    
+
 
 
     onInput(ev) {
@@ -342,6 +320,9 @@ class Mentionify {
     sendButton.addEventListener("click", (event) => {
         vscode.postMessage({ type: "prompt", value: textInput.textContent.trim() });
         googleApiKeyHeader.classList.add("hidden");
+        if (onboardingCompleted) {
+            textInput.textContent = '';
+        }
     });
 
     textInput.addEventListener("paste", (event) => {
@@ -349,6 +330,7 @@ class Mentionify {
         const pastedText = event.clipboardData.getData('text/plain');
         event.target.textContent = pastedText;
     });
+
 })();
 
 function readTriggeredMessage() {
@@ -367,12 +349,23 @@ function readTriggeredMessage() {
                 sendButton.disabled = true;
                 sendButton.classList.remove("cursor-pointer");
                 sendButton.classList.add("cursor-not-allowed");
+                loadingIndicator.classList.add("block");
+                loadingIndicator.classList.remove("hidden");
                 break;
             case "hideLoadingIndicator":
                 sendButton.disabled = false;
                 sendButton.classList.add("cursor-pointer");
                 sendButton.classList.remove("cursor-not-allowed");
+                loadingIndicator.classList.add("hidden");
+                loadingIndicator.classList.remove("block");
                 break;
+            case "showValidationLoader":
+                validationLoadingIndicator.classList.add("block");
+                validationLoadingIndicator.classList.remove("hidden");
+                break;
+            case "hideValidationLoader":
+                validationLoadingIndicator.classList.add("hidden");
+                validationLoadingIndicator.classList.remove("block");
         }
     });
 }
@@ -542,16 +535,35 @@ async function updateValidationList(message) {
         const listItem = document.createElement('li');
         listItem.textContent = message.value;
         listItem.setAttribute('data-type', message.type);
+        if (message.value.includes("invalid") || message.value.includes("not")) {
+            listItem.classList.add("invalid");
+        } else {
+            listItem.classList.add("valid");
+        }
         validationList.appendChild(listItem);
     }
-
+    
     // Check for specific messages to update flags
     switch (message.type) {
         case "apiKeyValidation":
             isApiKeyValid = message.value === "Gemini API Key is valid";
+            if (!isApiKeyValid) {
+                existingListItem.classList.add("invalid");
+                existingListItem.classList.remove("valid");
+            } else {
+                existingListItem?.classList.add("valid");
+                existingListItem?.classList.remove("invalid");
+            }
             break;
         case "dependencyValidation":
             areDependenciesInstalled = message.value === "All dependencies are installed";
+            if (!areDependenciesInstalled) {
+                existingListItem.classList.add("invalid");
+                existingListItem.classList.remove("valid");
+            } else {
+                existingListItem?.classList.add("valid");
+                existingListItem?.classList.remove("invalid");
+            }
             break;
     }
 

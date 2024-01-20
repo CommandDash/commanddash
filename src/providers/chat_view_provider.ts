@@ -38,7 +38,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         // add an event listener for messages received by the webview
-        webviewView.webview.onDidReceiveMessage((data) => {
+        webviewView.webview.onDidReceiveMessage(async (data) => {
             console.log('data', data);
             switch (data.type) {
                 case "codeSelected":
@@ -72,9 +72,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "validate":
                     {
+                        webviewView.webview.postMessage({type: "showValidationLoader"});
                         this.aiRepo = this.initGemini(data.value);
-                        this._validateApiKey(data.value);
-                        this._validateFlutterExtension();
+                        await this._validateApiKey(data.value);
+                        await this._validateFlutterExtension();
+                        webviewView.webview.postMessage({type: "hideValidationLoader"});
                         break;
                     }
                 case "updateSettings":
@@ -99,6 +101,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
         const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
+        const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
 
         // Modify your Content-Security-Policy
         const cspSource = webview.cspSource;
@@ -108,6 +111,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
+            .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
         return updatedOnboardingChatHtml;
