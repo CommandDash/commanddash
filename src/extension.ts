@@ -70,6 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
     
     try {
+        initWebview(context);
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
     } catch (error) {
@@ -98,7 +99,7 @@ function isOldOpenAIKey(apiKey: string): boolean {
     return apiKey.startsWith('sk-');
 }
 
-function initWebview(context: vscode.ExtensionContext, geminiRepo: GeminiRepository) {
+function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiRepository) {
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
     const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
     // Register the provider with the extension's context
