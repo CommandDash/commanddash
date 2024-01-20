@@ -222,10 +222,9 @@ export function filterSurroundingCode(orignalContent: string, codeCompletion: st
      // Cleanup logic for after lines
      const codeCompletionEndLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1]);
      for (let i = afterInsertLines.length-1; i > 0; i--) {
-        //TODO: Fix the range like we did in start
-        //  if (codeCompletionLines.length > i){
-        //      continue; // surrounding line is out of code completion range.
-        //  }
+        if(codeCompletionLines.length<i){
+            continue; // surrounding line is out of code completion range.
+        }
         //find the last line of the doc that matches with the last line of code completion
          const existingLine = removeWhitespaces(afterInsertLines[i]);
          if (codeCompletionEndLine === existingLine) {
@@ -246,8 +245,6 @@ export function filterSurroundingCode(orignalContent: string, codeCompletion: st
      }
     // Join the cleaned up code completion lines with the original content lines
     const result = codeCompletionLines.join('\n');
-
-    console.log(result);
     return result;
 }
 
