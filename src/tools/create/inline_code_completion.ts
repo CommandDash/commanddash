@@ -103,7 +103,10 @@ async function generateSuggestions(): Promise<string[]> {
         const currentLineContent = editor.document.lineAt(editor.selection.active.line).text.trim();
         const position = editor.selection.active;
         const fileContent = editor.document.getText();
-        var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Current file content:" + editor.document.getText() + "\n\n" + "Line of code:" + currentLineContent);
+        const shortcut = true; // to make sure we don't run entire findclosestdartfiles function for a simple usecase.
+        const filepath = editor.document.fileName; // don't include currentFile in most relevant files.
+        console.log("Current file path:", filepath);
+        var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Current file content:" + editor.document.getText() + "\n\n" + "Line of code:" + currentLineContent, undefined, shortcut, filepath);
         const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(position.line).range, getDartAnalyser(), undefined);
         if (contextualCode && contextualCode.length > 0) { // contextual code might not be available in all cases. Improvements are planned for contextual code gen.
             relevantFiles = relevantFiles + "\n" + contextualCode;
