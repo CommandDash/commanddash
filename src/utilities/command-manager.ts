@@ -90,7 +90,7 @@ export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, 
         { name: 'fluttergpt.refactorCode', handler: (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.fixErrors', handler: (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.optimizeCode', handler: (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        {name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: false, isMenu: true, isShortcut: true }}
+        { name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } }
         // Add more commands as needed.
     ];
 

@@ -102,8 +102,8 @@
       },
       {
         "command": "fluttergpt.createInlineCodeCompletion.menu",
-        "when": "false",
-        "title": "Inline code completion"
+        "title": "Inline code completion",
+        "when": "false"
       },
       {
         "command": "fluttergpt.createWidget",
@@ -155,6 +155,11 @@
           "command": "fluttergpt.addToReference.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@2"
         }
       ],
       "fluttergpt.createMenu": [
