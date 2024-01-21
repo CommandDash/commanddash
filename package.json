@@ -78,11 +78,6 @@
         "mac": "cmd+right",
         "when": "resourceLangId == 'dart'"
       },
-      {
-        "command": "fluttergpt.toggleChat",
-        "key": "ctrl+alt+o",
-        "mac": "cmd+alt+o"
-      }
     ],
     "commands": [
       {
