@@ -42,7 +42,7 @@ Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dar
 
 ### 💬 Generate
 <p align="center">
-<img src="https://media.giphy.com/media/5kEGTvZhP7joI0wbu4/giphy.gif" alt="Generate code with Gemini inside VSCODE" width="500"/>
+<img src="https://media.giphy.com/media/Xv31gFGTcseEta3jTD/giphy.gif" alt="Generate code with Gemini inside VSCODE" width="500"/>
 </p>
 
 Generate code snippets directly in your IDE with the inline code generation feature. Simply type your request and let Gemini provide you with instant code solutions. 
