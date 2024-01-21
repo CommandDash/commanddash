@@ -98,11 +98,11 @@
       {
         "command": "fluttergpt.createInlineCodeCompletion",
         "when": "editorHasSelection && resourceLangId == 'dart'",
-        "title": "FlutterGPT: Inline code generation"
+        "title": "FlutterGPT: Inline Code Generation"
       },
       {
         "command": "fluttergpt.createInlineCodeCompletion.menu",
-        "title": "Inline code generation",
+        "title": "Inline Code Generation",
         "when": "false"
       },
       {
