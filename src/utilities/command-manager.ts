@@ -65,23 +65,10 @@ export function registerCommand(
     }
 }
 
-let isChatOpen = false;
 export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
 
     // List of commands to register, with their names and options.
     const commands = [
-        {
-            name: 'fluttergpt.toggleChat',
-            handler: async () => {
-                if (isChatOpen) {
-                    vscode.commands.executeCommand('workbench.action.closeSidebar');
-                } else {
-                    vscode.commands.executeCommand('workbench.view.extension.webview');
-                }
-                isChatOpen = !isChatOpen;
-            },
-            options: { isCommand: false, isMenu: false, isShortcut: true }
-        },
         { name: 'fluttergpt.addToReference', handler: () => addToReference(context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'fluttergpt.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'fluttergpt.createCodeFromBlueprint', handler: () => createCodeFromBlueprint(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
