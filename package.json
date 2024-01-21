@@ -73,6 +73,12 @@
         "when": "editorHasSelection && resourceLangId == 'dart'"
       },
       {
+        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "key": "ctrl+right",
+        "mac": "cmd+right",
+        "when": "resourceLangId == 'dart'"
+      },
+      {
         "command": "fluttergpt.toggleChat",
         "key": "ctrl+alt+o",
         "mac": "cmd+alt+o"
@@ -87,6 +93,16 @@
       {
         "command": "fluttergpt.addToReference.menu",
         "title": "Add to Reference",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "title": "FlutterGPT: Inline Code Generation"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "title": "Inline Code Generation",
         "when": "false"
       },
       {
@@ -139,6 +155,11 @@
           "command": "fluttergpt.addToReference.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@2"
         }
       ],
       "fluttergpt.createMenu": [
@@ -155,6 +176,11 @@
           "command": "fluttergpt.createWidget.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@3"
+        },
+        {
+          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@4"
         }
       ]
     },
