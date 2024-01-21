@@ -2,6 +2,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+
+import { createInlineCodeCompletion } from './tools/create/inline_code_completion';
 import { makeHttpRequest } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
@@ -110,6 +112,7 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
     initCommands(context, geminiRepo, analyzer, flutterChatProvider);
+
 }
 
 export async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {
