@@ -219,24 +219,25 @@ export function filterSurroundingCode(orignalContent: string, codeCompletion: st
             }
             if (fullMatch){
                 codeCompletionLines = codeCompletionLines.slice(preInsertLines.length - i);
+				break;
             }
         }
     }
     
      // Cleanup logic for after lines
      const codeCompletionEndLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1]);
-     for (let i = afterInsertLines.length-1; i > 0; i--) {
+     for (let i = afterInsertLines.length; i > 0; i--) {
         if(codeCompletionLines.length<i){
             continue; // surrounding line is out of code completion range.
         }
         //find the last line of the doc that matches with the last line of code completion
-         const existingLine = removeWhitespaces(afterInsertLines[i]);
+         const existingLine = removeWhitespaces(afterInsertLines[i-1]);
          if (codeCompletionEndLine === existingLine) {
              let fullMatch = true;
              // make sure all the lines from last line in doc to the line after cursor are available in code compleiton
              for (let j = 1; j < i; j++) {
                  const previousCodeCompletionLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1 - j]);
-                 const previousExistingLine = removeWhitespaces(afterInsertLines[i-j]);
+                 const previousExistingLine = removeWhitespaces(afterInsertLines[i-1-j]);
                  if (previousCodeCompletionLine !== previousExistingLine) {
                      fullMatch = false;
                      break;
@@ -244,6 +245,7 @@ export function filterSurroundingCode(orignalContent: string, codeCompletion: st
              }
              if (fullMatch) {
                  codeCompletionLines = codeCompletionLines.slice(0, codeCompletionLines.length - i);
+				 break;
              }
          }
      }
