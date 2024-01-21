@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
   "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -77,7 +77,7 @@
         "key": "ctrl+right",
         "mac": "cmd+right",
         "when": "resourceLangId == 'dart'"
-      },
+      }
     ],
     "commands": [
       {

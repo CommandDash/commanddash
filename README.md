@@ -40,6 +40,13 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 
 Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers. Query your workspace using `@workspace` command.
 
+### 💬 Generate
+<p align="center">
+<img src="https://media.giphy.com/media/5kEGTvZhP7joI0wbu4/giphy.gif" alt="Generate code with Gemini inside VSCODE" width="500"/>
+</p>
+
+Generate code snippets directly in your IDE with the inline code generation feature. Simply type your request and let Gemini provide you with instant code solutions. 
+
 ### 💡 Create
 <p align="center">
 <img src="https://media.giphy.com/media/ytNTZHcMLFYmwbrgcA/giphy.gif" alt="Creating Widget using FlutterGPT" width="500"/>
@@ -146,11 +153,10 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes: 0.2.3
+## Release Notes: 0.2.4
 
-- Added dart extension as dependency
-- Gracefully handles missing gemini api key
-- Improved copy & merge functionality
+- Added inline code generation feature
+- Created a centralised command registration method
 
 ## License
 
