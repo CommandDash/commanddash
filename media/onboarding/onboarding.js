@@ -220,7 +220,7 @@ class CommandDeck {
 
         const isTriggerAtStartOfWord = triggerIdx === 0;
 
-        if (!keystrokeTriggered) {
+        if (!keystrokeTriggered || !isTriggerAtStartOfWord) {
             this.closeMenu();
             return;
         }
