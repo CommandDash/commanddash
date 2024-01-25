@@ -4,6 +4,7 @@ const copyIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://
 <path clip-rule="evenodd" d="M4.5 1.5L3 3V18L4.5 19.5V3H14.121L12.621 1.5H4.5Z" />
 </svg>
 `;
+
 const mergeIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path clip-rule="evenodd" d="M21 1.5L22.5 3V9L21 10.5H9L7.5 9V3L9 1.5H21ZM21 3H9V9H21V3Z" />
 <path clip-rule="evenodd" d="M21 13.5L22.5 15V21L21 22.5H9L7.5 21V15L9 13.5H21ZM21 15H9V21H21V15Z" />
@@ -37,10 +38,10 @@ let areDependenciesInstalled = false;
 let conversationHistory = [];
 let stepOneCompleted = false;
 let onboardingCompleted = false;
+let activeAgent;
 
 //initialising visual studio code library
 let vscode = null;
-
 
 const properties = [
     'direction',
@@ -82,7 +83,17 @@ const properties = [
     'MozTabSize',
 ];
 
-const actions = ['workspace'];
+let agents = ['workspace', 'fig2code', 'integrationtest', 'apiintegration'];
+const commands = ['refactor'];
+// Add your additional commands and agents
+const agentCommandsMap = {
+    'integrationtest': ['generate', 'ate'],
+};
+
+// Concatenate agent-specific commands to the agents array
+agents = agents.concat(
+    Object.entries(agentCommandsMap).map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`)).flat()
+);
 
 function getCaretCoordinates(element, position) {
     const div = document.createElement('div');
@@ -119,7 +130,7 @@ function getCaretCoordinates(element, position) {
     return coordinates;
 }
 
-class Mentionify {
+class CommandDeck {
     constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn) {
         this.ref = ref;
         this.menuRef = menuRef;
@@ -140,8 +151,13 @@ class Mentionify {
     }
 
     async makeOptions(query) {
-        const options = await this.resolveFn(query);
-        if (options.lenght !== 0) {
+        let options = [];
+        if (query.startsWith('@')) {
+            options = await this.resolveFn(query.slice(1), 'at');
+        } else if (query.startsWith('/')) {
+            options = await this.resolveFn(query.slice(1), 'slash');
+        }
+        if (options.length !== 0) {
             this.options = options;
             this.renderMenu();
         } else {
@@ -169,8 +185,9 @@ class Mentionify {
             const preMention = this.ref.textContent.substring(0, this.triggerIdx);
             const postMention = this.ref.textContent.substring(range.endOffset);
 
+            const trigger = this.ref.textContent[this.triggerIdx];
             // Replace the mention with the selected option along with '@'
-            const mentionNode = document.createTextNode(`@${option}`);
+            const mentionNode = document.createTextNode(`${trigger}${option}`);
             this.ref.textContent = ''; // Clear existing content
             this.ref.appendChild(document.createTextNode(preMention));
             this.ref.appendChild(mentionNode);
@@ -187,8 +204,6 @@ class Mentionify {
         };
     }
 
-
-
     onInput(ev) {
         const positionIndex = this.ref.selectionStart;
         const textBeforeCaret = this.ref.textContent.slice(0, positionIndex);
@@ -198,19 +213,19 @@ class Mentionify {
             ? textBeforeCaret.length - lastToken.length
             : -1;
         const maybeTrigger = textBeforeCaret[triggerIdx];
-        const keystrokeTriggered = maybeTrigger === '@';
-        // const highlightRegex = new RegExp(`\\B(@${actions.join("|")})\\b`, 'gi');
-        // const highlightedText = this.ref.textContent.replace(highlightRegex, (match) => `<span class="bg-white">${match}</span>`);
-        // this.ref.innerHTML = highlightedText;
+        const keystrokeTriggered = maybeTrigger === '@' || maybeTrigger === '/';
+
         this.ref.style.height = "auto";
         this.ref.style.height = this.ref.scrollHeight + "px";
+
+        const isTriggerAtStartOfWord = triggerIdx === 0;
 
         if (!keystrokeTriggered) {
             this.closeMenu();
             return;
         }
 
-        const query = textBeforeCaret.slice(triggerIdx + 1);
+        const query = textBeforeCaret.slice(triggerIdx);
         this.makeOptions(query);
 
         const coords = getCaretCoordinates(this.ref, positionIndex);
@@ -222,7 +237,25 @@ class Mentionify {
             this.top = window.scrollY + coords.top + top + coords.height - this.ref.scrollTop;
             this.triggerIdx = triggerIdx;
             this.renderMenu();
+
+            // Apply highlight class to existing mentions
+            // this.applyHighlightToExistingActions(positionIndex);
         }, 0);
+    }
+
+    applyHighlightToExistingActions(originalText, positionIndex) {
+        const trigger = this.ref.textContent[this.triggerIdx];
+        const allActions = [...agents, ...commands];
+        const regex = new RegExp(`\\B(${allActions.join("|")})\\b`, 'gi');
+
+        // Store original text for accurate highlighting
+        const highlightedText = originalText.replace(regex, (match) => `<span class="text-blue bg-rose-900">${trigger}${match}</span>`);
+
+        // Set HTML content
+        this.ref.innerHTML = highlightedText;
+
+        // Reset cursor position based on original text length
+        this.ref.selectionStart = this.ref.selectionEnd = positionIndex + (this.ref.textContent.length - originalText.length);
     }
 
     onKeyDown(ev) {
@@ -264,10 +297,12 @@ class Mentionify {
         this.menuRef.innerHTML = '';
 
         this.options.forEach((option, idx) => {
+            const trigger = this.ref.textContent[this.triggerIdx];
             this.menuRef.appendChild(this.menuItemFn(
                 option,
                 this.selectItem(idx),
-                this.active === idx));
+                this.active === idx,
+                trigger));
         });
 
         this.menuRef.hidden = false;
@@ -285,13 +320,40 @@ class Mentionify {
         textInput.textContent = 'How to wait for forEach to complete with asynchronous callbacks?';
     }
 
-    const resolveFn = prefix => prefix === ''
-        ? actions
-        : actions.filter(action => action.startsWith(prefix));
+    const resolveFn = async (query, type) => {
+        // Array to store possible matches
+        let matchingItems = [];
+
+        // When triggered with @
+        if (type === 'at') {
+            if (query.length === 0) {
+                matchingItems = agents;
+            } else {
+                matchingItems = agents.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+            }
+        }
+
+        // When triggered with /
+        else if (type === 'slash') {
+            // If no agent selected yet
+            if (!activeAgent) {
+                matchingItems = query.length === 0 ? commands : commands.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+            }
+            // If there is an active agent
+            else {
+                matchingItems = query.length === 0
+                    ? agentCommandsMap[activeAgent]
+                    : agentCommandsMap[activeAgent].filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+            }
+        }
+
+        return matchingItems;
+    };
+
 
     const replaceFn = (action, trigger) => `${trigger}${action} `;
 
-    const menuItemFn = (action, setItem, selected) => {
+    const menuItemFn = (action, setItem, selected, trigger) => {
         const div = document.createElement('div');
         div.setAttribute('role', 'option');
         div.className = 'menu-item';
@@ -299,12 +361,12 @@ class Mentionify {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `@${action}`;
+        div.textContent = `${trigger}${action}`;
         div.onclick = setItem;
         return div;
     };
 
-    new Mentionify(
+    new CommandDeck(
         textInput,
         textinputMenu,
         resolveFn,
@@ -391,7 +453,6 @@ function isValidGeminiApiKey(apiKey) {
 
 function displayMessages() {
     responseContainer.innerHTML = "";
-    console.log(conversationHistory);
 
     let modelCount = 0;
 
@@ -408,14 +469,12 @@ function displayMessages() {
 
             if (modelCount === 1 && !stepOneCompleted) {
                 stepOneCompleted = true;
-                console.log("Step One Completed");
                 // Update UI or perform actions for Step One completion
                 onboardingText.textContent = "That is insightful, isn't it? Now lets try something related to your workspace using @workspace annotation.";
                 textInput.textContent = "@workspace help me find router code and it's location.";
 
             } else if (modelCount === 2 && !onboardingCompleted) {
                 onboardingCompleted = true;
-                console.log("Onboarding Completed");
                 // Update UI or perform actions for Onboarding completion
                 onboardingText.textContent = "Awesome! You can watch more use cases here.";
                 textInput.textContent = "";
@@ -542,7 +601,7 @@ async function updateValidationList(message) {
         }
         validationList.appendChild(listItem);
     }
-    
+
     // Check for specific messages to update flags
     switch (message.type) {
         case "apiKeyValidation":

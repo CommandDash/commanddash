@@ -85,6 +85,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
                         break;
                     }
+                case "checkKeyIfExists": 
+                {
+                    this._checkIfKeyExists();
+                    break;
+                }
 
             }
         });
@@ -92,6 +97,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         vscode.window.onDidChangeActiveColorTheme(() => {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
+    }
+
+    private _checkIfKeyExists() {
+        const config = vscode.workspace.getConfiguration('fluttergpt');
+        const apiKey = config.get<string>('apiKey');
+        if (apiKey) {
+            this._view?.webview.postMessage({type: "keyExists"});
+        }
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
