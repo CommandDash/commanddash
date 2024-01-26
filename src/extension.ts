@@ -39,6 +39,8 @@ export async function activate(context: vscode.ExtensionContext) {
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
     if (!apiKey || isOldOpenAIKey(apiKey)) {
+        initWebview(context);
+        
         // Prompt the user to update their settings
         vscode.window.showErrorMessage(
             'Please update your API key to Gemini in the settings.',
@@ -70,7 +72,6 @@ export async function activate(context: vscode.ExtensionContext) {
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
     
     try {
-        initWebview(context);
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
     } catch (error) {

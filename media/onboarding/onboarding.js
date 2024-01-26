@@ -313,6 +313,9 @@ class CommandDeck {
     //initialising vscode library
     vscode = acquireVsCodeApi();
 
+    //check if key exists
+    ifKeyExists();
+
     //reading vscode triggered messages to webview
     readTriggeredMessage();
 
@@ -395,6 +398,13 @@ class CommandDeck {
 
 })();
 
+function ifKeyExists() {
+    vscode.postMessage({
+        type: "checkKeyIfExists",
+    });
+}
+
+
 function readTriggeredMessage() {
     window.addEventListener("message", (event) => {
         const message = event.data;
@@ -428,6 +438,20 @@ function readTriggeredMessage() {
             case "hideValidationLoader":
                 validationLoadingIndicator.classList.add("hidden");
                 validationLoadingIndicator.classList.remove("block");
+                break;
+            case "keyExists":
+                onboardingCompleted = true;
+                stepOneCompleted = true;
+                modelCount = 3;
+                googleApiKeyHeader.classList.add("hidden");
+                bottomContainer.classList.remove("hidden");
+                bottomContainer.classList.add("flex");
+                textInput.textContent = "";
+                textInput.contentEditable = true;
+                onboardingArrowIcon.classList.add("hidden");
+                onboardingText.classList.add("hidden");
+                tryFlutterText.classList.add("hidden");
+                break;
         }
     });
 }
