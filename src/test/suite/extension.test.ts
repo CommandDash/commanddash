@@ -9,7 +9,7 @@ import { filterSurroundingCode } from '../../tools/create/inline_code_completion
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Single match', ()=>{
+	test('Single match', () => {
 		const orignalContent = `class OldSection extends StatelessWidget {
 			final CategoryFeed oldBooks;
 			const OldSection(this.oldBooks);
@@ -27,7 +27,7 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(result, '			return Sizedbox.shrink();');
 	});
 
-	test('Double Matches', ()=>{
+	test('Double Matches', () => {
 		const orignalContent = `class OldSection extends StatelessWidget {
 			final CategoryFeed oldBooks;
 			const OldSection(this.oldBooks);
@@ -47,12 +47,12 @@ suite('Extension Test Suite', () => {
 			return Sizedbox.shrink();
 		}
 	}`;
-		
+
 		let result = filterSurroundingCode(orignalContent, codeCompletion, 8);
 		assert.strictEqual(result, '			return Sizedbox.shrink();');
-		
+
 	});
-	test('No Matches', ()=>{
+	test('No Matches', () => {
 		const orignalContent = `class OldSection extends StatelessWidget {
 			final CategoryFeed oldBooks;
 			const OldSection(this.oldBooks);
@@ -66,12 +66,12 @@ suite('Extension Test Suite', () => {
 		  }`;
 		const codeCompletion = `return Sizedbox.shrink();
 		}`;
-		
+
 		let result = filterSurroundingCode(orignalContent, codeCompletion, 8);
 		assert.strictEqual(result, 'return Sizedbox.shrink();');
-		
+
 	});
-	test('Curly brackets surrounding with keyword', ()=>{
+	test('Curly brackets surrounding with keyword', () => {
 		const orignalContent = `class OldSection extends StatelessWidget {
 			final CategoryFeed oldBooks;
 			const OldSection(this.oldBooks);
@@ -96,7 +96,7 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(result, '\t\t\t\treturn {\n\t\t\t\t\treturn Sizedbox.shrink();\n\t\t\t\t}');
 	});
 
-	test('Curly brackets surrounding without keyword', ()=>{
+	test('Curly brackets surrounding without keyword', () => {
 		const orignalContent = `class OldSection extends StatelessWidget {
 			final CategoryFeed oldBooks;
 			const OldSection(this.oldBooks);
@@ -120,23 +120,61 @@ suite('Extension Test Suite', () => {
 		let result = filterSurroundingCode(orignalContent, codeCompletion, 7);
 		assert.strictEqual(result, '\t\t\t\t {\n\t\t\t\t\treturn Sizedbox.shrink();\n\t\t\t\t}');
 	});
-	//TODO: This fails
-	test('Extra spaces match', ()=>{
+
+	test('Handles closing brackets', () => {
+		const orignalContent =
+			`  int method(int x) {
+				// if x is even, return x+x, also close brackets properly
+				if (x % 2 == 0) {
+					return x + x;
+
+			  }
+			}`;
+		const codeCompletion =
+			`return x + x;\n    }\n  }\n}`;
+		let result = filterSurroundingCode(orignalContent, codeCompletion, 4);
+		assert.strictEqual((result),
+			'    }');
+
+	});
+
+	test('Handles brackets with code', () => {
+		const orignalContent =
+			`class Evenizer {
+				int? returnIfEven(int x) {
+				  if (x % 2 == 0) {
+					
+				}
+			  }`;
+		const codeCompletion =
+			`if (x % 2 == 0) {
+				return x;
+			  }
+			}`;
+		let result = filterSurroundingCode(orignalContent, codeCompletion, 3);
+		assert.strictEqual((result),
+			`return x;
+		}`);
+
+	});
+
+	// TODO: This fails
+	test('Extra spaces match', () => {
 		const orignalContent = `class OldSection extends StatelessWidget {
-			final CategoryFeed oldBooks;
-			const OldSection(this.oldBooks);
+				final CategoryFeed oldBooks;
+				const OldSection(this.oldBooks);
 
-			@override
-			Widget build(BuildContext context) {
+				@override
+				Widget build(BuildContext context) {
 
-			}
-		  }`;
+				}
+			} `;
 		const codeCompletion = `@override
-		Widget build(BuildContext context) {
-			return Sizedbox.shrink();
-		}`;
+			Widget build(BuildContext context) {
+				return Sizedbox.shrink();
+			} `;
 		let result = filterSurroundingCode(orignalContent, codeCompletion, 7);
 		assert.strictEqual(result, '			return Sizedbox.shrink();');
 	});
-	
+
 });

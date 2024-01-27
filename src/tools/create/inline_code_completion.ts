@@ -124,7 +124,7 @@ async function generateSuggestions(): Promise<string[]> {
         const _conversationHistory: Array<{ role: string; parts: string }> = [];
         _conversationHistory.push({ role: "user", parts: prompt });
         const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
-        let sanitisedCode = filterSurroundingCode(fileContent, extractDartCode(result), position.line);
+        let sanitisedCode = filterSurroundingCode(fileContent, extractDartCode(result), position.line - 1);
         return [sanitisedCode ?? ''];
 
     }
@@ -192,68 +192,68 @@ function sanitizeCompletionCode(originalContent: string, completionCode: string,
 }
 
 
-export function filterSurroundingCode(orignalContent: string, codeCompletion: string, splitLineNumber: number ):string{
+export function filterSurroundingCode(orignalContent: string, codeCompletion: string, splitLineNumber: number): string {
     const orginalContentLines = orignalContent.split('\n');
     let codeCompletionLines = codeCompletion.split('\n');
-    
+
     const preInsertLines = orginalContentLines.slice(0, splitLineNumber);
     const afterInsertLines = orginalContentLines.slice(splitLineNumber + 1);
 
     const codeCompletionStartLine = removeWhitespaces(codeCompletionLines[0]);
-    for (let i = 0; i < preInsertLines.length; i++){ //5
-        if (codeCompletionLines.length<preInsertLines.length-i){
+    for (let i = 0; i < preInsertLines.length; i++) { //5
+        if (codeCompletionLines.length < preInsertLines.length - i) {
             continue; // surrounding line is out of code completion range.
         }
         //find the first line from the top of the document that matches the starting line of code completion.
         const existingLine = removeWhitespaces(preInsertLines[i]);
-        if (codeCompletionStartLine===existingLine){
+        if (codeCompletionStartLine === existingLine) {
             let fullMatch = true;
             // all the below lines in the document should also match with the code completion
-            for (let j = 1; j < preInsertLines.length - i; j++){
+            for (let j = 1; j < preInsertLines.length - i; j++) {
                 const followingCodeCompletionLine = removeWhitespaces(codeCompletionLines[j]);
-                const followingExistingLine = removeWhitespaces(preInsertLines[i+j]);
-                if(followingCodeCompletionLine!==followingExistingLine){
+                const followingExistingLine = removeWhitespaces(preInsertLines[i + j]);
+                if (followingCodeCompletionLine !== followingExistingLine) {
                     fullMatch = false;
                     break;
                 }
             }
-            if (fullMatch){
+            if (fullMatch) {
                 codeCompletionLines = codeCompletionLines.slice(preInsertLines.length - i);
-				break;
+                break;
             }
         }
     }
-    
-     // Cleanup logic for after lines
-     const codeCompletionEndLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1]);
-     for (let i = afterInsertLines.length; i > 0; i--) {
-        if(codeCompletionLines.length<i){
+
+    // Cleanup logic for after lines
+    const codeCompletionEndLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1]);
+    for (let i = afterInsertLines.length; i > 0; i--) {
+        if (codeCompletionLines.length < i) {
             continue; // surrounding line is out of code completion range.
         }
         //find the last line of the doc that matches with the last line of code completion
-         const existingLine = removeWhitespaces(afterInsertLines[i-1]);
-         if (codeCompletionEndLine === existingLine) {
-             let fullMatch = true;
-             // make sure all the lines from last line in doc to the line after cursor are available in code compleiton
-             for (let j = 1; j < i; j++) {
-                 const previousCodeCompletionLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1 - j]);
-                 const previousExistingLine = removeWhitespaces(afterInsertLines[i-1-j]);
-                 if (previousCodeCompletionLine !== previousExistingLine) {
-                     fullMatch = false;
-                     break;
-                 }
-             }
-             if (fullMatch) {
-                 codeCompletionLines = codeCompletionLines.slice(0, codeCompletionLines.length - i);
-				 break;
-             }
-         }
-     }
+        const existingLine = removeWhitespaces(afterInsertLines[i - 1]);
+        if (codeCompletionEndLine === existingLine) {
+            let fullMatch = true;
+            // make sure all the lines from last line in doc to the line after cursor are available in code compleiton
+            for (let j = 1; j < i; j++) {
+                const previousCodeCompletionLine = removeWhitespaces(codeCompletionLines[codeCompletionLines.length - 1 - j]);
+                const previousExistingLine = removeWhitespaces(afterInsertLines[i - 1 - j]);
+                if (previousCodeCompletionLine !== previousExistingLine) {
+                    fullMatch = false;
+                    break;
+                }
+            }
+            if (fullMatch) {
+                codeCompletionLines = codeCompletionLines.slice(0, codeCompletionLines.length - i);
+                break;
+            }
+        }
+    }
     // Join the cleaned up code completion lines with the original content lines
     const result = codeCompletionLines.join('\n');
     return result;
 }
 
 function removeWhitespaces(line: string): string {
-return line.replace(/\s/g, "");
+    return line.replace(/\s/g, "");
 }
