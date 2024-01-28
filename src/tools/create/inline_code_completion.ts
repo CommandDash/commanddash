@@ -117,9 +117,9 @@ async function generateSuggestions(): Promise<string[]> {
         const afterCursor = fileContent.substring(editor.document.offsetAt(position));
 
         // Add "CURSOR" between the two parts
-        const modifiedContent = beforeCursor + "CURSOR" + afterCursor;
+        const modifiedContent = beforeCursor + "[CURSOR]" + afterCursor;
 
-        const prompt = 'You\'ve complete access to the flutter codebase. I\'ll provide you with relevant file\'s code as context and your job is do code completion for the line of code I\'m providing. Respond with the code completion and inline comments only. Do not add detailed explanations. If you\'re unable to find answer for the requested prompt, return with a possible prediction of what this line of code might end up be. if the completion is inside a widget, only return the relevant completion and not the entire child. Here\'s the relevant files: \n\n' + relevantFiles + '\n\n and here is the content of current file:\n' + modifiedContent + '. Code completion to be at cursor position marked by "CURSOR"';
+        const prompt = 'You are a Flutter Inline Code Generation expert. You look at the [CURSOR] position of the user and understand the code before and after it. Also analyze and refer the contextual code attached from the project.\n Respond with the code block that should be inserted at the cursor position by predicting what user is trying to accomplish.\n\nHere is the current active editor:\n```\n' + modifiedContent + '\n```\n' + 'Some contextual code that might be relevant:\n```\n' + relevantFiles + '\n```\n' + 'Output the code block to be inserted when the user [CURSOR] is at.'
 
         const _conversationHistory: Array<{ role: string; parts: string }> = [];
         _conversationHistory.push({ role: "user", parts: prompt });
