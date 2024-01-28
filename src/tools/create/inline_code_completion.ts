@@ -107,11 +107,12 @@ async function generateSuggestions(): Promise<string[]> {
         const filepath = editor.document.fileName; // don't include currentFile in most relevant files.
         console.log("Current file path:", filepath);
         var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Current file content:" + editor.document.getText() + "\n\n" + "Line of code:" + currentLineContent, undefined, shortcut, filepath);
-        //TODO [KEVAL]: To fix this
-        // const contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.document.lineAt(position.line).range, getDartAnalyser(), undefined);
-        // if (contextualCode && contextualCode.length > 0) { // contextual code might not be available in all cases. Improvements are planned for contextual code gen.
-        //     relevantFiles = relevantFiles + "\n" + contextualCode;
-        // }
+        // Add code for all the elements used in the file.
+        const contextualCode = await new ContextualCodeProvider().getContextualCodeForCompletion(editor.document, getDartAnalyser());
+        if (contextualCode && contextualCode.length > 0) { // contextual code might not be available in all cases. Improvements are planned for contextual code gen.
+            // TODO: avoid duplications from the relevant files.
+            relevantFiles = relevantFiles + "\n" + contextualCode;
+        }
 
         const beforeCursor = fileContent.substring(0, editor.document.offsetAt(position));
         const afterCursor = fileContent.substring(editor.document.offsetAt(position));
@@ -119,8 +120,21 @@ async function generateSuggestions(): Promise<string[]> {
         // Add "CURSOR" between the two parts
         const modifiedContent = beforeCursor + "[CURSOR]" + afterCursor;
 
-        const prompt = 'You are a Flutter Inline Code Generation expert. You look at the [CURSOR] position of the user and understand the code before and after it. Also analyze and refer the contextual code attached from the project.\n Respond with the code block that should be inserted at the cursor position by predicting what user is trying to accomplish.\n\nHere is the current active editor:\n```\n' + modifiedContent + '\n```\n' + 'Some contextual code that might be relevant:\n```\n' + relevantFiles + '\n```\n' + 'Output the code block to be inserted when the user [CURSOR] is at.'
+        const prompt = `You are a Flutter Inline Code Generation expert. You look at the [CURSOR] position of the user and understand the code before and after it.
+        Also analyze and refer the contextual code attached from the project.
+        Respond with the code block that should be inserted at the cursor position by predicting what user is trying to accomplish.
 
+        Here is the current active editor:
+        \`\`\`
+        ${modifiedContent}
+        \`\`\`
+
+        Some contextual code that might be relevant:
+        \`\`\`
+        ${relevantFiles}
+        \`\`\`
+
+        Output the code block to be inserted when the user [CURSOR] is at.`;
         const _conversationHistory: Array<{ role: string; parts: string }> = [];
         _conversationHistory.push({ role: "user", parts: prompt });
         const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
