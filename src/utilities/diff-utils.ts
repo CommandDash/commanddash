@@ -3,12 +3,14 @@ import * as vscode from 'vscode';
 export async function handleDiffViewAndMerge(
     editor: vscode.TextEditor,
     originalCodeUri: vscode.Uri,
-    optimizedCode: string
+    optimizedCode: string,
+    context: vscode.ExtensionContext,
 ): Promise<void> {
     // Create a temporary file with a .dart extension to show the diff
-    const tempFilePath = originalCodeUri.fsPath.replace(/\.dart$/, '.optimized.dart');
-    const tempFileUri = vscode.Uri.file(tempFilePath);
+    const fileName = originalCodeUri.fsPath.split('/').pop()?.replace('.dart', '.optimized.dart') ?? 'optimized.dart';
+    const tempFileUri = vscode.Uri.joinPath(context.storageUri!, fileName);
     await vscode.workspace.fs.writeFile(tempFileUri, Buffer.from(optimizedCode, 'utf8'));
+
 
     // Open the diff view
     await vscode.commands.executeCommand(
