@@ -19,7 +19,6 @@ out/
 *.config
 
 # Ignore any test or example files
-test/
 example/
 demo/
 
