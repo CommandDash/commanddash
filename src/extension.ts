@@ -18,6 +18,7 @@ import { ErrorCodeActionProvider } from './providers/error_code_actions_provider
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { UpdateManager } from './utilities/update-manager';
 import { initCommands } from './utilities/command-manager';
+import { isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -76,7 +77,41 @@ export async function activate(context: vscode.ExtensionContext) {
         });
     }
 
-    // new ExtensionVersionManager(context).isExtensionUpdated();
+    const completionDecoration = vscode.window.createTextEditorDecorationType({
+        cursor: 'pointer',
+        after: {
+            contentText: "Use command (⌘) + (→) to auto complete using FlutterGPT",
+            color: 'gray',
+            fontStyle: 'italic',
+            fontWeight: 'bold',
+        },
+    });
+
+    vscode.workspace.onDidChangeTextDocument(async event => {
+
+        if (event.document.languageId === 'dart') {
+            const activeEditor = vscode.window.activeTextEditor!;
+
+            // Remove decorations after any change in the document
+            activeEditor.setDecorations(completionDecoration, []);
+
+            const currentLine = activeEditor.selection.active.line;
+
+            // Check if there's text on the first line
+            const lineText = activeEditor.document.lineAt(currentLine + 1).text.trim();
+            // check if the previous line is a comment
+            const isComment = activeEditor.document.lineAt(currentLine).text.trim().startsWith('//');
+
+            if (lineText.length === 0) {
+                if (isComment || await isFirstLineOfSymbol(activeEditor)) {
+                    // Set decoration on the current line
+                    const range = new vscode.Range(currentLine + 1, activeEditor.document.lineAt(currentLine).range.end.character, currentLine + 1, activeEditor.document.lineAt(currentLine).range.end.character);
+                    activeEditor.setDecorations(completionDecoration, [{ range }]);
+                }
+            }
+        }
+    });
+
 }
 
 function isOldOpenAIKey(apiKey: string): boolean {
