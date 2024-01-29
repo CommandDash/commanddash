@@ -7,6 +7,7 @@ import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
+import { filterSurroundingCode } from '../create/inline_code_completion';
 
 export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
@@ -65,22 +66,22 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
             let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.selection, analyzer, elementname);
 
             let referenceEditor = getReferenceEditor(globalState);
-            let brainstormingPrompt = 'You are a Flutter/Dart assistant helping user modify code within their editor window.';
-            brainstormingPrompt += `Modification instructions from user: ${instructions}. Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalString + '\n```\n';
+            let prompt = 'You are a Flutter/Dart assistant helping user modify code within their editor window.';
+            prompt += `Modification instructions from user: ${instructions}. Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalString + '\n```\n';
             
-            brainstormingPrompt = appendReferences(referenceEditor, brainstormingPrompt);
+            prompt = appendReferences(referenceEditor, prompt);
             if (contextualCode) {
-                brainstormingPrompt += `\n\nHere are the definitions of the symbols used in the code\n${contextualCode}\n\n`;
+                prompt += `\n\nHere are the definitions of the symbols used in the code\n${contextualCode}\n\n`;
             }
-            brainstormingPrompt += `Proceed step by step: 
+            prompt += `Proceed step by step: 
             1. Describe the selected piece of code.
             2. What is the intent of user's modification?
             3. How do you plan to achieve that? [Don't output code yet]
-            4. Output the modified code to be replaced in the editor in place of the CURSOR_SELECTION.`;
-            console.log(brainstormingPrompt);
+            4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION. Since this is without human review, you need to output the precise CURSOR_SELECTION`;
+            console.log(prompt);
             const result = await gemini.getCompletion([{
                 'role': 'user',
-                'parts': brainstormingPrompt
+                'parts': prompt
             }]);
             
             console.log(result);
@@ -90,6 +91,7 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
 
             let refactoredCode = extractDartCode(result, false);
             refactoredCode = refactoredCode.replace(/<CURSOR_SELECTION>/g, '');
+            refactoredCode = filterSurroundingCode(editor.document.getText(), refactoredCode, replaceRange.start.line, replaceRange.end.line);
             console.log("Refactored code:", refactoredCode);
             let documentRefactoredText = editor.document.getText(); // Get the entire document text
 
