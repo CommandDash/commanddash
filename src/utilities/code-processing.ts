@@ -1,11 +1,18 @@
 import * as vscode from 'vscode';
 
-export function extractDartCode(widgetCode: string): string {
-    let dartCode: string = widgetCode.split("```")[1] || widgetCode;
-    if (dartCode.startsWith('dart')) {
-        dartCode = dartCode.slice(4);
+export function extractDartCode(widgetCode: string, first: Boolean = true): string {
+    const codeBlocksRegex = /```(dart)?([\s\S]*?)```/g;
+
+    let dartCodes: string[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = codeBlocksRegex.exec(widgetCode)) !== null) {
+        let dartCode: string = match[2];
+        dartCodes.push(dartCode.trim());  // extracting and storing all dart code blocks
     }
-    return dartCode;
+    if (first) {
+        return dartCodes[0];
+    }
+    else {return dartCodes[dartCodes.length-1];}
 }
 
 export function previewCode(dartCode: string): string {
