@@ -24,7 +24,9 @@ export async function activateInlineHints(cacheManager: CacheManager) {
             activeEditor.setDecorations(completionDecoration, []);
 
             const currentLine = activeEditor.selection.active.line;
-
+            const totalLines = activeEditor.document.lineCount;
+            
+            if(currentLine+1>=totalLines) {return ;}
             // Check if there's text on the first line
             const lineText = activeEditor.document.lineAt(currentLine + 1).text.trim();
             // check if the previous line is a comment
