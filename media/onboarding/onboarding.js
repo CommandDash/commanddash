@@ -396,6 +396,8 @@ class CommandDeck {
         event.target.textContent = pastedText;
     });
 
+    textInput.addEventListener("focus", removePlaceholder);
+    textInput.addEventListener("blur", addPlaceholder);
 })();
 
 function ifKeyExists() {
@@ -404,6 +406,20 @@ function ifKeyExists() {
     });
 }
 
+function removePlaceholder() {
+    if (textInput.textContent.trim() === "# Message") {
+        textInput.textContent = '';
+        textInput.classList.remove('placeholder', 'text-white/[.4]');
+    }
+}
+
+// Function to add placeholder when the element is blurred and empty
+function addPlaceholder() {
+    if (textInput.textContent.trim() === '') {
+        textInput.textContent = '# Message';
+        textInput.classList.add('placeholder', 'text-white/[.4]');
+    }
+}
 
 function readTriggeredMessage() {
     window.addEventListener("message", (event) => {
@@ -487,10 +503,9 @@ function displayMessages() {
         if (message.role === "model") {
             modelCount++;
             userElement.innerHTML = "<strong>FlutterGPT</strong>";
-            userElement.classList.add("my-2");
-            contentElement.classList.add("border", "border-gray-300", "text-gray-900", "text-sm", "rounded-lg", "block", "w-full", "p-2.5", "mb-2", "bg-[#D9D9D9]", "break-words", "leading-relaxed");
+            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
+            contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "break-words", "leading-relaxed", "bg-[#3079D8]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
-
             if (modelCount === 1 && !stepOneCompleted) {
                 stepOneCompleted = true;
                 // Update UI or perform actions for Step One completion
@@ -509,10 +524,11 @@ function displayMessages() {
             }
         } else {
             userElement.innerHTML = "<strong>You</strong>";
-            userElement.classList.add("my-2");
-            contentElement.classList.add("border", "border-gray-300", "text-gray-900", "text-sm", "rounded-lg", "block", "w-full", "p-2.5", "mb-2", "bg-[#D9D9D9]", "break-words");
+            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#2F2F2F]");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#2F2F2F]");
             contentElement.innerHTML = message.parts;
         }
+        messageElement.classList.add("mt-1");
         messageElement.appendChild(userElement);
         messageElement.appendChild(contentElement);
         responseContainer.appendChild(messageElement);

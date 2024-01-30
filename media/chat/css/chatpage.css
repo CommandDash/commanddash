@@ -1,4 +1,4 @@
-body {
+/* body {
     margin: 0;
     padding: 0;
     display: flex;
@@ -6,7 +6,7 @@ body {
     align-items: left;
     justify-content: flex-end;
     height: 100vh;
-}
+} */
 
 #chat-container {
     width: 100%;

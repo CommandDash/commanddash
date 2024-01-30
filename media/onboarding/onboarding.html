@@ -10,14 +10,11 @@
 
 <body>
     <div class="h-screen flex flex-col" id="body-container">
-        <div class="py-3 sticky top-0 z-[11] inline-flex justify-center items-center flex-col w-full" id="header">
+        <div class="py-3 sticky top-0 z-[11] flex w-full px-5 bg-[#287CEB]" id="header">
             <img src="{{headerImageUri}}" class="mb-1" alt="header">
         </div>
 
-        <span class="text-lg font-bold break-words text-center mb-3">Your Open Source Flutter AI Copilot powered with
-            Gemini
-            Code & Vision</span>
-        <div class="py-3 border-t border-white my-2" id="google-api-key-header">
+        <div class="py-3 my-2 px-5" id="google-api-key-header">
             <p class="text-lg font-bold mb-5">Let's get started</span>
             <p class="break-words">Step 1. Create and enter <span class="font-bold">Free Gemini Key</span></p>
             <p class="break-words mb-5">Visit <a class="underline cursor-pointer"
@@ -25,26 +22,26 @@
                 your
                 free API key and enter below.</p>
             <input type="text" id="google-api-key-text-input"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2"
+                class="bg-white/[.1] border border-white/[.3] text-sm rounded-2xl block w-full p-2.5 mb-2"
                 required>
             <div class="list-section">
                 <ul id="validation-list"></ul>
-                <dotlottie-player src="{{loadingAnimationUri}}" class="hidden" id="validation-loader" background="transparent"
-                    speed="1" style="width: 50px; height: 50px" direction="1" playMode="normal" loop
-                    autoplay></dotlottie-player>
+                <dotlottie-player src="{{loadingAnimationUri}}" class="hidden" id="validation-loader"
+                    background="transparent" speed="1" style="width: 50px; height: 50px" direction="1" playMode="normal"
+                    loop autoplay></dotlottie-player>
             </div>
         </div>
-        <div class="flex-1 flex" id="bottom-container">
+        <div class="flex-1 hidden" id="bottom-container">
             <div class="self-end flex-col max-w-full flex-1">
-                <div class="w-full" id="try-flutter-text">
+                <div class="w-full px-5" id="try-flutter-text">
                     <p class="text-lg font-bold mb-5">Let's try out FlutterGPT</p>
                     <p class="mb-5">Let's ask one of the most viewed Flutter question on Stack overflow</p>
                 </div>
                 <div id="response" class="mb-5 my-3 relative"></div>
-                <dotlottie-player src="{{loadingAnimationUri}}" class="hidden" id="loader" background="transparent"
-                    speed="1" style="width: 50px; height: 50px" direction="1" playMode="normal" loop
+                <dotlottie-player src="{{loadingAnimationUri}}" class="px-5 hidden" id="loader" background="transparent"
+                    speed="1" style="width: 100px; height: 100px" direction="1" playMode="normal" loop
                     autoplay></dotlottie-player>
-                <p class="mb-5 my-3" id="onboarding-text"></p>
+                <p class="mb-5 my-3 px-5" id="onboarding-text"></p>
                 <div class="flex flex-row items-start justify-start pr-5 mb-3" id="onboarding-arrow-icon">
                     <div class="relative inline-flex flex-1 justify-end items-end mr-1">
                         <p class="absolute -top-3">Click the send button.</p>
@@ -56,33 +53,51 @@
                             fill="white" />
                     </svg>
                 </div>
-                <div id="menu" class="menu" role="listbox"></div>
-                <div class="w-full py-2 sticky bottom-0 z-10" id="bottom-text-input-container">
-                    <div class="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 mb-2 bg-[#D9D9D9] pr-6"
+                <div id="menu" class="menu px-5" role="listbox"></div>
+                <div class="w-full py-2 sticky bottom-0 z-10 px-5 pt-6 pb-5 bg-black"
+                    id="bottom-text-input-container">
+                    <div class="border border-white/[.6] text-gray-900 text-sm rounded-2xl block w-full p-2.5 mb-2 bg-white/[.1] pr-6"
                         id="text-input-container">
                         <div class="relative">
-                            <p id="text-input" contenteditable="true"></p>
-                            <div class="inline-flex flex-row mt-2">
-                                <p
-                                    class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center">
-                                    @
-                                </p>
-                                <p
-                                    class="border w-5 h-5 border-black text-center rounded-md inline-flex justify-center items-center ml-2">
-                                    /</p>
+                            <p id="text-input" contenteditable="true"># Message</p>
+                            <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
+                                <div>
+                                    <p
+                                        class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]" title="Agents">
+                                        @
+                                    </p>
+                                    <p
+                                        class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]" title="Commands">
+                                        /
+                                    </p>
+                                </div>
+                                <div class="inline-flex justify-center items-center">
+                                    <p
+                                        class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer" title="Attach">
+                                        +
+                                    </p>
+                                    <button class="ml-2" id="send-chat">
+                                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="16" cy="16" r="16" fill="#3079D8" />
+                                            <g clip-path="url(#clip0_148_1766)">
+                                                <path
+                                                    d="M24.3465 15.5489L9.59961 8.7998L14.1618 15.5512L9.92303 22.6215L24.3465 15.5489Z"
+                                                    fill="white" stroke="white" stroke-width="0.784"
+                                                    stroke-linejoin="round" />
+                                                <path d="M12.8081 15.5518L16.0081 15.5518" stroke="#3079D8"
+                                                    stroke-width="0.784" stroke-linecap="round" stroke-linejoin="round" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_148_1766">
+                                                    <rect width="19.2" height="19.2" fill="white"
+                                                        transform="translate(7.19971 4.7998)" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <button class="absolute top-1/2 right-0 transform -translate-y-1/2 py-2 rounded-md h-full"
-                                id="send-chat">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 0H0V20H20V0Z" fill="white" fill-opacity="0.01" />
-                                    <path d="M17.5 2.5L1.66663 8.39096L9.99996 10.0035L12.0855 18.3333L17.5 2.5Z"
-                                        stroke="black" stroke-linejoin="round" />
-                                    <path d="M10.0034 10.0035L12.3604 7.64648" stroke="black" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-
-                            </button>
                         </div>
                     </div>
                 </div>
