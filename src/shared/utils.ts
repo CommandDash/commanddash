@@ -150,7 +150,7 @@ export async function getCodeForRange(uri: vscode.Uri, range: vscode.Range): Pro
 			for (let i = startLine + 1; i < endLine; i++) {
 				fullcode += lines[i];
 			}
-			fullcode += lines[endLine].substring(0, endChar);
+			fullcode += lines[endLine - 1].substring(0, endChar);
 		}
 		return fullcode;
 	}
