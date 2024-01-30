@@ -173,49 +173,13 @@ function getDartAnalyser() { // This could be in a wider scope.
 }
 
 
-function sanitizeCompletionCode(originalContent: string, completionCode: string, lineNumberToReplace: number): string | null {
-    // Split the original content into lines
-    const lines = originalContent.split('\n');
 
-    // Check if the specified line number is within a valid range
-    if (lineNumberToReplace < 0 || lineNumberToReplace >= lines.length) {
-        console.error('Invalid line number.');
-        return null;
-    }
-
-    // Find the start and end indices of the line to be replaced
-    const lineStart = originalContent.indexOf(lines[lineNumberToReplace]);
-    const lineEnd = lineStart + lines[lineNumberToReplace].length;
-
-    let sanitizedCompletionCode = completionCode;
-    for (let i = 0; i < lines[lineNumberToReplace].length; i++) {
-        const charInOriginal = originalContent[lineStart + i];
-        const charInCompletion = completionCode[i];
-
-        if (charInOriginal === charInCompletion) {
-            sanitizedCompletionCode.replace(charInCompletion, '');
-        }
-    }
-
-    for (let i = 0; i < lines[lineNumberToReplace].length; i++) {
-        const charInOriginal = originalContent[lineEnd - i - 1];
-        const charInCompletion = completionCode[completionCode.length - i - 1];
-
-        if (charInOriginal === charInCompletion) {
-            sanitizedCompletionCode.replace(charInCompletion, '');
-        }
-    }
-
-    return sanitizedCompletionCode;
-}
-
-
-export function filterSurroundingCode(orignalContent: string, codeCompletion: string, splitLineNumber: number): string {
+export function filterSurroundingCode(orignalContent: string, codeCompletion: string, splitLineNumberStart: number, splitLineNumberEnd: number = splitLineNumberStart): string {
     const orginalContentLines = orignalContent.split('\n');
     let codeCompletionLines = codeCompletion.split('\n');
 
-    const preInsertLines = orginalContentLines.slice(0, splitLineNumber);
-    const afterInsertLines = orginalContentLines.slice(splitLineNumber + 1);
+    const preInsertLines = orginalContentLines.slice(0, splitLineNumberStart);
+    const afterInsertLines = orginalContentLines.slice(splitLineNumberEnd + 1);
 
     const codeCompletionStartLine = removeWhitespaces(codeCompletionLines[0]);
     for (let i = 0; i < preInsertLines.length; i++) { //5
@@ -275,3 +239,4 @@ export function filterSurroundingCode(orignalContent: string, codeCompletion: st
 function removeWhitespaces(line: string): string {
     return line.replace(/\s/g, "");
 }
+

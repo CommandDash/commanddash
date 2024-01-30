@@ -20,7 +20,6 @@ import { UpdateManager } from './utilities/update-manager';
 import { initCommands } from './utilities/command-manager';
 import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
-import { getInlineHintText } from './utilities/hints-utils';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
