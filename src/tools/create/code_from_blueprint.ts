@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
-import { logEvent } from '../../utilities/telemetry-reporter';
+import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 
 export async function createCodeFromBlueprint(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
@@ -58,6 +58,7 @@ export async function createCodeFromBlueprint(geminiRepo: GeminiRepository, glob
         });
 
     } catch (error: Error | unknown) {
+        logError('code-from-blueprint-error', error);
         if (error instanceof Error) {
             vscode.window.showErrorMessage(`${error.message}`);
         } else {

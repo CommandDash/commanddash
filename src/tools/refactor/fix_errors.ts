@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
-import { logEvent } from '../../utilities/telemetry-reporter';
+import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
@@ -103,6 +103,7 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
         await handleDiffViewAndMerge(editor, editor.document.uri, documentRefactoredText, context);
 
     } catch (error: Error | unknown) {
+        logError('fix-errors-error', error);
         if (error instanceof Error) {
             vscode.window.showErrorMessage(`${error.message}`);
         } else {

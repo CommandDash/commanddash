@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { GeminiRepository } from '../../repository/gemini-repository';
-import { logEvent } from '../../utilities/telemetry-reporter';
+import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import path = require('path');
 import { extractDartCode } from '../../utilities/code-processing';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
@@ -147,7 +147,8 @@ async function generateSuggestions(): Promise<string[]> {
 
     }
     catch (error: Error | unknown) {
-        if (error instanceof Error) {
+        logError('inline-code-completion-error', error);
+        if (error instanceof Error) {  
             vscode.window.showErrorMessage(`${error.message}`);
         } else {
             vscode.window.showErrorMessage(`Failed to generate code: ${error}`);

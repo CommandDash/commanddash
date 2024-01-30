@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { extractDartCode, previewCode } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
-import { logEvent } from '../../utilities/telemetry-reporter';
+import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
@@ -113,6 +113,7 @@ export async function refactorCode(gemini: GeminiRepository, globalState: vscode
         await handleDiffViewAndMerge(editor, editor.document.uri, documentRefactoredText, context);
 
     } catch (error: Error | unknown) {
+        logError('refactor-from-instructions-error', error);
         if (error instanceof Error) {
             vscode.window.showErrorMessage(`${error.message}`);
         } else {
