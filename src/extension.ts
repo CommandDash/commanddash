@@ -18,6 +18,9 @@ import { ErrorCodeActionProvider } from './providers/error_code_actions_provider
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { UpdateManager } from './utilities/update-manager';
 import { initCommands } from './utilities/command-manager';
+import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
+import { CacheManager } from './utilities/cache-manager';
+import { getInlineHintText } from './utilities/hints-utils';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -26,6 +29,11 @@ const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 export async function activate(context: vscode.ExtensionContext) {
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
+
+    // Initiate cache manager
+    const cacheManager = CacheManager.getInstance(context.globalState, context.workspaceState);
+    // Activate inline hints
+    activateInlineHints(cacheManager);
 
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
@@ -75,8 +83,6 @@ export async function activate(context: vscode.ExtensionContext) {
             }
         });
     }
-
-    // new ExtensionVersionManager(context).isExtensionUpdated();
 }
 
 function isOldOpenAIKey(apiKey: string): boolean {

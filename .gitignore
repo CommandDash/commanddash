@@ -27,6 +27,7 @@ build/
 dist/
 .env
 user_config.json
+.vscode-test/
 
 
 #Ignore lock files

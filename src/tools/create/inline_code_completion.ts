@@ -6,6 +6,7 @@ import { extractDartCode } from '../../utilities/code-processing';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from '../../shared/types/constants';
+import { CacheManager } from '../../utilities/cache-manager';
 
 let currentInlineCompletionLine: number | undefined;
 
@@ -16,7 +17,7 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
             document: vscode.TextDocument,
             position: vscode.Position,
             context: vscode.InlineCompletionContext,
-            token: vscode.CancellationToken
+            token: vscode.CancellationToken,
         ): Promise<vscode.InlineCompletionItem[] | undefined> {
             console.log('completion triggered');
             if (context.triggerKind === 1) { // only manual allowed
@@ -25,6 +26,7 @@ const disposable = vscode.languages.registerInlineCompletionItemProvider(
             const editor = vscode.window.activeTextEditor;
             if (editor) {
                 vscode.window.showInformationMessage('FlutterGPT: Generating code, please wait.');
+
 
                 // Convert the Gemini response to InlineCompletionItems
                 const suggestions = await new Promise<string[]>((resolve) => {
@@ -80,6 +82,8 @@ export async function createInlineCodeCompletion(geminiRepo: GeminiRepository) {
         cancellable: false,
         title: 'FlutterGPT: Generating code, please wait.'
     }, async (progress) => {
+        const cacheManager = CacheManager.getInstance();
+        cacheManager.incrementInlineCompletionCount();
         const out = await generateSuggestions();
         console.log(out);
         if (out?.length === 0) {
