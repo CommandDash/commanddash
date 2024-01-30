@@ -109,7 +109,7 @@ export async function activate(context: vscode.ExtensionContext) {
             const isComment = activeEditor.document.lineAt(currentLine).text.trim().startsWith('//');
 
             // If the user has not used inline completion for 5 times, show hint for the same
-            if (inline_count < 5) {
+            if (inline_count < 3) {
                 if (lineText.length === 0) {
                     if (isComment || await isFirstLineOfSymbol(activeEditor)) {
                         // Set decoration on the current line
