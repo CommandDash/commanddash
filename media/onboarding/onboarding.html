@@ -11,7 +11,7 @@
 <body>
     <div class="h-screen flex flex-col" id="body-container">
         <div class="py-3 sticky top-0 z-[11] flex w-full px-5 bg-[#287CEB]" id="header">
-            <img src="{{headerImageUri}}" class="mb-1" alt="header">
+            <img src="{{headerImageUri}}" class="mb-1 h-7" alt="header">
         </div>
 
         <div class="py-3 my-2 px-5" id="google-api-key-header">
@@ -22,7 +22,7 @@
                 your
                 free API key and enter below.</p>
             <input type="text" id="google-api-key-text-input"
-                class="bg-white/[.1] border border-white/[.3] text-sm rounded-2xl block w-full p-2.5 mb-2"
+                class="bg-white/[.1] border border-white/[.3] text-sm block w-full p-2.5 mb-2"
                 required>
             <div class="list-section">
                 <ul id="validation-list"></ul>
@@ -54,9 +54,9 @@
                     </svg>
                 </div>
                 <div id="menu" class="menu px-5" role="listbox"></div>
-                <div class="w-full py-2 sticky bottom-0 z-10 px-5 pt-6 pb-5 bg-black"
+                <div class="w-full sticky bottom-0 z-10 mb-[2px] bg-black"
                     id="bottom-text-input-container">
-                    <div class="border border-white/[.6] text-gray-900 text-sm rounded-2xl block w-full p-2.5 mb-2 bg-white/[.1] pr-6"
+                    <div class="border border-white/[.6] text-gray-900 text-sm block w-full p-2.5 mb-[2px] bg-white/[.1] pr-6"
                         id="text-input-container">
                         <div class="relative">
                             <p id="text-input" contenteditable="true"># Message</p>

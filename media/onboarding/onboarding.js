@@ -83,12 +83,10 @@ const properties = [
     'MozTabSize',
 ];
 
-let agents = ['workspace', 'fig2code', 'integrationtest', 'apiintegration'];
-const commands = ['refactor'];
+let agents = ['workspace'];
+const commands = [];
 // Add your additional commands and agents
-const agentCommandsMap = {
-    'integrationtest': ['generate', 'ate'],
-};
+const agentCommandsMap = {};
 
 // Concatenate agent-specific commands to the agents array
 agents = agents.concat(
@@ -369,7 +367,7 @@ class CommandDeck {
         return div;
     };
 
-    new CommandDeck(
+    const commandDeck = new CommandDeck(
         textInput,
         textinputMenu,
         resolveFn,
@@ -398,6 +396,17 @@ class CommandDeck {
 
     textInput.addEventListener("focus", removePlaceholder);
     textInput.addEventListener("blur", addPlaceholder);
+
+    textInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
+            event.preventDefault();
+            vscode.postMessage({
+                type: "prompt",
+                value: textInput.textContent.trim(),
+            });
+            textInput.textContent = "";
+        }
+    });
 })();
 
 function ifKeyExists() {
