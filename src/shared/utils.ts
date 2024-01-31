@@ -131,28 +131,47 @@ export function getErrorAtPosition(document: vscode.TextDocument, position: vsco
 }
 
 
+/**
+ * Retrieves the code within the specified range from a given file.
+ * If the file is open in an editor, the code is obtained from the editor.
+ * Otherwise, the code is read from the disk.
+ * This is to handle the case where the user has unsaved changes in the editor.
+ *
+ * @param uri - The URI of the file.
+ * @param range - The range of code to retrieve.
+ * @returns A Promise that resolves to the code within the specified range, or undefined if the code cannot be retrieved.
+ */
 export async function getCodeForRange(uri: vscode.Uri, range: vscode.Range): Promise<string | undefined> {
-	// ! is there a better way to do this?
-	const fileCode = await vscode.workspace.fs.readFile(uri);
-	if (fileCode) {
-		const code = Buffer.from(fileCode).toString('utf-8');
-		// Extract the code for the range
-		const lines = code.split(/\r?\n/g);
-		const startLine = range.start.line;
-		const endLine = range.end.line;
-		const startChar = range.start.character;
-		const endChar = range.end.character;
-		let fullcode = "";
-		if (startLine === endLine) {
-			fullcode = lines[startLine].substring(startChar, endChar);
-		} else {
-			fullcode = lines[startLine].substring(startChar);
-			for (let i = startLine + 1; i < endLine; i++) {
-				fullcode += lines[i];
-			}
-			fullcode += lines[endLine - 1].substring(0, endChar);
-		}
+	const document = vscode.workspace.textDocuments.find((doc) => doc.uri.toString() === uri.toString());
+	if (document) {
+		// The file is open in an editor
+		let fullcode = document.getText(range);
 		return fullcode;
+	} else {
+		// The file is not open in an editor
+		let fileCode = await vscode.workspace.fs.readFile(uri);
+		if (fileCode) {
+			const code = Buffer.from(fileCode).toString('utf-8');
+			// Extract the code for the range
+			const lines = code.split(/\r?\n/g);
+			const startLine = range.start.line;
+			const endLine = range.end.line;
+			const startChar = range.start.character;
+			const endChar = range.end.character;
+			let fullcode = "";
+			if (startLine === endLine) {
+				fullcode = lines[startLine].substring(startChar, endChar);
+			} else {
+				fullcode = lines[startLine].substring(startChar);
+				for (let i = startLine + 1; i < endLine; i++) {
+					fullcode += lines[i];
+				}
+				fullcode += lines[endLine].substring(0, endChar);
+			}
+			return fullcode;
+		}
+
 	}
+
 	return undefined;
 }
