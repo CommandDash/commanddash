@@ -142,7 +142,7 @@ async function generateSuggestions(): Promise<string[]> {
         const _conversationHistory: Array<{ role: string; parts: string }> = [];
         _conversationHistory.push({ role: "user", parts: prompt });
         const result = await GeminiRepository.getInstance().getCompletion(_conversationHistory);
-        let sanitisedCode = filterSurroundingCode(fileContent, extractDartCode(result), position.line - 1);
+        let sanitisedCode = filterSurroundingCode(fileContent, extractDartCode(result), position.line);
         return [sanitisedCode ?? ''];
 
     }
