@@ -22,8 +22,7 @@
                 your
                 free API key and enter below.</p>
             <input type="text" id="google-api-key-text-input"
-                class="bg-white/[.1] border border-white/[.3] text-sm block w-full p-2.5 mb-2"
-                required>
+                class="bg-white/[.1] border border-white/[.3] text-sm block w-full p-2.5 mb-2" required>
             <div class="list-section">
                 <ul id="validation-list"></ul>
                 <dotlottie-player src="{{loadingAnimationUri}}" class="hidden" id="validation-loader"
@@ -54,46 +53,37 @@
                     </svg>
                 </div>
                 <div id="menu" class="menu px-5" role="listbox"></div>
-                <div class="w-full sticky bottom-0 z-10 mb-[2px] bg-black"
-                    id="bottom-text-input-container">
+                <div class="w-full sticky bottom-0 z-10 mb-[2px] bg-black" id="bottom-text-input-container">
                     <div class="border border-white/[.6] text-gray-900 text-sm block w-full p-2.5 mb-[2px] bg-white/[.1] pr-6"
                         id="text-input-container">
                         <div class="relative">
                             <p id="text-input" contenteditable="true"># Message</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div>
-                                    <p
-                                        class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]" title="Agents">
+                                    <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
+                                        title="Agents">
                                         @
                                     </p>
-                                    <p
-                                        class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]" title="Commands">
+                                    <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
+                                        title="Commands">
                                         /
                                     </p>
                                 </div>
                                 <div class="inline-flex justify-center items-center">
-                                    <p
-                                        class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer" title="Attach">
+                                    <p class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer"
+                                        title="Attach">
                                         +
                                     </p>
                                     <button class="ml-2" id="send-chat">
                                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="16" cy="16" r="16" fill="#3079D8" />
-                                            <g clip-path="url(#clip0_148_1766)">
-                                                <path
-                                                    d="M24.3465 15.5489L9.59961 8.7998L14.1618 15.5512L9.92303 22.6215L24.3465 15.5489Z"
-                                                    fill="white" stroke="white" stroke-width="0.784"
-                                                    stroke-linejoin="round" />
-                                                <path d="M12.8081 15.5518L16.0081 15.5518" stroke="#3079D8"
-                                                    stroke-width="0.784" stroke-linecap="round" stroke-linejoin="round" />
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip0_148_1766">
-                                                    <rect width="19.2" height="19.2" fill="white"
-                                                        transform="translate(7.19971 4.7998)" />
-                                                </clipPath>
-                                            </defs>
+                                            <rect x="0.000488281" width="31.9997" height="32" rx="2" fill="#3079D8" />
+                                            <path
+                                                d="M23.9531 16.3394L9.24951 9.84766L13.7983 16.3417L9.57198 23.1423L23.9531 16.3394Z"
+                                                fill="white" stroke="white" stroke-width="0.784"
+                                                stroke-linejoin="round" />
+                                            <path d="M12.4482 16.3418L15.6388 16.3418" stroke="#3079D8"
+                                                stroke-width="0.784" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                     </button>
                                 </div>
