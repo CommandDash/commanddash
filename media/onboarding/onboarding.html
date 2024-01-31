@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{onboardingCssUri}}">
     <link rel="stylesheet" href="{{prismCssUri}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 
 <body>
@@ -52,8 +53,16 @@
                             fill="white" />
                     </svg>
                 </div>
+                <div class="hidden flex-col w-full h-48 animate__animated animate__slideInUp px-2 py-3"
+                    id="workspace-loader">
+                    <div class="inline-flex flex-row items-end px-2">
+                        <span id="workspace-loader-text">Finding the most relevant files</span>
+                        <div class="typing-loader mx-2"></div>
+                    </div>
+                    <div class="inline-flex flex-col px-3" id="file-names"></div>
+                </div>
                 <div id="menu" class="menu px-5" role="listbox"></div>
-                <div class="w-full sticky bottom-0 z-10 mb-[2px] bg-black" id="bottom-text-input-container">
+                <div class="w-full sticky bottom-0 z-10 bg-black p-2" id="bottom-text-input-container">
                     <div class="border border-white/[.6] text-gray-900 text-sm block w-full p-2.5 mb-[2px] bg-white/[.1] pr-6"
                         id="text-input-container">
                         <div class="relative">
@@ -62,17 +71,17 @@
                                 <div>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
                                         title="Agents">
-                                        @
+                                        
                                     </p>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
                                         title="Commands">
-                                        /
+                                        
                                     </p>
                                 </div>
                                 <div class="inline-flex justify-center items-center">
                                     <p class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer"
                                         title="Attach">
-                                        +
+                                        
                                     </p>
                                     <button class="ml-2" id="send-chat">
                                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
