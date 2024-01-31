@@ -51,7 +51,7 @@
         {
           "type": "webview",
           "id": "fluttergpt.chatView",
-          "name": "Chat View"
+          "name": "Command Deck"
         }
       ]
     },

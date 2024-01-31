@@ -186,3 +186,22 @@ p[contenteditable="true"] {
     pointer-events: none;
     opacity: .9;
 }
+
+#bottom-text-input-container {
+    background-color: var(--vscode-editor-background);
+    border-color: var(--vscode-sideBar-foreground);
+}
+
+#clear-chat-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 4px;
+    opacity: 0.8;
+    cursor: pointer;
+    z-index: 98;
+}
