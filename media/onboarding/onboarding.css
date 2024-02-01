@@ -105,52 +105,9 @@ p[contenteditable="true"] {
 #text-input {
     color: var(--vscode-editor-foreground);
 }
-.message {
-    margin-bottom: 16px;
-    position: relative;
-}
-.user-you {
-    background-color: #2F2F2F;
-    padding: 8px;
-    width: auto;
-    max-width: auto;
-    box-sizing: border-box;
-    display: flex;
-    align-items: left;
-}
-.user-you::before {
-    content: "";
-    display: block;
-    width: 4px;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-.user-gemini-pro {
-    background-color: rgba(48, 121, 216, .2);
-    padding: 8px;
-    width: auto;
-    max-width: auto;
-    box-sizing: border-box;
-    align-items: left;
-}
-.user-gemini-pro::before {
-    content: "";
-    display: block;
-    width: 4px;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-.user-gemini-pro p {
-    margin-left: 0px;
-    white-space: pre-wrap;
-}
-.user-you p {
-    margin-left: 0px;
-    white-space: pre-wrap;
+.user-message {
+    background-color: var(--vscode-panel-background);
+    color: var(--vscode-sideBar-foreground);
 }
 .typing-loader {
     width: 4px;
@@ -182,6 +139,10 @@ p[contenteditable="true"] {
     }
 }
 
+#google-api-key-text-input {
+    border-color: var(--vscode-editor-foreground);
+}
+
 .disabled {
     pointer-events: none;
     opacity: .9;
@@ -191,9 +152,11 @@ p[contenteditable="true"] {
     background-color: var(--vscode-editor-background);
     border-color: var(--vscode-sideBar-foreground);
 }
-
+#text-input-container {
+    border-color: var(--vscode-editor-foreground);
+}
 #clear-chat-button {
-    position: absolute;
+    position: fixed;
     top: 8px;
     right: 8px;
     background-color: rgba(0, 0, 0, 0.8);

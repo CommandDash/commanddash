@@ -384,6 +384,41 @@ class CommandDeck {
         textInput.textContent = 'How to wait for forEach to complete with asynchronous callbacks?';
     }
 
+    googleApiKeyTextInput.addEventListener("input", (event) => {
+        const apiKey = event.target.value;
+        validateApiKey(apiKey);
+    });
+
+    sendButton.addEventListener("click", (event) => {
+        vscode.postMessage({ type: "prompt", value: textInput.textContent.trim() });
+        googleApiKeyHeader.classList.add("hidden");
+        if (onboardingCompleted) {
+            textInput.textContent = '';
+        }
+    });
+
+    textInput.addEventListener("paste", (event) => {
+        event.preventDefault();
+        const pastedText = event.clipboardData.getData('text/plain');
+        event.target.textContent = pastedText;
+    });
+
+    textInput.addEventListener("keydown", handleSubmit);
+
+    textInput.addEventListener("focus", removePlaceholder);
+    textInput.addEventListener("blur", addPlaceholder);
+
+    clearChatIcon.addEventListener("click", () => {
+        responseContainer.innerHTML = "";
+        conversationHistory = [];
+
+        vscode.postMessage({
+            type: "clearChat",
+        });
+    });
+})();
+
+function handleSubmit(event) {
     const resolveFn = async (query, type) => {
         // Array to store possible matches
         let matchingItems = [];
@@ -437,48 +472,15 @@ class CommandDeck {
         menuItemFn
     );
 
-    googleApiKeyTextInput.addEventListener("input", (event) => {
-        const apiKey = event.target.value;
-        validateApiKey(apiKey);
-    });
-
-    sendButton.addEventListener("click", (event) => {
-        vscode.postMessage({ type: "prompt", value: textInput.textContent.trim() });
-        googleApiKeyHeader.classList.add("hidden");
-        if (onboardingCompleted) {
-            textInput.textContent = '';
-        }
-    });
-
-    textInput.addEventListener("paste", (event) => {
+    if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
-        const pastedText = event.clipboardData.getData('text/plain');
-        event.target.textContent = pastedText;
-    });
-
-    textInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
-            event.preventDefault();
-            vscode.postMessage({
-                type: "prompt",
-                value: textInput.textContent.trim(),
-            });
-            textInput.textContent = "";
-        }
-    });
-
-    textInput.addEventListener("focus", removePlaceholder);
-    textInput.addEventListener("blur", addPlaceholder);
-
-    clearChatIcon.addEventListener("click", () => {
-        responseContainer.innerHTML = "";
-        conversationHistory = [];
-
         vscode.postMessage({
-            type: "clearChat",
+            type: "prompt",
+            value: textInput.textContent.trim(),
         });
-    });
-})();
+        textInput.textContent = "";
+    }
+}
 
 function ifKeyExists() {
     vscode.postMessage({
@@ -517,23 +519,21 @@ function readTriggeredMessage() {
                 clearChatIcon.classList.add("block");
                 break;
             case "showLoadingIndicator":
-                sendButton.disabled = true;
                 sendButton.classList.remove("cursor-pointer");
                 sendButton.classList.add("cursor-not-allowed");
                 loadingIndicator.classList.add("block");
                 loadingIndicator.classList.remove("hidden");
-                textInputContainer.classList.add("disabled");
-                textInput.blur();
+                sendButton.classList.add("disabled");
+                textInput.removeEventListener("keydown", handleSubmit);
                 textInput.textContent = "";
                 break;
             case "hideLoadingIndicator":
-                sendButton.disabled = false;
                 sendButton.classList.add("cursor-pointer");
                 sendButton.classList.remove("cursor-not-allowed");
                 loadingIndicator.classList.add("hidden");
                 loadingIndicator.classList.remove("block");
-                textInputContainer.classList.remove("disabled");
-                textInput.focus();
+                sendButton.classList.remove("disabled");
+                textInput.addEventListener("keydown", handleSubmit);
                 break;
             case "showValidationLoader":
                 validationLoadingIndicator.classList.add("block");
@@ -561,13 +561,13 @@ function readTriggeredMessage() {
                 if (message.value) {
                     workspaceLoader.classList.remove("animate__slideOutDown");
                     workspaceLoader.classList.add("animate__slideInUp");
-                    textInputContainer.classList.add("disabled");
-                    textInput.blur();
+                    sendButton.classList.add("disabled");
+                    textInput.removeEventListener("keydown", handleSubmit);
                 } else {
                     workspaceLoader.classList.remove("animate__slideInUp");
                     workspaceLoader.classList.add("animate__slideOutDown");
-                    textInputContainer.classList.remove("disabled");
-                    textInput.focus();
+                    sendButton.classList.remove("disabled");
+                    textInput.addEventListener("keydown", handleSubmit);
                 }
                 if (!message.value) {
                     fileNameContainer.innerHTML = '';
@@ -637,8 +637,8 @@ function displayMessages() {
         const contentElement = document.createElement("p");
         if (message.role === "model") {
             modelCount++;
-            
-            userElement.innerHTML = flutterGPT;
+
+            userElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md">FlutterGPT</span></div>`
             userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#3079D8]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -660,15 +660,15 @@ function displayMessages() {
             }
         } else {
             userElement.innerHTML = "<strong>You</strong>";
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#2F2F2F]");
-            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#2F2F2F]");
+            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = message.parts;
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(userElement);
         messageElement.appendChild(contentElement);
         responseContainer.appendChild(messageElement);
-        scrollToBottom();
+        // scrollToBottom();
     });
     setResponse();
 }

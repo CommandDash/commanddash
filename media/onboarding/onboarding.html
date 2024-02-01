@@ -28,7 +28,7 @@
                 your
                 free API key and enter below.</p>
             <input type="text" id="google-api-key-text-input"
-                class="bg-white/[.1] border border-white/[.3] text-sm block w-full p-2.5 mb-2 rounded-[2px]" required>
+                class="bg-white/[.1] border text-sm block w-full p-2.5 mb-2 rounded-[2px]" required>
             <div class="list-section">
                 <ul id="validation-list"></ul>
                 <dotlottie-player src="{{loadingAnimationUri}}" class="hidden" id="validation-loader"
@@ -67,8 +67,8 @@
                     <div class="inline-flex flex-col px-3" id="file-names"></div>
                 </div>
                 <div id="menu" class="menu px-5" role="listbox"></div>
-                <div class="w-full sticky bottom-0 z-10 p-2" id="bottom-text-input-container">
-                    <div class="border text-gray-900 text-sm block w-full p-2.5 mb-[2px] bg-white/[.1] pr-6 rounded-[2px]"
+                <div class="w-full sticky bottom-0 z-10 px-2 py-1" id="bottom-text-input-container">
+                    <div class="border text-gray-900 text-sm block w-full px-2.5 py-1.5 mb-[2px] bg-white/[.1] rounded-[2px]"
                         id="text-input-container">
                         <div class="relative">
                             <p id="text-input" contenteditable="true"># Message</p>
@@ -76,7 +76,7 @@
                                 <div>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
                                         title="Agents">
-                                        
+                                        @
                                     </p>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
                                         title="Commands">
