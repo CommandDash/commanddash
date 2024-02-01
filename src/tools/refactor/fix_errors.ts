@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
-import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
+import { extractDartCode, extractExplanation, extractReferenceTextFromEditor, filterSurroundingCode } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
-import { filterSurroundingCode } from '../create/inline_code_completion';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
 
 export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {

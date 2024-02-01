@@ -3,11 +3,11 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import { filterSurroundingCode } from '../../tools/create/inline_code_completion';
 // import * as myExtension from '../../extension';
 
 import * as os from 'os';
 import * as path from 'path';
+import { filterSurroundingCode } from '../../utilities/code-processing';
 const orignalFile = `import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
+import { extractDartCode, extractExplanation, extractReferenceTextFromEditor, filterSurroundingCode } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
@@ -7,7 +7,6 @@ import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
-import { filterSurroundingCode } from '../create/inline_code_completion';
 
 export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {
     logEvent('optimize-code', { 'type': 'refractor' });
