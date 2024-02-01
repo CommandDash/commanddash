@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as vscode from "vscode";
 import * as crypto from 'crypto';
 import path = require("path");
+import { logError } from "../utilities/telemetry-reporter";
 
 function handleError(error: Error, userFriendlyMessage: string): never {
     console.error(error);
@@ -315,6 +316,7 @@ export class GeminiRepository {
             // Fetching most relevant files
             return resultString.trim();
         } catch (error) {
+            logError('find-closest-dart-files-error', error);
             console.error("Error finding closest Dart files: ", error);
             throw error; // Rethrow the error to be handled by the caller
         } finally {

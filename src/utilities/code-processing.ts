@@ -1,5 +1,14 @@
 import * as vscode from 'vscode';
 
+
+class DartCodeNotFoundError extends Error {
+    constructor(message?: string) {
+        super(message); // (1)
+        this.name = this.constructor.name; // (2)
+        Error.captureStackTrace(this, this.constructor); // (3)
+    }
+}
+
 export function extractDartCode(widgetCode: string, first: Boolean = true): string {
     const codeBlocksRegex = /```(dart)?([\s\S]*?)```/g;
 
@@ -9,10 +18,15 @@ export function extractDartCode(widgetCode: string, first: Boolean = true): stri
         let dartCode: string = match[2];
         dartCodes.push(dartCode.trim());  // extracting and storing all dart code blocks
     }
-    if (first) {
+    if (dartCodes.length === 0) {
+        throw new DartCodeNotFoundError(`No Dart code recognized in response: ${widgetCode}`);
+    } else if (first) {
+        // Returns the first Dart code block
         return dartCodes[0];
+    } else {
+        // Returns the last Dart code block
+        return dartCodes[dartCodes.length - 1];
     }
-    else {return dartCodes[dartCodes.length-1];}
 }
 
 export function previewCode(dartCode: string): string {
