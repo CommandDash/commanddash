@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
-import path = require('path');
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 
@@ -18,13 +17,20 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     ) {
         this.aiRepo = aiRepo;
     }
+    
+	// Public method to post a message to the webview
+	public postMessageToWebview(message: any): void {
+		if (this._view) {
+			this._view.webview.postMessage(message);
+		}
+	}
 
-    public resolveWebviewView(
-        webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
-        _token: vscode.CancellationToken,
-    ) {
-        this._view = webviewView;
+	public resolveWebviewView(
+		webviewView: vscode.WebviewView,
+		context: vscode.WebviewViewResolveContext,
+		_token: vscode.CancellationToken,
+	) {
+		this._view = webviewView;
 
         // set options for the webview, allow scripts
         webviewView.webview.options = {
@@ -94,10 +100,16 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
         });
 
-        vscode.window.onDidChangeActiveColorTheme(() => {
-            webviewView.webview.postMessage({ type: 'updateTheme' });
-        });
-    }
+		webviewView.onDidChangeVisibility(() => {
+			if (webviewView.visible && this._view) {
+				this._view?.webview.postMessage({ type: 'focusChatInput' });
+			}
+		});
+
+		vscode.window.onDidChangeActiveColorTheme(() => {
+			webviewView.webview.postMessage({ type: 'updateTheme' });
+		});
+	}
 
     private _checkIfKeyExists() {
         const config = vscode.workspace.getConfiguration('fluttergpt');

@@ -4,6 +4,24 @@ All notable changes to the "fluttergpt" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.2.7]
+
+- Added better error reporting.
+
+## [0.2.6]
+
+- Minor fixes.
+
+## [0.2.5]
+
+- Added hints for new features.
+- Improved contextual code for inline code completion.
+
+## [0.2.4]
+
+- Added inline code generation feature
+- Created a centralised command registration method
+
 ## [0.2.3]
 
 - Added dart extension as dependency

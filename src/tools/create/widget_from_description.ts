@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
-import { logEvent } from '../../utilities/telemetry-reporter';
+import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
 
 export async function createWidgetFromDescription(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
@@ -92,6 +92,7 @@ export async function createWidgetFromDescription(geminiRepo: GeminiRepository, 
             }
         });
     } catch (error: Error | unknown) {
+        logError('widget-from-description-error', error);
         if (error instanceof Error) {
             vscode.window.showErrorMessage(`${error.message}`);
         } else {

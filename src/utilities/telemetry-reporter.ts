@@ -20,3 +20,17 @@ export function activateTelemetry(context: vscode.ExtensionContext) {
 export function logEvent(eventName: string, properties?: { [key: string]: string; }, measures?: { [key: string]: number; }){
     reporter.sendTelemetryEvent(eventName, properties, measures);
 }
+
+export function logError(eventName: string, error: Error | unknown){
+    if (error instanceof Error) {
+        reporter.sendTelemetryErrorEvent(eventName, {
+            'name': error.name,
+            'message': error.message,
+            'stack': `${error.stack}`
+        });
+    } else {
+        reporter.sendTelemetryErrorEvent(eventName, {
+            'error': `${error}`
+        });
+    }   
+}

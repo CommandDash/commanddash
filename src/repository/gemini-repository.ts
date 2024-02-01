@@ -14,12 +14,19 @@ export class GeminiRepository {
     private genAI: GoogleGenerativeAI;
     private _view?: vscode.Webview;
 
+    private static _instance: GeminiRepository;
+
     constructor(apiKey: string) {
         this.apiKey = apiKey;
         this.genAI = new GoogleGenerativeAI(this.apiKey);
         this.ensureCacheDirExists().catch(error => {
             handleError(error, 'Failed to initialize the cache directory.');
         });
+        GeminiRepository._instance = this;
+    }
+
+    public static getInstance(): GeminiRepository {
+        return GeminiRepository._instance;
     }
 
     public async generateTextFromImage(prompt: string, image: string, mimeType: string): Promise<string> {
@@ -167,7 +174,7 @@ export class GeminiRepository {
     }
 
     // Find 5 closest dart files for query
-    public async findClosestDartFiles(query: string, view?: vscode.WebviewView): Promise<string> {
+    public async findClosestDartFiles(query: string, view?: vscode.WebviewView, shortcut: boolean = false, filepath: string = ''): Promise<string> {
         //start timer
         let operationCompleted = false;
         const timeoutPromise = new Promise<void>((resolve) => {
@@ -183,83 +190,104 @@ export class GeminiRepository {
                 throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
             }
 
+            let distances = [];
+            let fileContents: any[] = [];
+
             // Load cache if not already loaded
             if (Object.keys(this.codehashCache).length === 0) {
                 await this.loadCache();
             }
 
-            // Initialize the embedding model for document retrieval
-            const embeddingModel = this.genAI.getGenerativeModel({ model: "embedding-001" });
+            // Load this only when shortcut is not called.
+            if (!shortcut) {
 
-            // Find all Dart files in the workspace
-            const dartFiles = await vscode.workspace.findFiles('**/*.dart');
+                // Initialize the embedding model for document retrieval
+                const embeddingModel = this.genAI.getGenerativeModel({ model: "embedding-001" });
 
-            // Read the content of each Dart file and compute codehash
-            const fileContents = await Promise.all(dartFiles.map(async (file) => {
-                const document = await vscode.workspace.openTextDocument(file);
-                const relativePath = vscode.workspace.asRelativePath(file, false);
-                const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
-                const codehash = this.computeCodehash(text);
-                return {
-                    text,
-                    path: file.path,
-                    codehash
-                };
-            }));
+                // Find all Dart files in the workspace
+                const dartFiles = await vscode.workspace.findFiles('**/*.dart');
 
-            // Filter out files that haven't changed since last cache
-            const filesToUpdate = fileContents.filter(fileContent => {
-                const cachedEntry = this.codehashCache[fileContent.path];
-                return !cachedEntry || cachedEntry.codehash !== fileContent.codehash;
-            });
+                // Read the content of each Dart file and compute codehash
+                fileContents = await Promise.all(dartFiles.map(async (file) => {
+                    const document = await vscode.workspace.openTextDocument(file);
+                    const relativePath = vscode.workspace.asRelativePath(file, false);
+                    const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
+                    const codehash = this.computeCodehash(text);
+                    return {
+                        text,
+                        path: file.path,
+                        codehash
+                    };
+                }));
 
-            // Split the filesToUpdate into chunks of 100 or fewer
-            const batchSize = 100;
-            const batches = [];
-            for (let i = 0; i < filesToUpdate.length; i += batchSize) {
-                batches.push(filesToUpdate.slice(i, i + batchSize));
-            }
+                // Filter out files that haven't changed since last cache
+                const filesToUpdate = fileContents.filter(fileContent => {
+                    const cachedEntry = this.codehashCache[fileContent.path];
+                    return !cachedEntry || cachedEntry.codehash !== fileContent.codehash;
+                });
 
-            // Process each chunk to get embeddings
-            for (const batch of batches) {
-                try {
-                    const batchEmbeddings = await embeddingModel.batchEmbedContents({
-                        requests: batch.map((fileContent) => ({
-                            content: { role: "document", parts: [{ text: fileContent.text }] },
-                            taskType: TaskType.RETRIEVAL_DOCUMENT,
-                        })),
-                    });
-
-                    // Update cache with new embeddings
-                    batchEmbeddings.embeddings.forEach((embedding, index) => {
-                        const fileContent = batch[index];
-                        this.codehashCache[fileContent.path] = {
-                            codehash: fileContent.codehash,
-                            embedding: embedding
-                        };
-                    });
-                } catch (error) {
-                    console.error('Error embedding documents:', error);
-                    // Handle the error as appropriate for your application
+                // Split the filesToUpdate into chunks of 100 or fewer
+                const batchSize = 100;
+                const batches = [];
+                for (let i = 0; i < filesToUpdate.length; i += batchSize) {
+                    batches.push(filesToUpdate.slice(i, i + batchSize));
                 }
+
+                // Process each chunk to get embeddings
+                for (const batch of batches) {
+                    try {
+                        const batchEmbeddings = await embeddingModel.batchEmbedContents({
+                            requests: batch.map((fileContent) => ({
+                                content: { role: "document", parts: [{ text: fileContent.text }] },
+                                taskType: TaskType.RETRIEVAL_DOCUMENT,
+                            })),
+                        });
+
+                        // Update cache with new embeddings
+                        batchEmbeddings.embeddings.forEach((embedding, index) => {
+                            const fileContent = batch[index];
+                            this.codehashCache[fileContent.path] = {
+                                codehash: fileContent.codehash,
+                                embedding: embedding
+                            };
+                        });
+                    } catch (error) {
+                        console.error('Error embedding documents:', error);
+                        // Handle the error as appropriate for your application
+                    }
+                }
+
+                // Save updated cache
+                await this.saveCache();
+
+                operationCompleted = true; // -> fetching most relevant files
+
+                // Generate embedding for the query
+                const queryEmbedding = await embeddingModel.embedContent({
+                    content: { role: "query", parts: [{ text: query }] },
+                    taskType: TaskType.RETRIEVAL_QUERY
+                });
+
+                // Calculate the Euclidean distance between the query embedding and each document embedding
+                distances = dartFiles.map((file, index) => ({
+                    file: file,
+                    distance: this.euclideanDistance(this.codehashCache[file.path].embedding.values, queryEmbedding.embedding.values)
+                }));
+            } else {
+                // Shortcut is true, directly use cached embeddings
+                const dartFiles = Object.keys(this.codehashCache).map(path => ({ path }));
+                console.log(dartFiles);
+                const queryEmbedding = await this.genAI.getGenerativeModel({ model: "embedding-001" }).embedContent({
+                    content: { role: "query", parts: [{ text: query }] },
+                    taskType: TaskType.RETRIEVAL_QUERY
+                });
+                distances = dartFiles
+                    .filter(file => file.path !== filepath) // Exclude current file path.
+                    .map(file => ({
+                        file: file,
+                        distance: this.euclideanDistance(this.codehashCache[file.path].embedding.values, queryEmbedding.embedding.values)
+                    }));
             }
-
-            // Save updated cache
-            await this.saveCache();
-
-            operationCompleted = true; // -> fetching most relevant files
-
-            // Generate embedding for the query
-            const queryEmbedding = await embeddingModel.embedContent({
-                content: { role: "query", parts: [{ text: query }] },
-                taskType: TaskType.RETRIEVAL_QUERY
-            });
-
-            // Calculate the Euclidean distance between the query embedding and each document embedding
-            const distances = dartFiles.map((file, index) => ({
-                file: file,
-                distance: this.euclideanDistance(this.codehashCache[file.path].embedding.values, queryEmbedding.embedding.values)
-            }));
 
             // Sort the files by their distance to the query embedding in ascending order
             distances.sort((a, b) => a.distance - b.distance);
@@ -269,6 +297,12 @@ export class GeminiRepository {
             for (const fileEmbedding of distances.slice(0, 5)) {
                 const fileContent = fileContents.find(fc => fc.path === fileEmbedding.file.path)?.text;
                 resultString += fileContent;
+            }
+
+            // Enforce the context limit of 30k tokens
+            const tokenLimit = 30000;
+            if (resultString.length > tokenLimit) {
+                resultString = resultString.substring(0, tokenLimit);
             }
 
             // A list of most relevant file paths

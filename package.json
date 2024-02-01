@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
   "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
-  "version": "0.2.3",
+  "version": "0.2.7",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -71,6 +71,12 @@
         "key": "ctrl+R",
         "mac": "cmd+R",
         "when": "editorHasSelection && resourceLangId == 'dart'"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "key": "ctrl+right",
+        "mac": "cmd+right",
+        "when": "resourceLangId == 'dart'"
       }
     ],
     "commands": [
@@ -82,6 +88,16 @@
       {
         "command": "fluttergpt.addToReference.menu",
         "title": "Add to Reference",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "title": "FlutterGPT: Inline Code Generation"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "title": "Inline Code Generation",
         "when": "false"
       },
       {
@@ -116,27 +132,12 @@
         "title": "FlutterGPT Refactor: From Instructions"
       },
       {
-        "command": "fluttergpt.refactorCode.menu",
-        "title": "From Instructions",
-        "when": "false"
-      },
-      {
         "command": "fluttergpt.fixErrors",
         "title": "FlutterGPT Refactor: Fix Errors"
       },
       {
-        "command": "fluttergpt.fixErrors.menu",
-        "title": "Fix Errors",
-        "when": "false"
-      },
-      {
         "command": "fluttergpt.optimizeCode",
         "title": "FlutterGPT Refactor: Optimize"
-      },
-      {
-        "command": "fluttergpt.optimizeCode.menu",
-        "title": "Optimize",
-        "when": "false"
       }
     ],
     "menus": {
@@ -149,6 +150,11 @@
           "command": "fluttergpt.addToReference.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@2"
         }
       ],
       "fluttergpt.createMenu": [
@@ -165,6 +171,11 @@
           "command": "fluttergpt.createWidget.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@3"
+        },
+        {
+          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@4"
         }
       ]
     },

@@ -8,6 +8,8 @@ import { getCodeForRange, isPositionInElementDefinitionRange } from '../shared/u
 import { Token } from '../shared/types/token';
 export class ContextualCodeProvider {
 
+    // gets the contextual code for the given range.
+    // Contextual code is the code for all the symbols referenced in the range.
     public async getContextualCode(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<string | undefined> {
         const checkSymbols = (symbols: Outline[]): Outline | undefined => {
             for (const symbol of symbols) {
@@ -42,27 +44,34 @@ export class ContextualCodeProvider {
         const docTokens = await this.getDocumentTokens(document, analyzer, range);
 
 
-        const tokensByFilePath = docTokens.reduce((map, contextualSymbol) => {
-            if (contextualSymbol.tokenType !== undefined &&
-                ["Class", "Method", "ENUM"].includes(contextualSymbol.tokenType) &&
-                contextualSymbol.name !== elementname &&
-                contextualSymbol.code) {
-
-                const filePath = contextualSymbol.path;
-                if (!map.has(filePath)) {
-                    map.set(filePath, []);
-                }
-                map.get(filePath)!.push(contextualSymbol);
-            }
-            return map;
-        }, new Map<string, Token[]>());
+        const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
 
         // Iterate over the new Map to construct the desired string
         let code: string = "";
-        for (const [filePath, tokens] of tokensByFilePath) {
+        for (const [filePath, tokenCodes] of tokensByFilePath) {
             code += `file path: ${filePath}\n`;
-            for (const token of tokens) {
-                const symbolCode = "```dart\n" + token.code + "\n```";
+            for (const token of tokenCodes) {
+                const symbolCode = "```dart\n" + token + "\n```";
+                code += symbolCode + "\n";
+            }
+        }
+        return code;
+    }
+
+    // gets the contextual code for the whole file.
+    // Used for inline completions to handle cases where there is no method or class in context.
+    public async getContextualCodeForCompletion(document: vscode.TextDocument, analyzer: ILspAnalyzer,): Promise<string | undefined> {
+        // provide code for tokens in the whole file. Avoid duplicate code for the same file.
+        const docTokens = await this.getDocumentTokens(document, analyzer, new vscode.Range(0, 0, document.lineCount - 1, 0));
+
+        const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
+
+        // Iterate over the new Map to construct the desired string
+        let code: string = "";
+        for (const [filePath, tokenCodes] of tokensByFilePath) {
+            code += `file path: ${filePath}\n`;
+            for (const token of tokenCodes) {
+                const symbolCode = "```dart\n" + token + "\n```";
                 code += symbolCode + "\n";
             }
         }
@@ -82,6 +91,28 @@ export class ContextualCodeProvider {
         return tokens;
     }
 
+    private getTokensFilePathMap(docTokens: Token[], document: vscode.TextDocument) {
+        return docTokens.reduce((map, contextualSymbol) => {
+            if (contextualSymbol.tokenType !== undefined &&
+                ["Class", "Method", "ENUM"].includes(contextualSymbol.tokenType) &&
+                contextualSymbol.code) {
+
+                const filePath = contextualSymbol.path;
+                // document path relative to the workspace folder with seperator
+                const pathSeperator = path.sep; // add seperator to match the format
+                const relativePath = pathSeperator + path.relative(vscode.workspace.getWorkspaceFolder(document.uri)!.uri.fsPath, document.uri.fsPath);
+                if (relativePath !== filePath) {
+
+                    if (!map.has(filePath)) {
+                        map.set(filePath, new Set());
+                    }
+                    // check if the code is already added
+                    map.get(filePath)!.add(contextualSymbol.code);
+                }
+            }
+            return map;
+        }, new Map<string, Set<String>>());
+    }
 
 
     private async parseTokens(tokensArray: Uint32Array, document: vscode.TextDocument, analyzer: ILspAnalyzer): Promise<Token[]> {

@@ -40,6 +40,13 @@ To get started, right-click on your editor in a dart project. Checkout all featu
 
 Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers. Query your workspace using `@workspace` command.
 
+### 💬 Generate
+<p align="center">
+<img src="https://media.giphy.com/media/Xv31gFGTcseEta3jTD/giphy.gif" alt="Generate code with Gemini inside VSCODE" width="500"/>
+</p>
+
+Generate code snippets directly in your IDE with the inline code generation feature. Simply type your request and let Gemini provide you with instant code solutions. 
+
 ### 💡 Create
 <p align="center">
 <img src="https://media.giphy.com/media/ytNTZHcMLFYmwbrgcA/giphy.gif" alt="Creating Widget using FlutterGPT" width="500"/>
@@ -120,10 +127,9 @@ FlutterGPT 💙 is community centric and any contribution is most welcome to mak
 
 ### Ways to contribute
 
-- **Feature requests**: Sugggest new features that'll make your development process easier. File at [Issues Board](https://github.com/Welltested-AI/fluttergpt/issues).
-- **Fix existing issues**: Help us by fixing existing issues in our [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
-- **Pick up approved features**: You can also contribute by picking up approved features from our [Roadmap](ROADMAP.md).
-
+- **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+- **Pick up open issues**: Pick up and fix existing issues in [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+- **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://github.com/Welltested-AI/fluttergpt/discussions/182). 
 
 To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
@@ -146,11 +152,10 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes: 0.2.3
+## Release Notes: 0.2.4
 
-- Added dart extension as dependency
-- Gracefully handles missing gemini api key
-- Improved copy & merge functionality
+- Added inline code generation feature
+- Created a centralised command registration method
 
 ## License
 
