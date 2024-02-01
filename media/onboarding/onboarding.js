@@ -517,6 +517,7 @@ function readTriggeredMessage() {
                 header.classList.add("hidden");
                 clearChatIcon.classList.remove("hidden");
                 clearChatIcon.classList.add("block");
+                scrollToBottom();
                 break;
             case "showLoadingIndicator":
                 sendButton.classList.remove("cursor-pointer");
@@ -603,8 +604,13 @@ function readTriggeredMessage() {
 }
 
 function scrollToBottom() {
-    debugger;
-    responseContainer.scrollTop = responseContainer.scrollHeight;
+    // responseContainer.scrollTo(0, responseContainer.scrollHeight);
+    setTimeout(() => {
+        if (responseContainer) {
+            debugger;
+            responseContainer.scrollTo(0, 999999);
+        }
+    }, 100);
 }
 
 function validateApiKey(apiKey) {
@@ -638,7 +644,7 @@ function displayMessages() {
         if (message.role === "model") {
             modelCount++;
 
-            userElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md">FlutterGPT</span></div>`
+            userElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
             userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#3079D8]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -668,7 +674,7 @@ function displayMessages() {
         messageElement.appendChild(userElement);
         messageElement.appendChild(contentElement);
         responseContainer.appendChild(messageElement);
-        // scrollToBottom();
+        scrollToBottom();
     });
     setResponse();
 }

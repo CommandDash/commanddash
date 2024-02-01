@@ -42,7 +42,7 @@
                     <p class="text-lg font-bold mb-5">Let's try out FlutterGPT</p>
                     <p class="mb-5">Let's ask one of the most viewed Flutter question on Stack overflow</p>
                 </div>
-                <div id="response" class="mb-5 my-3 relative"></div>
+                <div id="response" class="mb-5 my-3 relative overflow-y-auto"></div>
                 <dotlottie-player src="{{loadingAnimationUri}}" class="px-5 hidden" id="loader" background="transparent"
                     speed="1" style="width: 100px; height: 100px" direction="1" playMode="normal" loop
                     autoplay></dotlottie-player>
@@ -75,7 +75,7 @@
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
-                                        title="Agents">
+                                        title="Agents" id="agents">
                                         @
                                     </p>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"

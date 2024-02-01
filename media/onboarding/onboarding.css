@@ -142,7 +142,9 @@ p[contenteditable="true"] {
 #google-api-key-text-input {
     border-color: var(--vscode-editor-foreground);
 }
-
+#agents{
+    color: var(--vscode-input-placeholderForeground);
+}
 .disabled {
     pointer-events: none;
     opacity: .9;
