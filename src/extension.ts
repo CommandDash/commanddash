@@ -46,7 +46,8 @@ export async function activate(context: vscode.ExtensionContext) {
             'Open Settings'
         ).then(selection => {
             if (selection === 'Open Settings') {
-                vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+                // vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+                vscode.commands.executeCommand('workbench.view.extensions');
             }
         });
     }

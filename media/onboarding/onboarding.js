@@ -93,7 +93,6 @@ const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
-const clearChatIcon = document.getElementById("clear-chat-button");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -385,7 +384,7 @@ class CommandDeck {
     }
 
     googleApiKeyTextInput.addEventListener("input", (event) => {
-        const apiKey = event.target.value;
+        const apiKey = event.target.value.trim();
         validateApiKey(apiKey);
     });
 
@@ -407,15 +406,6 @@ class CommandDeck {
 
     textInput.addEventListener("focus", removePlaceholder);
     textInput.addEventListener("blur", addPlaceholder);
-
-    clearChatIcon.addEventListener("click", () => {
-        responseContainer.innerHTML = "";
-        conversationHistory = [];
-
-        vscode.postMessage({
-            type: "clearChat",
-        });
-    });
 })();
 
 function handleSubmit(event) {
@@ -489,7 +479,7 @@ function ifKeyExists() {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Message") {
+    if (textInput.textContent.trim() === "# Ask FlutterGPT") {
         textInput.textContent = '';
         textInput.classList.remove('placeholder', 'text-white/[.4]');
     }
@@ -498,7 +488,7 @@ function removePlaceholder() {
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Message';
+        textInput.textContent = '# Ask FlutterGPT';
         textInput.classList.add('placeholder', 'text-white/[.4]');
     }
 }
@@ -515,8 +505,6 @@ function readTriggeredMessage() {
                 conversationHistory = message.value;
                 displayMessages(conversationHistory);
                 header.classList.add("hidden");
-                clearChatIcon.classList.remove("hidden");
-                clearChatIcon.classList.add("block");
                 scrollToBottom();
                 break;
             case "showLoadingIndicator":
@@ -599,7 +587,19 @@ function readTriggeredMessage() {
                     });
                 }
                 break;
+            case 'clearCommandDeck':
+                clearChat();
+                break;
         }
+    });
+}
+
+function clearChat() {
+    responseContainer.innerHTML = "";
+    conversationHistory = [];
+
+    vscode.postMessage({
+        type: "clearChat",
     });
 }
 
@@ -607,7 +607,6 @@ function scrollToBottom() {
     // responseContainer.scrollTo(0, responseContainer.scrollHeight);
     setTimeout(() => {
         if (responseContainer) {
-            debugger;
             responseContainer.scrollTo(0, 999999);
         }
     }, 100);
@@ -710,6 +709,9 @@ function setResponse() {
         _copyIcon.addEventListener("click", () => {
             const textToCopy = _preBlock.textContent.trim();
             navigator.clipboard.writeText(textToCopy);
+            vscode.postMessage({
+                type: "copyCode",
+            });
         });
 
         const _mergeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -722,7 +724,7 @@ function setResponse() {
 
         _mergeIcon.addEventListener("click", () => {
             vscode.postMessage({
-                type: "pasteCode",
+                type: "mergeCode",
                 value: _preBlock.textContent.trim(),
             });
         });

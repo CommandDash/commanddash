@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from 'fs';
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
+import { logError, logEvent } from "../utilities/telemetry-reporter";
 
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
@@ -57,7 +58,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         break;
                     }
 
-                case "pasteCode":
+                case "mergeCode":
                     {
                         const editor = vscode.window.activeTextEditor;
                         if (editor) {
@@ -69,6 +70,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                                 }
                             });
                         }
+                        logEvent('merge-code', {from: 'command-deck'});
+                        break;
+                    }
+                    case "copyCode":
+                    {
+                        logEvent('copy-code', {from: 'command-deck'});
                         break;
                     }
                 case "clearChat":
@@ -109,6 +116,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 		vscode.window.onDidChangeActiveColorTheme(() => {
 			webviewView.webview.postMessage({ type: 'updateTheme' });
 		});
+
+        logEvent('new-chat-start', {from: 'command-deck'});
 	}
 
     private _checkIfKeyExists() {
@@ -231,6 +240,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
         } catch (error) {
             console.error("Error processing workspace prompt: ", error);
+            logError('workspace-prompt-error', error);
         }
         // Use the stored conversation history for the prompt
         try {
@@ -246,12 +256,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            logEvent('follow-up-message', {from: 'command-deck', message: JSON.stringify(this._publicConversationHistory)});
             this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
             this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 
         } catch (error) {
             console.error(error);
             const response = error instanceof Error ? error.message : 'An unexpected error occurred.';
+            logError('command-deck-conversation-error', error);
             this._view?.webview.postMessage({ type: 'displaySnackbar', value: response });
             this._view?.webview.postMessage({ type: 'addResponse', value: '' });
         } finally {
@@ -261,9 +273,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     }
 
 
-    private clearConversationHistory() {
+    public clearConversationHistory() {
         this._privateConversationHistory = [];
         this._publicConversationHistory = [];
+        logEvent('clear-chat-conversation', {from: 'command-deck'});
     }
+
 }
 

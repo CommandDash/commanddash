@@ -12,9 +12,6 @@
 
 <body>
     <div class="h-screen flex flex-col" id="body-container">
-        <button id="clear-chat-button" class="hidden">
-            Clear Chat <i class="fa-solid fa-trash-can" style="color: #ffffff;"></i>
-        </button>
         <div class="py-3 sticky top-0 z-[11] flex w-full px-5 bg-[#287CEB] items-center" id="header">
             <img src="{{headerImageUri}}" class="h-7" alt="header">
             <span class="text-xl font-bold text-white">FlutterGPT</span>
@@ -71,7 +68,7 @@
                     <div class="border text-gray-900 text-sm block w-full px-2.5 py-1.5 mb-[2px] bg-white/[.1] rounded-[2px]"
                         id="text-input-container">
                         <div class="relative">
-                            <p id="text-input" contenteditable="true"># Message</p>
+                            <p id="text-input" contenteditable="true"># Ask FlutterGPT</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
