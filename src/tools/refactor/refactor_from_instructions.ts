@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { extractDartCode, previewCode } from '../../utilities/code-processing';
+import { extractDartCode, filterSurroundingCode, previewCode } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
@@ -7,7 +7,6 @@ import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
-import { filterSurroundingCode } from '../create/inline_code_completion';
 
 export async function refactorCode(gemini: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext) {
     logEvent('refactor-code', { 'type': 'refractor' });

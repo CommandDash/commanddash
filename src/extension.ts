@@ -38,13 +38,16 @@ export async function activate(context: vscode.ExtensionContext) {
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
     if (!apiKey || isOldOpenAIKey(apiKey)) {
+        initWebview(context);
+        
         // Prompt the user to update their settings
         vscode.window.showErrorMessage(
             'Please update your API key to Gemini in the settings.',
             'Open Settings'
         ).then(selection => {
             if (selection === 'Open Settings') {
-                vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+                // vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+                vscode.commands.executeCommand('workbench.view.extensions');
             }
         });
     }
@@ -67,6 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
+    
     try {
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
@@ -77,8 +81,12 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeConfiguration(event => {
             let affected = event.affectsConfiguration("fluttergpt.apiKey");
             if (affected) {
-                const geminiRepo = initGemini();
-                initFlutterExtension(context, geminiRepo, analyzer);
+                try {
+                    const geminiRepo = initGemini();
+                    initFlutterExtension(context, geminiRepo, analyzer);
+                } catch (error) {
+                    console.error(error);
+                }
             }
         });
     }
@@ -88,7 +96,7 @@ function isOldOpenAIKey(apiKey: string): boolean {
     return apiKey.startsWith('sk-');
 }
 
-function initWebview(context: vscode.ExtensionContext, geminiRepo: GeminiRepository) {
+function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiRepository) {
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
     const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
     // Register the provider with the extension's context

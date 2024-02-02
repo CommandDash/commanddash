@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as vscode from "vscode";
 import * as crypto from 'crypto';
 import path = require("path");
+import { logError } from "../utilities/telemetry-reporter";
 
 function handleError(error: Error, userFriendlyMessage: string): never {
     console.error(error);
@@ -68,7 +69,35 @@ export class GeminiRepository {
 
         const response = result.response;
         const text = response.text();
+        console.log('gemini response', text);
         return text;
+    }
+
+    //validate api key by sending 'Test message' as prompt
+    public async validateApiKey(apiKey: string) {
+        try {
+            const _genAI = new GoogleGenerativeAI(apiKey);
+            const model = _genAI.getGenerativeModel({ model: 'gemini-pro' });
+            const result = await model.generateContent('Test message');
+            return result.response.text;
+        } catch (error) {
+            // Check if the error is related to an invalid API key
+            if (this.isApiKeyInvalidError(error)) {
+                throw new Error('API key is not valid. Please pass a valid API key.');
+            } else {
+                // Re-throw other errors
+                throw error;
+            }
+        }
+    }
+
+    // Function to check if the error is related to an invalid API key
+    private isApiKeyInvalidError(error: any): boolean {
+        return (
+            error &&
+            error.message &&
+            error.message.includes('API_KEY_INVALID')
+        );
     }
 
     // Cache structure
@@ -177,7 +206,8 @@ export class GeminiRepository {
                 const embeddingModel = this.genAI.getGenerativeModel({ model: "embedding-001" });
 
                 // Find all Dart files in the workspace
-                const dartFiles = await vscode.workspace.findFiles('**/*.dart');
+                const excludePatterns = "**/{android,ios,web,linux,macos,windows,.dart_tool}/**";
+                const dartFiles = await vscode.workspace.findFiles('**/*.dart', excludePatterns);
 
                 // Read the content of each Dart file and compute codehash
                 fileContents = await Promise.all(dartFiles.map(async (file) => {
@@ -287,6 +317,7 @@ export class GeminiRepository {
             // Fetching most relevant files
             return resultString.trim();
         } catch (error) {
+            logError('find-closest-dart-files-error', error);
             console.error("Error finding closest Dart files: ", error);
             throw error; // Rethrow the error to be handled by the caller
         } finally {

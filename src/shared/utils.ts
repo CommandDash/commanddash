@@ -46,10 +46,12 @@ export async function getCodeForElementAtRange(analyzer: ILspAnalyzer, document:
 }
 
 export async function cursorIsAt(type: String, analyzer: ILspAnalyzer, document: vscode.TextDocument, activeTextEditor: vscode.TextEditor | undefined, range: vscode.Range, strict: boolean = true): Promise<{ symbolRange: vscode.Range, symbol: Outline } | undefined> {
-
-	const position = activeTextEditor?.selection.active;
+	if (!activeTextEditor){
+		return undefined;
+	}
+	const position = activeTextEditor.selection.active;
 	// adjust the position to the start of the word
-	const wordRange = document.getWordRangeAtPosition(position!)!;
+	const wordRange = document.getWordRangeAtPosition(position);
 	if (!wordRange) {
 		return undefined;
 	}

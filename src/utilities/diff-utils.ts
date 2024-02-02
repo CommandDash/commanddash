@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { logError } from './telemetry-reporter';
 
 export async function handleDiffViewAndMerge(
     editor: vscode.TextEditor,
@@ -26,6 +27,7 @@ export async function handleDiffViewAndMerge(
             try {
                 await vscode.workspace.fs.delete(tempFileUri, { recursive: true, useTrash: false });
             } catch (error) {
+                logError('handleDiffViewAndMerge-deletetempFileForceClosing', error);
                 console.error('Failed to delete temporary file:', error);
             }
             closeSubscription.dispose();
@@ -58,6 +60,7 @@ export async function handleDiffViewAndMerge(
     try {
         await vscode.workspace.fs.delete(tempFileUri, { recursive: true, useTrash: false });
     } catch (error) {
+        logError('handleDiffViewAndMerge-deletetempFileclosing', error);
         console.error('Failed to delete temporary file:', error);
     }
 }

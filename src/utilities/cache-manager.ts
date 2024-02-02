@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { logError } from './telemetry-reporter';
 
 export class CacheManager {
     private static instance: CacheManager;
@@ -43,6 +44,7 @@ export class CacheManager {
             currentCount++;
             await this.setGlobalValue<number>("inline-count", currentCount);
         } catch (error) {
+            logError('incrementInlineCompletionCount', error);
             console.log("Failed updating cache for FlutterGpt!!");
         }
     }
@@ -51,6 +53,7 @@ export class CacheManager {
         try {
             return await this.getGlobalValue<number | undefined>("inline-count") ?? 0;
         } catch (error) {
+            logError('getInlineCompletionCount', error);
             console.log("Failed updating cache for FlutterGpt!!");
             return 0;
         }

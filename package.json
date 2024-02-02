@@ -51,7 +51,7 @@
         {
           "type": "webview",
           "id": "fluttergpt.chatView",
-          "name": "Chat"
+          "name": "Command Deck"
         }
       ]
     },
@@ -138,6 +138,18 @@
       {
         "command": "fluttergpt.optimizeCode",
         "title": "FlutterGPT Refactor: Optimize"
+      },
+      {
+        "command": "fluttergpt.openCommandDeck",
+        "title": "Open FlutterGPT Command Deck"
+      },
+      {
+        "command": "fluttergpt.clearChat",
+        "title": "Clear Chat",
+        "icon": {
+          "light": "resources/light/trash.svg",
+          "dark": "resources/dark/trash.svg"
+        }
       }
     ],
     "menus": {
@@ -155,6 +167,12 @@
           "command": "fluttergpt.createInlineCodeCompletion.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "fluttergpt.clearChat",
+          "group": "navigation"
         }
       ],
       "fluttergpt.createMenu": [
