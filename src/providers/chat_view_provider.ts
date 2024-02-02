@@ -256,7 +256,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
-            logEvent('follow-up-message', {from: 'command-deck', message: JSON.stringify(this._publicConversationHistory)});
+            logEvent('follow-up-message', {from: 'command-deck'});
             this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
             this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 
