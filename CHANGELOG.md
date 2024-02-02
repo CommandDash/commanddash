@@ -4,6 +4,12 @@ All notable changes to the "fluttergpt" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.2.9]
+
+- New User Onboarding
+- Upgraded Chat UI (💙)
+- Bug fixes and improvements
+
 ## [0.2.8]
 
 - Improved contextual code for inline code completion.
