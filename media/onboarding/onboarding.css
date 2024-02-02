@@ -145,6 +145,9 @@ p[contenteditable="true"] {
 #agents{
     color: var(--vscode-input-placeholderForeground);
 }
+.placeholder {
+    color: var(--vscode-input-placeholderForeground) !important;
+}
 .disabled {
     pointer-events: none;
     opacity: .9;
