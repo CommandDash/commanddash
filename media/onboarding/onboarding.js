@@ -299,11 +299,13 @@ class CommandDeck {
             this.renderMenu();
 
             // Apply highlight class to existing mentions
+            // debugger;
             // this.applyHighlightToExistingActions(positionIndex);
         }, 0);
     }
 
     applyHighlightToExistingActions(originalText, positionIndex) {
+        // debugger;
         const trigger = this.ref.textContent[this.triggerIdx];
         const allActions = [...agents, ...commands];
         const regex = new RegExp(`\\B(${allActions.join("|")})\\b`, 'gi');
@@ -481,7 +483,7 @@ function ifKeyExists() {
 function removePlaceholder() {
     if (textInput.textContent.trim() === "# Ask FlutterGPT") {
         textInput.textContent = '';
-        textInput.classList.remove('placeholder', 'text-white/[.4]');
+        textInput.classList.remove('placeholder', '!text-white/[.4]');
     }
 }
 
@@ -489,7 +491,7 @@ function removePlaceholder() {
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
         textInput.textContent = '# Ask FlutterGPT';
-        textInput.classList.add('placeholder', 'text-white/[.4]');
+        textInput.classList.add('placeholder', '!text-white/[.4]');
     }
 }
 
