@@ -206,7 +206,8 @@ export class GeminiRepository {
                 const embeddingModel = this.genAI.getGenerativeModel({ model: "embedding-001" });
 
                 // Find all Dart files in the workspace
-                const dartFiles = await vscode.workspace.findFiles('**/*.dart');
+                const excludePatterns = "**/{android,ios,web,linux,macos,windows,.dart_tool}/**";
+                const dartFiles = await vscode.workspace.findFiles('**/*.dart', excludePatterns);
 
                 // Read the content of each Dart file and compute codehash
                 fileContents = await Promise.all(dartFiles.map(async (file) => {
