@@ -22,13 +22,14 @@ export async function makeHttpRequest<T>(config: AxiosRequestConfig): Promise<T>
 export async function makeAuthorizedHttpRequest<T>(config:AxiosRequestConfig,context:vscode.ExtensionContext): Promise<T>{
     // add base url localhost:5000
     config.baseURL =process.env["HOST"]!;
-    const access_token = context.globalState.get('access_token');
-    const refresh_token = context.globalState.get<string>('refresh_token');
-    if (!refresh_token){
+    const accessToken = context.globalState.get('access_token');
+    const refreshToken = context.globalState.get<string>('refresh_token');
+    if (!refreshToken){
         throw new Error("Please login to FlutterGpt to use this feature");
     }
     config.headers = {
-        Authorization: `Bearer ${access_token}`
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Authorization: `Bearer ${accessToken}`
     };
     try {
         const response: AxiosResponse<T> = await axios(config);
@@ -36,8 +37,8 @@ export async function makeAuthorizedHttpRequest<T>(config:AxiosRequestConfig,con
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response?.status === 401||error.response?.status === 422){
-                const new_access_token = await getNewAccessToken(refresh_token);
-                context.globalState.update('access_token',new_access_token);
+                const newAccessToken = await getNewAccessToken(refreshToken);
+                context.globalState.update('access_token',newAccessToken);
                 return makeAuthorizedHttpRequest<T>(config,context);
             }
             throw new Error(`Error: ${error.response?.data.error.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data.error.message}`);
@@ -48,11 +49,12 @@ export async function makeAuthorizedHttpRequest<T>(config:AxiosRequestConfig,con
 }
 
 
-async function getNewAccessToken(refresh_token:string): Promise<string>{
-    const response = await makeHttpRequest<{access_token:string}>({url:"http://localhost:5000/token/refresh",method:'POST',
+async function getNewAccessToken(refreshToken:string): Promise<string>{
+    const response = await makeHttpRequest<{accessToken:string}>({url:"http://localhost:5000/token/refresh",method:'POST',
     headers:{
-        Authorization:`Bearer ${refresh_token}` 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Authorization:`Bearer ${refreshToken}` 
     }
 });
-    return response.access_token;
+    return response.accessToken;
 }
