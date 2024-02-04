@@ -34,6 +34,8 @@ import { optimizeCode } from '../tools/refactor/optimize_code';
 import { logEvent } from './telemetry-reporter';
 import { FlutterGPTViewProvider } from '../providers/chat_view_provider'; // Adjust the import path accordingly
 import { createInlineCodeCompletion } from '../tools/create/inline_code_completion';
+import { getUserPrefferedModel } from './model-repository-provider';
+import { GenerationRepository } from '../repository/generation-repository';
 
 
 export function registerCommand(
@@ -66,17 +68,17 @@ export function registerCommand(
     }
 }
 
-export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
-
+export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider,) {
+    const generationRepository: GenerationRepository = getUserPrefferedModel();
     // List of commands to register, with their names and options.
     const commands = [
         { name: 'fluttergpt.addToReference', handler: () => addToReference(context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'fluttergpt.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.createCodeFromBlueprint', handler: () => createCodeFromBlueprint(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.createCodeFromDescription', handler: () => createCodeFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.refactorCode', handler: (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(geminiRepo, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'fluttergpt.fixErrors', handler: (aiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(geminiRepo, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'fluttergpt.optimizeCode', handler: (aiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(geminiRepo, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'fluttergpt.createCodeFromBlueprint', handler: () => createCodeFromBlueprint(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
+        { name: 'fluttergpt.createCodeFromDescription', handler: () => createCodeFromDescription(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
+        { name: 'fluttergpt.refactorCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(generationRepository, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'fluttergpt.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'fluttergpt.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } }
         // Add more commands as needed.
     ];

@@ -8,8 +8,9 @@ import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { filterSurroundingCode } from '../create/inline_code_completion';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
+import { GenerationRepository } from '../../repository/generation-repository';
 
-export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {
+export async function fixErrors(generationRepository: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {
     logEvent('fix-errors', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -74,10 +75,11 @@ export async function fixErrors(geminiRepo: GeminiRepository, errors: vscode.Dia
             3. How do you plan to fix that? [Don't output code yet]
             4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION. Since this is without human review, you need to output the precise CURSOR_SELECTION`;
 
-            const result = await geminiRepo.getCompletion([{
-                'role': 'user',
-                'parts': prompt
-            }]);
+            const result = await generationRepository.fixErrors(finalString, contextualCode, errorsDescription, globalState);
+            if (!result) {
+                vscode.window.showErrorMessage('Failed to fix code. Please try again.');
+                return;
+            }
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
 

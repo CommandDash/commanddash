@@ -3,22 +3,24 @@ import * as fs from 'fs';
 import * as vscode from "vscode";
 import * as crypto from 'crypto';
 import path = require("path");
+import { appendReferences } from "../utilities/prompt_helpers";
+import { getReferenceEditor } from "../utilities/state-objects";
+import { GenerationRepository } from "./generation-repository";
+import { extractReferenceTextFromEditor } from "../utilities/code-processing";
 
 function handleError(error: Error, userFriendlyMessage: string): never {
     console.error(error);
     throw new Error(userFriendlyMessage);
 }
 
-export class GeminiRepository {
-    private apiKey?: string;
+export class GeminiRepository extends GenerationRepository {
     private genAI: GoogleGenerativeAI;
-    private _view?: vscode.Webview;
 
     private static _instance: GeminiRepository;
 
     constructor(apiKey: string) {
-        this.apiKey = apiKey;
-        this.genAI = new GoogleGenerativeAI(this.apiKey);
+        super(apiKey);
+        this.genAI = new GoogleGenerativeAI(apiKey);
         this.ensureCacheDirExists().catch(error => {
             handleError(error, 'Failed to initialize the cache directory.');
         });
@@ -265,16 +267,16 @@ export class GeminiRepository {
             distances.sort((a, b) => a.distance - b.distance);
 
             // Construct a string with the closest Dart files and their content
-            let resultString = '';
+            let resultstring = '';
             for (const fileEmbedding of distances.slice(0, 5)) {
                 const fileContent = fileContents.find(fc => fc.path === fileEmbedding.file.path)?.text;
-                resultString += fileContent;
+                resultstring += fileContent;
             }
 
             // Enforce the context limit of 30k tokens
             const tokenLimit = 30000;
-            if (resultString.length > tokenLimit) {
-                resultString = resultString.substring(0, tokenLimit);
+            if (resultstring.length > tokenLimit) {
+                resultstring = resultstring.substring(0, tokenLimit);
             }
 
             // A list of most relevant file paths
@@ -285,7 +287,7 @@ export class GeminiRepository {
             console.log("Most relevant file paths:" + filePaths);
 
             // Fetching most relevant files
-            return resultString.trim();
+            return resultstring.trim();
         } catch (error) {
             console.error("Error finding closest Dart files: ", error);
             throw error; // Rethrow the error to be handled by the caller
@@ -313,4 +315,165 @@ export class GeminiRepository {
         };
     }
 
+    public async optimizeCode(finalstring: string, contextualCode: string | undefined, globalState: vscode.Memento): Promise<string | undefined> {
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output response in the modified format..\n\n`;
+        prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalstring + '\n```\n\n';
+        if (contextualCode) {
+            prompt += `Here are the definitions of the symbols used in the code\n${contextualCode} \n\n`;
+        }
+        let referenceEditor = getReferenceEditor(globalState);
+        prompt = appendReferences(referenceEditor, prompt);
+        prompt += `Output the optimized code in a single code block to be replaced over selected code.`;
+        prompt += `Proceed step by step:
+            1. Describe the selected piece of code.
+            2. What are the possible optimizations?
+            3. How do you plan to achieve that ? [Don't output code yet]
+            4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.Since this is without human review, you need to output the precise CURSOR_SELECTION`;
+        console.log(prompt);
+        const result = await this.getCompletion([{
+            'role': 'user',
+            'parts': prompt
+        }]);
+        return result;
+    }
+
+    public async fixErrors(finalstring: string, contextualCode: string | undefined, errorsDescription: string, globalState: vscode.Memento): Promise<string | undefined> {
+        let prompt = `Follow the instructions carefully and to the letter. You're a Flutter/Dart debugging expert.\n\n`;
+        prompt += ` Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalstring + '\n```\n\n';
+        if (errorsDescription) {
+            prompt += `The errors are: ${errorsDescription}\n\n`;
+        }
+        if (contextualCode) {
+            prompt += `Here are the definitions of the symbols used in the code\n${contextualCode}\n\n`;
+        }
+        prompt = appendReferences(getReferenceEditor(globalState), prompt);
+
+        prompt += `First give a short explanation and then output the fixed code in a single code block to be replaced over the selected code.`;
+        prompt += `Proceed step by step: 
+        1. Describe the selected piece of code and the error.
+        2. What is the cause of the error?
+        3. How do you plan to fix that? [Don't output code yet]
+        4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION. Since this is without human review, you need to output the precise CURSOR_SELECTION`;
+
+        const result = await this.getCompletion([{
+            'role': 'user',
+            'parts': prompt
+        }]);
+        return result;
+    }
+
+    public async refactorCode(finalstring: string, contextualCode: string | undefined, instructions: string, globalState: vscode.Memento): Promise<string | undefined> {
+        let referenceEditor = getReferenceEditor(globalState);
+        let prompt = 'You are a Flutter/Dart assistant helping user modify code within their editor window.';
+        prompt += `Modification instructions from user: ${instructions}. Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalstring + '\n```\n';
+
+        prompt = appendReferences(referenceEditor, prompt);
+        if (contextualCode) {
+            prompt += `\n\nHere are the definitions of the symbols used in the code\n${contextualCode}\n\n`;
+        }
+        prompt += `Proceed step by step: 
+        1. Describe the selected piece of code.
+        2. What is the intent of user's modification?
+        3. How do you plan to achieve that? [Don't output code yet]
+        4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION. Since this is without human review, you need to output the precise CURSOR_SELECTION`;
+        console.log(prompt);
+        const result = await this.getCompletion([{
+            'role': 'user',
+            'parts': prompt
+        }]);
+        return result;
+    }
+
+    public async createModelClass(library: string | undefined, jsonStructure: string, includeHelpers: string | undefined, globalState: vscode.Memento): Promise<string | undefined> {
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        let referenceEditor = getReferenceEditor(globalState);
+        if (referenceEditor !== undefined) {
+            const referenceText = extractReferenceTextFromEditor(referenceEditor);
+            if (referenceText !== '') {
+                prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
+            }
+        }
+        prompt += `Create a Flutter model class, keeping null safety in mind for from the following JSON structure: ${jsonStructure}.`;
+
+        if (library && library !== 'None') {
+            prompt += `Use ${library}`;
+        }
+        if (includeHelpers === 'Yes') {
+            prompt += `Make sure toJson, fromJson, and copyWith methods are included.`;
+        }
+        prompt += `Output the model class code in a single block.`;
+
+        const result = await this.getCompletion([
+            {
+                role: "user",
+                parts: prompt
+            }
+        ]);
+
+        return result;
+    }
+
+    public async createRepositoryFromJson(description: string, globalState: vscode.Memento): Promise<string | undefined> {
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        let referenceEditor = getReferenceEditor(globalState);
+        if (referenceEditor !== undefined) {
+            const referenceText = extractReferenceTextFromEditor(referenceEditor);
+            if (referenceText !== '') {
+                prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
+            }
+        }
+
+        prompt += `Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`;
+
+        const result = await this.getCompletion([{
+            'role': 'user',
+            'parts': prompt
+        }]);
+
+        return result;
+    }
+
+    public async createCodeFromBlueprint(blueprint: string, globalState: vscode.Memento): Promise<string | undefined> {
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        let referenceEditor = getReferenceEditor(globalState);
+        if (referenceEditor !== undefined) {
+            const referenceText = extractReferenceTextFromEditor(referenceEditor);
+            if (referenceText !== '') {
+                prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
+            }
+        }
+        prompt += `Create Flutter/Dart code for the following blueprint: \n===${blueprint}\n===. Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code in a single block.`;
+        const result = await this.getCompletion([{
+            'role': 'user',
+            'parts': prompt
+        }]);
+        return result;
+    }
+
+    public async createCodeFromDescription(aboveText: string, belowText: string, instructions: string, globalState: vscode.Memento): Promise<string | undefined> {
+        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
+        let referenceEditor = getReferenceEditor(globalState);
+        if (referenceEditor !== undefined) {
+            const referenceText = extractReferenceTextFromEditor(referenceEditor);
+            if (referenceText !== '') {
+                prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
+            }
+        }
+        prompt += `Create a valid Dart code block based on the following instructions:\n${instructions}\n\n`;
+        prompt += `To give you more context, here's `;
+        if (aboveText.length > 0) {
+            prompt += `the code above the line where you're asked to insert the code: \n ${aboveText}\n\n`;
+        }
+        if (belowText.length > 0) {
+            if (aboveText.length > 0) { prompt += `And here's `; }
+            prompt += `the code below the line where you're asked to insert the code: \n ${belowText}\n\n`;
+        }
+        prompt += `Should you have any general suggestions, add them as comments before the code block. Inline comments are also welcome`;
+
+        const result = await this.getCompletion([{
+            'role': 'user',
+            'parts': prompt
+        }]);
+        return result;
+    }
 }
