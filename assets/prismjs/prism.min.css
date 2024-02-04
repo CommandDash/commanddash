@@ -18,6 +18,7 @@ pre[class*=language-] {
     white-space: pre-wrap;
     font-size: .65rem;
     word-break: break-word;
+    color: var(--vscode-editorWidget-foreground);
 }
 
 pre[class*=language-] {
@@ -118,4 +119,8 @@ pre[class*=language-]:hover {
 
 .token.inserted {
     color: green
+}
+
+#text {
+    color: white;
 }

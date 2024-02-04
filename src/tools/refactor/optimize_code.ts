@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
-import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
+import { extractDartCode, filterSurroundingCode, } from '../../utilities/code-processing';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
-import { filterSurroundingCode } from '../create/inline_code_completion';
 import { GenerationRepository } from '../../repository/generation-repository';
 
 export async function optimizeCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {
