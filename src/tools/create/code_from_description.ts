@@ -3,8 +3,9 @@ import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
+import { GenerationRepository } from '../../repository/generation-repository';
 
-export async function createCodeFromDescription(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
+export async function createCodeFromDescription(generationRepository: GenerationRepository, globalState: vscode.Memento) {
     logEvent('create-code-from-description', { 'type': "create" });
     try {
         const editor = vscode.window.activeTextEditor;
@@ -52,14 +53,14 @@ export async function createCodeFromDescription(geminiRepo: GeminiRepository, gl
             }
             prompt += `Should you have any general suggestions, add them as comments before the code block. Inline comments are also welcome`;
 
-            const result = await geminiRepo.getCompletion([{
-                'role': 'user',
-                'parts': prompt
-            }]);
+            const result = await generationRepository.createCodeFromDescription(aboveText, belowText, instructions, globalState);
 
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
-
+            if (!result) {
+                vscode.window.showErrorMessage('Failed to create code');
+                return;
+            }
             const createdCode = extractDartCode(result);
 
             editor.edit((editBuilder) => {

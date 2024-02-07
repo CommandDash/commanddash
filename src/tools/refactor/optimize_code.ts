@@ -1,14 +1,12 @@
 import * as vscode from 'vscode';
-import { extractDartCode, extractExplanation, extractReferenceTextFromEditor, filterSurroundingCode } from '../../utilities/code-processing';
-import { getReferenceEditor } from '../../utilities/state-objects';
+import { extractDartCode, filterSurroundingCode, } from '../../utilities/code-processing';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
-import { GeminiRepository } from '../../repository/gemini-repository';
-import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
+import { GenerationRepository } from '../../repository/generation-repository';
 
-export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {
+export async function optimizeCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementName: string | undefined, context: vscode.ExtensionContext) {
     logEvent('optimize-code', { 'type': 'refractor' });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -61,25 +59,11 @@ export async function optimizeCode(geminiRepo: GeminiRepository, globalState: vs
 
             let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, replaceRange, analyzer, elementName);
 
-            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the instructions carefully and output response in the modified format..\n\n`;
-            prompt += `Develop and optimize the following Flutter code by troubleshooting errors, fixing errors, and identifying root causes of issues. Reflect and critique your solution to ensure it meets the requirements and specifications of speed, flexibility and user friendliness.\n\n Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalString + '\n```\n\n';
-            if (contextualCode) {
-                prompt += `Here are the definitions of the symbols used in the code\n${contextualCode} \n\n`;
+            const result = await generationRepository.optimizeCode(finalString, contextualCode, globalState);
+            if (!result) {
+                vscode.window.showErrorMessage('Failed to optimize code. Please try again.');
+                return;
             }
-            let referenceEditor = getReferenceEditor(globalState);
-            prompt = appendReferences(referenceEditor, prompt);
-            // prompt += `Output the optimized code in a single code block to be replaced over selected code.`;
-            prompt += `Proceed step by step:
-            1. Describe the selected piece of code.
-            2. What are the possible optimizations?
-            3. How do you plan to achieve that ? [Don't output code yet]
-            4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.Since this is without human review, you need to output the precise CURSOR_SELECTION`;
-            console.log(prompt);
-            const result = await geminiRepo.getCompletion([{
-                'role': 'user',
-                'parts': prompt
-            }]);
-
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
 

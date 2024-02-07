@@ -3,8 +3,9 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
+import { GenerationRepository } from '../../repository/generation-repository';
 
-export async function createCodeFromBlueprint(geminiRepo: GeminiRepository, globalState: vscode.Memento) {
+export async function createCodeFromBlueprint(generationRepository: GenerationRepository, globalState: vscode.Memento) {
     logEvent('create-code-from-blueprint', { 'type': "create" });
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -19,15 +20,7 @@ export async function createCodeFromBlueprint(geminiRepo: GeminiRepository, glob
     }
 
     try {
-        let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-        let referenceEditor = getReferenceEditor(globalState);
-        if (referenceEditor !== undefined) {
-            const referenceText = extractReferenceTextFromEditor(referenceEditor);
-            if (referenceText !== '') {
-                prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
-            }
-        }
-        prompt += `Create Flutter/Dart code for the following blueprint: \n===${blueprint}\n===. Closely analyze the blueprint, see if any state management or architecture is specified and output complete functioning code in a single block.`;
+
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Creating Code",
@@ -41,12 +34,13 @@ export async function createCodeFromBlueprint(geminiRepo: GeminiRepository, glob
                 const increment = progressPercentage - prevProgressPercentage;
                 progress.report({ increment });
             }, 200);
-            const result = await geminiRepo.getCompletion([{
-                'role': 'user',
-                'parts': prompt
-            }]);
+            const result = await generationRepository.createCodeFromBlueprint(blueprint, globalState);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
+            if (!result) {
+                vscode.window.showErrorMessage('Failed to create code');
+                return;
+            }
 
             const dartCode = extractDartCode(result);
             editor.edit((editBuilder) => {

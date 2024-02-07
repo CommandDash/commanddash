@@ -3,9 +3,10 @@ import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } f
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
+import { GenerationRepository } from '../../repository/generation-repository';
 
 //not active currently. to be thought out and revised again.
-export async function createModelClass(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
+export async function createModelClass(generationRepository: GenerationRepository, globalState: vscode.Memento) {
   logEvent("create-model-class", { 'type': "create" });
   try {
     const jsonStructure = await vscode.window.showInputBox({
@@ -69,14 +70,13 @@ export async function createModelClass(giminiRepo: GeminiRepository, globalState
         }
         prompt += `Output the model class code in a single block.`;
 
-        const result = await giminiRepo.getCompletion([
-          {
-            role: "user",
-            parts: prompt
-          }
-        ]);
+        const result = await generationRepository.createModelClass(library, jsonStructure, includeHelpers, globalState);
         clearInterval(progressInterval);
         progress.report({ increment: 100 });
+        if (!result) {
+          vscode.window.showErrorMessage("Failed to create model class. Please try again.");
+          return;
+        }
 
         const dartCode = extractDartCode(result);
         const editor = vscode.window.activeTextEditor;

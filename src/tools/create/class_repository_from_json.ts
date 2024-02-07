@@ -3,8 +3,9 @@ import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
 import { GeminiRepository } from '../../repository/gemini-repository';
+import { GenerationRepository } from '../../repository/generation-repository';
 //not active currently. to be thought out and revised again.
-export async function createRepoClassFromPostman(giminiRepo: GeminiRepository, globalState: vscode.Memento) {
+export async function createRepoClassFromPostman(generationRepository: GenerationRepository, globalState: vscode.Memento) {
     logEvent('create-repo-class-from-postman', { 'type': "create" });
     try {
         await vscode.window.withProgress({
@@ -35,24 +36,15 @@ export async function createRepoClassFromPostman(giminiRepo: GeminiRepository, g
             if (description === "placeholder") {
                 return;
             }
-            let prompt = `You're an expert Flutter/Dart coding assistant. Follow the user instructions carefully and to the letter.\n\n`;
-            let referenceEditor = getReferenceEditor(globalState);
-            if (referenceEditor !== undefined) {
-                const referenceText = extractReferenceTextFromEditor(referenceEditor);
-                if (referenceText !== '') {
-                    prompt += `Keeping in mind these references/context:\n${referenceText}\n`;
-                }
-            }
 
-            prompt += `Create a Flutter API repository class from the following postman export:\n${description}\nGive class an appropriate name based on the name and info of the export\nBegin!`;
-
-            const result = await giminiRepo.getCompletion([{
-                'role': 'user',
-                'parts': prompt
-            }]);
-
+            const result = await generationRepository.createRepositoryFromJson(description, globalState);
             clearInterval(progressInterval);
             progress.report({ increment: 100 });
+            if (!result) {
+                vscode.window.showErrorMessage(`Failed to create api service`);
+                return;
+            }
+
             const dartCode = extractDartCode(result);
             if (editor) {
                 const document = editor.document;
