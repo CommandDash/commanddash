@@ -20,12 +20,17 @@ import { UpdateManager } from './utilities/update-manager';
 import { initCommands } from './utilities/command-manager';
 import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
+import { ExposedApiKeyManager } from './utilities/exposed-api-key-manager';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
+
+    //check for secret key inside config and shift it to secret storage. For current users
+    new ExposedApiKeyManager(context).checkAndShiftConfigApiKey();
+
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
 
@@ -129,6 +134,7 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
 }
 
 export async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {
+    //TODO Yash: change this as well acc. to secret storage changes
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
     if (!apiKey || isOldOpenAIKey(apiKey)) {
@@ -164,6 +170,7 @@ export function promptGithubLogin(context: vscode.ExtensionContext): void {
 }
 
 function initGemini(): GeminiRepository {
+    //TODO Yash: change this acc. to new secret storage
     console.debug("creating new gemini repo instance");
     const config = vscode.workspace.getConfiguration('fluttergpt');
     var apiKey = config.get<string>('apiKey');
