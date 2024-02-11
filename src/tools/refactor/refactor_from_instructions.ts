@@ -86,13 +86,12 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             // Modify the documentText string instead of the document directly
             const startOffset = editor.document.offsetAt(replaceRange.start);
             const endOffset = editor.document.offsetAt(replaceRange.end);
-
             documentRefactoredText = documentRefactoredText.substring(0, startOffset) + refactoredCode + documentRefactoredText.substring(endOffset);
         });
-        vscode.window.showInformationMessage('Code refactored successfully!');
 
+        vscode.window.showInformationMessage('Code refactored successfully!');
         // Pass the current editor, current document uri and optimized code respectively.
-        await handleDiffViewAndMerge(editor, editor.document.uri, documentRefactoredText, context);
+        await handleDiffViewAndMerge(editor, editor.document.uri, editor.document.getText(), documentRefactoredText, context);
 
     } catch (error: Error | unknown) {
         logError('refactor-from-instructions-error', error);

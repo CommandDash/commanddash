@@ -101,7 +101,7 @@ export async function fixErrors(generationRepository: GenerationRepository, erro
         });
 
         // Pass the current editor, current document uri and optimized code respectively.
-        await handleDiffViewAndMerge(editor, editor.document.uri, documentRefactoredText, context);
+        await handleDiffViewAndMerge(editor, editor.document.uri, editor.document.getText(), documentRefactoredText, context);
 
     } catch (error: Error | unknown) {
         logError('fix-errors-error', error);

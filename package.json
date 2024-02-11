@@ -92,7 +92,7 @@
       },
       {
         "command": "fluttergpt.createInlineCodeCompletion",
-        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "when": "!editorHasSelection && resourceLangId == 'dart'",
         "title": "FlutterGPT: Inline Code Generation"
       },
       {
@@ -165,7 +165,7 @@
         },
         {
           "command": "fluttergpt.createInlineCodeCompletion.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@2"
         }
       ],
@@ -189,11 +189,6 @@
           "command": "fluttergpt.createWidget.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@3"
-        },
-        {
-          "command": "fluttergpt.createInlineCodeCompletion.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@4"
         }
       ]
     },

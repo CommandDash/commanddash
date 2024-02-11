@@ -85,7 +85,7 @@ export async function optimizeCode(generationRepository: GenerationRepository, g
         vscode.window.showInformationMessage('Code optimization successful!');
 
         // Pass the current editor, current document uri and optimized code respectively.
-        await handleDiffViewAndMerge(editor, editor.document.uri, documentRefactoredText, context);
+        await handleDiffViewAndMerge(editor, editor.document.uri, editor.document.getText(), documentRefactoredText, context);
     } catch (error: Error | unknown) {
         logError('optimize-code-error', error);
         if (error instanceof Error) {
