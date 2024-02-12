@@ -10,28 +10,38 @@ export class ExposedApiKeyManager {
         this.context = context;
     }
 
-    async checkAndShiftConfigApiKey() {
+    public async checkAndShiftConfigApiKey() {
         //check if api key is in config then take the api key and shift to secretStorage
-        let deletedApiKey: string | undefined =
-            await this.checkIfApiKeyIsInConfigAndDelete();
-        if (deletedApiKey) {
+        let apiKey: string | undefined =
+            await this.getApiKeyFromConfig();
+            let isApiKeyShifted = false;
+        if (apiKey) {
             //SET API KEY IN SECRET STORAGE
-            await new SecretApiKeyManager(this.context).setApiKey(
+           isApiKeyShifted =  await new SecretApiKeyManager(this.context).setApiKey(
                 this.context,
-                deletedApiKey
+                apiKey
             );
             
         }
+        // we only delete the key from config only if we successfully shift the key to secret storage
+        if(isApiKeyShifted){
+this.deleteApiKeyFromConfig();
+        }else{
+            console.log("Failure in shifting Api key to secret storage");
+
+            // should we show user visible error? 
+        }
+
     }
 
-    public async checkIfApiKeyIsInConfigAndDelete(): Promise<string | undefined> {
+    private async getApiKeyFromConfig(): Promise<string | undefined> {
         try {
 
             const config = vscode.workspace.getConfiguration("fluttergpt");
             const apiKey = config.get<string>("apiKey");
 
             if (apiKey) {
-                config.update("apiKey", undefined, vscode.ConfigurationTarget.Global);
+                
 
                 return apiKey;
             }
@@ -43,5 +53,9 @@ export class ExposedApiKeyManager {
         }
     }
 
-   
+   private deleteApiKeyFromConfig(){
+    const config = vscode.workspace.getConfiguration("fluttergpt");
+
+    config.update("apiKey", undefined, vscode.ConfigurationTarget.Global);
+   }
 }
