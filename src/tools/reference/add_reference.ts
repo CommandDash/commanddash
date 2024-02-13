@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import * as path from 'path';
 import { logEvent } from '../../utilities/telemetry-reporter';
+import { FlutterGPTViewProvider } from '../../providers/chat_view_provider';
 
-export async function addToReference(globalState: vscode.Memento) {
+export async function addToReference(globalState: vscode.Memento, flutterGPTViewProvider: FlutterGPTViewProvider) {
     logEvent('add-to-reference', { 'type': 'reference' });
     
     const editor = vscode.window.activeTextEditor;
@@ -13,6 +14,8 @@ export async function addToReference(globalState: vscode.Memento) {
     }
   
     const referenceContent = editor.document.getText(editor.selection);
+    const startLineNumber = editor.selection.start.line + 1;
+    const endLineNumber = editor.selection.end.line + 1;
   
     let referenceEditor: vscode.TextEditor | undefined;
 
@@ -40,5 +43,6 @@ export async function addToReference(globalState: vscode.Memento) {
     // Focus back on the original editor
     await vscode.window.showTextDocument(editor.document, { viewColumn: vscode.ViewColumn.One, preview: false });
 
+    flutterGPTViewProvider.postMessageToWebview({type: 'addToReference', value: JSON.stringify({relativePath, referenceContent: `\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, startLineNumber, endLineNumber})});
   }
 

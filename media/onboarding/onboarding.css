@@ -101,6 +101,7 @@ p[contenteditable="true"] {
     outline: none;
     max-height: 100px;
     overflow: auto;
+    white-space: pre-wrap;
 }
 #text-input {
     color: var(--vscode-editor-foreground);
@@ -142,9 +143,7 @@ p[contenteditable="true"] {
 #google-api-key-text-input {
     border-color: var(--vscode-editor-foreground);
 }
-#agents{
-    color: var(--vscode-input-placeholderForeground);
-}
+
 .placeholder {
     color: var(--vscode-input-placeholderForeground) !important;
 }
@@ -152,7 +151,29 @@ p[contenteditable="true"] {
     pointer-events: none;
     opacity: .9;
 }
-
+.chips {
+    color: var(--vscode-editor-foreground);
+    outline: .5px solid var(--vscode-editor-foreground);
+    padding: 3px 7px;
+    margin: 1px 2px;
+    position: relative;
+    cursor: move;
+    font-size: 11px;
+    display: inline-block;
+    border-radius: 7px;
+}
+.close-icon {
+    display: none;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+.chips:hover .close-icon {
+    display: inline-block;
+}
+#agents{
+    color: var(--vscode-input-placeholderForeground);
+}
 #bottom-text-input-container {
     background-color: var(--vscode-editor-background);
     border-color: var(--vscode-sideBar-foreground);
