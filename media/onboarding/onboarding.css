@@ -159,7 +159,8 @@ p[contenteditable="true"] {
     position: relative;
     cursor: move;
     font-size: 11px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     border-radius: 7px;
 }
 .close-icon {

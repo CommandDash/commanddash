@@ -413,6 +413,8 @@ class CommandDeck {
     textInput.addEventListener("keydown", handleSubmit);
     textInput.addEventListener("focus", removePlaceholder);
     textInput.addEventListener("blur", addPlaceholder);
+    textInput.addEventListener("dragover", dragOver);
+    textInput.addEventListener("drop", drop);
 
 
 })();
@@ -625,11 +627,13 @@ function readTriggeredMessage() {
 function createReferenceChips(references) {
 
     const chip = document.createElement("span");
+    const icon = document.createElement("p");
     const chipId = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
     if (document.getElementById(chipId)) {
         return;
     }
-    chip.innerHTML = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
+
+    chip.innerHTML = `${chipId.trim()}`;
     chip.id = chipId;
     chip.setAttribute("draggable", "true");
     chip.setAttribute("contenteditable", "false");
@@ -643,9 +647,6 @@ function createReferenceChips(references) {
     chipsData = { ...chipsData, [chipId]: references };
     insertChipAtCursor(chip, textInput);
 };
-
-textInput.addEventListener("dragover", dragOver);
-textInput.addEventListener("drop", drop);
 
 function dragOver(event) {
     event.preventDefault();

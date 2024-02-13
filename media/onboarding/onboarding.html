@@ -71,8 +71,54 @@
                             <!-- Add "# Ask FlutterGPT" after completing chips -->
                             <p contenteditable="true" id="text-input"># Ask FlutterGPT</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
-                                <div>
-                                    <p class="text-center inline-flex justify-center items-center text-white/[.4]"
+                                <div class="inline-flex">
+                                    <p class="text-center inline-flex justify-center items-center opacity-50 cursor-pointer"
+                                        title="Code snippets">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <g clip-path="url(#clip0_1896_4)">
+                                                <path
+                                                    d="M2.44739 9.55215L0.395172 7.49993C0.150814 7.2496 0 6.89595 0 6.55185C0 6.3922 0.0899636 6.14236 0.157973 5.99942L2.05222 2.05176L2.44739 9.55215Z"
+                                                    fill="#01579B" />
+                                                <path
+                                                    d="M9.47344 2.44739L7.42122 0.395172C7.24201 0.214767 6.86879 0 6.55285 0C6.28128 0 6.01473 0.0546463 5.84268 0.157973L2.05371 2.05222L9.47344 2.44739Z"
+                                                    fill="#40C4FF" />
+                                                <path
+                                                    d="M4.89463 11.9998H9.86864V9.86839L6.15794 8.68359L2.76318 9.86839L4.89463 11.9998Z"
+                                                    fill="#40C4FF" />
+                                                <path
+                                                    d="M2.05225 8.44705C2.05225 9.08037 2.13171 9.23572 2.4467 9.55238L2.76241 9.86833H9.86858L6.39532 5.92091L2.05225 2.05176V8.44705Z"
+                                                    fill="#29B6F6" />
+                                                <path
+                                                    d="M8.36879 2.05176H2.05225L9.86858 9.86714H12V4.97259L9.47365 2.44597C9.11857 2.09042 8.80357 2.05176 8.36879 2.05176Z"
+                                                    fill="#01579B" />
+                                                <path opacity="0.2"
+                                                    d="M2.52644 9.63066C2.21073 9.31399 2.13222 9.00163 2.13222 8.44705V2.13098L2.05371 2.05176V8.44705C2.05371 9.00186 2.05371 9.15554 2.52644 9.63089L2.76292 9.86738L2.52644 9.63066Z"
+                                                    fill="white" />
+                                                <path opacity="0.2"
+                                                    d="M11.9215 4.89453V9.78908H9.79004L9.86855 9.86854H12V4.97304L11.9215 4.89453Z"
+                                                    fill="#263238" />
+                                                <path opacity="0.2"
+                                                    d="M9.47344 2.44693C9.08233 2.0551 8.76208 2.05176 8.29007 2.05176H2.05371L2.13222 2.13027H8.29007C8.5256 2.13027 9.12027 2.09065 9.47392 2.44621L9.47344 2.44693Z"
+                                                    fill="white" />
+                                                <path opacity="0.2"
+                                                    d="M11.9215 4.89455L9.47362 2.44739L7.4214 0.395172C7.24219 0.214767 6.86897 0 6.55303 0C6.28146 0 6.01491 0.0546463 5.84286 0.157973L2.05389 2.05222L0.158689 5.99988C0.0909181 6.14377 0 6.39338 0 6.55231C0 6.89713 0.151769 7.24911 0.394217 7.49967L2.28679 9.37817C2.33715 9.43924 2.39076 9.49755 2.44739 9.55285L2.5259 9.63136L2.76215 9.86784L4.81437 11.9201L4.89287 11.9986H9.86593V9.8676H11.9974V4.97305L11.9215 4.89455Z"
+                                                    fill="url(#paint0_radial_1896_4)" />
+                                            </g>
+                                            <defs>
+                                                <radialGradient id="paint0_radial_1896_4" cx="0" cy="0" r="1"
+                                                    gradientUnits="userSpaceOnUse"
+                                                    gradientTransform="translate(5.99964 5.9994) scale(5.99917)">
+                                                    <stop stop-color="white" stop-opacity="0.1" />
+                                                    <stop offset="1" stop-color="white" stop-opacity="0" />
+                                                </radialGradient>
+                                                <clipPath id="clip0_1896_4">
+                                                    <rect width="12" height="12" fill="white" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    </p>
+                                    <p class="text-center inline-flex justify-center items-center text-white/[.4] cursor-pointer px-2"
                                         title="Agents" id="agents">
                                         @
                                     </p>
@@ -82,10 +128,12 @@
                                     </p>
                                 </div>
                                 <div class="inline-flex justify-center items-center">
-                                    <p class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer"
-                                        title="Attach">
+                                    <label
+                                        class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer"
+                                        title="Attach" id="attach-file" for="file-upload">
 
-                                    </p>
+                                    </label>
+                                    <input id="file-upload" type="file" accept="image/*" class="hidden" />
                                     <button class="ml-2" id="send-chat">
                                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
