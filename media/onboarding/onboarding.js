@@ -99,7 +99,7 @@ const chips = document.getElementById("chips");
 let isApiKeyValid = false;
 let areDependenciesInstalled = false;
 let conversationHistory = [];
-let chipsData = {};
+let chipsData = {}; // {'lib/main.dart [1-2]': {code: 'console.log('hello')'}}
 let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
@@ -401,6 +401,7 @@ class CommandDeck {
         if (onboardingCompleted) {
             textInput.textContent = '';
         }
+        adjustHeight();
     });
 
     textInput.addEventListener("paste", (event) => {
@@ -415,8 +416,6 @@ class CommandDeck {
     textInput.addEventListener("blur", addPlaceholder);
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
-
-
 })();
 
 function handleSubmit(event) {
@@ -475,7 +474,7 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
-        debugger;
+        
         let prompt = textInput.textContent;
 
         for (const chip in chipsData) {
@@ -489,6 +488,22 @@ function handleSubmit(event) {
         });
 
         textInput.textContent = "";
+        adjustHeight();
+    }
+
+    if (event.key === "Backspace") {
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+
+        // Check if the cursor is at the beginning of the textInput
+        if (range.startContainer === textInput && range.startOffset === 0) {
+            // Remove the last chip if it exists
+            const chips = textInput.querySelectorAll(".chip");
+            if (chips.length > 0) {
+                const lastChip = chips[chips.length - 1];
+                lastChip.parentNode.removeChild(lastChip);
+            }
+        }
     }
 
     const target = event.target;
@@ -619,6 +634,7 @@ function readTriggeredMessage() {
 
             case 'addToReference':
                 createReferenceChips(JSON.parse(message.value));
+                adjustHeight();
                 break;
         }
     });
@@ -627,13 +643,13 @@ function readTriggeredMessage() {
 function createReferenceChips(references) {
 
     const chip = document.createElement("span");
-    const icon = document.createElement("p");
     const chipId = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
+    debugger;
     if (document.getElementById(chipId)) {
         return;
     }
 
-    chip.innerHTML = `${chipId.trim()}`;
+    chip.innerHTML = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
     chip.id = chipId;
     chip.setAttribute("draggable", "true");
     chip.setAttribute("contenteditable", "false");
@@ -682,11 +698,17 @@ function insertChipAtCursor(chip, textInput) {
         // Get the range of the current selection
         const range = selection.getRangeAt(0);
 
-        // Delete the contents of the range
-        range.deleteContents();
+        // Check if the cursor is at the end of the textInput
+        if (range.startContainer === textInput && range.startOffset === textInput.childNodes.length) {
+            // Append the chip at the end
+            textInput.appendChild(chip);
+            textInput.appendChild(nonBreakingSpace);
+        } else {
+            // Insert the chip at the current cursor position
+            range.insertNode(chip);
+            textInput.appendChild(nonBreakingSpace);
+        }
 
-        // Insert the chip into the range
-        range.insertNode(chip);
     } else {
         // If there is no selection, append the chip at the end
         textInput.appendChild(chip);
@@ -939,6 +961,11 @@ function setAPIKeyInSettings() {
         type: "updateSettings",
         value: geminiAPIKey
     });
+}
+
+function adjustHeight() {
+    textInput.style.height = 'auto';
+    textInput.style.height = textInput.scrollHeight + 'px';
 }
 
 // Function to introduce a delay using a Promise
