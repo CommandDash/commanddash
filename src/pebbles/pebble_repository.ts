@@ -8,6 +8,7 @@ import { promptGithubLogin } from '../extension'
 import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-utils';
 import { logEvent } from '../utilities/telemetry-reporter';
 import { GeminiRepository } from '../repository/gemini-repository';
+import { SecretApiKeyManager } from '../utilities/secret-storage-manager';
 
 
 
@@ -15,7 +16,7 @@ async function getConfigs(context: vscode.ExtensionContext): Promise<Record<stri
     const access_token = context.globalState.get('access_token');
     const refresh_token = context.globalState.get('refresh_token');
     const config = vscode.workspace.getConfiguration('fluttergpt');
-    const apiKey = config.get<string>('apiKey');
+    var apiKey = await SecretApiKeyManager.instance.getApiKey();
 
 
     return {

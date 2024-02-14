@@ -17,21 +17,22 @@ export class ExposedApiKeyManager {
             let isApiKeyShifted = false;
         if (apiKey) {
             //SET API KEY IN SECRET STORAGE
-           isApiKeyShifted =  await new SecretApiKeyManager(this.context).setApiKey(
-                this.context,
+           isApiKeyShifted =  await  SecretApiKeyManager.instance.setApiKey(
+                
                 apiKey
             );
             
         }
-        // we only delete the key from config only if we successfully shift the key to secret storage
+        // we delete the key from config only if we successfully shift the key to secret storage
         if(isApiKeyShifted){
 this.deleteApiKeyFromConfig();
         }else{
+            // this else cond. does not necesarily indicate an error
             console.log("Failure in shifting Api key to secret storage");
 
-            // should we show user visible error? 
+            
         }
-
+return;
     }
 
     private async getApiKeyFromConfig(): Promise<string | undefined> {
@@ -48,7 +49,7 @@ this.deleteApiKeyFromConfig();
 
             return undefined;
         } catch (error) {
-            console.log("this.checkIfApiKeyIsInConfig error:", error);
+            console.log("err trying to get apiKey from config", error);
             return undefined;
         }
     }

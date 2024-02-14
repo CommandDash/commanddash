@@ -45,6 +45,8 @@ export class GeminiRepository extends GenerationRepository {
     }
 
     public async getCompletion(prompt: { role: string, parts: string }[], isReferenceAdded?: boolean, view?: vscode.WebviewView): Promise<string> {
+       // TODO: change this msg and flow acc. to new apikey method
+        
         if (!this.apiKey) {
             throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
         }

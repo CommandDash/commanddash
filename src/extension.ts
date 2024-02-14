@@ -21,6 +21,7 @@ import { initCommands } from './utilities/command-manager';
 import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
 import { ExposedApiKeyManager } from './utilities/exposed-api-key-manager';
+import { SecretApiKeyManager } from './utilities/secret-storage-manager';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -28,8 +29,11 @@ const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
 
+    //before anything else we first need to load context into our secret storage manager so we can easily access it everywhere
+    SecretApiKeyManager.instance.loadContext(context);
+
     //check for secret key inside config and shift it to secret storage. For current users
-    new ExposedApiKeyManager(context).checkAndShiftConfigApiKey();
+  await  new ExposedApiKeyManager(context).checkAndShiftConfigApiKey();
 
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
@@ -40,22 +44,9 @@ export async function activate(context: vscode.ExtensionContext) {
     activateInlineHints(cacheManager);
 
     // Check if the Gemini API key is set
-    const config = vscode.workspace.getConfiguration('fluttergpt');
-    const apiKey = config.get<string>('apiKey');
-    if (!apiKey || isOldOpenAIKey(apiKey)) {
-        initWebview(context);
-        
-        // Prompt the user to update their settings
-        vscode.window.showErrorMessage(
-            'Please update your API key to Gemini in the settings.',
-            'Open Settings'
-        ).then(selection => {
-            if (selection === 'Open Settings') {
-                // vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
-                vscode.commands.executeCommand('workbench.view.extensions');
-            }
-        });
-    }
+    checkForApiKeyAndAskIfMissing(context);
+
+    
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
     activateTelemetry(context);
@@ -77,21 +68,21 @@ export async function activate(context: vscode.ExtensionContext) {
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
     
     try {
-        let geminiRepo = initGemini();
+        let geminiRepo = await initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
     } catch (error) {
         console.error(error);
     }
     finally {
-        vscode.workspace.onDidChangeConfiguration(event => {
-            let affected = event.affectsConfiguration("fluttergpt.apiKey");
-            if (affected) {
-                try {
-                    const geminiRepo = initGemini();
-                    initFlutterExtension(context, geminiRepo, analyzer);
-                } catch (error) {
-                    console.error(error);
-                }
+        
+        
+        // will only trigger if the apikey is changed so no need to validate again just call necessary functions
+        SecretApiKeyManager.instance.onDidChangeApiKey(async event => {
+            try {
+                const geminiRepo =await initGemini();
+                initFlutterExtension(context, geminiRepo, analyzer);
+            } catch (error) {
+                console.error(error);
             }
         });
     }
@@ -134,20 +125,25 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
 }
 
 export async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {
-    //TODO Yash: change this as well acc. to secret storage changes
-    const config = vscode.workspace.getConfiguration('fluttergpt');
-    const apiKey = config.get<string>('apiKey');
-    if (!apiKey || isOldOpenAIKey(apiKey)) {
-        const selection = await vscode.window.showInformationMessage(
-            'Please update your API key to Gemini in the settings.',
-            'Open Settings'
-        );
-        if (selection === 'Open Settings') {
-            vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
-        }
-        return false;
-    }
-    return true;
+    
+    return checkForApiKeyAndAskIfMissing(context);
+    
+// commented below code as logic is very much similar to above func, can revive it if needed. but make changes 
+// acc. to new changes in apiKey storage: ref- above func()  
+
+    // const config = vscode.workspace.getConfiguration('fluttergpt');
+    // const apiKey = config.get<string>('apiKey');
+    // if (!apiKey || isOldOpenAIKey(apiKey)) {
+    //     const selection = await vscode.window.showInformationMessage(
+    //         'Please update your API key to Gemini in the settings.',
+    //         'Open Settings'
+    //     );
+    //     if (selection === 'Open Settings') {
+    //         vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+    //     }
+    //     return false;
+    // }
+    // return true;
 }
 
 export function promptGithubLogin(context: vscode.ExtensionContext): void {
@@ -169,15 +165,61 @@ export function promptGithubLogin(context: vscode.ExtensionContext): void {
 
 }
 
-function initGemini(): GeminiRepository {
-    //TODO Yash: change this acc. to new secret storage
+async function initGemini(): Promise<GeminiRepository> {
+    
     console.debug("creating new gemini repo instance");
-    const config = vscode.workspace.getConfiguration('fluttergpt');
-    var apiKey = config.get<string>('apiKey');
+   
+    var apiKey = await SecretApiKeyManager.instance.getApiKey();
+
     if (!apiKey) {
         throw new Error('API token not set, please go to extension settings to set it (read README.md for more info)');
     }
     return new GeminiRepository(apiKey);
+}
+
+async function checkForApiKeyAndAskIfMissing(context: vscode.ExtensionContext): Promise<boolean> {
+    const config = vscode.workspace.getConfiguration('fluttergpt');
+    const apiKey = config.get<string>('apiKey');
+    //TODO: remove in prod .. only for testing as a new user
+    // await SecretApiKeyManager.instance.deleteApiKey();
+    const apiKeyFromSecretStorage = await SecretApiKeyManager.instance.getApiKey();
+console.log(apiKeyFromSecretStorage);
+    // if apikey and apiKeyFromSecretStorage both values are not present then we consider as a new user and show a
+    //input box
+
+     
+    if ((!apiKey && !apiKeyFromSecretStorage) || isOldOpenAIKey(apiKey!)) {
+        initWebview(context);
+        
+        // Prompt the user to update their settings
+        vscode.window.showErrorMessage(
+            'Please update your API key to Gemini.',
+            'Update Now'
+        ).then(selection => {
+            if (selection === 'Update Now') {
+                // vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
+                // vscode.commands.executeCommand('workbench.view.extensions');
+                getApiKeyFromUserAndStoreInSecretStorage(context);
+            }
+        });
+        return false;
+    }
+    return true;
+}
+
+async function getApiKeyFromUserAndStoreInSecretStorage(context: vscode.ExtensionContext){
+    const apiKey = await vscode.window.showInputBox({
+        prompt: 'Get API Key from here [link](https://makersuite.google.com/app/apikey)',
+        placeHolder: 'API Key',
+        password: true, // Hide the input (optional)
+        ignoreFocusOut: true,
+    });
+
+    if (apiKey) {
+       SecretApiKeyManager.instance.setApiKey(apiKey);
+        vscode.window.showInformationMessage('API key saved successfully!');
+        
+    }
 }
 
 // This method is called when your extension is deactivated

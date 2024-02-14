@@ -10,6 +10,7 @@ import TelemetryReporter from '@vscode/extension-telemetry';
 import { logEvent } from '../utilities/telemetry-reporter';
 import { get } from 'http';
 import { GeminiRepository } from '../repository/gemini-repository';
+import { SecretApiKeyManager } from '../utilities/secret-storage-manager';
 
 export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
 
@@ -169,8 +170,8 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     public async getConfigs(context: vscode.ExtensionContext): Promise<Record<string, unknown>> {
         const access_token = context.globalState.get('access_token');
         const refresh_token = context.globalState.get('refresh_token');
-        const config = vscode.workspace.getConfiguration('fluttergpt');
-        const apiKey = config.get<string>('apiKey');
+        
+        var apiKey = await SecretApiKeyManager.instance.getApiKey();
 
 
         return {

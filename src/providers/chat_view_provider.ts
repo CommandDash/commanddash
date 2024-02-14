@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
+import { SecretApiKeyManager } from "../utilities/secret-storage-manager";
 
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
@@ -120,9 +121,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         logEvent('new-chat-start', {from: 'command-deck'});
 	}
 
-    private _checkIfKeyExists() {
-        const config = vscode.workspace.getConfiguration('fluttergpt');
-        const apiKey = config.get<string>('apiKey');
+     private async _checkIfKeyExists() {
+        var apiKey = await SecretApiKeyManager.instance.getApiKey();
         if (apiKey) {
             this._view?.webview.postMessage({type: "keyExists"});
         }

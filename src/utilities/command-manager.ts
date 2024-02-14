@@ -68,8 +68,8 @@ export function registerCommand(
     }
 }
 
-export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider,) {
-    const generationRepository: GenerationRepository = getUserPrefferedModel();
+export async function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider,) {
+    const generationRepository: GenerationRepository = await getUserPrefferedModel();
     // List of commands to register, with their names and options.
     const commands = [
         { name: 'fluttergpt.addToReference', handler: () => addToReference(context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
