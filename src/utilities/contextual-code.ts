@@ -83,8 +83,11 @@ export class ContextualCodeProvider {
     private async getDocumentTokens(document: vscode.TextDocument, analyzer: ILspAnalyzer, range: vscode.Range): Promise<Token[]> {
 
         let tokenSource = new vscode.CancellationTokenSource();
-        const shape = analyzer.client.getFeature(SemanticTokensRegistrationType.method).getProvider(document)! as SemanticTokensProviderShape;
-        const semanticTokens = await shape.range!.provideDocumentRangeSemanticTokens(document, range, tokenSource.token);
+        const shape = analyzer.client.getFeature(SemanticTokensRegistrationType.method).getProvider(document) as SemanticTokensProviderShape | undefined;
+        const semanticTokens = await shape?.range?.provideDocumentRangeSemanticTokens(document, range, tokenSource.token);
+        if (semanticTokens === undefined || semanticTokens?.data === undefined) {
+            return [];
+        }
         let tokens = await this.parseTokens(semanticTokens?.data!, document, analyzer);
 
 
@@ -106,7 +109,6 @@ export class ContextualCodeProvider {
                     if (!map.has(filePath)) {
                         map.set(filePath, new Set());
                     }
-                    // check if the code is already added
                     map.get(filePath)!.add(contextualSymbol.code);
                 }
             }
