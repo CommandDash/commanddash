@@ -658,6 +658,9 @@ function readTriggeredMessage() {
     });
 }
 
+// command to open command dash
+//fluttergpt.chatView.focus
+
 function createReferenceChips(references) {
 
     const chip = document.createElement("span");
@@ -719,7 +722,7 @@ function insertChipAtCursor(chip, textInput) {
     const nonBreakingSpace = document.createElement("span");
     nonBreakingSpace.innerHTML = "&nbsp;";
 
-    if (selection.rangeCount > 0) {
+    if (selection.rangeCount > 0 && textInput === document.activeElement) {
         // Get the range of the current selection
         const range = selection.getRangeAt(0);
 
