@@ -161,7 +161,10 @@ export class GeminiRepository extends GenerationRepository {
     private async ensureCacheDirExists() {
         const cacheDir = path.dirname(this.cacheFilePath);
         try {
-            await fs.promises.mkdir(cacheDir, { recursive: true, mode: 0o700 }); // Sets the directory mode to read/write/execute for the owner only
+            // Create the directory if it doesn't exist
+            if (!fs.existsSync(cacheDir)) {
+                await fs.promises.mkdir(cacheDir, { recursive: true, mode: 0o700 }); // Sets the directory mode to read/write/execute for the owner only
+            }
         } catch (error: any) {
             if (error.code !== 'EEXIST') {
                 handleError(error as Error, 'Failed to create a secure cache directory.');
