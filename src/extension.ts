@@ -41,7 +41,6 @@ export async function activate(context: vscode.ExtensionContext) {
     if (!apiKey || isOldOpenAIKey(apiKey)) {
         initWebview(context);
         showMissingApiKey();
-
     }
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -62,15 +61,16 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
-
+    var _inlineErrorCommand: vscode.Disposable;
     try {
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
     } catch (error) {
         console.error(error);
         // Handle inoine completion shortcut
-        registerCommand(context, 'fluttergpt.createInlineCodeCompletion', () => {
-        }, { isCommand: true, isMenu: true, isShortcut: true });
+        _inlineErrorCommand = vscode.commands.registerCommand('fluttergpt.createInlineCodeCompletion', () => {
+            showMissingApiKey();
+        });
     }
     finally {
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -78,7 +78,12 @@ export async function activate(context: vscode.ExtensionContext) {
             if (affected) {
                 try {
                     const geminiRepo = initGemini();
+                    if (_inlineErrorCommand) {
+                        // Dispose the error command if it exists
+                        _inlineErrorCommand!.dispose();
+                    }
                     initFlutterExtension(context, geminiRepo, analyzer);
+
                 } catch (error) {
                     console.error(error);
                 }
@@ -116,12 +121,11 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
 
-    const flutterChatProvider = initWebview(context, geminiRepo);
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
-    initCommands(context, geminiRepo, analyzer, flutterChatProvider);
+    initCommands(context, geminiRepo, analyzer);
 
 }
 
