@@ -482,6 +482,7 @@ function handleSubmit(event) {
                 prompt = prompt.replace(chip, chipsData[chip].referenceContent);
             }
         }
+
         vscode.postMessage({
             type: "prompt",
             value: prompt,
@@ -633,6 +634,7 @@ function readTriggeredMessage() {
                 break;
 
             case 'addToReference':
+                removePlaceholder();
                 createReferenceChips(JSON.parse(message.value));
                 adjustHeight();
                 break;
@@ -644,12 +646,12 @@ function createReferenceChips(references) {
 
     const chip = document.createElement("span");
     const chipId = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
-    debugger;
+    
     if (document.getElementById(chipId)) {
         return;
     }
 
-    chip.innerHTML = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
+    chip.innerHTML = `${dartIcon}<span class="ml-1">${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
     chip.id = chipId;
     chip.setAttribute("draggable", "true");
     chip.setAttribute("contenteditable", "false");
