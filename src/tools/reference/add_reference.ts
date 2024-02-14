@@ -19,12 +19,13 @@ export async function addToReference(globalState: vscode.Memento, flutterGPTView
   
 
     const workspaceFolders  = vscode.workspace.workspaceFolders;
+    const fileName = path.basename(editor.document.fileName);
     let relativePath = editor.document.fileName;
     if (workspaceFolders && workspaceFolders.length > 0) {
       const workspaceRoot = workspaceFolders[0].uri.fsPath;
       relativePath = path.relative(workspaceRoot, editor.document.fileName);
     }
 
-    flutterGPTViewProvider.postMessageToWebview({type: 'addToReference', value: JSON.stringify({relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, startLineNumber, endLineNumber})});
+    flutterGPTViewProvider.postMessageToWebview({type: 'addToReference', value: JSON.stringify({relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, startLineNumber, endLineNumber, fileName})});
   }
 

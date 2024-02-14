@@ -474,7 +474,6 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
-        
         let prompt = textInput.textContent;
 
         for (const chip in chipsData) {
@@ -645,13 +644,13 @@ function readTriggeredMessage() {
 function createReferenceChips(references) {
 
     const chip = document.createElement("span");
-    const chipId = `${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]`;
+    const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
     
     if (document.getElementById(chipId)) {
         return;
     }
 
-    chip.innerHTML = `${dartIcon}<span class="ml-1">${references.relativePath}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
+    chip.innerHTML = `${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
     chip.id = chipId;
     chip.setAttribute("draggable", "true");
     chip.setAttribute("contenteditable", "false");
@@ -665,6 +664,13 @@ function createReferenceChips(references) {
     chipsData = { ...chipsData, [chipId]: references };
     insertChipAtCursor(chip, textInput);
 };
+
+function truncateText(str) {
+    if (str.length > 25) {
+        return str.substr(0, 10) + '...' + str.substr(str.length-10, str.length);
+      }
+      return str;
+}
 
 function dragOver(event) {
     event.preventDefault();

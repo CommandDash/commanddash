@@ -99,7 +99,7 @@ ul {
 }
 p[contenteditable="true"] {
     outline: none;
-    max-height: 100px;
+    max-height: 270px;
     overflow: auto;
     white-space: pre-wrap;
 }
