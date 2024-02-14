@@ -38,8 +38,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
+    initWebview(context);
     if (!apiKey || isOldOpenAIKey(apiKey)) {
-        initWebview(context);
         showMissingApiKey();
     }
     console.log('Congratulations, "fluttergpt" is now active!');
