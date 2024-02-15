@@ -18,7 +18,11 @@ export async function activateInlineHints(cacheManager: CacheManager) {
         const inlineCount = await cacheManager.getInlineCompletionCount();
 
         if (event.document.languageId === 'dart') {
-            const activeEditor = vscode.window.activeTextEditor!;
+            const activeEditor = vscode.window.activeTextEditor;
+
+            if(!activeEditor){
+                return;
+            }
 
             // Remove decorations after any change in the document
             activeEditor.setDecorations(completionDecoration, []);

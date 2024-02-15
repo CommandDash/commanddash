@@ -152,11 +152,6 @@ To get a sense of direction of where we're heading, please check out our [Roadma
 This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
 
 
-## Release Notes: 0.2.4
-
-- Added inline code generation feature
-- Created a centralised command registration method
-
 ## License
 
 FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE](LICENSE) file for more information.
