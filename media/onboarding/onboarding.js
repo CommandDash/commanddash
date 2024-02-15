@@ -93,11 +93,16 @@ const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
+const chips = document.getElementById("chips");
+const tutorialModal = document.getElementById("tutorial-modal");
+const codeSnippetButton = document.getElementById("code-snippets");
+const closeTutorialModal = document.getElementById("close-tutorial-modal");
 
 //initialising variables
 let isApiKeyValid = false;
 let areDependenciesInstalled = false;
 let conversationHistory = [];
+let chipsData = {}; // {'lib/main.dart [1-2]': {code: 'console.log('hello')'}}
 let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
@@ -298,27 +303,22 @@ class CommandDeck {
             this.triggerIdx = triggerIdx;
             this.renderMenu();
 
-            // Apply highlight class to existing mentions
-            // debugger;
-            // this.applyHighlightToExistingActions(positionIndex);
+            // this.applyHighlightToExistingActions(textBeforeCaret, positionIndex);
         }, 0);
     }
 
     applyHighlightToExistingActions(originalText, positionIndex) {
-        debugger;
         const trigger = this.ref.textContent[this.triggerIdx];
         const allActions = [...agents, ...commands];
-        const regex = new RegExp(`\\B(${allActions.join("|")})\\b`, 'gi');
 
-        // Store original text for accurate highlighting
-        const highlightedText = originalText.replace(regex, (match) => `<span class="text-blue bg-rose-900">${trigger}${match}</span>`);
+        // Highlight workspace mentions specifically
+        const workspaceRegex = /\B@workspace\b/gi;
+        const highlightedText = originalText.replace(workspaceRegex, (match) => `<span class="text-black">${match}</span>`);
 
         // Set HTML content
         this.ref.innerHTML = highlightedText;
-
-        // Reset cursor position based on original text length
-        this.ref.selectionStart = this.ref.selectionEnd = positionIndex + (this.ref.textContent.length - originalText.length);
     }
+
 
     onKeyDown(ev) {
         let keyCaught = false;
@@ -391,11 +391,20 @@ class CommandDeck {
     });
 
     sendButton.addEventListener("click", (event) => {
-        vscode.postMessage({ type: "prompt", value: textInput.textContent.trim() });
+        let prompt = textInput.textContent;
+
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
+        }
+
+        vscode.postMessage({ type: "prompt", value: prompt });
         googleApiKeyHeader.classList.add("hidden");
         if (onboardingCompleted) {
             textInput.textContent = '';
         }
+        adjustHeight();
     });
 
     textInput.addEventListener("paste", (event) => {
@@ -404,11 +413,27 @@ class CommandDeck {
         event.target.textContent = pastedText;
     });
 
+    // event listeners for text input
     textInput.addEventListener("keydown", handleSubmit);
-
     textInput.addEventListener("focus", removePlaceholder);
     textInput.addEventListener("blur", addPlaceholder);
+    textInput.addEventListener("dragover", dragOver);
+    textInput.addEventListener("drop", drop);
+
+    //event listeners for code snippet button
+    codeSnippetButton.addEventListener("click", onClickCodeSnippet);
+
+    //event listeners for tutorial modal
+    closeTutorialModal.addEventListener("click", onCloseTutorialModal);
 })();
+
+function onCloseTutorialModal(event) {
+    tutorialModal.classList.add("hidden");
+}
+
+function onClickCodeSnippet(event) {
+    tutorialModal.classList.remove("hidden");
+}
 
 function handleSubmit(event) {
     const resolveFn = async (query, type) => {
@@ -466,11 +491,42 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
+        let prompt = textInput.textContent;
+
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
+        }
+
         vscode.postMessage({
             type: "prompt",
-            value: textInput.textContent.trim(),
+            value: prompt,
         });
+
         textInput.textContent = "";
+        adjustHeight();
+    }
+
+    if (event.key === "Backspace") {
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+
+        // Check if the cursor is at the beginning of the textInput
+        if (range.startContainer === textInput && range.startOffset === 0) {
+            // Remove the last chip if it exists
+            const chips = textInput.querySelectorAll(".chip");
+            if (chips.length > 0) {
+                const lastChip = chips[chips.length - 1];
+                lastChip.parentNode.removeChild(lastChip);
+            }
+        }
+    }
+
+    const target = event.target;
+    if (target.tagName === "SPAN") {
+        // Redirect editing focus to the parent p tag
+        target.parentNode.focus();
     }
 }
 
@@ -592,8 +648,100 @@ function readTriggeredMessage() {
             case 'clearCommandDeck':
                 clearChat();
                 break;
+
+            case 'addToReference':
+                removePlaceholder();
+                createReferenceChips(JSON.parse(message.value));
+                adjustHeight();
+                break;
         }
     });
+}
+
+// command to open command dash
+//fluttergpt.chatView.focus
+
+function createReferenceChips(references) {
+
+    const chip = document.createElement("span");
+    const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
+    
+    if (document.getElementById(chipId)) {
+        return;
+    }
+
+    chip.innerHTML = `${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
+    chip.id = chipId;
+    chip.setAttribute("draggable", "true");
+    chip.setAttribute("contenteditable", "false");
+    chip.addEventListener("dragstart", dragStart);
+    chip.classList.add("chips");
+
+    function dragStart(event) {
+        event.dataTransfer.setData('text/plain', this.innerText);
+    }
+
+    chipsData = { ...chipsData, [chipId]: references };
+    insertChipAtCursor(chip, textInput);
+};
+
+function truncateText(str) {
+    if (str.length > 25) {
+        return str.substr(0, 10) + '...' + str.substr(str.length-10, str.length);
+      }
+      return str;
+}
+
+function dragOver(event) {
+    event.preventDefault();
+}
+
+function drop(event) {
+    event.preventDefault();
+    const sel = window.getSelection();
+    let range;
+    if (document.caretRangeFromPoint)
+        range = document.caretRangeFromPoint(event.clientX, event.clientY);
+    else {
+        sel.collapse(event.rangeParent, event.rangeOffset);
+        range = sel.getRangeAt(0);
+    }
+    const draggedChipId = event.dataTransfer.getData('text/plain');
+    const draggedChip = document.getElementById(draggedChipId);
+
+    if (draggedChip) {
+        // If the dragged chip exists, move it to the new drop position
+        range.deleteContents();
+        range.insertNode(draggedChip);
+    }
+}
+
+function insertChipAtCursor(chip, textInput) {
+    // Get the current selection
+    const selection = window.getSelection();
+    const nonBreakingSpace = document.createElement("span");
+    nonBreakingSpace.innerHTML = "&nbsp;";
+
+    if (selection.rangeCount > 0 && textInput === document.activeElement) {
+        // Get the range of the current selection
+        const range = selection.getRangeAt(0);
+
+        // Check if the cursor is at the end of the textInput
+        if (range.startContainer === textInput && range.startOffset === textInput.childNodes.length) {
+            // Append the chip at the end
+            textInput.appendChild(chip);
+            textInput.appendChild(nonBreakingSpace);
+        } else {
+            // Insert the chip at the current cursor position
+            range.insertNode(chip);
+            textInput.appendChild(nonBreakingSpace);
+        }
+
+    } else {
+        // If there is no selection, append the chip at the end
+        textInput.appendChild(chip);
+        textInput.appendChild(nonBreakingSpace);
+    }
 }
 
 function clearChat() {
@@ -669,7 +817,7 @@ function displayMessages() {
             userElement.innerHTML = "<strong>You</strong>";
             userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
-            contentElement.innerHTML = message.parts;
+            contentElement.innerHTML = markdownToPlain(message.parts);
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(userElement);
@@ -841,6 +989,11 @@ function setAPIKeyInSettings() {
         type: "updateSettings",
         value: geminiAPIKey
     });
+}
+
+function adjustHeight() {
+    textInput.style.height = 'auto';
+    textInput.style.height = textInput.scrollHeight + 'px';
 }
 
 // Function to introduce a delay using a Promise
