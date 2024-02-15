@@ -4,6 +4,14 @@ All notable changes to the "fluttergpt" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.2.10]
+
+- References can be added to command deck
+- Better diff-view
+- Improved inline code generations
+- Better tutorials
+- Bug fixes and improvements
+
 ## [0.2.9]
 
 - New User Onboarding
