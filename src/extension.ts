@@ -85,7 +85,7 @@ export async function activate(context: vscode.ExtensionContext) {
                     if (chatViewProvider) {
                         chatViewProvider.aiRepo = geminiRepo;
                     }
-                    initFlutterExtension(context, geminiRepo, analyzer, false);
+                    initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
 
                 } catch (error) {
                     console.error(error);
@@ -116,22 +116,21 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
     return chatProvider;
 }
 
-function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, initWebView: boolean = true) {
+function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, chatViewProvider: FlutterGPTViewProvider | undefined = undefined) {
 
     const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
-
-    if (initWebView) {
-        const flutterChatProvider = initWebview(context, geminiRepo);
+    if (!chatViewProvider) {
+        chatViewProvider = initWebview(context, geminiRepo);
     }
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
-    initCommands(context, geminiRepo, analyzer);
+    initCommands(context, geminiRepo, analyzer, chatViewProvider);
 
 }
 

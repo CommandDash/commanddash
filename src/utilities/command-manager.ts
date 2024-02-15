@@ -68,7 +68,7 @@ export function registerCommand(
     }
 }
 
-export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any,) {
+export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
     const generationRepository: GenerationRepository = getUserPrefferedModel();
     // List of commands to register, with their names and options.
     const commands = [
@@ -79,7 +79,8 @@ export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, 
         { name: 'fluttergpt.refactorCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(generationRepository, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } }
+        { name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } },
+        { name: 'fluttergpt.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: true, isShortcut: false } }
         // Add more commands as needed.
     ];
 
