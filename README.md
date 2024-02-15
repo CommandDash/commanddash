@@ -26,8 +26,8 @@ Our vision is to make Flutter development faster and easily adoptable by automat
 
 ##### 1. Create Free Gemini API Key
 Visit [Makersuite by Google](https://makersuite.google.com/) and create your free API Key.
-##### 2. Add the key to FlutterGPT
-In your VSCODE settings, search for `fluttergpt.apiKey` and paste the API Key.
+##### 2. Add the key in chat view
+Open the FlutterGPT chat view, and paste your API key in the input field.
 ##### 3. Run your first command.
 To get started, right-click on your editor in a dart project. Checkout all features below. 🔽
 
