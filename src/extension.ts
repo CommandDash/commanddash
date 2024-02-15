@@ -17,7 +17,7 @@ import { GeminiRepository } from './repository/gemini-repository';
 import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { UpdateManager } from './utilities/update-manager';
-import { initCommands } from './utilities/command-manager';
+import { initCommands, registerCommand } from './utilities/command-manager';
 import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
 import { tempScheme, virtualDocumentProvider } from './utilities/virtual-document-provider';
@@ -39,18 +39,8 @@ export async function activate(context: vscode.ExtensionContext) {
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
     if (!apiKey || isOldOpenAIKey(apiKey)) {
-        initWebview(context);
-        
-        // Prompt the user to update their settings
-        vscode.window.showErrorMessage(
-            'Please update your API key to Gemini in the settings.',
-            'Open Settings'
-        ).then(selection => {
-            if (selection === 'Open Settings') {
-                // vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
-                vscode.commands.executeCommand('workbench.view.extensions');
-            }
-        });
+        var chatViewProvider = initWebview(context);
+        showMissingApiKey();
     }
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -71,12 +61,16 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
-    
+    var _inlineErrorCommand: vscode.Disposable;
     try {
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
     } catch (error) {
         console.error(error);
+        // Handle inoine completion shortcut
+        _inlineErrorCommand = vscode.commands.registerCommand('fluttergpt.createInlineCodeCompletion', () => {
+            showMissingApiKey();
+        });
     }
     finally {
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -84,7 +78,15 @@ export async function activate(context: vscode.ExtensionContext) {
             if (affected) {
                 try {
                     const geminiRepo = initGemini();
-                    initFlutterExtension(context, geminiRepo, analyzer);
+                    if (_inlineErrorCommand) {
+                        // Dispose the error command if it exists
+                        _inlineErrorCommand!.dispose();
+                    }
+                    if (chatViewProvider) {
+                        chatViewProvider.aiRepo = geminiRepo;
+                    }
+                    initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
+
                 } catch (error) {
                     console.error(error);
                 }
@@ -114,20 +116,21 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
     return chatProvider;
 }
 
-function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer) {
+function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, chatViewProvider: FlutterGPTViewProvider | undefined = undefined) {
 
     const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
-
-    const flutterChatProvider = initWebview(context, geminiRepo);
+    if (!chatViewProvider) {
+        chatViewProvider = initWebview(context, geminiRepo);
+    }
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
-    initCommands(context, geminiRepo, analyzer, flutterChatProvider);
+    initCommands(context, geminiRepo, analyzer, chatViewProvider);
 
 }
 
@@ -135,13 +138,7 @@ export async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Pr
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
     if (!apiKey || isOldOpenAIKey(apiKey)) {
-        const selection = await vscode.window.showInformationMessage(
-            'Please update your API key to Gemini in the settings.',
-            'Open Settings'
-        );
-        if (selection === 'Open Settings') {
-            vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
-        }
+        showMissingApiKey();
         return false;
     }
     return true;
@@ -179,4 +176,15 @@ function initGemini(): GeminiRepository {
 // This method is called when your extension is deactivated
 export function deactivate() {
     console.log("FlutterGPT deactivated");
+}
+
+function showMissingApiKey() {
+    vscode.window.showInformationMessage(
+        'Please add your Gemini Key to use FlutterGPT.',
+        'Add Now'
+    ).then(selection => {
+        if (selection === 'Add Now') {
+            vscode.commands.executeCommand(FlutterGPTViewProvider.viewType + '.focus');
+        }
+    });
 }

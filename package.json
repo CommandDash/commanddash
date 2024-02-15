@@ -140,10 +140,6 @@
         "title": "FlutterGPT Refactor: Optimize"
       },
       {
-        "command": "fluttergpt.openCommandDeck",
-        "title": "Open FlutterGPT Command Deck"
-      },
-      {
         "command": "fluttergpt.clearChat",
         "title": "Clear Chat",
         "icon": {
