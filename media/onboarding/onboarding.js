@@ -94,9 +94,7 @@ const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
-const tutorialModal = document.getElementById("tutorial-modal");
 const codeSnippetButton = document.getElementById("code-snippets");
-const closeTutorialModal = document.getElementById("close-tutorial-modal");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -421,20 +419,7 @@ class CommandDeck {
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-    //event listeners for code snippet button
-    codeSnippetButton.addEventListener("click", onClickCodeSnippet);
-
-    //event listeners for tutorial modal
-    closeTutorialModal.addEventListener("click", onCloseTutorialModal);
 })();
-
-function onCloseTutorialModal(event) {
-    tutorialModal.classList.add("hidden");
-}
-
-function onClickCodeSnippet(event) {
-    tutorialModal.classList.remove("hidden");
-}
 
 function handleSubmit(event) {
     const resolveFn = async (query, type) => {
