@@ -38,8 +38,8 @@ export async function activate(context: vscode.ExtensionContext) {
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
-    initWebview(context);
     if (!apiKey || isOldOpenAIKey(apiKey)) {
+        var chatViewProvider = initWebview(context);
         showMissingApiKey();
     }
     console.log('Congratulations, "fluttergpt" is now active!');
@@ -82,7 +82,10 @@ export async function activate(context: vscode.ExtensionContext) {
                         // Dispose the error command if it exists
                         _inlineErrorCommand!.dispose();
                     }
-                    initFlutterExtension(context, geminiRepo, analyzer);
+                    if (chatViewProvider) {
+                        chatViewProvider.aiRepo = geminiRepo;
+                    }
+                    initFlutterExtension(context, geminiRepo, analyzer, false);
 
                 } catch (error) {
                     console.error(error);
@@ -113,7 +116,7 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
     return chatProvider;
 }
 
-function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer) {
+function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, initWebView: boolean = true) {
 
     const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
@@ -121,6 +124,9 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
 
+    if (initWebView) {
+        const flutterChatProvider = initWebview(context, geminiRepo);
+    }
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
