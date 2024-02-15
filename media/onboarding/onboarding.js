@@ -387,7 +387,8 @@ class CommandDeck {
 
     googleApiKeyTextInput.addEventListener("input", (event) => {
         const apiKey = event.target.value.trim();
-        validateApiKey(apiKey);
+        const debouncedFunction = debounce(validateApiKey, 500);
+        debouncedFunction(apiKey);
     });
 
     sendButton.addEventListener("click", (event) => {
@@ -744,6 +745,30 @@ function insertChipAtCursor(chip, textInput) {
     }
 }
 
+function debounce(func, wait, immediate = false) {
+    let timeout;
+  
+    return (...args) => {
+      const context = this;
+  
+      const later = () => {
+        timeout = null;
+        if (!immediate) {
+            func.apply(context, args);
+        };
+      };
+  
+      const callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+  
+      if (callNow) {
+        func.apply(context, args);
+      };
+    };
+  }
+  
+
 function clearChat() {
     responseContainer.innerHTML = "";
     conversationHistory = [];
@@ -963,23 +988,18 @@ async function updateValidationList(message) {
 
     // Check if both conditions are met, add "All permissions look good"
     if (isApiKeyValid && areDependenciesInstalled) {
-        const permissionsListItem = document.querySelector(`li[data-type="permissionsValidation"]`);
-
-        if (!permissionsListItem) {
             bodyContainer.classList.add("flex", "flex-col");
             bottomContainer.classList.remove("hidden");
             bottomContainer.classList.add("flex");
             setAPIKeyInSettings();
-        }
+        
     } else {
         // Remove "All permissions look good" item if conditions are not met
-        const permissionsListItem = document.querySelector(`li[data-type="permissionsValidation"]`);
-        if (permissionsListItem) {
-            validationList.removeChild(permissionsListItem);
+            // validationList.removeChild(permissionsListItem);
             bodyContainer.classList.remove("flex", "flex-col");
             bottomContainer.classList.add("hidden");
             bottomContainer.classList.remove("flex");
-        }
+        
     }
 }
 
