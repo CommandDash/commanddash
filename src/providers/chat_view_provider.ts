@@ -276,7 +276,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public clearConversationHistory() {
         this._privateConversationHistory = [];
         this._publicConversationHistory = [];
-        logEvent('clear-chat-conversation', {from: 'command-deck'});
     }
 
 }
