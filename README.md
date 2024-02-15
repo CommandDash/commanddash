@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img height=200px src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/icon.png"></a>
+ <img height=200px src="/media/icon.png"></a>
 </p>
 <h1 align="center">FlutterGPT</h1>
 <div align="center">
@@ -74,7 +74,7 @@ Command: `FlutterGPT Create: Code from Description`
 ### ✨ Refactor
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
 </p>
 
 #### 1. **From Instruction**
