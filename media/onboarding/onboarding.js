@@ -94,9 +94,7 @@ const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
-const tutorialModal = document.getElementById("tutorial-modal");
 const codeSnippetButton = document.getElementById("code-snippets");
-const closeTutorialModal = document.getElementById("close-tutorial-modal");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -387,7 +385,8 @@ class CommandDeck {
 
     googleApiKeyTextInput.addEventListener("input", (event) => {
         const apiKey = event.target.value.trim();
-        validateApiKey(apiKey);
+        const debouncedFunction = debounce(validateApiKey, 700);
+        debouncedFunction(apiKey);
     });
 
     sendButton.addEventListener("click", (event) => {
@@ -420,20 +419,7 @@ class CommandDeck {
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-    //event listeners for code snippet button
-    codeSnippetButton.addEventListener("click", onClickCodeSnippet);
-
-    //event listeners for tutorial modal
-    closeTutorialModal.addEventListener("click", onCloseTutorialModal);
 })();
-
-function onCloseTutorialModal(event) {
-    tutorialModal.classList.add("hidden");
-}
-
-function onClickCodeSnippet(event) {
-    tutorialModal.classList.remove("hidden");
-}
 
 function handleSubmit(event) {
     const resolveFn = async (query, type) => {
@@ -665,7 +651,7 @@ function createReferenceChips(references) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
-    
+
     if (document.getElementById(chipId)) {
         return;
     }
@@ -687,9 +673,9 @@ function createReferenceChips(references) {
 
 function truncateText(str) {
     if (str.length > 25) {
-        return str.substr(0, 10) + '...' + str.substr(str.length-10, str.length);
-      }
-      return str;
+        return str.substr(0, 10) + '...' + str.substr(str.length - 10, str.length);
+    }
+    return str;
 }
 
 function dragOver(event) {
@@ -743,6 +729,30 @@ function insertChipAtCursor(chip, textInput) {
         textInput.appendChild(nonBreakingSpace);
     }
 }
+
+function debounce(func, wait, immediate = false) {
+    let timeout;
+
+    return (...args) => {
+        const context = this;
+
+        const later = () => {
+            timeout = null;
+            if (!immediate) {
+                func.apply(context, args);
+            };
+        };
+
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+
+        if (callNow) {
+            func.apply(context, args);
+        };
+    };
+}
+
 
 function clearChat() {
     responseContainer.innerHTML = "";
@@ -963,23 +973,17 @@ async function updateValidationList(message) {
 
     // Check if both conditions are met, add "All permissions look good"
     if (isApiKeyValid && areDependenciesInstalled) {
-        const permissionsListItem = document.querySelector(`li[data-type="permissionsValidation"]`);
+        bodyContainer.classList.add("flex", "flex-col");
+        bottomContainer.classList.remove("hidden");
+        bottomContainer.classList.add("flex");
+        setAPIKeyInSettings();
 
-        if (!permissionsListItem) {
-            bodyContainer.classList.add("flex", "flex-col");
-            bottomContainer.classList.remove("hidden");
-            bottomContainer.classList.add("flex");
-            setAPIKeyInSettings();
-        }
     } else {
         // Remove "All permissions look good" item if conditions are not met
-        const permissionsListItem = document.querySelector(`li[data-type="permissionsValidation"]`);
-        if (permissionsListItem) {
-            validationList.removeChild(permissionsListItem);
-            bodyContainer.classList.remove("flex", "flex-col");
-            bottomContainer.classList.add("hidden");
-            bottomContainer.classList.remove("flex");
-        }
+        bodyContainer.classList.remove("flex", "flex-col");
+        bottomContainer.classList.add("hidden");
+        bottomContainer.classList.remove("flex");
+
     }
 }
 

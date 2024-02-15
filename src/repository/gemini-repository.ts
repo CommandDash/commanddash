@@ -87,14 +87,14 @@ export class GeminiRepository extends GenerationRepository {
             if (this.isApiKeyInvalidError(error)) {
                 throw new Error('API key is not valid. Please pass a valid API key.');
             } else {
-                // Re-throw other errors
-                throw error;
+                // Handle other errors internally (optional: log them for debugging)
+                console.error('gemini api error', error);
             }
         }
     }
 
     // Function to check if the error is related to an invalid API key
-    private isApiKeyInvalidError(error: any): boolean {
+    public isApiKeyInvalidError(error: any): boolean {
         return (
             error &&
             error.message &&
