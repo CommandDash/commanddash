@@ -387,7 +387,7 @@ class CommandDeck {
 
     googleApiKeyTextInput.addEventListener("input", (event) => {
         const apiKey = event.target.value.trim();
-        const debouncedFunction = debounce(validateApiKey, 500);
+        const debouncedFunction = debounce(validateApiKey, 700);
         debouncedFunction(apiKey);
     });
 
@@ -666,7 +666,7 @@ function createReferenceChips(references) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
-    
+
     if (document.getElementById(chipId)) {
         return;
     }
@@ -688,9 +688,9 @@ function createReferenceChips(references) {
 
 function truncateText(str) {
     if (str.length > 25) {
-        return str.substr(0, 10) + '...' + str.substr(str.length-10, str.length);
-      }
-      return str;
+        return str.substr(0, 10) + '...' + str.substr(str.length - 10, str.length);
+    }
+    return str;
 }
 
 function dragOver(event) {
@@ -747,27 +747,27 @@ function insertChipAtCursor(chip, textInput) {
 
 function debounce(func, wait, immediate = false) {
     let timeout;
-  
+
     return (...args) => {
-      const context = this;
-  
-      const later = () => {
-        timeout = null;
-        if (!immediate) {
+        const context = this;
+
+        const later = () => {
+            timeout = null;
+            if (!immediate) {
+                func.apply(context, args);
+            };
+        };
+
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+
+        if (callNow) {
             func.apply(context, args);
         };
-      };
-  
-      const callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-  
-      if (callNow) {
-        func.apply(context, args);
-      };
     };
-  }
-  
+}
+
 
 function clearChat() {
     responseContainer.innerHTML = "";
@@ -988,18 +988,17 @@ async function updateValidationList(message) {
 
     // Check if both conditions are met, add "All permissions look good"
     if (isApiKeyValid && areDependenciesInstalled) {
-            bodyContainer.classList.add("flex", "flex-col");
-            bottomContainer.classList.remove("hidden");
-            bottomContainer.classList.add("flex");
-            setAPIKeyInSettings();
-        
+        bodyContainer.classList.add("flex", "flex-col");
+        bottomContainer.classList.remove("hidden");
+        bottomContainer.classList.add("flex");
+        setAPIKeyInSettings();
+
     } else {
         // Remove "All permissions look good" item if conditions are not met
-            // validationList.removeChild(permissionsListItem);
-            bodyContainer.classList.remove("flex", "flex-col");
-            bottomContainer.classList.add("hidden");
-            bottomContainer.classList.remove("flex");
-        
+        bodyContainer.classList.remove("flex", "flex-col");
+        bottomContainer.classList.add("hidden");
+        bottomContainer.classList.remove("flex");
+
     }
 }
 

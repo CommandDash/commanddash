@@ -157,11 +157,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is valid' });
         } catch (error) {
             console.log('gemini api error', error);
-            if (this.aiRepo?.isApiKeyInvalidError(error)) {
-                this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is invalid' });
-            } else {
-                this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is valid' });
-            }
+            this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is invalid' });
         }
     }
 
