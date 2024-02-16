@@ -1,0 +1,229 @@
+{
+  "name": "fluttergpt",
+  "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
+  "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
+  "version": "0.2.10",
+  "publisher": "WelltestedAI",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "repository": {
+    "url": "https://github.com/Welltested-AI/fluttergpt/vscode"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "flutter",
+    "dart",
+    "gemini",
+    "bard",
+    "copilot",
+    "gpt",
+    "ai",
+    "assistant",
+    "chat",
+    "coding"
+  ],
+  "activationEvents": [
+    "onLanguage:dart"
+  ],
+  "extensionDependencies": [
+    "Dart-Code.dart-code"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "extensionKind": [
+      "ui"
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "webview",
+          "title": "FlutterGPT",
+          "icon": "./media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "webview": [
+        {
+          "type": "webview",
+          "id": "fluttergpt.chatView",
+          "name": "Command Deck"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "FlutterGPT",
+      "type": "object",
+      "properties": {
+        "fluttergpt.apiKey": {
+          "type": "string",
+          "markdownDescription": "Gemini API KEY(https://makersuite.google.com/)"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "fluttergpt.addToReference.menu",
+        "key": "ctrl+R",
+        "mac": "cmd+R",
+        "when": "editorHasSelection && resourceLangId == 'dart'"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "key": "ctrl+right",
+        "mac": "cmd+right",
+        "when": "resourceLangId == 'dart'"
+      }
+    ],
+    "commands": [
+      {
+        "command": "fluttergpt.addToReference",
+        "when": "editorHasSelection && resourceLangId == 'dart'",
+        "title": "FlutterGPT: Add to Reference"
+      },
+      {
+        "command": "fluttergpt.addToReference.menu",
+        "title": "Add to Reference",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion",
+        "when": "!editorHasSelection && resourceLangId == 'dart'",
+        "title": "FlutterGPT: Inline Code Generation"
+      },
+      {
+        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "title": "Inline Code Generation",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createWidget",
+        "title": "FlutterGPT Create: Widget from Image or Description"
+      },
+      {
+        "command": "fluttergpt.createWidget.menu",
+        "title": "Widget from Image or Description",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createCodeFromBlueprint",
+        "title": "FlutterGPT Create: Code from Blueprint"
+      },
+      {
+        "command": "fluttergpt.createCodeFromBlueprint.menu",
+        "title": "Code from Blueprint",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.createCodeFromDescription",
+        "title": "FlutterGPT Create: Code From Description"
+      },
+      {
+        "command": "fluttergpt.createCodeFromDescription.menu",
+        "title": "Code From Description",
+        "when": "false"
+      },
+      {
+        "command": "fluttergpt.refactorCode",
+        "title": "FlutterGPT Refactor: From Instructions"
+      },
+      {
+        "command": "fluttergpt.fixErrors",
+        "title": "FlutterGPT Refactor: Fix Errors"
+      },
+      {
+        "command": "fluttergpt.optimizeCode",
+        "title": "FlutterGPT Refactor: Optimize"
+      },
+      {
+        "command": "fluttergpt.clearChat",
+        "title": "Clear Chat",
+        "icon": {
+          "light": "resources/light/trash.svg",
+          "dark": "resources/dark/trash.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "fluttergpt.createMenu",
+          "group": "fluttergpt-menu-group@3"
+        },
+        {
+          "command": "fluttergpt.addToReference.menu",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "when": "!editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "fluttergpt.clearChat",
+          "group": "navigation"
+        }
+      ],
+      "fluttergpt.createMenu": [
+        {
+          "command": "fluttergpt.createCodeFromBlueprint.menu",
+          "group": "fluttergpt-menu-group@1"
+        },
+        {
+          "command": "fluttergpt.createCodeFromDescription.menu",
+          "title": "From Description",
+          "group": "fluttergpt-menu-group@2"
+        },
+        {
+          "command": "fluttergpt.createWidget.menu",
+          "when": "!editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@3"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "fluttergpt.createMenu",
+        "label": "FlutterGPT Create"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/js-yaml": "^4.0.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.77.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/parser": "^5.59.2",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.39.0",
+    "glob": "^10.2.2",
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.1.1",
+    "@vscode/extension-telemetry": "^0.8.1",
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0",
+    "url-metadata": "^3.3.1",
+    "vscode-languageclient": "^9.0.1"
+  }
+}
