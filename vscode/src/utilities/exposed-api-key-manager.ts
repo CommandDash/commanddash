@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import { SecretApiKeyManager } from "./secret-storage-manager";
 import { error } from "console";
+import { logEvent } from "./telemetry-reporter";
 
 export class ExposedApiKeyManager {
     readonly context: vscode.ExtensionContext;
@@ -25,6 +26,9 @@ export class ExposedApiKeyManager {
         }
         // we delete the key from config only if we successfully shift the key to secret storage
         if(isApiKeyShifted){
+            console.log("Success shifting api key");
+             
+            logEvent('shifted-api-key', {'type':'shift'});
 this.deleteApiKeyFromConfig();
         }else{
             // this else cond. does not necesarily indicate an error

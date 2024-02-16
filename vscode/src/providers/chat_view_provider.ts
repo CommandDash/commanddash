@@ -95,7 +95,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "updateSettings":
                     {
-                        vscode.workspace.getConfiguration().update("fluttergpt.apiKey", data.value, vscode.ConfigurationTarget.Global);
+                       await SecretApiKeyManager.instance.setApiKey(data.value);
                         vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
                         break;
                     }

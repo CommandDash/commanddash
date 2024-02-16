@@ -29,7 +29,7 @@ export const DART_MODE: vscode.DocumentFilter & { language: string } = { languag
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
-
+    activateTelemetry(context);
     //before anything else we first need to load context into our secret storage manager so we can easily access it everywhere
     SecretApiKeyManager.instance.loadContext(context);
 
@@ -50,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext) {
     
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
-    activateTelemetry(context);
+    
     logEvent('activated');
 
     // Dart-code extenstion stuff
@@ -199,31 +199,19 @@ async function checkForApiKeyAndAskIfMissing(context: vscode.ExtensionContext): 
     //TODO: remove in prod .. only for testing as a new user
     // await SecretApiKeyManager.instance.deleteApiKey();
     const apiKeyFromSecretStorage = await SecretApiKeyManager.instance.getApiKey();
-console.log(apiKeyFromSecretStorage);
+
     // if apikey and apiKeyFromSecretStorage both values are not present then we consider as a new user and show a
     //input box
-
-     
     if ((!apiKey && !apiKeyFromSecretStorage) || isOldOpenAIKey(apiKey!)) {
         
         initWebview(context);
-        
-        // Prompt the user to update their settings
-        vscode.window.showErrorMessage(
-            'Please update your API key to Gemini.',
-            'Update Now'
-        ).then(selection => {
-            if (selection === 'Update Now') {
-                // vscode.commands.executeCommand('workbench.action.openSettings', 'fluttergpt.apiKey');
-                // vscode.commands.executeCommand('workbench.view.extensions');
-                getApiKeyFromUserAndStoreInSecretStorage(context);
-            }
-        });
+        showMissingApiKey();
         return false;
     }
     return true;
 }
 
+// not being used as new flow of getting api key is introduced
 async function getApiKeyFromUserAndStoreInSecretStorage(context: vscode.ExtensionContext){
     const apiKey = await vscode.window.showInputBox({
         prompt: 'Get API Key from here [link](https://makersuite.google.com/app/apikey)',
