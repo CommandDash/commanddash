@@ -58,4 +58,23 @@ export class CacheManager {
             return 0;
         }
     }
+
+    async setGeminiCache(cacheData: string): Promise<void> {
+        try {
+            await this.setWorkspaceValue<string>("gemini-cache", cacheData);
+        } catch (error) {
+            logError('setGeminiCache', error);
+            console.log("Failed updating cache for FlutterGpt!!");
+        }
+    }
+
+    async getGeminiCache(): Promise<string | undefined> {
+        try {
+            return await this.getWorkspaceValue<string | undefined>("gemini-cache");
+        } catch (error) {
+            logError('getGeminiCache', error);
+            console.log("Failed updating cache for FlutterGpt!!");
+            return undefined;
+        }
+    }
 }
