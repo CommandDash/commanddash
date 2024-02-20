@@ -24,7 +24,7 @@ Dash AI is an open-source coding assistant being built for Flutter Devs. It curr
 Our vision is to make Flutter development seamless by automating low-level tasks while also making it easy for non Flutter devs to adopt and build production-ready apps in no time.
 
 
-#### Dash AI: Just Like a Mini-Engineer
+## Dash AI: Just Like a Mini-Engineer
 
 Imagine Dash AI beyond code writing. It can run and debug your app, listening to real-time log outputs and device screen (multimodality) to iterate the code until your goal is met. Just like we devs do ourselves.
 
@@ -51,15 +51,6 @@ To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTIN
 ## Community
 
 Connect with like minded people building with Flutter and using AI to do so, every step of the way :D [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA)
-
-## Roadmap
-
-To get a sense of direction of where we're heading, please check out our [Roadmap](ROADMAP.md).
-
-## Known Issues
-
-This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
-
 
 ## License
 
