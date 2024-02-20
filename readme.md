@@ -34,7 +34,7 @@ Acheiving this requires below requirements to be fulfilled.
 **2. Upto date with latest syntax**
 **3. Ability to run and operate the app**
 
-The specifics of each step is defined in the respective columns in roadmap. We are setting a timeline of 4-6 months to achieve them.
+The specifics of each step is defined in the [roadmap](./ROADMAP.md). We are setting a timeline of 4-6 months to achieve them.
 
 ## Contributing
 
