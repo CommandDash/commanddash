@@ -47,14 +47,14 @@ ul {
 }
 
 .menu {
-    position: absolute;
     z-index: 99;
-    border-radius: 7px;
     background-color: var(--vscode-activityBar-background);
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
 }
 
 .menu-item {
-    cursor: default;
+    cursor: pointer;
     padding: .5rem 1rem;
     border-radius: 7px;
 }
@@ -65,8 +65,8 @@ ul {
     border-radius: 7px;
 }
 
-.menu-item:hover:not(.selected) {
-    background-color: #fafafa;
+.menu-item:hover {
+    background-color: var(--vscode-editor-background);
     border-radius: 7px;
 }
 
@@ -163,15 +163,19 @@ p[contenteditable="true"] {
     align-items: center;
     border-radius: 7px;
 }
-.close-icon {
-    display: none;
-    position: absolute;
-    top: -5px;
-    right: -5px;
+
+.chips-reference {
+    color: #ea580c;
+    outline: .5px solid #ea580c;
+    padding: 3px 5px;
+    margin: 2px;
+    position: relative;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 7px;
 }
-.chips:hover .close-icon {
-    display: inline-block;
-}
+
 #agents{
     color: var(--vscode-input-placeholderForeground);
 }

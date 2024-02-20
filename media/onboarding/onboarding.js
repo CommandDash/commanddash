@@ -104,6 +104,7 @@ let chipsData = {}; // {'lib/main.dart [1-2]': {code: 'console.log('hello')'}}
 let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
+let commandEnable = false;
 
 //initialising visual studio code library
 let vscode = null;
@@ -149,9 +150,38 @@ const properties = [
 ];
 
 let agents = ['workspace'];
-const commands = [];
+const commands = ['refactor'];
+
 // Add your additional commands and agents
 const agentCommandsMap = {};
+
+const commandsExecution = {
+    'refactor': {
+        'exe': (input) => {
+            commandEnable = true;
+            input.textContent = '';
+            const command = document.createElement('span');
+            const textRefactor = document.createElement('span');
+            const refactor = document.createElement('span');
+
+            command.innerHTML = `/refactor <span id="add-reference-text" contenteditable="false" class="bg-black mb-1 text-white px-[7px] m inline-block">Add reference</span><span id="reference-id"></span>&nbsp;`;
+
+            refactor.innerHTML = `<span contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
+            refactor.classList.add("inline-block");
+
+            textRefactor.contentEditable = "true";
+            textRefactor.classList.add("bg-slate-700", "px-2");
+
+            refactor.appendChild(textRefactor);
+            command.appendChild(refactor);
+            input.appendChild(command);
+
+            setCaretToEnd(textRefactor);
+
+            adjustHeight();
+        }
+    }
+};
 
 // Concatenate agent-specific commands to the agents array
 agents = agents.concat(
@@ -242,28 +272,44 @@ class CommandDeck {
         return () => {
             const option = this.options[active];
 
-            // Assuming this.ref is a contenteditable element
-            const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
-            const preMention = this.ref.textContent.substring(0, this.triggerIdx);
-            const postMention = this.ref.textContent.substring(range.endOffset);
+            const isOptionAvailable = commandsExecution.hasOwnProperty(option);
 
-            const trigger = this.ref.textContent[this.triggerIdx];
-            // Replace the mention with the selected option along with '@'
-            const mentionNode = document.createTextNode(`${trigger}${option}`);
-            this.ref.textContent = ''; // Clear existing content
-            this.ref.appendChild(document.createTextNode(preMention));
-            this.ref.appendChild(mentionNode);
-            this.ref.appendChild(document.createTextNode(postMention));
+            if (isOptionAvailable) {
+                commandsExecution[option].exe(this.ref);
+            } else {
 
-            // Move the cursor to the end of the mention
-            range.setStart(mentionNode, option.length + 1); // +1 for '@'
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
+                // this.ref is a contenteditable element
+                const selection = window.getSelection();
+                const range = selection.getRangeAt(0);
+                const preMention = this.ref.textContent.substring(0, this.triggerIdx);
+                const postMention = this.ref.textContent.substring(range.endOffset);
 
-            this.closeMenu();
+                const trigger = this.ref.textContent[this.triggerIdx];
+                // Replace the mention with the selected option along with '@'
+                const mentionNode = document.createElement("span");
+                mentionNode.id = "special-commands";
+                mentionNode.classList.add("text-blue-500", "inline-block");
+                mentionNode.contentEditable = "false";
+                mentionNode.textContent = `${trigger}${option}`;
+                this.ref.textContent = ''; // Clear existing content
+                this.ref.appendChild(document.createTextNode(preMention));
+                this.ref.appendChild(mentionNode);
+                this.ref.appendChild(document.createTextNode(postMention));
+
+                // Add &nbsp; only if it's not already present
+                if (this.ref.lastChild && this.ref.lastChild.nodeValue !== '\u00A0') {
+                    this.ref.appendChild(document.createTextNode('\u00A0'));
+                }
+
+                // Move the cursor to the end of the mention
+                range.setStart(mentionNode.firstChild, option.length + 1); // +1 for '@'
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+
             this.ref.focus();
+            this.closeMenu();
         };
     }
 
@@ -294,29 +340,19 @@ class CommandDeck {
         const coords = getCaretCoordinates(this.ref, positionIndex);
         const { top, left } = this.ref.getBoundingClientRect();
 
+        const savedCaretPosition = positionIndex;
+
         setTimeout(() => {
             this.active = 0;
             this.left = window.scrollX + coords.left + left + this.ref.scrollLeft;
             this.top = window.scrollY + coords.top + top + coords.height - this.ref.scrollTop;
             this.triggerIdx = triggerIdx;
+
             this.renderMenu();
 
-            // this.applyHighlightToExistingActions(textBeforeCaret, positionIndex);
+            this.ref.selectionStart = this.ref.selectionEnd = savedCaretPosition;
         }, 0);
     }
-
-    applyHighlightToExistingActions(originalText, positionIndex) {
-        const trigger = this.ref.textContent[this.triggerIdx];
-        const allActions = [...agents, ...commands];
-
-        // Highlight workspace mentions specifically
-        const workspaceRegex = /\B@workspace\b/gi;
-        const highlightedText = originalText.replace(workspaceRegex, (match) => `<span class="text-black">${match}</span>`);
-
-        // Set HTML content
-        this.ref.innerHTML = highlightedText;
-    }
-
 
     onKeyDown(ev) {
         let keyCaught = false;
@@ -336,6 +372,23 @@ class CommandDeck {
                 case 'Tab':
                     this.selectItem(this.active)();
                     keyCaught = true;
+                    break;
+                case 'Backspace':
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0);
+                    const mentionNode = document.getElementById("special-commands");
+
+                    if (mentionNode) {
+                        const prevNode = mentionNode.previousSibling;
+                        const nextNode = mentionNode.nextSibling;
+                        this.ref.removeChild(mentionNode);
+
+                        // Restore the cursor position 
+                        range.setStartAfter(prevNode || nextNode);
+                        range.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
                     break;
             }
         }
@@ -507,6 +560,14 @@ function handleSubmit(event) {
                 lastChip.parentNode.removeChild(lastChip);
             }
         }
+
+        setTimeout(() => {
+            if (textInput.textContent.trim().length === 0) {
+                // Perform some action
+                commandEnable = false;
+            }
+        }, 500);
+
     }
 
     const target = event.target;
@@ -520,6 +581,20 @@ function ifKeyExists() {
     vscode.postMessage({
         type: "checkKeyIfExists",
     });
+}
+
+function setCaretToEnd(target) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    range.selectNodeContents(target);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    target.focus();
+    range.detach(); // optimization
+
+    // set scroll to the end if multiline
+    target.scrollTop = target.scrollHeight;
 }
 
 function removePlaceholder() {
@@ -658,17 +733,14 @@ function createReferenceChips(references) {
 
     chip.innerHTML = `${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
     chip.id = chipId;
-    chip.setAttribute("draggable", "true");
     chip.setAttribute("contenteditable", "false");
-    chip.addEventListener("dragstart", dragStart);
-    chip.classList.add("chips");
-
-    function dragStart(event) {
-        event.dataTransfer.setData('text/plain', this.innerText);
-    }
 
     chipsData = { ...chipsData, [chipId]: references };
-    insertChipAtCursor(chip, textInput);
+    if (commandEnable) {
+        insertAtReference(chip);
+    } else {
+        insertChipAtCursor(chip, textInput);
+    }
 };
 
 function truncateText(str) {
@@ -703,6 +775,14 @@ function drop(event) {
 }
 
 function insertChipAtCursor(chip, textInput) {
+    //chip property setting
+    chip.setAttribute("draggable", "true");
+    chip.addEventListener("dragstart", dragStart);
+    chip.classList.add("chips");
+
+    function dragStart(event) {
+        event.dataTransfer.setData('text/plain', this.innerText);
+    }
     // Get the current selection
     const selection = window.getSelection();
     const nonBreakingSpace = document.createElement("span");
@@ -728,6 +808,17 @@ function insertChipAtCursor(chip, textInput) {
         textInput.appendChild(chip);
         textInput.appendChild(nonBreakingSpace);
     }
+}
+
+function insertAtReference(chip) {
+
+    chip.classList.add("chips-reference");
+
+    const referenceChip = document.getElementById("reference-id");
+    const referenceText = document.getElementById("add-reference-text");
+    referenceText.classList.add("hidden");
+    referenceChip.innerHTML = "";
+    referenceChip.appendChild(chip);
 }
 
 function debounce(func, wait, immediate = false) {

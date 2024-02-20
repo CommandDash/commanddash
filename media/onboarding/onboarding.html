@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{onboardingCssUri}}">
     <link rel="stylesheet" href="{{prismCssUri}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 
@@ -63,8 +63,8 @@
                     </div>
                     <div class="inline-flex flex-col px-3" id="file-names"></div>
                 </div>
-                <div id="menu" class="menu px-5" role="listbox"></div>
                 <div class="w-full sticky bottom-0 z-10 px-2 py-1" id="bottom-text-input-container">
+                    <div id="menu" class="menu p-1" role="listbox"></div>
                     <div class="border text-gray-900 text-sm block w-full px-2.5 py-1.5 mb-[2px] bg-white/[.1] rounded-[2px]"
                         id="text-input-container">
                         <div class="relative">
@@ -72,9 +72,13 @@
                             <p contenteditable="true" id="text-input"># Ask FlutterGPT</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div class="inline-flex">
-                                    <p class="text-center inline-flex justify-center items-center text-white/[.4] cursor-pointer pr-2"
+                                    <p class="text-center inline-flex justify-center items-center text-white/[.4] cursor-pointer"
                                         title="Specialized agents" id="agents">
                                         @
+                                    </p>
+                                    <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
+                                        title="Slash commands">
+                                        /
                                     </p>
                                     <p class="text-center inline-flex justify-center items-center opacity-50 cursor-pointer"
                                         title="Use 'Add to Reference' in menu to attach selected code to chat">
@@ -121,10 +125,6 @@
                                                 </clipPath>
                                             </defs>
                                         </svg>
-                                    </p>
-                                    <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
-                                        title="Commands">
-
                                     </p>
                                 </div>
                                 <div class="inline-flex justify-center items-center">
