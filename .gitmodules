@@ -1,0 +1,3 @@
+[submodule "pub"]
+	path = pub
+	url = https://github.com/Welltested-AI/commanddash.git
