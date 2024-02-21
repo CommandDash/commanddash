@@ -178,7 +178,9 @@ const commandsExecution = {
 
             setCaretToEnd(textRefactor);
 
-            adjustHeight();
+            setTimeout(() => {
+                adjustHeight();
+            }, 0);
         }
     }
 };
@@ -408,6 +410,7 @@ class CommandDeck {
         this.menuRef.style.left = this.left + 'px';
         this.menuRef.style.top = (this.top - this.menuRef.offsetHeight - caretHeight) + 'px';
         this.menuRef.innerHTML = '';
+        this.menuRef.classList.add("p-1");
 
         this.options.forEach((option, idx) => {
             const trigger = this.ref.textContent[this.triggerIdx];
