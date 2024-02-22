@@ -22,8 +22,7 @@ Dash AI is an open-source coding assistant being built for Flutter Devs. It is a
 <img src="https://media.giphy.com/media/T4ZnPW67QbajS5z4nU/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
 
-Our vision is to make Flutter development seamless by automating low-level tasks while also making it easy for non Flutter devs to adopt and build production-ready apps in no time.
-
+Our vision is to build a mini-engineer that performs tedious development tasks with a single command. This dramatically reduces development friction, making it easy for both native and newcomer Flutter devs to quickly build production-ready apps.
 
 ## The Mini-Engineer Vision
 
