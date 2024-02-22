@@ -26,7 +26,7 @@ Our vision is to build a mini-engineer that performs tedious development tasks w
 
 ## The Mini-Engineer Vision
 
-Engineering a feature of an app requires multiple iterations of writing code, running tests and debugging to meet the end-user requirements.  Dash AI is aimed to automate this entire process. 
+Engineering a feature for an app requires multiple iterations of writing code, running tests and debugging to meet the end-user requirements.  Dash AI is aimed to automate this entire process. 
 
 Imagine asking: *"Implement this JIRA ticket for me"*
 
