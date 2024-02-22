@@ -4,10 +4,10 @@
 <img  height=200px  src="assets/commanddash-logo.png"></a>
 </p>
 <h1 align="center">Dash AI</h1>
-<center>
+<div align = "center">
 
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
-</center>
+</div>
 
 <h3 align="center">Your Flutter AI Copilot powered with Gemini Code & Vision</h3>
 
