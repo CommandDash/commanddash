@@ -12,7 +12,7 @@
 <h3 align="center">Your Flutter AI Copilot powered with Gemini Code & Vision</h3>
 
 -----------------
-Dash AI is an open-source coding assistant being built for Flutter Devs. It is aimed to not only write code, but also run and debug it by itself. **This allows Dash AI to assist beyond code completion, and autopilot entire tasks.** 
+Dash AI is an open-source coding assistant being built for Flutter Devs. It is aimed to not only write code, but also run and debug it. **This allows Dash AI to assist beyond code completion, and autopilot routine tasks for you.** 
 
 
 - ✨ Powered by Gemini
@@ -22,11 +22,11 @@ Dash AI is an open-source coding assistant being built for Flutter Devs. It is a
 <img src="https://media.giphy.com/media/T4ZnPW67QbajS5z4nU/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
 
-Our vision is to build a mini-engineer that performs tedious development tasks with a single command. This dramatically reduces development friction, making it easy for both native and newcomer Flutter devs to quickly build production-ready apps.
+Our vision is to build a single-command assistant that automates tedious development tasks. Enabling both seasoned and beginner Flutter devs to focus on the creativity and innovation, bringing their app ideas to life faster.
 
 ## The Mini-Engineer Vision
 
-Engineering a feature for an app requires multiple iterations of writing code, running tests and debugging to meet the end-user requirements.  Dash AI is aimed to automate this entire process. 
+Engineering a feature for an app requires multiple iterations of writing code, running tests and debugging to meet the end-user requirements. Dash AI is designed to assist you through the entire process.
 
 Imagine asking: *"Implement this JIRA ticket for me"*
 
@@ -73,6 +73,7 @@ To keep up with evolving programming languages and coding practices, we'll use R
 **3. Ability to Write, Run and Debug Code**
 Modern LLMs are multimodal, understanding text, code, visuals, and even audio. When connected to Dart Tools (analyzer, debugger, devtools) and Dart Runtime (VM), they can leverage their multimodal capabilities to not only write code but also:
 
+ - [ ] Write code across multiple files.
  - [ ] Run the tests or app by itself. 
  - [ ] Read the console logs and iterate code.
  - [ ] Observe to device screen (multimodality) and interact with the app, to verify if features are met.
