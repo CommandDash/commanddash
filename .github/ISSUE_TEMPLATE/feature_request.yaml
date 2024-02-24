@@ -7,24 +7,18 @@ body:
     attributes:
       value: |
         Thanks for taking the time to help us improve!
-  - type: textarea
-    id: description
-    attributes:
-      label: Is your feature request related to a problem?
-      description: A clear & concise description of what the problem is.
-      placeholder: "Example: I'm always frustrated when [...]"
 
   - type: textarea
-    id: solution
+    id: issue
     attributes:
-      label: "Describe the solution that you'd like"
+      label: "Describe the problem and solution that you'd like."
       description: A clear description of what you want to happen.
       placeholder: "Example: When clicking this I want that."
 
   - type: textarea
     id: alternatives
     attributes:
-      label: "Describe alternatives that you have considered"
+      label: "Describe alternatives that you have considered."
       description: "A clear description of any alternative solutions or features you've considered."
       placeholder: "Example: Instead of this it should do that."
 
