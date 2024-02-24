@@ -99,10 +99,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                 case "checkKeyIfExists": 
-                {
-                    this._checkIfKeyExists();
-                    break;
-                }
+                    {
+                        this._checkIfKeyExists();
+                        break;
+                    }
+                case "dashResponse":
+                    {
+                        const {agent, data: _data, messageId, buttonType} = JSON.parse(data.value);
+                        console.log('agent', buttonType, _data, messageId, agent);
+                    }
 
             }
         });
@@ -200,8 +205,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return new GeminiRepository(apiKey);
     }
 
-    private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
-    private _privateConversationHistory: Array<{ role: string, parts: string }> = [];
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
+    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     private async getResponse(prompt: string) {
         if (!this._view) {

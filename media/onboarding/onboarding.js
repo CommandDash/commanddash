@@ -993,13 +993,14 @@ function displayMessages() {
 
     conversationHistory.forEach((message) => {
         const messageElement = document.createElement("div");
-        const userElement = document.createElement("p");
+        const roleElement = document.createElement("p");
         const contentElement = document.createElement("p");
+        const buttonContainer = document.createElement("p");
         if (message.role === "model") {
             modelCount++;
 
-            userElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#3079D8]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
             if (modelCount === 1 && !stepOneCompleted) {
@@ -1018,19 +1019,41 @@ function displayMessages() {
                 onboardingText.classList.add("hidden");
                 tryFlutterText.classList.add("hidden");
             }
-        } else {
-            userElement.innerHTML = "<strong>You</strong>";
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
+        } else if (message.role === "user") {
+            roleElement.innerHTML = "<strong>You</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
+        } else if (message.role === "dash") {
+            //UI implementation
+            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-orange-500", "text-white");
+            contentElement.innerHTML = markdownToPlain(message.parts);
+            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
+            message?.buttons.forEach((type) => {
+                const button = document.createElement("div");
+                button.classList.add("px-2.5", "py-1.5", "bg-black", "text-xs", "text-white", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                button.textContent = type;
+                button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, message.messageId, type));
+                buttonContainer.appendChild(button);
+            });
         }
         messageElement.classList.add("mt-1");
-        messageElement.appendChild(userElement);
+        messageElement.appendChild(roleElement);
         messageElement.appendChild(contentElement);
+        messageElement.appendChild(buttonContainer);
         responseContainer.appendChild(messageElement);
         scrollToBottom();
     });
     setResponse();
+}
+
+function handleButtonEvent(agent, data, messageId, buttonType) {
+    vscode.postMessage({
+        type: "dashResponse",
+        value: JSON.stringify({agent, data, messageId, buttonType})
+    });
 }
 
 function setResponse() {
