@@ -160,27 +160,105 @@ const commandsExecution = {
         'exe': (input) => {
             commandEnable = true;
             input.textContent = '';
+
+            let isChipsFocused = false;
+            let isTextRefactorInputFocused = false;
+
             const command = document.createElement('span');
-            const textRefactor = document.createElement('span');
+            const textRefactorInput = document.createElement('span');
             const refactor = document.createElement('span');
+            const referenceText = document.createElement('span');
+            const refactorTextNode = document.createTextNode('/refactor\u00A0');
+            const referenceIdSpan = document.createElement('span');
 
-            command.innerHTML = `/refactor <span id="add-reference-text" contenteditable="false" class="bg-black mb-1 text-white px-[7px] m inline-block">Add reference</span><span id="reference-id"></span>&nbsp;`;
+            referenceIdSpan.id = "reference-id";
+            referenceIdSpan.contentEditable = "false";
+            referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
 
+            referenceText.id = "add-reference-text";
+            referenceText.contentEditable = "false";
+            referenceText.classList.add("bg-black", "text-white", "mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "border-transparent");
+            referenceText.textContent = "Add reference";
+            referenceText.addEventListener("click", function (event) {
+                isChipsFocused = !isChipsFocused;
+                isChipsFocused ? referenceText.classList.add("border-orange-500") : referenceText.classList.remove("border-orange-500");
+                if (isChipsFocused) {
+                    isTextRefactorInputFocused = false;
+                }
+            });
+
+            command.appendChild(refactorTextNode);
+            command.appendChild(referenceText);
+            command.appendChild(referenceIdSpan);
+
+            refactor.id = "text-refactor-container";
             refactor.innerHTML = `<span contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
             refactor.classList.add("inline-block");
 
-            textRefactor.contentEditable = "true";
-            textRefactor.classList.add("bg-slate-700", "px-2");
+            textRefactorInput.id = "text-refactor-input";
+            textRefactorInput.contentEditable = "true";
+            textRefactorInput.tabIndex = "0";
+            textRefactorInput.classList.add("bg-slate-700", "px-2");
+            textRefactorInput.addEventListener("focus", function(event) {
+                if (isTextRefactorInputFocused) {
+                    isChipsFocused = false;
+                }
+                referenceText.classList.remove("border-orange-500");
+                isTextRefactorInputFocused = !isTextRefactorInputFocused;
+            });
+            
+            textRefactorInput.appendChild(document.createTextNode("\u00A0"));
 
-            refactor.appendChild(textRefactor);
+            refactor.appendChild(textRefactorInput);
             command.appendChild(refactor);
             input.appendChild(command);
 
-            setCaretToEnd(textRefactor);
+            setCaretToEnd(textRefactorInput);
+
+            tippy('#add-reference-text', {
+                content: "Add reference",
+                theme: "flutter-blue"
+            });
+
+            input.addEventListener('keydown', function(event) {
+                let keyCaught = false;
+                switch (event.key) {
+                    case "Tab":
+                        if (isTextRefactorInputFocused) {
+                            isTextRefactorInputFocused = false;
+                            isChipsFocused = true;
+                            referenceText.classList.add("border-orange-500");
+                            textRefactorInput.blur();
+                        } else {
+                            isChipsFocused = false;
+                            isTextRefactorInputFocused = true;
+                            textRefactorInput.focus();
+                            setCaretToEnd(textRefactorInput);
+                        }
+                        keyCaught = true;
+                        break;
+                    
+                    case "Backspace":
+                        if (textRefactorInput.textContent.trim() === "" && textRefactorInput.innerText.trim() === "") {
+                            // Clear the text
+                            input.removeChild(command);
+                            setTimeout(() => {
+                                input.focus();
+                                adjustHeight();
+                            }, 0);
+                        }
+                        break;
+                }
+                if (keyCaught) {
+                    event.preventDefault();
+                }
+            });
 
             setTimeout(() => {
                 adjustHeight();
+                textRefactorInput.focus();
             }, 0);
+
         }
     }
 };
@@ -475,7 +553,28 @@ class CommandDeck {
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
+    //adding tooltips to the elements
+    addToolTipsById();
+
 })();
+
+function addToolTipsById() {
+
+    tippy('#agents', {
+        content: "Specialized agents",
+        theme: "flutter-blue"
+    });
+
+    tippy('#slash-commands', {
+        content: "Slash commands",
+        theme: "flutter-blue"
+    });
+
+    tippy('#dart-add-reference', {
+        content: "Use 'Add to Reference' in menu to attach selected code to chat",
+        theme: "flutter-blue"
+    });
+}
 
 function handleSubmit(event) {
     const resolveFn = async (query, type) => {
@@ -721,7 +820,9 @@ function readTriggeredMessage() {
             case 'addToReference':
                 removePlaceholder();
                 createReferenceChips(JSON.parse(message.value));
-                adjustHeight();
+                setTimeout(() => 
+                    adjustHeight(), 
+                0);
                 break;
         }
     });
@@ -897,13 +998,14 @@ function displayMessages() {
 
     conversationHistory.forEach((message) => {
         const messageElement = document.createElement("div");
-        const userElement = document.createElement("p");
+        const roleElement = document.createElement("p");
         const contentElement = document.createElement("p");
+        const buttonContainer = document.createElement("p");
         if (message.role === "model") {
             modelCount++;
 
-            userElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#3079D8]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
             if (modelCount === 1 && !stepOneCompleted) {
@@ -922,19 +1024,41 @@ function displayMessages() {
                 onboardingText.classList.add("hidden");
                 tryFlutterText.classList.add("hidden");
             }
-        } else {
-            userElement.innerHTML = "<strong>You</strong>";
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
+        } else if (message.role === "user") {
+            roleElement.innerHTML = "<strong>You</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
+        } else if (message.role === "dash") {
+            //UI implementation
+            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-orange-500", "text-white");
+            contentElement.innerHTML = markdownToPlain(message.parts);
+            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
+            message?.buttons.forEach((type) => {
+                const button = document.createElement("div");
+                button.classList.add("px-2.5", "py-1.5", "bg-black", "text-xs", "text-white", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                button.textContent = type;
+                button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, message.messageId, type));
+                buttonContainer.appendChild(button);
+            });
         }
         messageElement.classList.add("mt-1");
-        messageElement.appendChild(userElement);
+        messageElement.appendChild(roleElement);
         messageElement.appendChild(contentElement);
+        messageElement.appendChild(buttonContainer);
         responseContainer.appendChild(messageElement);
         scrollToBottom();
     });
     setResponse();
+}
+
+function handleButtonEvent(agent, data, messageId, buttonType) {
+    vscode.postMessage({
+        type: "dashResponse",
+        value: JSON.stringify({agent, data, messageId, buttonType})
+    });
 }
 
 function setResponse() {

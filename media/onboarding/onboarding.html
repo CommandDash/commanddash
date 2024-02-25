@@ -77,11 +77,11 @@
                                         @
                                     </p>
                                     <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
-                                        title="Slash commands">
+                                        title="Slash commands" id="slash-commands">
                                         /
                                     </p>
                                     <p class="text-center inline-flex justify-center items-center opacity-50 cursor-pointer"
-                                        title="Use 'Add to Reference' in menu to attach selected code to chat">
+                                        title="Use 'Add to Reference' in menu to attach selected code to chat" id="dart-add-reference">
                                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <g clip-path="url(#clip0_1896_4)">
@@ -134,7 +134,7 @@
 
                                     </label>
                                     <input id="file-upload" type="file" accept="image/*" class="hidden" />
-                                    <button class="ml-2" id="send-chat">
+                                    <button class="ml-2" id="send-chat" title="tool tip on the send button">
                                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <rect x="0.000488281" width="31.9997" height="32" rx="2" fill="#3079D8" />
@@ -154,6 +154,8 @@
             </div>
         </div>
     </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{onboardingJsUri}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
