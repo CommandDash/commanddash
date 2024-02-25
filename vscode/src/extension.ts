@@ -3,7 +3,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { createInlineCodeCompletion } from './tools/create/inline_code_completion';
 import { makeHttpRequest } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
@@ -17,8 +16,8 @@ import { GeminiRepository } from './repository/gemini-repository';
 import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { UpdateManager } from './utilities/update-manager';
-import { initCommands, registerCommand } from './utilities/command-manager';
-import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
+import { initCommands } from './utilities/command-manager';
+import { activateInlineHints } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
 import { tempScheme, virtualDocumentProvider } from './utilities/virtual-document-provider';
 
@@ -27,74 +26,77 @@ export const DART_MODE: vscode.DocumentFilter & { language: string } = { languag
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
-    //Check for update on activation of extension
-    new UpdateManager(context).checkForUpdate();
-
-    // Initiate cache manager
-    const cacheManager = CacheManager.getInstance(context.globalState, context.workspaceState);
-    // Activate inline hints
-    activateInlineHints(cacheManager);
-
-    // Check if the Gemini API key is set
-    const config = vscode.workspace.getConfiguration('fluttergpt');
-    const apiKey = config.get<string>('apiKey');
-    if (!apiKey || isOldOpenAIKey(apiKey)) {
-        var chatViewProvider = initWebview(context);
-        showMissingApiKey();
-    }
-    console.log('Congratulations, "fluttergpt" is now active!');
-    dotenv.config({ path: path.join(__dirname, '../.env') });
-    activateTelemetry(context);
-    logEvent('activated');
-
-    // Dart-code extenstion stuff
-    const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
-    if (!dartExt) {
-        // This should not happen since the FlutterGPT extension has a dependency on the Dart one
-        // but just in case, we'd like to give a useful error message.
-        vscode.window.showWarningMessage("Kindly install 'Dart' extension to activate FlutterGPT");
-    }
-    await dartExt?.activate();
-
-    if (!dartExt?.exports) {
-        console.error("The Dart extension did not provide an exported API. Maybe it failed to activate or is not the latest version?");
-    }
-
-    const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
-    var _inlineErrorCommand: vscode.Disposable;
     try {
-        let geminiRepo = initGemini();
-        initFlutterExtension(context, geminiRepo, analyzer);
-    } catch (error) {
-        console.error(error);
-        // Handle inoine completion shortcut
-        _inlineErrorCommand = vscode.commands.registerCommand('fluttergpt.createInlineCodeCompletion', () => {
+        //Check for update on activation of extension
+        new UpdateManager(context).checkForUpdate();
+
+        // Initiate cache manager
+        const cacheManager = CacheManager.getInstance(context.globalState, context.workspaceState);
+        // Activate inline hints
+        activateInlineHints(cacheManager);
+
+        // Check if the Gemini API key is set
+        const config = vscode.workspace.getConfiguration('fluttergpt');
+        const apiKey = config.get<string>('apiKey');
+        if (!apiKey || isOldOpenAIKey(apiKey)) {
+            var chatViewProvider = initWebview(context);
             showMissingApiKey();
-        });
-    }
-    finally {
-        vscode.workspace.onDidChangeConfiguration(event => {
-            let affected = event.affectsConfiguration("fluttergpt.apiKey");
-            if (affected) {
-                try {
-                    const geminiRepo = initGemini();
-                    if (_inlineErrorCommand) {
-                        // Dispose the error command if it exists
-                        _inlineErrorCommand!.dispose();
-                    }
-                    if (chatViewProvider) {
-                        chatViewProvider.aiRepo = geminiRepo;
-                    }
-                    initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
+        }
+        console.log('Congratulations, "fluttergpt" is now active!');
+        dotenv.config({ path: path.join(__dirname, '../.env') });
+        activateTelemetry(context);
+        logEvent('activated');
 
-                } catch (error) {
-                    console.error(error);
+        // Dart-code extenstion stuff
+        const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
+        if (!dartExt) {
+            // This should not happen since the FlutterGPT extension has a dependency on the Dart one
+            // but just in case, we'd like to give a useful error message.
+            vscode.window.showWarningMessage("Kindly install 'Dart' extension to activate FlutterGPT");
+        }
+        await dartExt?.activate();
+        const analyzer: ILspAnalyzer = dartExt?.exports?._privateApi?.analyzer;
+        if (!analyzer) {
+            console.error("The Dart extension did not provide an analyzer. Maybe it failed to activate or is not the latest version?");
+        }
+        console.log("Got the analyzer from Dart extension");
+        var _inlineErrorCommand: vscode.Disposable;
+        try {
+            let geminiRepo = initGemini();
+            initFlutterExtension(context, geminiRepo, analyzer);
+        } catch (error) {
+            console.error(error);
+            // Handle inoine completion shortcut
+            _inlineErrorCommand = vscode.commands.registerCommand('fluttergpt.createInlineCodeCompletion', () => {
+                showMissingApiKey();
+            });
+        }
+        finally {
+            vscode.workspace.onDidChangeConfiguration(event => {
+                let affected = event.affectsConfiguration("fluttergpt.apiKey");
+                if (affected) {
+                    try {
+                        const geminiRepo = initGemini();
+                        if (_inlineErrorCommand) {
+                            // Dispose the error command if it exists
+                            _inlineErrorCommand!.dispose();
+                        }
+                        if (chatViewProvider) {
+                            chatViewProvider.aiRepo = geminiRepo;
+                        }
+                        initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
+
+                    } catch (error) {
+                        console.error(error);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    vscode.workspace.registerTextDocumentContentProvider(tempScheme, virtualDocumentProvider);
+        vscode.workspace.registerTextDocumentContentProvider(tempScheme, virtualDocumentProvider);
+    } catch (error) {
+        vscode.window.showErrorMessage('Error activating FlutterGPT: ' + error);
+    }
 }
 
 function isOldOpenAIKey(apiKey: string): boolean {

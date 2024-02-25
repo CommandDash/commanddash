@@ -147,7 +147,7 @@ async function generateSuggestions(): Promise<string[]> {
     }
 }
 
-function getDartAnalyser() { // This could be in a wider scope.
+function getDartAnalyser(): ILspAnalyzer { // This could be in a wider scope.
     const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
     if (!dartExt) {
         // This should not happen since the FlutterGPT extension has a dependency on the Dart one
