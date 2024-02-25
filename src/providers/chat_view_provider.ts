@@ -3,35 +3,40 @@ import * as fs from 'fs';
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
-
+import { refactorCode } from "../tools/refactor/refactor_from_instructions";
+import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
+import { RefactorActionManager } from "../action-managers/refactor-agent";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "fluttergpt.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     aiRepo?: GeminiRepository;
+    analyzer?: ILspAnalyzer;
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
         private context: vscode.ExtensionContext,
         aiRepo?: GeminiRepository,
+        analyzer?: ILspAnalyzer,
     ) {
         this.aiRepo = aiRepo;
+        this.analyzer = analyzer;
     }
-    
-	// Public method to post a message to the webview
-	public postMessageToWebview(message: any): void {
-		if (this._view) {
-			this._view.webview.postMessage(message);
-		}
-	}
 
-	public resolveWebviewView(
-		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext,
-		_token: vscode.CancellationToken,
-	) {
-		this._view = webviewView;
+    // Public method to post a message to the webview
+    public postMessageToWebview(message: any): void {
+        if (this._view) {
+            this._view.webview.postMessage(message);
+        }
+    }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
 
         // set options for the webview, allow scripts
         webviewView.webview.options = {
@@ -52,6 +57,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     {
                         break;
                     }
+                case "action":
+                    {
+                        this.handleAction(data.value);
+                        break;
+                    }
+
                 case "prompt":
                     {
                         this.getResponse(data.value);
@@ -70,12 +81,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                                 }
                             });
                         }
-                        logEvent('merge-code', {from: 'command-deck'});
+                        logEvent('merge-code', { from: 'command-deck' });
                         break;
                     }
-                    case "copyCode":
+                case "copyCode":
                     {
-                        logEvent('copy-code', {from: 'command-deck'});
+                        logEvent('copy-code', { from: 'command-deck' });
                         break;
                     }
                 case "clearChat":
@@ -85,11 +96,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "validate":
                     {
-                        webviewView.webview.postMessage({type: "showValidationLoader"});
+                        webviewView.webview.postMessage({ type: "showValidationLoader" });
                         this.aiRepo = this.initGemini(data.value);
                         await this._validateApiKey(data.value);
                         await this._validateFlutterExtension();
-                        webviewView.webview.postMessage({type: "hideValidationLoader"});
+                        webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
                 case "updateSettings":
@@ -98,35 +109,47 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
                         break;
                     }
-                case "checkKeyIfExists": 
-                {
-                    this._checkIfKeyExists();
-                    break;
-                }
+                case "checkKeyIfExists":
+                    {
+                        this._checkIfKeyExists();
+                        break;
+                    }
 
             }
         });
 
-		webviewView.onDidChangeVisibility(() => {
-			if (webviewView.visible && this._view) {
-				this._view?.webview.postMessage({ type: 'focusChatInput' });
-			}
-		});
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible && this._view) {
+                this._view?.webview.postMessage({ type: 'focusChatInput' });
+            }
+        });
 
-		vscode.window.onDidChangeActiveColorTheme(() => {
-			webviewView.webview.postMessage({ type: 'updateTheme' });
-		});
+        vscode.window.onDidChangeActiveColorTheme(() => {
+            webviewView.webview.postMessage({ type: 'updateTheme' });
+        });
 
-        logEvent('new-chat-start', {from: 'command-deck'});
-	}
+        logEvent('new-chat-start', { from: 'command-deck' });
+    }
 
     private _checkIfKeyExists() {
         const config = vscode.workspace.getConfiguration('fluttergpt');
         const apiKey = config.get<string>('apiKey');
         if (apiKey) {
-            this._view?.webview.postMessage({type: "keyExists"});
+            this._view?.webview.postMessage({ type: "keyExists" });
         }
     }
+
+    private async handleAction(input: string) {
+        const data = JSON.parse(input);
+        const actionType = data.message.startsWith('/') ? data.message.split(' ')[0].substring(1) : '';
+        const chipsData = new Map(Object.entries(data.chipsData)).values();
+        data.message = data.message.replace(`/${actionType}`, '').trim();
+        if (actionType === 'refactor') {
+            const result = await RefactorActionManager.handleRequest(chipsData, data, this.aiRepo!, this.context, this.analyzer!);
+            this._publicConversationHistory.push({ role: 'modal', parts: data.message });
+        }
+    }
+
 
     private _getHtmlForWebview(webview: vscode.Webview) {
         const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
@@ -256,7 +279,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
-            logEvent('follow-up-message', {from: 'command-deck'});
+            logEvent('follow-up-message', { from: 'command-deck' });
             this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
             this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 

@@ -534,16 +534,21 @@ function handleSubmit(event) {
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
         let prompt = textInput.textContent;
-
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
-
+        // for (const chip in chipsData) {
+        //     if (prompt.includes(chip)) {
+        //         prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+        //     }
+        // }
+        console.log({
+            'message': prompt,
+            'chipsData': chipsData,
+        });
         vscode.postMessage({
-            type: "prompt",
-            value: prompt,
+            type: "action",
+            value: JSON.stringify({
+                'message': prompt,
+                'chipsData': chipsData,
+            }),
         });
 
         textInput.textContent = "";

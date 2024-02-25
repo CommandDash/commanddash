@@ -40,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const apiKey = config.get<string>('apiKey');
     if (!apiKey || isOldOpenAIKey(apiKey)) {
         initWebview(context);
-        
+
         // Prompt the user to update their settings
         vscode.window.showErrorMessage(
             'Please update your API key to Gemini in the settings.',
@@ -71,7 +71,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
-    
+
     try {
         let geminiRepo = initGemini();
         initFlutterExtension(context, geminiRepo, analyzer);
@@ -99,9 +99,9 @@ function isOldOpenAIKey(apiKey: string): boolean {
     return apiKey.startsWith('sk-');
 }
 
-function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiRepository) {
+function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiRepository, analyzer?: ILspAnalyzer) {
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
-    const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
+    const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo, analyzer);
     // Register the provider with the extension's context
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(FlutterGPTViewProvider.viewType, chatProvider,
@@ -122,7 +122,7 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
 
-    const flutterChatProvider = initWebview(context, geminiRepo);
+    const flutterChatProvider = initWebview(context, geminiRepo, analyzer);
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));

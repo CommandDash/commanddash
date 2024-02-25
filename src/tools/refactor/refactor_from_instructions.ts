@@ -6,10 +6,10 @@ import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
 import { GenerationRepository } from '../../repository/generation-repository';
 
-export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext) {
+export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext, usedEditor: vscode.TextEditor | undefined, instructions: string | undefined) {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
-        const editor = vscode.window.activeTextEditor;
+        const editor = usedEditor === undefined ? vscode.window.activeTextEditor : usedEditor;
         if (!editor) {
             vscode.window.showErrorMessage('No active editor');
             return;
@@ -40,12 +40,12 @@ export async function refactorCode(generationRepository: GenerationRepository, g
         // Construct the final string with highlighted selected code
         const finalString = `${docStart}${highlightStart}${selectedText}${highlightEnd}${docEnd}`;
 
-
-        const instructions = await vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
         if (!instructions) {
-            return;
+            instructions = await vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
+            if (!instructions) {
+                return;
+            }
         }
-
         let documentRefactoredText = editor.document.getText(); // Get the entire document text
 
         await vscode.window.withProgress({
@@ -63,7 +63,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             }, 200);
 
             let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.selection, analyzer, elementname);
-            const result = await generationRepository.refactorCode(finalString, contextualCode, instructions, globalState);
+            const result = await generationRepository.refactorCode(finalString, contextualCode, instructions!, globalState);
             console.log(result);
             if (!result) {
                 vscode.window.showErrorMessage('Failed to refactor code. Please try again.');
