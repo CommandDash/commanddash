@@ -352,40 +352,21 @@ class CommandDeck {
         return () => {
             const option = this.options[active];
 
-            const isOptionAvailable = commandsExecution.hasOwnProperty(option);
+            const isSlashOptionAvailable = commandsExecution.hasOwnProperty(option);
 
-            if (isOptionAvailable) {
+            if (isSlashOptionAvailable) {
                 commandsExecution[option].exe(this.ref);
             } else {
-
-                // this.ref is a contenteditable element
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-                const preMention = this.ref.textContent.substring(0, this.triggerIdx);
-                const postMention = this.ref.textContent.substring(range.endOffset);
-
                 const trigger = this.ref.textContent[this.triggerIdx];
-                // Replace the mention with the selected option along with '@'
+                this.ref.textContent = "";
                 const mentionNode = document.createElement("span");
                 mentionNode.id = "special-commands";
                 mentionNode.classList.add("text-blue-500", "inline-block");
-                mentionNode.contentEditable = "false";
-                mentionNode.textContent = `${trigger}${option}`;
-                this.ref.textContent = ''; // Clear existing content
-                this.ref.appendChild(document.createTextNode(preMention));
+                mentionNode.contentEditable = false;
+                mentionNode.textContent = `${trigger}${option}\u200B`;
                 this.ref.appendChild(mentionNode);
-                this.ref.appendChild(document.createTextNode(postMention));
-
-                // Add &nbsp; only if it's not already present
-                if (this.ref.lastChild && this.ref.lastChild.nodeValue !== '\u00A0') {
-                    this.ref.appendChild(document.createTextNode('\u00A0'));
-                }
-
-                // Move the cursor to the end of the mention
-                range.setStart(mentionNode.firstChild, option.length + 1); // +1 for '@'
-                range.collapse(true);
-                selection.removeAllRanges();
-                selection.addRange(range);
+                this.ref.appendChild(document.createTextNode("\u00A0"));
+                setCaretToEnd(this.ref);
             }
 
             this.ref.focus();
@@ -629,6 +610,8 @@ function handleSubmit(event) {
         replaceFn,
         menuItemFn
     );
+
+    console.log('commandDeck.active', commandDeck.active, commandDeck.triggerIdx, commandDeck.options);
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
