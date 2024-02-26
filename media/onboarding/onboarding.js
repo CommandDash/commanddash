@@ -100,7 +100,7 @@ const codeSnippetButton = document.getElementById("code-snippets");
 let isApiKeyValid = false;
 let areDependenciesInstalled = false;
 let conversationHistory = [];
-let chipsData = {}; // {'lib/main.dart [1-2]': {code: 'console.log('hello')'}}
+let chipsData = {};
 let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
@@ -168,12 +168,15 @@ const commandsExecution = {
             const textRefactorInput = document.createElement('span');
             const refactor = document.createElement('span');
             const referenceText = document.createElement('span');
-            const refactorTextNode = document.createTextNode('/refactor\u00A0');
+            const refactorTextNode = document.createElement('span');
             const referenceIdSpan = document.createElement('span');
 
             referenceIdSpan.id = "reference-id";
             referenceIdSpan.contentEditable = "false";
             referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
+
+            refactorTextNode.textContent = "/refactor\u00A0";
+            refactorTextNode.classList.add("text-pink-600");
 
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
@@ -610,8 +613,6 @@ function handleSubmit(event) {
         replaceFn,
         menuItemFn
     );
-
-    console.log('commandDeck.active', commandDeck.active, commandDeck.triggerIdx, commandDeck.options);
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
