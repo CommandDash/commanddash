@@ -6,6 +6,7 @@ import { logError, logEvent } from "../utilities/telemetry-reporter";
 import { refactorCode } from "../tools/refactor/refactor_from_instructions";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { RefactorActionManager } from "../action-managers/refactor-agent";
+import { DiffViewAgent } from "../action-managers/diff-view-agent";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "fluttergpt.chatView";
@@ -118,6 +119,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     {
                         const { agent, data: _data, messageId, buttonType } = JSON.parse(data.value);
                         console.log('agent', buttonType, _data, messageId, agent);
+                        if (agent === "diffView") {
+                            const updatedMessage = await DiffViewAgent.handleResponse(buttonType, _data, messageId);
+                            // update the message with messageId
+                            if (updatedMessage) {
+                                this._publicConversationHistory[messageId] = updatedMessage;
+                                this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+                            }
+                        }
                     }
 
             }
@@ -143,15 +152,19 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._view?.webview.postMessage({ type: "keyExists" });
         }
     }
-
     private async handleAction(input: string) {
         const data = JSON.parse(input);
-        const actionType = data.message.startsWith('/') ? data.message.split(' ')[0].substring(1) : '';
-        const chipsData = new Map(Object.entries(data.chipsData)).values();
+        const actionType = data.message.startsWith('/') ? data.message.split('\u00A0')[0].substring(1) : '';
+        const chipsData = data.chipsData;
         data.message = data.message.replace(`/${actionType}`, '').trim();
         if (actionType === 'refactor') {
+            this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
             const result = await RefactorActionManager.handleRequest(chipsData, data, this.aiRepo!, this.context, this.analyzer!);
-            this._publicConversationHistory.push({ role: 'modal', parts: data.message });
+            this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+            this._publicConversationHistory.push(result);
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
+
         }
     }
 
@@ -228,7 +241,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return new GeminiRepository(apiKey);
     }
 
-    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }> = [];
     private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     private async getResponse(prompt: string) {
