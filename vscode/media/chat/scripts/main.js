@@ -382,6 +382,72 @@ class Mentionify {
         }
     }
 
+    function countLeadingSpacesOfLine(line) {
+        const leadingSpaces = line.match(/^ */);
+        return leadingSpaces ? leadingSpaces[0].length : 0;
+    }
+
+    function preProcessMarkdown(markdown) {
+        const lines = markdown.split("\n");
+      
+        const processedLines = lines.map(line => {
+            const leadingSpaces = countLeadingSpacesOfLine(line);
+      
+            if (leadingSpaces % 4 !== 0) {
+                const leadingSpacesToAdd = (Math.ceil(leadingSpaces / 4)) * 4 - leadingSpaces;
+                return " ".repeat(leadingSpacesToAdd) + line;
+            } 
+        
+            return line;
+        });
+      
+        return processedLines.join("\n");
+    }
+
+    function startAttributeExtension() {
+        let startNumbers = [];
+
+        return [
+            {
+                type: "lang", 
+                filter: function (text) {
+                    const olMarkdownRegex = /^\s*(\d+)\. /gm;
+
+                    const lines = text.split("\n");
+
+                    lines.forEach(line => {
+                        const match = olMarkdownRegex.exec(line);
+
+                        if (match) {
+                            startNumbers.push(match[1]);
+                        }
+                    });
+
+                    return text;
+                }
+            }, 
+            {
+                type: "output", 
+                filter: function (text) {
+                    if (startNumbers.length > 0) {
+                        const lines = text.split("\n");
+
+                        lines.forEach((line, index) => {
+                            if (line.includes("<ol>")) {
+                                const startNumber = startNumbers.shift();
+                                lines[index] = line.replace("<ol>", `<ol start="${startNumber}">`);
+                            }
+                        });
+
+                        text = lines.join("\n");
+                    }
+
+                    return text;
+                }
+            }
+        ];
+    }
+
     function setResponse() {
         const converter = new showdown.Converter({
             omitExtraWLInCodeBlocks: true,
@@ -389,10 +455,12 @@ class Mentionify {
             excludeTrailingPunctuationFromURLs: true,
             literalMidWordUnderscores: true,
             simpleLineBreaks: true,
+            extensions: [startAttributeExtension]
         });
 
         response = fixCodeBlocks(response);
-        html = converter.makeHtml(response);
+        processedResponse = preProcessMarkdown(response);
+        html = converter.makeHtml(processedResponse);
         document.getElementById("response").innerHTML = html;
 
         const preCodeBlocks = document.querySelectorAll("pre code");
@@ -573,10 +641,12 @@ class Mentionify {
             openLinksInNewWindow: true, // Add this option to open links in a new window
             ghCodeBlocks: true, // Enable GitHub-style code blocks (optional for better styling)
             strikethrough: true, // Enable strikethrough syntax (optional)
-            tasklists: true // Enable task list syntax for checkboxes (optional)
+            tasklists: true, // Enable task list syntax for checkboxes (optional)
+            extensions: [startAttributeExtension]
         });
         // response = fixCodeBlocks(input);
-        html = converter.makeHtml(input);
+        processedInput = preProcessMarkdown(input);
+        html = converter.makeHtml(processedInput);
         return html;
     }
 
