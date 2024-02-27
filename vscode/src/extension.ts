@@ -83,6 +83,7 @@ export async function activate(context: vscode.ExtensionContext) {
         
         // will only trigger if the apikey is changed so no need to validate again just call necessary functions
         SecretApiKeyManager.instance.onDidChangeApiKey(async event => {
+            //TODO: solve view provider already registered error when changing the key in ss
             try {
                 var chatViewProvider = initWebview(context);
                 const geminiRepo =await initGemini();
@@ -95,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 }
                 initFlutterExtension(context, geminiRepo, analyzer);
             } catch (error) {
-                console.error(error);
+                                console.error(error);
             }
         });
     }
@@ -111,7 +112,7 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
     const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
     // Register the provider with the extension's context
-    context.subscriptions.push(
+        context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(FlutterGPTViewProvider.viewType, chatProvider,
             {
                 webviewOptions: { retainContextWhenHidden: true },
@@ -205,6 +206,7 @@ async function checkForApiKeyAndAskIfMissing(context: vscode.ExtensionContext): 
     if ((!apiKey && !apiKeyFromSecretStorage) || isOldOpenAIKey(apiKey!)) {
         
         initWebview(context);
+        //TODO : Maybe Remove this for new api key entering flow
         showMissingApiKey();
         return false;
     }

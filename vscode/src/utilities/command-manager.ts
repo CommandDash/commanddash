@@ -80,7 +80,8 @@ export async function initCommands(context: vscode.ExtensionContext, geminiRepo:
         { name: 'fluttergpt.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } },
-        { name: 'fluttergpt.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({type: 'clearCommandDeck'}), options: {isCommand: true, isMenu: true, isShortcut: false} }
+        { name: 'fluttergpt.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({type: 'clearCommandDeck'}), options: {isCommand: true, isMenu: true, isShortcut: false} },
+        { name: 'fluttergpt.profile', handler: () => flutterGPTViewProvider?.postMessageToWebview({type: 'profileCommandDeck'}), options: {isCommand: true, isMenu: true, isShortcut: false} }
         // Add more commands as needed.
     ];
 

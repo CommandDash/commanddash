@@ -146,6 +146,14 @@
           "light": "resources/light/trash.svg",
           "dark": "resources/dark/trash.svg"
         }
+      },
+      {
+        "command": "fluttergpt.profile",
+        "title": "Go to profile",
+        "icon": {
+          "light": "resources/light/profile.svg",
+          "dark": "resources/dark/profile.svg"
+        }
       }
     ],
     "menus": {
@@ -168,6 +176,10 @@
       "view/title": [
         {
           "command": "fluttergpt.clearChat",
+          "group": "navigation"
+        },
+        {
+          "command": "fluttergpt.profile",
           "group": "navigation"
         }
       ],

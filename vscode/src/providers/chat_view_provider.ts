@@ -49,6 +49,16 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage(async (data) => {
             console.log('data', data);
             switch (data.type) {
+                case 'backFromProfile':
+                    {
+                        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+                        break;
+                    }
+                case 'updateApiKey':
+                    {
+                        this.updateApiKey(data.value); 
+                        break;
+                    }
                 case "codeSelected":
                     {
                         break;
@@ -82,6 +92,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "clearChat":
                     {
                         this.clearConversationHistory();
+                        break;
+                    }
+                case "gotoProfile":
+                    {
+                        webviewView.webview.html = this._getHtmlForProfileWebview(webviewView.webview);
                         break;
                     }
                 case "validate":
@@ -128,6 +143,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    private async updateApiKey(apiKey: string){
+        //TODO: check for valid key before adding
+        
+        SecretApiKeyManager.instance.setApiKey(apiKey);
+       let newApiKey = await SecretApiKeyManager.instance.getApiKey();
+       
+       
+    }
+
     private _getHtmlForWebview(webview: vscode.Webview) {
         const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
         const onboardingHtml = fs.readFileSync(onboardingHtmlPath.fsPath, 'utf8');
@@ -149,6 +173,101 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
         return updatedOnboardingChatHtml;
+    }
+
+    private _getHtmlForProfileWebview(webview: vscode.Webview) {
+        const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+
+            <!--
+                Use a content security policy to only allow loading styles from our extension directory,
+                and only allow scripts that have a specific nonce.
+                (See the 'webview-sample' extension sample for img-src content security policy examples)
+            -->
+            
+
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+        .head-container {
+            display: flex;
+            align-items: center;
+        }
+        #back-button {
+            margin-right: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        #back-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #FFF; /* Adjust color as needed */
+        }
+        h2 {
+            margin: 0;
+        }
+    </style>
+           
+
+            <title>Profile Page</title>
+        </head>
+        <body>
+        <div class="container">
+        <div class="head-container">
+        <button id="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M10.646 2.646a.5.5 0 0 1 0 .708L6.707 8l3.939 3.939a.5.5 0 1 1-.708.708l-4.242-4.243a.5.5 0 0 1 0-.707L10.646 2.646zM4.5 8a.5.5 0 0 1 .5-.5h6.793a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>
+        </svg>
+        </button>
+        <h2>Profile Page</h2>
+       </div>
+        
+            <input type="text" id="api-key" placeholder="Update api-key...">
+            <button class="ml-2" id="update-api-key">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.000488281" width="31.9997" height="32" rx="2" fill="#3079D8" />
+                    <path
+                        d="M23.9531 16.3394L9.24951 9.84766L13.7983 16.3417L9.57198 23.1423L23.9531 16.3394Z"
+                        fill="black" stroke="black" stroke-width="0.784"
+                        stroke-linejoin="round" />
+                    <path d="M12.4482 16.3418L15.6388 16.3418" stroke="#3079D8"
+                        stroke-width="0.784" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            
+     
+    </div>
+            
+
+            
+            <script>
+             const vscode = acquireVsCodeApi(); 
+            const updateApiKeyButton = document.getElementById("update-api-key");
+            const backButton = document.getElementById("back-button");
+const apiKey = document.getElementById("api-key");
+updateApiKeyButton.addEventListener("click", (event) => {
+   
+    updatedApiKey = apiKey.value;
+
+ vscode.postMessage({ type: "updateApiKey", value:  updatedApiKey}); 
+    
+    
+});
+
+backButton.addEventListener("click", (event) => {
+    vscode.postMessage({ type: "backFromProfile", value:  ''}); 
+    
+});
+            
+        </script>
+            
+        </body>
+        </html>`;
+        
     }
 
     private async _validateApiKey(apiKey: string) {

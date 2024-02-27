@@ -635,6 +635,10 @@ function readTriggeredMessage() {
                 clearChat();
                 break;
 
+            case 'profileCommandDeck':
+                gotoProfile();
+                break;
+
             case 'addToReference':
                 removePlaceholder();
                 createReferenceChips(JSON.parse(message.value));
@@ -760,6 +764,16 @@ function clearChat() {
 
     vscode.postMessage({
         type: "clearChat",
+    });
+}
+
+
+
+function gotoProfile() {
+    
+
+    vscode.postMessage({
+        type: "gotoProfile",
     });
 }
 
