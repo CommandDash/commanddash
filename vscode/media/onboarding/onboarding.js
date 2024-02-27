@@ -509,20 +509,21 @@ class CommandDeck {
     });
 
     sendButton.addEventListener("click", (event) => {
-        let prompt = textInput.textContent;
+        // let prompt = textInput.textContent;
 
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
+        // for (const chip in chipsData) {
+        //     if (prompt.includes(chip)) {
+        //         prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+        //     }
+        // }
 
-        vscode.postMessage({ type: "prompt", value: prompt });
-        googleApiKeyHeader.classList.add("hidden");
-        if (onboardingCompleted) {
-            textInput.textContent = '';
-        }
-        adjustHeight();
+        // vscode.postMessage({ type: "prompt", value: prompt });
+        // googleApiKeyHeader.classList.add("hidden");
+        // if (onboardingCompleted) {
+        //     textInput.textContent = '';
+        // }
+        // adjustHeight();
+        submitResponse();
     });
 
     textInput.addEventListener("paste", (event) => {
@@ -559,6 +560,39 @@ function addToolTipsById() {
         content: "Use 'Add to Reference' in menu to attach selected code to chat",
         theme: "flutter-blue"
     });
+}
+
+function submitResponse() {
+    const textRefactor = document.getElementById("text-to-refactor-span");
+    if (textRefactor) {
+        textRefactor.remove();
+    }
+    let prompt = textInput.textContent;
+    if (!prompt.startsWith('/')) {
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
+        }
+    }
+    if (!prompt.startsWith('/')) {
+        vscode.postMessage({ type: "prompt", value: prompt });
+    } else {
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
+        }
+        vscode.postMessage({
+            type: "action",
+            value: JSON.stringify({
+                'message': prompt,
+                'chipsData': chipsData,
+            }),
+        });
+    }
+    textInput.textContent = "";
+    adjustHeight();
 }
 
 function handleSubmit(event) {
@@ -617,32 +651,7 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
-        const textRefactor = document.getElementById("text-to-refactor-span");
-        if (textRefactor) {
-            textRefactor.remove();
-        }
-        let prompt = textInput.textContent;
-        if (!prompt.startsWith('/')) {
-            for (const chip in chipsData) {
-                if (prompt.includes(chip)) {
-                    prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-                }
-            }
-        }
-        if (!prompt.startsWith('/')) {
-            vscode.postMessage({ type: "prompt", value: prompt });
-        } else {
-            debugger;
-            vscode.postMessage({
-                type: "action",
-                value: JSON.stringify({
-                    'message': prompt,
-                    'chipsData': chipsData,
-                }),
-            });
-        }
-        textInput.textContent = "";
-        adjustHeight();
+        submitResponse();
     }
 
     if (event.key === "Backspace") {

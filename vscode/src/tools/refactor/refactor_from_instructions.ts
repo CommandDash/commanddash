@@ -46,6 +46,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
 
             const workspaceFolders = vscode.workspace.workspaceFolders;
             let relativePath = editor.document.fileName;
+            const referenceContent = editor.document.getText(editor.selection);
             if (workspaceFolders && workspaceFolders.length > 0) {
                 const workspaceRoot = workspaceFolders[0].uri.fsPath;
                 relativePath = path.relative(workspaceRoot, editor.document.fileName);
@@ -62,7 +63,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             });
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'addToReference', value: JSON.stringify({
-                    relativePath: relativePath.trim(), referenceContent: '', referenceData: {
+                    relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, referenceData: {
                         'selection': {
                             'start': {
                                 'line': replaceRange.start.line,
