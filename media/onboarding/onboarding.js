@@ -187,12 +187,13 @@ const commandsExecution = {
                 }
             });
 
+            command.id = "command-span";
             command.appendChild(refactorTextNode);
             command.appendChild(referenceText);
             command.appendChild(referenceIdSpan);
 
             refactor.id = "text-refactor-container";
-            refactor.innerHTML = `<span contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
+            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
             refactor.classList.add("inline-block");
 
             textRefactorInput.id = "text-refactor-input";
@@ -632,6 +633,10 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
+        const textRefactor = document.getElementById("text-to-refactor-span");
+        if (textRefactor) {
+            textRefactor.remove();
+        }
         let prompt = textInput.textContent;
         if (!prompt.startsWith('/')) {
             for (const chip in chipsData) {
@@ -643,6 +648,7 @@ function handleSubmit(event) {
         if (!prompt.startsWith('/')) {
             vscode.postMessage({ type: "prompt", value: prompt });
         } else {
+            debugger;
             vscode.postMessage({
                 type: "action",
                 value: JSON.stringify({
@@ -926,9 +932,10 @@ function insertAtReference(chip) {
 
     const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");
-    referenceText.classList.add("hidden");
+    referenceText.remove();
     referenceChip.innerHTML = "";
     referenceChip.appendChild(chip);
+    referenceChip.appendChild(document.createTextNode("\u00A0"));
 }
 
 function debounce(func, wait, immediate = false) {
