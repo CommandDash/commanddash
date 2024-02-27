@@ -578,11 +578,6 @@ function submitResponse() {
     if (!prompt.startsWith('/')) {
         vscode.postMessage({ type: "prompt", value: prompt });
     } else {
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
         vscode.postMessage({
             type: "action",
             value: JSON.stringify({
