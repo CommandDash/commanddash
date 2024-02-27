@@ -190,26 +190,27 @@ const commandsExecution = {
                 }
             });
 
+            command.id = "command-span";
             command.appendChild(refactorTextNode);
             command.appendChild(referenceText);
             command.appendChild(referenceIdSpan);
 
             refactor.id = "text-refactor-container";
-            refactor.innerHTML = `<span contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
+            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
             refactor.classList.add("inline-block");
 
             textRefactorInput.id = "text-refactor-input";
             textRefactorInput.contentEditable = "true";
             textRefactorInput.tabIndex = "0";
             textRefactorInput.classList.add("bg-slate-700", "px-2");
-            textRefactorInput.addEventListener("focus", function(event) {
+            textRefactorInput.addEventListener("focus", function (event) {
                 if (isTextRefactorInputFocused) {
                     isChipsFocused = false;
                 }
                 referenceText.classList.remove("border-orange-500");
                 isTextRefactorInputFocused = !isTextRefactorInputFocused;
             });
-            
+
             textRefactorInput.appendChild(document.createTextNode("\u00A0"));
 
             refactor.appendChild(textRefactorInput);
@@ -223,7 +224,7 @@ const commandsExecution = {
                 theme: "flutter-blue"
             });
 
-            input.addEventListener('keydown', function(event) {
+            input.addEventListener('keydown', function (event) {
                 let keyCaught = false;
                 switch (event.key) {
                     case "Tab":
@@ -240,7 +241,7 @@ const commandsExecution = {
                         }
                         keyCaught = true;
                         break;
-                    
+
                     case "Backspace":
                         if (textRefactorInput.textContent.trim() === "" && textRefactorInput.innerText.trim() === "") {
                             // Clear the text
@@ -616,19 +617,30 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
+        const textRefactor = document.getElementById("text-to-refactor-span");
+        if (textRefactor) {
+            textRefactor.remove();
+        }
         let prompt = textInput.textContent;
-
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+        if (!prompt.startsWith('/')) {
+            for (const chip in chipsData) {
+                if (prompt.includes(chip)) {
+                    prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+                }
             }
         }
-
-        vscode.postMessage({
-            type: "prompt",
-            value: prompt,
-        });
-
+        if (!prompt.startsWith('/')) {
+            vscode.postMessage({ type: "prompt", value: prompt });
+        } else {
+            debugger;
+            vscode.postMessage({
+                type: "action",
+                value: JSON.stringify({
+                    'message': prompt,
+                    'chipsData': chipsData,
+                }),
+            });
+        }
         textInput.textContent = "";
         adjustHeight();
     }
@@ -799,10 +811,16 @@ function readTriggeredMessage() {
             case 'addToReference':
                 removePlaceholder();
                 createReferenceChips(JSON.parse(message.value));
-                setTimeout(() => 
-                    adjustHeight(), 
-                0);
+                setTimeout(() =>
+                    adjustHeight(),
+                    0);
                 break;
+            case 'setInput':
+                textInput.textContent = message.value;
+                if (message.value.startsWith('/')) {
+                    const action = message.value.split(' ')[0].slice(1);
+                    commandsExecution[action].exe(textInput);
+                }
         }
     });
 }
@@ -814,7 +832,7 @@ function createReferenceChips(references) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
-
+    references.chipId = chipId;
     if (document.getElementById(chipId)) {
         return;
     }
@@ -904,9 +922,10 @@ function insertAtReference(chip) {
 
     const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");
-    referenceText.classList.add("hidden");
+    referenceText.remove();
     referenceChip.innerHTML = "";
     referenceChip.appendChild(chip);
+    referenceChip.appendChild(document.createTextNode("\u00A0"));
 }
 
 function debounce(func, wait, immediate = false) {
@@ -1011,15 +1030,17 @@ function displayMessages() {
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
-            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
-            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-orange-500", "text-white");
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#d66ab1]");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#d66ab1]", "text-white");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
+            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5",
+                "bg-[#d66ab1]");
+            const messageIndex = conversationHistory.indexOf(message);
             message?.buttons.forEach((type) => {
                 const button = document.createElement("div");
                 button.classList.add("px-2.5", "py-1.5", "bg-black", "text-xs", "text-white", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
                 button.textContent = type;
-                button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, message.messageId, type));
+                button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, messageIndex, type));
                 buttonContainer.appendChild(button);
             });
         }
@@ -1036,7 +1057,7 @@ function displayMessages() {
 function handleButtonEvent(agent, data, messageId, buttonType) {
     vscode.postMessage({
         type: "dashResponse",
-        value: JSON.stringify({agent, data, messageId, buttonType})
+        value: JSON.stringify({ agent, data, messageId, buttonType })
     });
 }
 

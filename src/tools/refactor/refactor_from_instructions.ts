@@ -5,11 +5,13 @@ import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
 import { GenerationRepository } from '../../repository/generation-repository';
+import { FlutterGPTViewProvider } from '../../providers/chat_view_provider';
+import * as path from 'path';
 
-export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext) {
+export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider, usedEditor: vscode.TextEditor | undefined, instructions: string | undefined, showLoadingIndicator: boolean = true): Promise<string | undefined> {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
-        const editor = vscode.window.activeTextEditor;
+        const editor = usedEditor === undefined ? vscode.window.activeTextEditor : usedEditor;
         if (!editor) {
             vscode.window.showErrorMessage('No active editor');
             return;
@@ -40,38 +42,52 @@ export async function refactorCode(generationRepository: GenerationRepository, g
         // Construct the final string with highlighted selected code
         const finalString = `${docStart}${highlightStart}${selectedText}${highlightEnd}${docEnd}`;
 
-
-        const instructions = await vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
         if (!instructions) {
+
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            let relativePath = editor.document.fileName;
+            if (workspaceFolders && workspaceFolders.length > 0) {
+                const workspaceRoot = workspaceFolders[0].uri.fsPath;
+                relativePath = path.relative(workspaceRoot, editor.document.fileName);
+            }
+            const startLineNumber = replaceRange.start.line;
+            const endLineNumber = replaceRange.end.line;
+            const fileName = path.basename(editor.document.fileName);
+
+            // focus chatView
+            vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            flutterGPTViewProvider.postMessageToWebview({
+                type: 'setInput',
+                value: "/refactor"
+            });
+            flutterGPTViewProvider.postMessageToWebview({
+                type: 'addToReference', value: JSON.stringify({
+                    relativePath: relativePath.trim(), referenceContent: '', referenceData: {
+                        'selection': {
+                            'start': {
+                                'line': replaceRange.start.line,
+                                'character': replaceRange.start.character
+                            },
+                            'end': {
+                                'line': replaceRange.end.line,
+                                'character': replaceRange.end.character,
+                            }
+                        },
+                        'editor': editor.document.uri.toString(),
+                    }, startLineNumber, endLineNumber, fileName
+                }),
+            });
             return;
         }
-
         let documentRefactoredText = editor.document.getText(); // Get the entire document text
-
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Refactoring Code",
-            cancellable: false
-        }, async (progress) => {
-            let progressPercentage = 0;
-            let prevProgressPercentage = 0;
-            const progressInterval = setInterval(() => {
-                prevProgressPercentage = progressPercentage;
-                progressPercentage = (progressPercentage + 10) % 100;
-                const increment = progressPercentage - prevProgressPercentage;
-                progress.report({ increment });
-            }, 200);
-
+        const refactorCodeWithoutProgress = async () => {
             let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.selection, analyzer, elementname);
-            const result = await generationRepository.refactorCode(finalString, contextualCode, instructions, globalState);
+            const result = await generationRepository.refactorCode(finalString, contextualCode, instructions!, globalState);
             console.log(result);
             if (!result) {
                 vscode.window.showErrorMessage('Failed to refactor code. Please try again.');
                 return;
             }
-
-            clearInterval(progressInterval);
-            progress.report({ increment: 100 });
 
             let refactoredCode = extractDartCode(result, false);
             if (!refactoredCode) {
@@ -82,17 +98,39 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             refactoredCode = filterSurroundingCode(editor.document.getText(), refactoredCode, replaceRange.start.line, replaceRange.end.line);
             console.log("Refactored code:", refactoredCode);
 
-
             // Modify the documentText string instead of the document directly
             const startOffset = editor.document.offsetAt(replaceRange.start);
             const endOffset = editor.document.offsetAt(replaceRange.end);
             documentRefactoredText = documentRefactoredText.substring(0, startOffset) + refactoredCode + documentRefactoredText.substring(endOffset);
-        });
-
-        vscode.window.showInformationMessage('Code refactored successfully!');
+        };
+        if (showLoadingIndicator) {
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "Refactoring Code",
+                cancellable: false
+            }, async (progress) => {
+                let progressPercentage = 0;
+                let prevProgressPercentage = 0;
+                const progressInterval = setInterval(() => {
+                    prevProgressPercentage = progressPercentage;
+                    progressPercentage = (progressPercentage + 10) % 100;
+                    const increment = progressPercentage - prevProgressPercentage;
+                    progress.report({ increment });
+                }, 200);
+                try {
+                    await refactorCodeWithoutProgress();
+                    vscode.window.showInformationMessage('Code refactored successfully!');
+                } finally {
+                    clearInterval(progressInterval);
+                }
+            });
+        }
+        else {
+            await refactorCodeWithoutProgress();
+        }
         // Pass the current editor, current document uri and optimized code respectively.
-        await handleDiffViewAndMerge(editor, editor.document.uri, editor.document.getText(), documentRefactoredText, context);
-
+        handleDiffViewAndMerge(editor, editor.document.uri, editor.document.getText(), documentRefactoredText, context, showLoadingIndicator);
+        return documentRefactoredText;
     } catch (error: Error | unknown) {
         logError('refactor-from-instructions-error', error);
         if (error instanceof Error) {
