@@ -825,6 +825,12 @@ function readTriggeredMessage() {
                     adjustHeight(),
                     0);
                 break;
+            case 'setInput':
+                textInput.textContent = message.value;
+                if (message.value.startsWith('/')) {
+                    const action = message.value.split(' ')[0].slice(1);
+                    commandsExecution[action].exe(textInput);
+                }
         }
     });
 }
@@ -1033,10 +1039,11 @@ function displayMessages() {
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
-            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
-            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-orange-500", "text-white");
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#d66ab1]");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#d66ab1]", "text-white");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5", "bg-orange-500");
+            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5",
+                "bg-[#d66ab1]");
             const messageIndex = conversationHistory.indexOf(message);
             message?.buttons.forEach((type) => {
                 const button = document.createElement("div");

@@ -5,8 +5,10 @@ import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
 import { GenerationRepository } from '../../repository/generation-repository';
+import { FlutterGPTViewProvider } from '../../providers/chat_view_provider';
+import * as path from 'path';
 
-export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext, usedEditor: vscode.TextEditor | undefined, instructions: string | undefined, showLoadingIndicator: boolean = true): Promise<string | undefined> {
+export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider, usedEditor: vscode.TextEditor | undefined, instructions: string | undefined, showLoadingIndicator: boolean = true): Promise<string | undefined> {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = usedEditor === undefined ? vscode.window.activeTextEditor : usedEditor;
@@ -41,10 +43,41 @@ export async function refactorCode(generationRepository: GenerationRepository, g
         const finalString = `${docStart}${highlightStart}${selectedText}${highlightEnd}${docEnd}`;
 
         if (!instructions) {
-            instructions = await vscode.window.showInputBox({ prompt: "Enter refactor instructions" });
-            if (!instructions) {
-                return;
+
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            let relativePath = editor.document.fileName;
+            if (workspaceFolders && workspaceFolders.length > 0) {
+                const workspaceRoot = workspaceFolders[0].uri.fsPath;
+                relativePath = path.relative(workspaceRoot, editor.document.fileName);
             }
+            const startLineNumber = replaceRange.start.line;
+            const endLineNumber = replaceRange.end.line;
+            const fileName = path.basename(editor.document.fileName);
+
+            // focus chatView
+            vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            flutterGPTViewProvider.postMessageToWebview({
+                type: 'setInput',
+                value: "/refactor"
+            });
+            flutterGPTViewProvider.postMessageToWebview({
+                type: 'addToReference', value: JSON.stringify({
+                    relativePath: relativePath.trim(), referenceContent: '', referenceData: {
+                        'selection': {
+                            'start': {
+                                'line': replaceRange.start.line,
+                                'character': replaceRange.start.character
+                            },
+                            'end': {
+                                'line': replaceRange.end.line,
+                                'character': replaceRange.end.character,
+                            }
+                        },
+                        'editor': editor.document.uri.toString(),
+                    }, startLineNumber, endLineNumber, fileName
+                }),
+            });
+            return;
         }
         let documentRefactoredText = editor.document.getText(); // Get the entire document text
         const refactorCodeWithoutProgress = async () => {

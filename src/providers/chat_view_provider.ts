@@ -159,7 +159,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         data.message = data.message.replace(`/${actionType}`, '').trim();
         if (actionType === 'refactor') {
             this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
-            const result = await RefactorActionManager.handleRequest(chipsData, data, this.aiRepo!, this.context, this.analyzer!);
+            const result = await RefactorActionManager.handleRequest(chipsData, data, this.aiRepo!, this.context, this.analyzer!, this);
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
             this._publicConversationHistory.push(result);
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
@@ -243,6 +243,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }> = [];
     private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
+
+    public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {
+        this._publicConversationHistory.push(message);
+        this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+    }
 
     private async getResponse(prompt: string) {
         if (!this._view) {
