@@ -6,6 +6,7 @@ export class DiffViewAgent {
         const optimizedCode = data.optimizedCode;
         const originalCodeUri = data.originalCodeUri;
         const editorUri = chip.referenceData.editor;
+
         const document = vscode.workspace.textDocuments.find(function (e) {
             console.log(e.uri.toString(), editorUri);
             return e.uri.toString() === editorUri;
@@ -25,23 +26,31 @@ export class DiffViewAgent {
                 document.positionAt(0),
                 document.positionAt(document.getText().length)
             );
-            workspaceEdit.replace(originalCodeUri, entireDocumentRange, optimizedCode);
+            workspaceEdit.replace(document.uri, entireDocumentRange, optimizedCode);
+            await vscode.workspace.applyEdit(workspaceEdit);
             if (await vscode.workspace.applyEdit(workspaceEdit)) {
-                let openDocument = await vscode.workspace.openTextDocument(document.uri);
+                if (vscode.window.activeTextEditor?.document.uri.toString() !== document.uri.toString()) {
+                    let openDocument = await vscode.workspace.openTextDocument(document.uri);
+                    await vscode.window.showTextDocument(openDocument, {
+                        viewColumn: range.start.character,
+                        preserveFocus: false,
+                        selection: range,
+                    });
+                }
+            }
+
+        } else {
+            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+            let openDocument = await vscode.workspace.openTextDocument(document.uri);
+            // show text document if the document is not open
+            if (vscode.window.activeTextEditor?.document.uri.toString() !== document.uri.toString()) {
                 await vscode.window.showTextDocument(openDocument, {
                     viewColumn: range.start.character,
                     preserveFocus: false,
                     selection: range,
                 });
             }
-        } else {
-            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-            let openDocument = await vscode.workspace.openTextDocument(document.uri);
-            await vscode.window.showTextDocument(openDocument, {
-                viewColumn: range.start.character,
-                preserveFocus: false,
-                selection: range,
-            });
+
         }
         return { role: "dash", parts: 'Code refactored successfully!', messageId: messageId, data: {}, buttons: [], agent: "messageView" };
     }

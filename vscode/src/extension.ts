@@ -35,19 +35,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Activate inline hints
     activateInlineHints(cacheManager);
 
-    // Check if the Gemini API key is set
-    const config = vscode.workspace.getConfiguration('fluttergpt');
-    const apiKey = config.get<string>('apiKey');
-    if (!apiKey || isOldOpenAIKey(apiKey)) {
-        var chatViewProvider = initWebview(context);
-        showMissingApiKey();
-    }
-    console.log('Congratulations, "fluttergpt" is now active!');
-    dotenv.config({ path: path.join(__dirname, '../.env') });
-    activateTelemetry(context);
-    logEvent('activated');
-
-    // Dart-code extenstion stuff
+    // Get analyzer from Dart extension
     const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
     if (!dartExt) {
         // This should not happen since the FlutterGPT extension has a dependency on the Dart one
@@ -61,6 +49,20 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
+    // Check if the Gemini API key is set
+    const config = vscode.workspace.getConfiguration('fluttergpt');
+    const apiKey = config.get<string>('apiKey');
+    if (!apiKey || isOldOpenAIKey(apiKey)) {
+        var chatViewProvider = initWebview(context, undefined, analyzer);
+        showMissingApiKey();
+    }
+    console.log('Congratulations, "fluttergpt" is now active!');
+    dotenv.config({ path: path.join(__dirname, '../.env') });
+    activateTelemetry(context);
+    logEvent('activated');
+
+    // Dart-code extenstion stuff
+
     var _inlineErrorCommand: vscode.Disposable;
     try {
         let geminiRepo = initGemini();
@@ -124,7 +126,7 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
     if (!chatViewProvider) {
-        chatViewProvider = initWebview(context, geminiRepo);
+        chatViewProvider = initWebview(context, geminiRepo, analyzer);
     }
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
