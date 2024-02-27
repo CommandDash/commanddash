@@ -2,14 +2,14 @@
   "name": "fluttergpt",
   "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
   "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.82.0"
   },
   "repository": {
-    "url": "https://github.com/Welltested-AI/fluttergpt"
+    "url": "https://github.com/Welltested-AI/fluttergpt/vscode"
   },
   "categories": [
     "Other"
@@ -138,10 +138,6 @@
       {
         "command": "fluttergpt.optimizeCode",
         "title": "FlutterGPT Refactor: Optimize"
-      },
-      {
-        "command": "fluttergpt.openCommandDeck",
-        "title": "Open FlutterGPT Command Deck"
       },
       {
         "command": "fluttergpt.clearChat",

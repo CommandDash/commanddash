@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img height=200px src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/icon.png"></a>
+ <img height=200px src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/develop/vscode/media/icon.png"></a>
 </p>
 <h1 align="center">FlutterGPT</h1>
 <div align="center">
@@ -26,8 +26,8 @@ Our vision is to make Flutter development faster and easily adoptable by automat
 
 ##### 1. Create Free Gemini API Key
 Visit [Makersuite by Google](https://makersuite.google.com/) and create your free API Key.
-##### 2. Add the key to FlutterGPT
-In your VSCODE settings, search for `fluttergpt.apiKey` and paste the API Key.
+##### 2. Add the key in chat view
+Open the FlutterGPT chat view, and paste your API key in the input field.
 ##### 3. Run your first command.
 To get started, right-click on your editor in a dart project. Checkout all features below. 🔽
 
@@ -74,7 +74,7 @@ Command: `FlutterGPT Create: Code from Description`
 ### ✨ Refactor
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/main/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
+<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/develop/vscode/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
 </p>
 
 #### 1. **From Instruction**
