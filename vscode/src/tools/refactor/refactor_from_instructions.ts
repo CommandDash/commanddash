@@ -61,6 +61,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
                 type: 'setInput',
                 value: "/refactor"
             });
+            console.log('selected text', selectedText);
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'addToReference', value: JSON.stringify({
                     relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, referenceData: {

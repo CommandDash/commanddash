@@ -26,7 +26,6 @@ export async function addToReference(globalState: vscode.Memento, flutterGPTView
     relativePath = path.relative(workspaceRoot, editor.document.fileName);
   }
 
-  debugger;
   flutterGPTViewProvider.postMessageToWebview({
     type: 'addToReference', value: JSON.stringify({
       relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, referenceData: {

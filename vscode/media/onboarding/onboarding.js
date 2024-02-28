@@ -176,11 +176,11 @@ const commandsExecution = {
             referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
 
             refactorTextNode.textContent = "/refactor\u00A0";
-            refactorTextNode.classList.add("text-pink-600");
+            refactorTextNode.classList.add("text-pink-400");
 
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
-            referenceText.classList.add("bg-black", "text-white", "mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "border-transparent");
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "border-pink-400");
             referenceText.textContent = "Add reference";
             referenceText.addEventListener("click", function (event) {
                 isChipsFocused = !isChipsFocused;
@@ -202,7 +202,7 @@ const commandsExecution = {
             textRefactorInput.id = "text-refactor-input";
             textRefactorInput.contentEditable = "true";
             textRefactorInput.tabIndex = "0";
-            textRefactorInput.classList.add("bg-slate-700", "px-2");
+            textRefactorInput.classList.add("px-2", "border", "border-pink-400", "inline-block");
             textRefactorInput.addEventListener("focus", function (event) {
                 if (isTextRefactorInputFocused) {
                     isChipsFocused = false;
@@ -578,13 +578,29 @@ function submitResponse() {
     if (!prompt.startsWith('/')) {
         vscode.postMessage({ type: "prompt", value: prompt });
     } else {
+        debugger;
+        const chipId = [];
+        const instructions = prompt;
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+                chipId.push(chip);
+            }
+        }
+
         vscode.postMessage({
             type: "action",
             value: JSON.stringify({
                 'message': prompt,
                 'chipsData': chipsData,
+                'chipId': chipId,
+                'instructions': instructions,
             }),
         });
+
+        if (commandEnable) {
+            commandEnable = false;
+        }
     }
     textInput.textContent = "";
     adjustHeight();
@@ -817,7 +833,7 @@ function readTriggeredMessage() {
                 createReferenceChips(JSON.parse(message.value));
                 setTimeout(() =>
                     adjustHeight(),
-                    0);
+                0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -828,9 +844,6 @@ function readTriggeredMessage() {
         }
     });
 }
-
-// command to open command dash
-//fluttergpt.chatView.focus
 
 function createReferenceChips(references) {
 
@@ -926,7 +939,9 @@ function insertAtReference(chip) {
 
     const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");
-    referenceText.remove();
+    if (referenceText) {
+        referenceText.remove();
+    }
     referenceChip.innerHTML = "";
     referenceChip.appendChild(chip);
     referenceChip.appendChild(document.createTextNode("\u00A0"));

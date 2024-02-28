@@ -174,8 +174,7 @@ p[contenteditable="true"] {
 }
 
 .chips-reference {
-    color: #ea580c;
-    outline: .5px solid #ea580c;
+    outline: .5px solid #db2777;
     padding: 3px 5px;
     margin: 2px;
     position: relative;
@@ -186,6 +185,10 @@ p[contenteditable="true"] {
 }
 
 #agents {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+#slash-commands {
     color: var(--vscode-input-placeholderForeground);
 }
 
