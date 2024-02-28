@@ -111,7 +111,7 @@ export class SecretApiKeyManager{
  * Emits an event only if the apiKey's value is changed. And is disposed off when
  * extension is disposed.
  */
-private async onApiKeyChange(): Promise<void> {
+private async onApiKeyChange() {
     if(!this._context){
         throw new Error("context in secret storage is not defined");
         

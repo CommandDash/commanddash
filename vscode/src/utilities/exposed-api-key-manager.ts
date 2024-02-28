@@ -5,10 +5,12 @@ import { error } from "console";
 import { logEvent } from "./telemetry-reporter";
 
 export class ExposedApiKeyManager {
-    readonly context: vscode.ExtensionContext;
+    
+    secretApiKeyManager: SecretApiKeyManager;
 
-    constructor(context: vscode.ExtensionContext) {
-        this.context = context;
+    constructor( secretApiKeyManager: SecretApiKeyManager) {
+        
+        this.secretApiKeyManager = secretApiKeyManager;
     }
 
     public async checkAndShiftConfigApiKey() {
@@ -18,7 +20,7 @@ export class ExposedApiKeyManager {
             let isApiKeyShifted = false;
         if (apiKey) {
             //SET API KEY IN SECRET STORAGE
-           isApiKeyShifted =  await  SecretApiKeyManager.instance.setApiKey(
+           isApiKeyShifted =  await  this.secretApiKeyManager.setApiKey(
                 
                 apiKey
             );
@@ -29,7 +31,7 @@ export class ExposedApiKeyManager {
             console.log("Success shifting api key");
              
             logEvent('shifted-api-key', {'type':'shift'});
-this.deleteApiKeyFromConfig();
+await this.deleteApiKeyFromConfig();
         }else{
             // this else cond. does not necesarily indicate an error
             console.log("Failure in shifting Api key to secret storage");
@@ -58,9 +60,9 @@ return;
         }
     }
 
-   private deleteApiKeyFromConfig(){
+   private async deleteApiKeyFromConfig(){
     const config = vscode.workspace.getConfiguration("fluttergpt");
 
-    config.update("apiKey", undefined, vscode.ConfigurationTarget.Global);
+   await config.update("apiKey", undefined, vscode.ConfigurationTarget.Global);
    }
 }

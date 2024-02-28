@@ -29,12 +29,15 @@ export const DART_MODE: vscode.DocumentFilter & { language: string } = { languag
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
+
+    (global as any).testExtensionContext = context;
     activateTelemetry(context);
     //before anything else we first need to load context into our secret storage manager so we can easily access it everywhere
     SecretApiKeyManager.instance.loadContext(context);
 
     //check for secret key inside config and shift it to secret storage. For current users
-  await  new ExposedApiKeyManager(context).checkAndShiftConfigApiKey();
+    await  new ExposedApiKeyManager(SecretApiKeyManager.instance).checkAndShiftConfigApiKey();
+
 
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
