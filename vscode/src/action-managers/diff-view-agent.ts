@@ -5,17 +5,21 @@ export class DiffViewAgent {
         const chip = data.chip;
         const optimizedCode = data.optimizedCode;
         const originalCodeUri = data.originalCodeUri;
-        const editorUri = chip.referenceData.editor;
 
-        const document = vscode.workspace.textDocuments.find(function (e) {
-            console.log(e.uri.toString(), editorUri);
-            return e.uri.toString() === editorUri;
+        let document = vscode.workspace.textDocuments.find(function (e) {
+            console.log(e.uri.toString(), originalCodeUri);
+            return e.uri.toString() === originalCodeUri;
         });
 
         const selection = chip.referenceData.selection;
         const range: vscode.Range = new vscode.Range(new vscode.Position(selection.start.line, selection.start.character), new vscode.Position(selection.end.line, selection.end.character));
         if (!document) {
-            return;
+            // if document is not founds, open the document
+            let uri = vscode.Uri.parse(originalCodeUri);
+            document = await vscode.workspace.openTextDocument(uri);
+            if (!document) {
+                return;
+            }
         }
         if (userChoice === 'accept') {
 
