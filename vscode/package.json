@@ -41,7 +41,7 @@
       "activitybar": [
         {
           "id": "webview",
-          "title": "FlutterGPT",
+          "title": "Dash AI",
           "icon": "./media/icon.png"
         }
       ]
@@ -56,7 +56,7 @@
       ]
     },
     "configuration": {
-      "title": "FlutterGPT",
+      "title": "Dash AI",
       "type": "object",
       "properties": {
         "fluttergpt.apiKey": {

@@ -160,7 +160,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         data.instructions = data.instructions.replace(`/${actionType}`, '').trim();
         const chipIds: string[] = data.chipId;
         if (actionType === 'refactor') {
-            this._publicConversationHistory.push({ role: 'user', parts: data.message });
+            this._publicConversationHistory.push({ role: 'user', parts: data.message, agent: '/refactor' });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
             const result = await RefactorActionManager.handleRequest(chipsData, chipIds, data, this.aiRepo!, this.context, this.analyzer!, this);
