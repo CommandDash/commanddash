@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{onboardingCssUri}}">
     <link rel="stylesheet" href="{{prismCssUri}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 </head>
 
@@ -63,8 +63,8 @@
                     </div>
                     <div class="inline-flex flex-col px-3" id="file-names"></div>
                 </div>
-                <div id="menu" class="menu px-5" role="listbox"></div>
                 <div class="w-full sticky bottom-0 z-10 px-2 py-1" id="bottom-text-input-container">
+                    <div id="menu" class="menu" role="listbox"></div>
                     <div class="border text-gray-900 text-sm block w-full px-2.5 py-1.5 mb-[2px] bg-white/[.1] rounded-[2px]"
                         id="text-input-container">
                         <div class="relative">
@@ -72,12 +72,16 @@
                             <p contenteditable="true" id="text-input"># Ask FlutterGPT</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div class="inline-flex">
-                                    <p class="text-center inline-flex justify-center items-center text-white/[.4] cursor-pointer pr-2"
+                                    <p class="text-center inline-flex justify-center items-center text-white/[.4] cursor-pointer"
                                         title="Specialized agents" id="agents">
                                         @
                                     </p>
+                                    <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
+                                        title="Slash commands" id="slash-commands">
+                                        /
+                                    </p>
                                     <p class="text-center inline-flex justify-center items-center opacity-50 cursor-pointer"
-                                        title="Use 'Add to Reference' in menu to attach selected code to chat">
+                                        title="Use 'Add to Reference' in menu to attach selected code to chat" id="dart-add-reference">
                                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <g clip-path="url(#clip0_1896_4)">
@@ -122,10 +126,6 @@
                                             </defs>
                                         </svg>
                                     </p>
-                                    <p class="w-5 h-5 text-center inline-flex justify-center items-center text-white/[.4]"
-                                        title="Commands">
-
-                                    </p>
                                 </div>
                                 <div class="inline-flex justify-center items-center">
                                     <label
@@ -134,7 +134,7 @@
 
                                     </label>
                                     <input id="file-upload" type="file" accept="image/*" class="hidden" />
-                                    <button class="ml-2" id="send-chat">
+                                    <button class="ml-2" id="send-chat" title="tool tip on the send button">
                                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <rect x="0.000488281" width="31.9997" height="32" rx="2" fill="#3079D8" />
@@ -154,6 +154,8 @@
             </div>
         </div>
     </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{onboardingJsUri}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
