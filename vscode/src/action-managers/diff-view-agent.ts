@@ -30,7 +30,7 @@ export class DiffViewAgent {
                 document.positionAt(0),
                 document.positionAt(document.getText().length)
             );
-            workspaceEdit.replace(document.uri, entireDocumentRange, optimizedCode);
+            workspaceEdit.replace(vscode.Uri.parse(originalCodeUri), entireDocumentRange, optimizedCode);
             await vscode.workspace.applyEdit(workspaceEdit);
             if (await vscode.workspace.applyEdit(workspaceEdit)) {
                 if (vscode.window.activeTextEditor?.document.uri.toString() !== document.uri.toString()) {
