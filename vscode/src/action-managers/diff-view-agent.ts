@@ -6,13 +6,13 @@ export class DiffViewAgent {
         const optimizedCode = data.optimizedCode;
         const originalCodeUri = data.originalCodeUri;
 
+
         let document = vscode.workspace.textDocuments.find(function (e) {
             console.log(e.uri.toString(), originalCodeUri);
             return e.uri.toString() === originalCodeUri;
         });
 
         const selection = chip.referenceData.selection;
-        const range: vscode.Range = new vscode.Range(new vscode.Position(selection.start.line, selection.start.character), new vscode.Position(selection.end.line, selection.end.character));
         if (!document) {
             // if document is not founds, open the document
             let uri = vscode.Uri.parse(originalCodeUri);
@@ -31,14 +31,13 @@ export class DiffViewAgent {
                 document.positionAt(document.getText().length)
             );
             workspaceEdit.replace(vscode.Uri.parse(originalCodeUri), entireDocumentRange, optimizedCode);
-            await vscode.workspace.applyEdit(workspaceEdit);
-            if (await vscode.workspace.applyEdit(workspaceEdit)) {
+            const isSuccess = await vscode.workspace.applyEdit(workspaceEdit);
+            if (isSuccess) {
                 if (vscode.window.activeTextEditor?.document.uri.toString() !== document.uri.toString()) {
-                    let openDocument = await vscode.workspace.openTextDocument(document.uri);
-                    await vscode.window.showTextDocument(openDocument, {
-                        viewColumn: range.start.character,
+                    await vscode.window.showTextDocument(document, {
+                        viewColumn: selection.start.character,
                         preserveFocus: false,
-                        selection: range,
+                        selection: new vscode.Range(new vscode.Position(selection.start.line, selection.start.character), new vscode.Position(selection.start.line, selection.start.character))
                     });
                 }
             }
@@ -49,9 +48,9 @@ export class DiffViewAgent {
             // show text document if the document is not open
             if (vscode.window.activeTextEditor?.document.uri.toString() !== document.uri.toString()) {
                 await vscode.window.showTextDocument(openDocument, {
-                    viewColumn: range.start.character,
+                    viewColumn: selection.start.character,
                     preserveFocus: false,
-                    selection: range,
+                    selection: new vscode.Range(new vscode.Position(selection.start.line, selection.start.character), new vscode.Position(selection.start.line, selection.start.character))
                 });
             }
 
