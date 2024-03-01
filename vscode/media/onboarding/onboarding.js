@@ -227,6 +227,7 @@ const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
+const readStoryView = document.getElementById("read-story-view");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -312,7 +313,8 @@ const commandsExecution = {
 
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "rounded-[4px]");
+            referenceText.tabIndex = 0;
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "rounded-[4px]", "focus:border-[#497BEF]");
             referenceText.textContent = "Code Attachment";
             referenceText.addEventListener("click", function (event) {
                 isChipsFocused = !isChipsFocused;
@@ -328,13 +330,13 @@ const commandsExecution = {
             command.appendChild(referenceIdSpan);
 
             refactor.id = "text-refactor-container";
-            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
+            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">Text to refactor</span>`;
             refactor.classList.add("inline-block");
 
             textRefactorInput.id = "text-refactor-input";
             textRefactorInput.contentEditable = "true";
             textRefactorInput.tabIndex = "0";
-            textRefactorInput.classList.add("px-2", "border", "border-[#497BEF]", "inline-block");
+            textRefactorInput.classList.add("px-2", "border", "border-[#497BEF]", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]");
             textRefactorInput.addEventListener("focus", function (event) {
                 if (isTextRefactorInputFocused) {
                     isChipsFocused = false;
@@ -392,7 +394,7 @@ const commandsExecution = {
 
             setTimeout(() => {
                 adjustHeight();
-                textRefactorInput.focus();
+                referenceText.focus();
             }, 0);
 
         }
@@ -681,6 +683,7 @@ function addToolTipsById() {
 }
 
 function submitResponse() {
+
     const textRefactor = document.getElementById("text-to-refactor-span");
     if (textRefactor) {
         textRefactor.remove();
@@ -693,7 +696,7 @@ function submitResponse() {
             }
         }
     }
-    if (!prompt.startsWith('/')) {
+    if (!prompt.startsWith('/') && prompt.length > 0) {
         vscode.postMessage({ type: "prompt", value: prompt });
     } else {
         const chipId = [];
@@ -705,15 +708,17 @@ function submitResponse() {
             }
         }
 
-        vscode.postMessage({
-            type: "action",
-            value: JSON.stringify({
-                'message': prompt,
-                'chipsData': chipsData,
-                'chipId': chipId,
-                'instructions': instructions
-            }),
-        });
+        if (chipId.length > 0) {
+            vscode.postMessage({
+                type: "action",
+                value: JSON.stringify({
+                    'message': prompt,
+                    'chipsData': chipsData,
+                    'chipId': chipId,
+                    'instructions': instructions
+                }),
+            });
+        }        
 
         if (commandEnable) {
             commandEnable = false;
@@ -964,7 +969,6 @@ function readTriggeredMessage() {
 
 function createReferenceChips(references) {
 
-    debugger;
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
     references.chipId = chipId;
@@ -1057,12 +1061,15 @@ function insertAtReference(chip) {
 
     const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");
+    const refactorInput = document.getElementById("text-refactor-input");
     if (referenceText) {
         referenceText.remove();
     }
     referenceChip.innerHTML = "";
     referenceChip.appendChild(chip);
     referenceChip.appendChild(document.createTextNode("\u00A0"));
+
+    refactorInput.focus();
 }
 
 function debounce(func, wait, immediate = false) {
@@ -1093,6 +1100,9 @@ function clearChat() {
     responseContainer.innerHTML = "";
     conversationHistory = [];
 
+    if (conversationHistory.length === 0) {
+        readStoryView.classList.remove("hidden");
+    }
     vscode.postMessage({
         type: "clearChat",
     });
@@ -1130,6 +1140,10 @@ function displayMessages() {
     responseContainer.innerHTML = "";
 
     let modelCount = 0;
+
+    if (conversationHistory.length > 0) {
+        readStoryView.classList.add("hidden");
+    }
 
     conversationHistory.forEach((message) => {
         const messageElement = document.createElement("div");
@@ -1181,7 +1195,12 @@ function displayMessages() {
             const messageIndex = conversationHistory.indexOf(message);
             message?.buttons.forEach((type) => {
                 const button = document.createElement("div");
-                button.classList.add("px-2.5", "py-1.5", "bg-pink-400", "text-xs", "text-white", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                button.classList.add("px-2.5", "py-1.5",  "text-xs", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                if (['disable', 'decline', 'reject', 'cancel', 'dismiss', 'close' ,'delete'].includes(type)) {
+                    button.classList.add("bg-[#f2f2f2]", "text-black");
+                } else {
+                    button.classList.add("bg-pink-400", "text-white");
+                }
                 button.textContent = type;
                 button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, messageIndex, type));
                 buttonContainer.appendChild(button);

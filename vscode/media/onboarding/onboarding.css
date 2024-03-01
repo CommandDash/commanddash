@@ -184,6 +184,10 @@ p[contenteditable="true"] {
     border-radius: 7px;
 }
 
+.chips-reference:focus {
+    color: red;
+}
+
 #agents {
     color: var(--vscode-input-placeholderForeground);
 }
@@ -203,6 +207,10 @@ p[contenteditable="true"] {
 
 #add-reference-text {
     border-color: var(--vscode-editor-foreground);
+}
+
+#add-reference-text:focus {
+    border-color: .5px solid #497BEF;
 }
 
 #clear-chat-button {
