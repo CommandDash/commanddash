@@ -10,13 +10,16 @@ export class RefactorActionManager {
 
   static async handleRequest(chips: any, chipIds: string[], data: any, aiRepo: GeminiRepository, context: vscode.ExtensionContext, analyzer: ILspAnalyzer, flutterGPTViewProvider: FlutterGPTViewProvider) {
     var instructions = data.instructions as string;
-    for (const chip of chipIds) {
-      if (instructions.includes(chip)) {
-        instructions = instructions.replace(chip, '');
+    var chip;
+    for (const chipId of chipIds) {
+      if (instructions.includes(chipId)) {
+        instructions = instructions.replace(chipId, '');
+        // Assuming first chip is code to refactor
+        if (!chip) {
+          chip = chips[chipId];
+        }
       }
     }
-    const chip = Object.values(chips).values().next().value;
-    // Assuming first chip is code to refactor
     const editorUri = chip.referenceData.editor;
     let editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === editorUri);
     if (!editor) {
