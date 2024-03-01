@@ -68,7 +68,7 @@ function replaceLineOfCode(line: number, replaceString: string) {
     });
 }
 
-export async function createInlineCodeCompletion(geminiRepo: GeminiRepository) {
+export async function createInlineCodeCompletion() {
     // manual trigger using shortcut ctrl+space
     logEvent('create-inline-code-completion', { 'type': "create" });
     vscode.window.withProgress({
@@ -100,6 +100,7 @@ async function generateSuggestions(): Promise<string[]> {
         const fileContent = editor.document.getText();
         const filepath = editor.document.fileName; // don't include currentFile in most relevant files.
         console.log("Current file path:", filepath);
+        ///TODO: Replace with Generation Repository
         var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Current file content:" + editor.document.getText() + "\n\n" + "Line of code:" + currentLineContent, undefined, true, filepath);
         // Add code for all the elements used in the file.
         const contextualCode = await new ContextualCodeProvider().getContextualCodeForCompletion(editor.document, getDartAnalyser());

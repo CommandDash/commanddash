@@ -41,9 +41,9 @@ export class GeminiRepository extends GenerationRepository {
             if (fs.existsSync(this.cacheFilePath)) {
                 // Move the cache file to the CacheManager
                 const cacheData = await fs.promises.readFile(this.cacheFilePath, 'utf8');
+                console.log(cacheData);
                 if (cacheData.length > 0) {
                     await CacheManager.getInstance().setGeminiCache(cacheData);
-                    await fs.promises.writeFile(this.cacheFilePath, '', { encoding: 'utf8', flag: 'w' });
                 }
                 // Delete the old cache file
                 await fs.promises.unlink(this.cacheFilePath);
