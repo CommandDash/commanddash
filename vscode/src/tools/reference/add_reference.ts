@@ -28,7 +28,7 @@ export async function addToReference(globalState: vscode.Memento, flutterGPTView
 
   flutterGPTViewProvider.postMessageToWebview({
     type: 'addToReference', value: JSON.stringify({
-      relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, referenceData: {
+      relativePath: relativePath.trim(), referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${referenceContent.toString()}\n\`\`\`\n`, referenceData: {
         'selection': {
           'start': {
             'line': startLineNumber,

@@ -312,8 +312,8 @@ const commandsExecution = {
 
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "border-white");
-            referenceText.textContent = "Add reference";
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "rounded-[4px]");
+            referenceText.textContent = "Code Attachment";
             referenceText.addEventListener("click", function (event) {
                 isChipsFocused = !isChipsFocused;
                 isChipsFocused ? referenceText.classList.add("border-[#497BEF]") : referenceText.classList.remove("border-[#497BEF]");
@@ -352,7 +352,7 @@ const commandsExecution = {
             setCaretToEnd(textRefactorInput);
 
             tippy('#add-reference-text', {
-                content: "Add reference",
+                content: "Select any code snippet, right click and use “Dash AI: Attach Code” from the menu bar.",
                 theme: "flutter-blue"
             });
 
@@ -759,7 +759,7 @@ function handleSubmit(event) {
     const menuItemFn = (action, setItem, selected, trigger) => {
         const div = document.createElement('div');
         div.setAttribute('role', 'option');
-        div.className = 'menu-item';
+        div.className = 'menu-item text-rose-400';
         if (selected) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
@@ -964,6 +964,7 @@ function readTriggeredMessage() {
 
 function createReferenceChips(references) {
 
+    debugger;
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
     references.chipId = chipId;
