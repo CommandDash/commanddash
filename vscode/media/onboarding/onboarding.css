@@ -162,14 +162,8 @@ p[contenteditable="true"] {
 .chips {
     color: var(--vscode-editor-foreground);
     outline: .5px solid var(--vscode-editor-foreground);
-    padding: 3px 7px;
-    margin: 1px 2px;
     position: relative;
     cursor: move;
-    font-size: 11px;
-    display: inline-flex;
-    align-items: center;
-    border-radius: 7px;
 }
 
 .chips-reference {
@@ -200,11 +194,19 @@ p[contenteditable="true"] {
 }
 
 #add-reference-text {
-    border-color: var(--vscode-editor-foreground);
+    outline: 1px solid var(--vscode-editor-foreground);
 }
 
 #add-reference-text:focus {
-    border-color: .5px solid #497BEF;
+    outline: 1px solid #497BEF;
+}
+
+#text-refactor-input {
+    outline: 1px solid var(--vscode-editor-foreground);
+}
+
+#text-refactor-input:focus {
+    outline: 1px solid #497BEF;
 }
 
 #clear-chat-button {

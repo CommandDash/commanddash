@@ -227,7 +227,6 @@ const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
-const readStoryView = document.getElementById("read-story-view");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -320,7 +319,7 @@ const commandsExecution = {
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
             referenceText.tabIndex = 0;
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "rounded-[4px]");
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]");
             referenceText.textContent = "Code Attachment";
             referenceText.addEventListener("click", function (event) {
                 isChipsFocused = !isChipsFocused;
@@ -342,7 +341,7 @@ const commandsExecution = {
             textRefactorInput.id = "text-refactor-input";
             textRefactorInput.contentEditable = "true";
             textRefactorInput.tabIndex = "0";
-            textRefactorInput.classList.add("px-2", "border", "border-[#497BEF]", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]");
+            textRefactorInput.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]");
             textRefactorInput.addEventListener("focus", function (event) {
                 if (isTextRefactorInputFocused) {
                     isChipsFocused = false;
@@ -1029,7 +1028,7 @@ function insertChipAtCursor(chip, textInput) {
     //chip property setting
     chip.setAttribute("draggable", "true");
     chip.addEventListener("dragstart", dragStart);
-    chip.classList.add("chips");
+    chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips");
 
     function dragStart(event) {
         event.dataTransfer.setData('text/plain', this.innerText);
@@ -1106,9 +1105,6 @@ function clearChat() {
     responseContainer.innerHTML = "";
     conversationHistory = [];
 
-    if (conversationHistory.length === 0) {
-        readStoryView.classList.remove("hidden");
-    }
     vscode.postMessage({
         type: "clearChat",
     });
@@ -1146,10 +1142,6 @@ function displayMessages() {
     responseContainer.innerHTML = "";
 
     let modelCount = 0;
-
-    if (conversationHistory.length > 0) {
-        readStoryView.classList.add("hidden");
-    }
 
     conversationHistory.forEach((message) => {
         const messageElement = document.createElement("div");
