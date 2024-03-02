@@ -37,13 +37,14 @@ export class GeminiRepository extends GenerationRepository {
      */
     private async migrateCache() {
         try {
+            // TODO: Need to update the migration logic for the new cache structure
             // Check if the cache file exists in the old location
             if (fs.existsSync(this.cacheFilePath)) {
                 // Move the cache file to the CacheManager
                 const cacheData = await fs.promises.readFile(this.cacheFilePath, 'utf8');
                 console.log(cacheData);
                 if (cacheData.length > 0) {
-                    await CacheManager.getInstance().setGeminiCache(cacheData);
+                    await CacheManager.getInstance().setGeminiCache(this.codehashCache);
                 }
                 // Delete the old cache file
                 await fs.promises.unlink(this.cacheFilePath);
@@ -160,7 +161,7 @@ export class GeminiRepository extends GenerationRepository {
     private async saveCache() {
         try {
             const cacheData = JSON.stringify(this.codehashCache);
-            await CacheManager.getInstance().setGeminiCache(cacheData);
+            await CacheManager.getInstance().setGeminiCache(this.codehashCache);
         } catch (error) {
             if (error instanceof Error) {
                 handleError(error, 'Failed to save the cache data.');
