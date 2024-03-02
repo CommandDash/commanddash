@@ -288,6 +288,12 @@ const commands = ['refactor'];
 // Add your additional commands and agents
 const agentCommandsMap = {};
 
+//description for commands and agents
+const description = {
+    'refactor': 'Placeholder for refactor description',
+    'workspace': 'Placeholder for workspace description'
+};
+
 const commandsExecution = {
     'refactor': {
         'exe': (input) => {
@@ -314,7 +320,7 @@ const commandsExecution = {
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
             referenceText.tabIndex = 0;
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "rounded-[4px]", "focus:border-[#497BEF]");
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "rounded-[4px]");
             referenceText.textContent = "Code Attachment";
             referenceText.addEventListener("click", function (event) {
                 isChipsFocused = !isChipsFocused;
@@ -769,7 +775,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${trigger}${action}`;
+        div.textContent = `${trigger}${action} - ${description[action]}`;
         div.onclick = setItem;
         return div;
     };
@@ -1057,7 +1063,7 @@ function insertChipAtCursor(chip, textInput) {
 
 function insertAtReference(chip) {
 
-    chip.classList.add("chips-reference");
+    chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips-reference");
 
     const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");

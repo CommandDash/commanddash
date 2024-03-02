@@ -175,13 +175,7 @@ p[contenteditable="true"] {
 .chips-reference {
     color: var(--vscode-editor-foreground);
     outline: .5px solid var(--vscode-editor-foreground);
-    padding: 3px 5px;
-    margin: 2px;
     position: relative;
-    font-size: 11px;
-    display: inline-flex;
-    align-items: center;
-    border-radius: 7px;
 }
 
 .chips-reference:focus {
