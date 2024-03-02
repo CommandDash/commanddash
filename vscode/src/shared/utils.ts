@@ -6,6 +6,7 @@ import { GeminiRepository } from '../repository/gemini-repository';
 import { ILspAnalyzer } from './types/LspAnalyzer';
 import { Outline } from './types/custom_protocols';
 import { SemanticTokensRegistrationType, SemanticTokensProviderShape, SymbolKind } from 'vscode-languageclient';
+import * as crypto from 'crypto';
 
 export async function getCodeForElementAtRange(analyzer: ILspAnalyzer, document: vscode.TextDocument, range: vscode.Range): Promise<string | undefined> {
 	const outline = (await analyzer.fileTracker.waitForOutline(document));
@@ -46,7 +47,7 @@ export async function getCodeForElementAtRange(analyzer: ILspAnalyzer, document:
 }
 
 export async function cursorIsAt(type: String, analyzer: ILspAnalyzer, document: vscode.TextDocument, activeTextEditor: vscode.TextEditor | undefined, range: vscode.Range, strict: boolean = true): Promise<{ symbolRange: vscode.Range, symbol: Outline } | undefined> {
-	if (!activeTextEditor){
+	if (!activeTextEditor) {
 		return undefined;
 	}
 	const position = activeTextEditor.selection.active;
@@ -176,4 +177,10 @@ export async function getCodeForRange(uri: vscode.Uri, range: vscode.Range): Pro
 	}
 
 	return undefined;
+}
+
+export function computeCodehash(fileContents: string): string {
+	// Normalize the file content by removing whitespace and newlines
+	const normalizedContent = fileContents.replace(/\s+/g, '');
+	return crypto.createHash('sha256').update(normalizedContent).digest('hex');
 }

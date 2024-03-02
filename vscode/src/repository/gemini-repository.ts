@@ -9,6 +9,7 @@ import { GenerationRepository } from "./generation-repository";
 import { extractReferenceTextFromEditor } from "../utilities/code-processing";
 import { logError } from "../utilities/telemetry-reporter";
 import { CacheManager } from "../utilities/cache-manager";
+import { computeCodehash } from "../shared/utils";
 
 function handleError(error: Error, userFriendlyMessage: string): never {
     console.error(error);
@@ -150,7 +151,7 @@ export class GeminiRepository extends GenerationRepository {
             throw new Error('No workspace folders found.');
         }
         const projectFolder = workspaceFolders[0].uri.fsPath; // Assuming single root workspace
-        const hash = this.computeCodehash(projectFolder); // Hash the path for uniqueness
+        const hash = computeCodehash(projectFolder); // Hash the path for uniqueness
         // Use os.tmpdir() to get the system's temporary directory
         const tempDir = require('os').tmpdir();
         return require('path').join(tempDir, 'flutterGPT', `${hash}.codehashCache.json`);
@@ -183,14 +184,6 @@ export class GeminiRepository extends GenerationRepository {
         } catch (error) {
             console.error("Error loading cache: ", error);
         }
-    }
-
-
-    // Compute a codehash for file contents
-    private computeCodehash(fileContents: string): string {
-        // Normalize the file content by removing whitespace and newlines
-        const normalizedContent = fileContents.replace(/\s+/g, '');
-        return crypto.createHash('sha256').update(normalizedContent).digest('hex');
     }
 
     // Find 5 closest dart files for query
@@ -233,7 +226,7 @@ export class GeminiRepository extends GenerationRepository {
                     const document = await vscode.workspace.openTextDocument(file);
                     const relativePath = vscode.workspace.asRelativePath(file, false);
                     const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
-                    const codehash = this.computeCodehash(text);
+                    const codehash = computeCodehash(text);
                     return {
                         text,
                         path: file.path,
