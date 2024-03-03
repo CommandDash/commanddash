@@ -289,8 +289,8 @@ const agentCommandsMap = {};
 
 //description for commands and agents
 const description = {
-    'refactor': 'Placeholder for refactor description',
-    'workspace': 'Placeholder for workspace description'
+    'refactor': 'Refactor code with instructions',
+    'workspace': 'Ask questions across your workspace'
 };
 
 const commandsExecution = {

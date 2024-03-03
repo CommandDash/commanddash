@@ -1,7 +1,7 @@
 {
   "name": "fluttergpt",
-  "displayName": "Dash AI: Autopilot for Flutter with Gemini.",
-  "description": "CommandDash to autopilot your Flutter Development Tasks",
+  "displayName": "CommandDash: Your Flutter AI Autopilot",
+  "description": "With Dash AI inside, build entire features on autopilot",
   "version": "0.2.10",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
@@ -68,15 +68,15 @@
     "keybindings": [
       {
         "command": "dashai.attachToDash.menu",
-        "key": "ctrl+R",
-        "mac": "cmd+R",
+        "key": "ctrl+shift+R",
+        "mac": "cmd+shift+R",
         "when": "editorHasSelection && resourceLangId == 'dart'"
       },
       {
         "command": "dashai.createInlineCodeCompletion.menu",
-        "key": "ctrl+right",
-        "mac": "cmd+right",
-         "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
+        "key": "ctrl+shift+right",
+        "mac": "cmd+shift+right",
+        "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
       }
     ],
     "commands": [
