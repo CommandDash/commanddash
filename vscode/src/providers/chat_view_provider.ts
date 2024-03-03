@@ -255,7 +255,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            await vscode.commands.executeCommand('dashai.chatView.focus');
         } else {
             this._view?.show?.(true);
         }

@@ -67,62 +67,69 @@
     },
     "keybindings": [
       {
-        "command": "dashai.addToReference",
+        "command": "dashai.attachToDash.menu",
         "key": "ctrl+R",
         "mac": "cmd+R",
         "when": "editorHasSelection && resourceLangId == 'dart'"
       },
       {
-        "command": "dashai.createInlineCodeCompletion",
+        "command": "dashai.createInlineCodeCompletion.menu",
         "key": "ctrl+right",
         "mac": "cmd+right",
-        "when": "resourceLangId == 'dart'"
+         "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
       }
     ],
     "commands": [
       {
-        "command": "dashai.addToReference",
-        "title": "Attach Snippet to Dash",
-        "when": "false"
+        "command": "dashai.attachToDash",
+        "title": "Dash AI: Attach Snippet to Dash"
       },
       {
-        "command": "dashai.createInlineCodeCompletion",
-        "title": "Inline Code Generation",
-        "when": "false"
+        "command": "dashai.attachToDash.menu",
+        "title": "Attach Snippet to Dash"
       },
+
+      {
+        "command": "dashai.createInlineCodeCompletion",
+        "title": "Dash AI: Inline Code Generation"
+      },
+      {
+        "command": "dashai.createInlineCodeCompletion.menu",
+        "title": "Inline Code Generation"
+      },
+
       {
         "command": "dashai.createWidget",
         "title": "Dash AI Create: Widget from Image or Description"
       },
       {
         "command": "dashai.createWidget.menu",
-        "title": "Widget from Image or Description",
-        "when": "false"
+        "title": "Widget from Image or Description"
       },
+      
       {
         "command": "dashai.createCodeFromBlueprint",
         "title": "Dash AI Create: Code from Blueprint"
       },
       {
         "command": "dashai.createCodeFromBlueprint.menu",
-        "title": "Code from Blueprint",
-        "when": "false"
+        "title": "Code from Blueprint"
       },
+
       {
         "command": "dashai.createCodeFromDescription",
         "title": "Dash AI Create: Code From Description"
       },
       {
         "command": "dashai.createCodeFromDescription.menu",
-        "title": "Code From Description",
-        "when": "false"
+        "title": "Code From Description"
       },
       {
         "command": "dashai.fixErrors",
-        "title": "DashAI Refactor: Fix Errors"
+        "title": "Dash AI Refactor: Fix Errors"
       },
       {
-        "command": "fluttergpt.optimizeCode",
+        "command": "dashai.optimizeCode",
         "title": "Dash AI Refactor: Optimize"
       },
       {
@@ -135,20 +142,71 @@
       }
     ],
     "menus": {
-      "editor/context": [
+      "commandPalette": [
         {
-          "submenu": "dashai.createMenu",
-          "group": "fluttergpt-menu-group@1"
+          "command": "dashai.attachToDash",
+          "when": "editorHasSelection && resourceLangId == 'dart'"
+        },
+        {
+          "command": "dashai.attachToDash.menu",
+          "when": "false"
         },
         {
           "command": "dashai.createInlineCodeCompletion",
-          "when": "!editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@2"
+          "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.addToReference",
+          "command": "dashai.createInlineCodeCompletion.menu",
+          "when": "false"
+        },
+        {
+          "command": "dashai.createWidget",
+          "when": "!editorHasSelection && resourceLangId == 'dart'"
+        },
+        {
+          "command": "dashai.createWidget.menu",
+          "when": "false"
+        },
+        {
+          "command": "dashai.createCodeFromBlueprint",
+          "when": "editorHasSelection && resourceLangId == 'dart'"
+        },
+        {
+          "command": "dashai.createCodeFromBlueprint.menu",
+          "when": "false"
+        },
+  
+        {
+          "command": "dashai.createCodeFromDescription",
+          "when": "!editorHasSelection && resourceLangId == 'dart'"
+        },
+        {
+          "command": "dashai.createCodeFromDescription.menu",
+          "when": "false"
+        },
+        {
+          "command": "dashai.fixErrors",
+          "when": "editorHasSelection && resourceLangId == 'dart'"
+        },
+        {
+          "command": "dashai.optimizeCode",
+          "when": "editorHasSelection && resourceLangId == 'dart'"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "dashai.createMenu",
+          "group": "dashai-menu-group@1"
+        },
+        {
+          "command": "dashai.createInlineCodeCompletion.menu",
+          "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'",
+          "group": "dashai-menu-group@2"
+        },
+        {
+          "command": "dashai.attachToDash.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@3"
+          "group": "dashai-menu-group@3"
         }
       ],
       "view/title": [
@@ -160,17 +218,18 @@
       "dashai.createMenu": [
         {
           "command": "dashai.createCodeFromBlueprint.menu",
-          "group": "fluttergpt-menu-group@1"
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "dashai-menu-group@1"
         },
         {
           "command": "dashai.createCodeFromDescription.menu",
-          "title": "From Description",
-          "group": "fluttergpt-menu-group@2"
+          "when": "!editorHasSelection && resourceLangId == 'dart'",
+          "group": "dashai-menu-group@2"
         },
         {
           "command": "dashai.createWidget.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
-          "group": "fluttergpt-menu-group@3"
+          "group": "dashai-menu-group@3"
         }
       ]
     },
