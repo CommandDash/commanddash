@@ -68,9 +68,8 @@
     "keybindings": [
       {
         "command": "dashai.attachToDash.menu",
-        "key": "ctrl+shift+R",
-        "mac": "cmd+shift+R",
-        "when": "editorHasSelection && resourceLangId == 'dart'"
+        "key": "ctrl+R",
+        "mac": "cmd+R"
       },
       {
         "command": "dashai.createInlineCodeCompletion.menu",
