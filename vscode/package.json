@@ -1,7 +1,7 @@
 {
   "name": "fluttergpt",
-  "displayName": "FlutterGPT: AI Copilot with Gemini inside Dart",
-  "description": "Gemini capabilities fused inside Dart Analyzer to ship Flutter apps faster.",
+  "displayName": "Dash AI: Autopilot for Flutter with Gemini.",
+  "description": "CommandDash to autopilot your Flutter Development Tasks",
   "version": "0.2.10",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
@@ -18,8 +18,8 @@
     "flutter",
     "dart",
     "gemini",
-    "bard",
     "copilot",
+    "autopilot",
     "gpt",
     "ai",
     "assistant",
@@ -41,7 +41,7 @@
       "activitybar": [
         {
           "id": "webview",
-          "title": "Dash AI",
+          "title": "CommandDash",
           "icon": "./media/icon.png"
         }
       ]
@@ -50,8 +50,8 @@
       "webview": [
         {
           "type": "webview",
-          "id": "fluttergpt.chatView",
-          "name": "Command Deck"
+          "id": "dashai.chatView",
+          "name": "Panel"
         }
       ]
     },
@@ -67,13 +67,13 @@
     },
     "keybindings": [
       {
-        "command": "fluttergpt.addToReference.menu",
+        "command": "dashai.addToReference",
         "key": "ctrl+R",
         "mac": "cmd+R",
         "when": "editorHasSelection && resourceLangId == 'dart'"
       },
       {
-        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "command": "dashai.createInlineCodeCompletion",
         "key": "ctrl+right",
         "mac": "cmd+right",
         "when": "resourceLangId == 'dart'"
@@ -81,66 +81,52 @@
     ],
     "commands": [
       {
-        "command": "fluttergpt.addToReference",
-        "when": "editorHasSelection && resourceLangId == 'dart'",
-        "title": "FlutterGPT: Add to Reference"
-      },
-      {
-        "command": "fluttergpt.addToReference.menu",
-        "title": "Add to Reference",
+        "command": "dashai.addToReference",
+        "title": "Attach Snippet to Dash",
         "when": "false"
       },
       {
-        "command": "fluttergpt.createInlineCodeCompletion",
-        "when": "!editorHasSelection && resourceLangId == 'dart'",
-        "title": "FlutterGPT: Inline Code Generation"
-      },
-      {
-        "command": "fluttergpt.createInlineCodeCompletion.menu",
+        "command": "dashai.createInlineCodeCompletion",
         "title": "Inline Code Generation",
         "when": "false"
       },
       {
-        "command": "fluttergpt.createWidget",
-        "title": "FlutterGPT Create: Widget from Image or Description"
+        "command": "dashai.createWidget",
+        "title": "Dash AI Create: Widget from Image or Description"
       },
       {
-        "command": "fluttergpt.createWidget.menu",
+        "command": "dashai.createWidget.menu",
         "title": "Widget from Image or Description",
         "when": "false"
       },
       {
-        "command": "fluttergpt.createCodeFromBlueprint",
-        "title": "FlutterGPT Create: Code from Blueprint"
+        "command": "dashai.createCodeFromBlueprint",
+        "title": "Dash AI Create: Code from Blueprint"
       },
       {
-        "command": "fluttergpt.createCodeFromBlueprint.menu",
+        "command": "dashai.createCodeFromBlueprint.menu",
         "title": "Code from Blueprint",
         "when": "false"
       },
       {
-        "command": "fluttergpt.createCodeFromDescription",
-        "title": "FlutterGPT Create: Code From Description"
+        "command": "dashai.createCodeFromDescription",
+        "title": "Dash AI Create: Code From Description"
       },
       {
-        "command": "fluttergpt.createCodeFromDescription.menu",
+        "command": "dashai.createCodeFromDescription.menu",
         "title": "Code From Description",
         "when": "false"
       },
       {
-        "command": "fluttergpt.refactorCode",
-        "title": "FlutterGPT Refactor: From Instructions"
-      },
-      {
-        "command": "fluttergpt.fixErrors",
-        "title": "FlutterGPT Refactor: Fix Errors"
+        "command": "dashai.fixErrors",
+        "title": "DashAI Refactor: Fix Errors"
       },
       {
         "command": "fluttergpt.optimizeCode",
-        "title": "FlutterGPT Refactor: Optimize"
+        "title": "Dash AI Refactor: Optimize"
       },
       {
-        "command": "fluttergpt.clearChat",
+        "command": "dashai.clearChat",
         "title": "Clear Chat",
         "icon": {
           "light": "resources/light/trash.svg",
@@ -151,38 +137,38 @@
     "menus": {
       "editor/context": [
         {
-          "submenu": "fluttergpt.createMenu",
-          "group": "fluttergpt-menu-group@3"
-        },
-        {
-          "command": "fluttergpt.addToReference.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "submenu": "dashai.createMenu",
           "group": "fluttergpt-menu-group@1"
         },
         {
-          "command": "fluttergpt.createInlineCodeCompletion.menu",
+          "command": "dashai.createInlineCodeCompletion",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@2"
+        },
+        {
+          "command": "dashai.addToReference",
+          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "group": "fluttergpt-menu-group@3"
         }
       ],
       "view/title": [
         {
-          "command": "fluttergpt.clearChat",
+          "command": "dashai.clearChat",
           "group": "navigation"
         }
       ],
-      "fluttergpt.createMenu": [
+      "dashai.createMenu": [
         {
-          "command": "fluttergpt.createCodeFromBlueprint.menu",
+          "command": "dashai.createCodeFromBlueprint.menu",
           "group": "fluttergpt-menu-group@1"
         },
         {
-          "command": "fluttergpt.createCodeFromDescription.menu",
+          "command": "dashai.createCodeFromDescription.menu",
           "title": "From Description",
           "group": "fluttergpt-menu-group@2"
         },
         {
-          "command": "fluttergpt.createWidget.menu",
+          "command": "dashai.createWidget.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
           "group": "fluttergpt-menu-group@3"
         }
@@ -190,8 +176,8 @@
     },
     "submenus": [
       {
-        "id": "fluttergpt.createMenu",
-        "label": "FlutterGPT Create"
+        "id": "dashai.createMenu",
+        "label": "Dash AI: Create"
       }
     ]
   },

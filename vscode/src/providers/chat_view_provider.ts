@@ -9,7 +9,7 @@ import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "fluttergpt.chatView";
+    public static readonly viewType = "dashai.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     aiRepo?: GeminiRepository;
