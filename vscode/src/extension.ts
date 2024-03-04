@@ -70,7 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
     } catch (error) {
         console.error(error);
         // Handle inoine completion shortcut
-        _inlineErrorCommand = vscode.commands.registerCommand('fluttergpt.createInlineCodeCompletion', () => {
+        _inlineErrorCommand = vscode.commands.registerCommand('dashai.createInlineCodeCompletion', () => {
             showMissingApiKey();
         });
     }

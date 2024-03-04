@@ -9,7 +9,7 @@ import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "fluttergpt.chatView";
+    public static readonly viewType = "dashai.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     aiRepo?: GeminiRepository;
@@ -255,7 +255,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            await vscode.commands.executeCommand('dashai.chatView.focus');
         } else {
             this._view?.show?.(true);
         }

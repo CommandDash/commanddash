@@ -56,7 +56,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             const fileName = path.basename(editor.document.fileName);
 
             // focus chatView
-            vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            vscode.commands.executeCommand('dashai.chatView.focus');
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'setInput',
                 value: "/refactor"

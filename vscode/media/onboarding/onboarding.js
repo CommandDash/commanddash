@@ -289,8 +289,8 @@ const agentCommandsMap = {};
 
 //description for commands and agents
 const description = {
-    'refactor': 'Placeholder for refactor description',
-    'workspace': 'Placeholder for workspace description'
+    'refactor': 'Refactor code with instructions',
+    'workspace': 'Ask questions across your workspace'
 };
 
 const commandsExecution = {
@@ -335,7 +335,7 @@ const commandsExecution = {
             command.appendChild(referenceIdSpan);
 
             refactor.id = "text-refactor-container";
-            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">Text to refactor</span>`;
+            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">Refactor Instructions</span>`;
             refactor.classList.add("inline-block");
 
             textRefactorInput.id = "text-refactor-input";
@@ -357,9 +357,9 @@ const commandsExecution = {
             input.appendChild(command);
 
             setCaretToEnd(textRefactorInput);
-
+            //TODO[YASH]: Use platform specific shortcut naming. checkout shortcut-hint-utils
             tippy('#add-reference-text', {
-                content: "Select any code snippet, right click and use “Dash AI: Attach Code” from the menu bar.",
+                content: "Use 'CMD+R' to attach selected code in editor",
                 theme: "flutter-blue"
             });
 
@@ -669,6 +669,7 @@ class CommandDeck {
 
 })();
 
+
 function addToolTipsById() {
 
     tippy('#agents', {
@@ -682,7 +683,7 @@ function addToolTipsById() {
     });
 
     tippy('#dart-add-reference', {
-        content: "Use 'Add to Reference' in menu to attach selected code to chat",
+        content: `Use 'Attach Snippet to Dash' or 'CMD+R' after selecting the code in editor`,
         theme: "flutter-blue"
     });
 }
