@@ -40,9 +40,9 @@ Attach multiple code snippets from different files in your inline chat. With ful
 
 ### 🚀 @Agents and /Commands
 
-Use built in agents and commands to autopilot different kinds of tasks for you.
+Use built in agents and commands to autopilot different kinds of tasks.
 
-Currently, we only support:
+Currently, we support:
 
 #### 1. `@workspace` agent.
 Ask anything related to Flutter or Dart and get instant answers. Query your workspace using `@workspace` command.
