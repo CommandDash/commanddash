@@ -56,7 +56,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             const fileName = path.basename(editor.document.fileName);
 
             // focus chatView
-            vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            vscode.commands.executeCommand('dashai.chatView.focus');
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'setInput',
                 value: "/refactor"
@@ -64,7 +64,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             console.log('selected text', selectedText);
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'addToReference', value: JSON.stringify({
-                    relativePath: relativePath.trim(), referenceContent: `\`\n${relativePath.trim()}\n\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, referenceData: {
+                    relativePath: relativePath.trim(), referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, referenceData: {
                         'selection': {
                             'start': {
                                 'line': replaceRange.start.line,

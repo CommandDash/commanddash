@@ -63,7 +63,6 @@ ul {
 
 .menu-item.selected {
     background-color: var(--vscode-activityBar-background);
-    color: var(--vscode-textLink-activeForeground);
     border-radius: 7px;
 }
 
@@ -163,25 +162,18 @@ p[contenteditable="true"] {
 .chips {
     color: var(--vscode-editor-foreground);
     outline: .5px solid var(--vscode-editor-foreground);
-    padding: 3px 7px;
-    margin: 1px 2px;
     position: relative;
     cursor: move;
-    font-size: 11px;
-    display: inline-flex;
-    align-items: center;
-    border-radius: 7px;
 }
 
 .chips-reference {
-    outline: .5px solid #db2777;
-    padding: 3px 5px;
-    margin: 2px;
+    color: var(--vscode-editor-foreground);
+    outline: .5px solid var(--vscode-editor-foreground);
     position: relative;
-    font-size: 11px;
-    display: inline-flex;
-    align-items: center;
-    border-radius: 7px;
+}
+
+.chips-reference:focus {
+    color: red;
 }
 
 #agents {
@@ -199,6 +191,22 @@ p[contenteditable="true"] {
 
 #text-input-container {
     border-color: var(--vscode-editor-foreground);
+}
+
+#add-reference-text {
+    outline: 1px solid var(--vscode-editor-foreground);
+}
+
+#add-reference-text:focus {
+    outline: 1px solid #497BEF;
+}
+
+#text-refactor-input {
+    outline: 1px solid var(--vscode-editor-foreground);
+}
+
+#text-refactor-input:focus {
+    outline: 1px solid #497BEF;
 }
 
 #clear-chat-button {

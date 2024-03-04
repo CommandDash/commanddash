@@ -7,9 +7,10 @@ import { refactorCode } from "../tools/refactor/refactor_from_instructions";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
+import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "fluttergpt.chatView";
+    public static readonly viewType = "dashai.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     aiRepo?: GeminiRepository;
@@ -142,6 +143,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
+        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+
         logEvent('new-chat-start', { from: 'command-deck' });
     }
 
@@ -160,7 +163,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         data.instructions = data.instructions.replace(`/${actionType}`, '').trim();
         const chipIds: string[] = data.chipId;
         if (actionType === 'refactor') {
-            this._publicConversationHistory.push({ role: 'user', parts: data.message });
+            this._publicConversationHistory.push({ role: 'user', parts: data.message, agent: '/refactor' });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
             const result = await RefactorActionManager.handleRequest(chipsData, chipIds, data, this.aiRepo!, this.context, this.analyzer!, this);
@@ -192,6 +195,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
+        
 
         return updatedOnboardingChatHtml;
     }
@@ -255,7 +259,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            await vscode.commands.executeCommand('dashai.chatView.focus');
         } else {
             this._view?.show?.(true);
         }

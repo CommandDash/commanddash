@@ -27,7 +27,7 @@ export class ErrorCodeActionProvider implements vscode.CodeActionProvider {
 				const fixErrorsAction = new vscode.CodeAction("✨ Auto-Fix", vscode.CodeActionKind.QuickFix);
 				fixErrorsAction.command = {
 					arguments: [this.analyzer, errors, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange?.symbol.element.name],
-					command: "fluttergpt.fixErrors",
+					command: "dashai.fixErrors",
 					title: "Fix errors",
 				};
 				functionAction.push(fixErrorsAction);
