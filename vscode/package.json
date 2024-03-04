@@ -42,7 +42,7 @@
         {
           "id": "webview",
           "title": "CommandDash",
-          "icon": "./media/icon.png"
+          "icon": "./media/activity-icon.png"
         }
       ]
     },
