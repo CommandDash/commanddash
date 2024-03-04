@@ -100,10 +100,11 @@ const codeSnippetButton = document.getElementById("code-snippets");
 let isApiKeyValid = false;
 let areDependenciesInstalled = false;
 let conversationHistory = [];
-let chipsData = {}; // {'lib/main.dart [1-2]': {code: 'console.log('hello')'}}
+let chipsData = {};
 let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
+let commandEnable = false;
 
 //initialising visual studio code library
 let vscode = null;
@@ -149,9 +150,122 @@ const properties = [
 ];
 
 let agents = ['workspace'];
-const commands = [];
+const commands = ['refactor'];
+
 // Add your additional commands and agents
 const agentCommandsMap = {};
+
+const commandsExecution = {
+    'refactor': {
+        'exe': (input) => {
+            commandEnable = true;
+            input.textContent = '';
+
+            let isChipsFocused = false;
+            let isTextRefactorInputFocused = false;
+
+            const command = document.createElement('span');
+            const textRefactorInput = document.createElement('span');
+            const refactor = document.createElement('span');
+            const referenceText = document.createElement('span');
+            const refactorTextNode = document.createElement('span');
+            const referenceIdSpan = document.createElement('span');
+
+            referenceIdSpan.id = "reference-id";
+            referenceIdSpan.contentEditable = "false";
+            referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
+
+            refactorTextNode.textContent = "/refactor\u00A0";
+            refactorTextNode.classList.add("text-pink-400");
+
+            referenceText.id = "add-reference-text";
+            referenceText.contentEditable = "false";
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "border", "cursor-pointer", "border-pink-400");
+            referenceText.textContent = "Add reference";
+            referenceText.addEventListener("click", function (event) {
+                isChipsFocused = !isChipsFocused;
+                isChipsFocused ? referenceText.classList.add("border-orange-500") : referenceText.classList.remove("border-orange-500");
+                if (isChipsFocused) {
+                    isTextRefactorInputFocused = false;
+                }
+            });
+
+            command.id = "command-span";
+            command.appendChild(refactorTextNode);
+            command.appendChild(referenceText);
+            command.appendChild(referenceIdSpan);
+
+            refactor.id = "text-refactor-container";
+            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] inline-block">Text to refactor</span>`;
+            refactor.classList.add("inline-block");
+
+            textRefactorInput.id = "text-refactor-input";
+            textRefactorInput.contentEditable = "true";
+            textRefactorInput.tabIndex = "0";
+            textRefactorInput.classList.add("px-2", "border", "border-pink-400", "inline-block");
+            textRefactorInput.addEventListener("focus", function (event) {
+                if (isTextRefactorInputFocused) {
+                    isChipsFocused = false;
+                }
+                referenceText.classList.remove("border-orange-500");
+                isTextRefactorInputFocused = !isTextRefactorInputFocused;
+            });
+
+            textRefactorInput.appendChild(document.createTextNode("\u00A0"));
+
+            refactor.appendChild(textRefactorInput);
+            command.appendChild(refactor);
+            input.appendChild(command);
+
+            setCaretToEnd(textRefactorInput);
+
+            tippy('#add-reference-text', {
+                content: "Add reference",
+                theme: "flutter-blue"
+            });
+
+            input.addEventListener('keydown', function (event) {
+                let keyCaught = false;
+                switch (event.key) {
+                    case "Tab":
+                        if (isTextRefactorInputFocused) {
+                            isTextRefactorInputFocused = false;
+                            isChipsFocused = true;
+                            referenceText.classList.add("border-orange-500");
+                            textRefactorInput.blur();
+                        } else {
+                            isChipsFocused = false;
+                            isTextRefactorInputFocused = true;
+                            textRefactorInput.focus();
+                            setCaretToEnd(textRefactorInput);
+                        }
+                        keyCaught = true;
+                        break;
+
+                    case "Backspace":
+                        if (textRefactorInput.textContent.trim() === "" && textRefactorInput.innerText.trim() === "") {
+                            // Clear the text
+                            input.removeChild(command);
+                            setTimeout(() => {
+                                input.focus();
+                                adjustHeight();
+                            }, 0);
+                        }
+                        break;
+                }
+                if (keyCaught) {
+                    event.preventDefault();
+                }
+            });
+
+            setTimeout(() => {
+                adjustHeight();
+                textRefactorInput.focus();
+            }, 0);
+
+        }
+    }
+};
 
 // Concatenate agent-specific commands to the agents array
 agents = agents.concat(
@@ -242,28 +356,25 @@ class CommandDeck {
         return () => {
             const option = this.options[active];
 
-            // Assuming this.ref is a contenteditable element
-            const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
-            const preMention = this.ref.textContent.substring(0, this.triggerIdx);
-            const postMention = this.ref.textContent.substring(range.endOffset);
+            const isSlashOptionAvailable = commandsExecution.hasOwnProperty(option);
 
-            const trigger = this.ref.textContent[this.triggerIdx];
-            // Replace the mention with the selected option along with '@'
-            const mentionNode = document.createTextNode(`${trigger}${option}`);
-            this.ref.textContent = ''; // Clear existing content
-            this.ref.appendChild(document.createTextNode(preMention));
-            this.ref.appendChild(mentionNode);
-            this.ref.appendChild(document.createTextNode(postMention));
+            if (isSlashOptionAvailable) {
+                commandsExecution[option].exe(this.ref);
+            } else {
+                const trigger = this.ref.textContent[this.triggerIdx];
+                this.ref.textContent = "";
+                const mentionNode = document.createElement("span");
+                mentionNode.id = "special-commands";
+                mentionNode.classList.add("text-blue-500", "inline-block");
+                mentionNode.contentEditable = false;
+                mentionNode.textContent = `${trigger}${option}\u200B`;
+                this.ref.appendChild(mentionNode);
+                this.ref.appendChild(document.createTextNode("\u00A0"));
+                setCaretToEnd(this.ref);
+            }
 
-            // Move the cursor to the end of the mention
-            range.setStart(mentionNode, option.length + 1); // +1 for '@'
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-
-            this.closeMenu();
             this.ref.focus();
+            this.closeMenu();
         };
     }
 
@@ -294,29 +405,19 @@ class CommandDeck {
         const coords = getCaretCoordinates(this.ref, positionIndex);
         const { top, left } = this.ref.getBoundingClientRect();
 
+        const savedCaretPosition = positionIndex;
+
         setTimeout(() => {
             this.active = 0;
             this.left = window.scrollX + coords.left + left + this.ref.scrollLeft;
             this.top = window.scrollY + coords.top + top + coords.height - this.ref.scrollTop;
             this.triggerIdx = triggerIdx;
+
             this.renderMenu();
 
-            // this.applyHighlightToExistingActions(textBeforeCaret, positionIndex);
+            this.ref.selectionStart = this.ref.selectionEnd = savedCaretPosition;
         }, 0);
     }
-
-    applyHighlightToExistingActions(originalText, positionIndex) {
-        const trigger = this.ref.textContent[this.triggerIdx];
-        const allActions = [...agents, ...commands];
-
-        // Highlight workspace mentions specifically
-        const workspaceRegex = /\B@workspace\b/gi;
-        const highlightedText = originalText.replace(workspaceRegex, (match) => `<span class="text-black">${match}</span>`);
-
-        // Set HTML content
-        this.ref.innerHTML = highlightedText;
-    }
-
 
     onKeyDown(ev) {
         let keyCaught = false;
@@ -337,6 +438,23 @@ class CommandDeck {
                     this.selectItem(this.active)();
                     keyCaught = true;
                     break;
+                case 'Backspace':
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0);
+                    const mentionNode = document.getElementById("special-commands");
+
+                    if (mentionNode) {
+                        const prevNode = mentionNode.previousSibling;
+                        const nextNode = mentionNode.nextSibling;
+                        this.ref.removeChild(mentionNode);
+
+                        // Restore the cursor position 
+                        range.setStartAfter(prevNode || nextNode);
+                        range.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                    break;
             }
         }
 
@@ -355,6 +473,7 @@ class CommandDeck {
         this.menuRef.style.left = this.left + 'px';
         this.menuRef.style.top = (this.top - this.menuRef.offsetHeight - caretHeight) + 'px';
         this.menuRef.innerHTML = '';
+        this.menuRef.classList.add("p-1");
 
         this.options.forEach((option, idx) => {
             const trigger = this.ref.textContent[this.triggerIdx];
@@ -390,20 +509,21 @@ class CommandDeck {
     });
 
     sendButton.addEventListener("click", (event) => {
-        let prompt = textInput.textContent;
+        // let prompt = textInput.textContent;
 
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
+        // for (const chip in chipsData) {
+        //     if (prompt.includes(chip)) {
+        //         prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+        //     }
+        // }
 
-        vscode.postMessage({ type: "prompt", value: prompt });
-        googleApiKeyHeader.classList.add("hidden");
-        if (onboardingCompleted) {
-            textInput.textContent = '';
-        }
-        adjustHeight();
+        // vscode.postMessage({ type: "prompt", value: prompt });
+        // googleApiKeyHeader.classList.add("hidden");
+        // if (onboardingCompleted) {
+        //     textInput.textContent = '';
+        // }
+        // adjustHeight();
+        submitResponse();
     });
 
     textInput.addEventListener("paste", (event) => {
@@ -419,7 +539,72 @@ class CommandDeck {
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
+    //adding tooltips to the elements
+    addToolTipsById();
+
 })();
+
+function addToolTipsById() {
+
+    tippy('#agents', {
+        content: "Specialized agents",
+        theme: "flutter-blue"
+    });
+
+    tippy('#slash-commands', {
+        content: "Slash commands",
+        theme: "flutter-blue"
+    });
+
+    tippy('#dart-add-reference', {
+        content: "Use 'Add to Reference' in menu to attach selected code to chat",
+        theme: "flutter-blue"
+    });
+}
+
+function submitResponse() {
+    const textRefactor = document.getElementById("text-to-refactor-span");
+    if (textRefactor) {
+        textRefactor.remove();
+    }
+    let prompt = textInput.textContent;
+    if (!prompt.startsWith('/')) {
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
+        }
+    }
+    if (!prompt.startsWith('/')) {
+        vscode.postMessage({ type: "prompt", value: prompt });
+    } else {
+        debugger;
+        const chipId = [];
+        const instructions = prompt;
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+                chipId.push(chip);
+            }
+        }
+
+        vscode.postMessage({
+            type: "action",
+            value: JSON.stringify({
+                'message': prompt,
+                'chipsData': chipsData,
+                'chipId': chipId,
+                'instructions': instructions,
+            }),
+        });
+
+        if (commandEnable) {
+            commandEnable = false;
+        }
+    }
+    textInput.textContent = "";
+    adjustHeight();
+}
 
 function handleSubmit(event) {
     const resolveFn = async (query, type) => {
@@ -477,21 +662,7 @@ function handleSubmit(event) {
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
         event.preventDefault();
-        let prompt = textInput.textContent;
-
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
-
-        vscode.postMessage({
-            type: "prompt",
-            value: prompt,
-        });
-
-        textInput.textContent = "";
-        adjustHeight();
+        submitResponse();
     }
 
     if (event.key === "Backspace") {
@@ -507,6 +678,14 @@ function handleSubmit(event) {
                 lastChip.parentNode.removeChild(lastChip);
             }
         }
+
+        setTimeout(() => {
+            if (textInput.textContent.trim().length === 0) {
+                // Perform some action
+                commandEnable = false;
+            }
+        }, 500);
+
     }
 
     const target = event.target;
@@ -520,6 +699,20 @@ function ifKeyExists() {
     vscode.postMessage({
         type: "checkKeyIfExists",
     });
+}
+
+function setCaretToEnd(target) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+    range.selectNodeContents(target);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    target.focus();
+    range.detach(); // optimization
+
+    // set scroll to the end if multiline
+    target.scrollTop = target.scrollHeight;
 }
 
 function removePlaceholder() {
@@ -638,37 +831,39 @@ function readTriggeredMessage() {
             case 'addToReference':
                 removePlaceholder();
                 createReferenceChips(JSON.parse(message.value));
-                adjustHeight();
+                setTimeout(() =>
+                    adjustHeight(),
+                0);
                 break;
+            case 'setInput':
+                textInput.textContent = message.value;
+                if (message.value.startsWith('/')) {
+                    const action = message.value.split(' ')[0].slice(1);
+                    commandsExecution[action].exe(textInput);
+                }
         }
     });
 }
-
-// command to open command dash
-//fluttergpt.chatView.focus
 
 function createReferenceChips(references) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
-
+    references.chipId = chipId;
     if (document.getElementById(chipId)) {
         return;
     }
 
     chip.innerHTML = `${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
     chip.id = chipId;
-    chip.setAttribute("draggable", "true");
     chip.setAttribute("contenteditable", "false");
-    chip.addEventListener("dragstart", dragStart);
-    chip.classList.add("chips");
-
-    function dragStart(event) {
-        event.dataTransfer.setData('text/plain', this.innerText);
-    }
 
     chipsData = { ...chipsData, [chipId]: references };
-    insertChipAtCursor(chip, textInput);
+    if (commandEnable) {
+        insertAtReference(chip);
+    } else {
+        insertChipAtCursor(chip, textInput);
+    }
 };
 
 function truncateText(str) {
@@ -703,6 +898,14 @@ function drop(event) {
 }
 
 function insertChipAtCursor(chip, textInput) {
+    //chip property setting
+    chip.setAttribute("draggable", "true");
+    chip.addEventListener("dragstart", dragStart);
+    chip.classList.add("chips");
+
+    function dragStart(event) {
+        event.dataTransfer.setData('text/plain', this.innerText);
+    }
     // Get the current selection
     const selection = window.getSelection();
     const nonBreakingSpace = document.createElement("span");
@@ -728,6 +931,20 @@ function insertChipAtCursor(chip, textInput) {
         textInput.appendChild(chip);
         textInput.appendChild(nonBreakingSpace);
     }
+}
+
+function insertAtReference(chip) {
+
+    chip.classList.add("chips-reference");
+
+    const referenceChip = document.getElementById("reference-id");
+    const referenceText = document.getElementById("add-reference-text");
+    if (referenceText) {
+        referenceText.remove();
+    }
+    referenceChip.innerHTML = "";
+    referenceChip.appendChild(chip);
+    referenceChip.appendChild(document.createTextNode("\u00A0"));
 }
 
 function debounce(func, wait, immediate = false) {
@@ -864,13 +1081,14 @@ function displayMessages() {
 
     conversationHistory.forEach((message) => {
         const messageElement = document.createElement("div");
-        const userElement = document.createElement("p");
+        const roleElement = document.createElement("p");
         const contentElement = document.createElement("p");
+        const buttonContainer = document.createElement("p");
         if (message.role === "model") {
             modelCount++;
 
-            userElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${flutterGPT}<span class="font-bold text-md ml-1">FlutterGPT</span></div>`;
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#3079D8]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#3079D8]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
             if (modelCount === 1 && !stepOneCompleted) {
@@ -889,19 +1107,43 @@ function displayMessages() {
                 onboardingText.classList.add("hidden");
                 tryFlutterText.classList.add("hidden");
             }
-        } else {
-            userElement.innerHTML = "<strong>You</strong>";
-            userElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
+        } else if (message.role === "user") {
+            roleElement.innerHTML = "<strong>You</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
+        } else if (message.role === "dash") {
+            //UI implementation
+            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#d66ab1]");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#d66ab1]", "text-white");
+            contentElement.innerHTML = markdownToPlain(message.parts);
+            buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5",
+                "bg-[#d66ab1]");
+            const messageIndex = conversationHistory.indexOf(message);
+            message?.buttons.forEach((type) => {
+                const button = document.createElement("div");
+                button.classList.add("px-2.5", "py-1.5", "bg-black", "text-xs", "text-white", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                button.textContent = type;
+                button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, messageIndex, type));
+                buttonContainer.appendChild(button);
+            });
         }
         messageElement.classList.add("mt-1");
-        messageElement.appendChild(userElement);
+        messageElement.appendChild(roleElement);
         messageElement.appendChild(contentElement);
+        messageElement.appendChild(buttonContainer);
         responseContainer.appendChild(messageElement);
         scrollToBottom();
     });
     setResponse();
+}
+
+function handleButtonEvent(agent, data, messageId, buttonType) {
+    vscode.postMessage({
+        type: "dashResponse",
+        value: JSON.stringify({ agent, data, messageId, buttonType })
+    });
 }
 
 function setResponse() {
