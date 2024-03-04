@@ -4,10 +4,9 @@
 </p>
 <h1 align="center">CommandDash (Beta)</h1>
 <div align="center">
+<h3> Your Flutter AI Autopilot with Gemini Code & Vision.</h3>
 
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![VScode version](https://img.shields.io/visual-studio-marketplace/v/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
-
-<h3> Your Flutter AI Autopilot with Gemini Code & Vision.</h3>
 </div>
 <img src="/assets/docs/poster.jpg"></a>
 
