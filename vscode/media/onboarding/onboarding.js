@@ -237,6 +237,7 @@ let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
 let commandEnable = false;
+let shortCutHints = '';
 
 //initialising visual studio code library
 let vscode = null;
@@ -319,7 +320,7 @@ const commandsExecution = {
             referenceText.id = "add-reference-text";
             referenceText.contentEditable = "false";
             referenceText.tabIndex = 0;
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]");
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]", "mt-1");
             referenceText.textContent = "Code Attachment";
             referenceText.addEventListener("click", function (event) {
                 isChipsFocused = !isChipsFocused;
@@ -359,7 +360,7 @@ const commandsExecution = {
             setCaretToEnd(textRefactorInput);
             //TODO[YASH]: Use platform specific shortcut naming. checkout shortcut-hint-utils
             tippy('#add-reference-text', {
-                content: "Use 'CMD+R' to attach selected code in editor",
+                content: `Use ${shortCutHints} to attach selected code in editor`,
                 theme: "flutter-blue"
             });
 
@@ -664,8 +665,6 @@ class CommandDeck {
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-    //adding tooltips to the elements
-    addToolTipsById();
 
 })();
 
@@ -683,7 +682,7 @@ function addToolTipsById() {
     });
 
     tippy('#dart-add-reference', {
-        content: `Use 'Attach Snippet to Dash' or 'CMD+R' after selecting the code in editor`,
+        content: `Use 'Attach Snippet to Dash' or ${shortCutHints} after selecting the code in editor`,
         theme: "flutter-blue"
     });
 }
@@ -770,7 +769,7 @@ function handleSubmit(event) {
     const menuItemFn = (action, setItem, selected, trigger) => {
         const div = document.createElement('div');
         div.setAttribute('role', 'option');
-        div.className = 'menu-item text-rose-400';
+        div.className = `menu-item ${trigger === '@' ? 'text-blue-500' : 'text-rose-500'}`;
         if (selected) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
@@ -969,6 +968,13 @@ function readTriggeredMessage() {
                     const action = message.value.split(' ')[0].slice(1);
                     commandsExecution[action].exe(textInput);
                 }
+                break;
+            case 'shortCutHints':
+                debugger;
+                shortCutHints = message.value;
+                //adding tooltips to the elements
+                addToolTipsById();
+                break;
         }
     });
 }

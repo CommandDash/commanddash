@@ -12,3 +12,14 @@ export function shortcutInlineCodeGeneration(minified: boolean = false): string{
     return stringRepresentation;
 }
 
+export function shortcutInlineCodeRefactor(minified: boolean = false): string{
+    const platform = os.platform();
+    let stringRepresentation;
+
+    if (platform === 'win32' || platform === 'linux') {
+        stringRepresentation = minified? 'ctrl+→' : '(ctrl) + (R)';
+    } else  {
+        stringRepresentation = minified? '⌘+→' : '(⌘) + (R)';
+    }
+    return stringRepresentation;
+}

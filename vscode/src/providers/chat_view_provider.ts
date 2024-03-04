@@ -7,6 +7,7 @@ import { refactorCode } from "../tools/refactor/refactor_from_instructions";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
+import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dashai.chatView";
@@ -142,6 +143,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
+        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+
         logEvent('new-chat-start', { from: 'command-deck' });
     }
 
@@ -192,6 +195,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
+        
 
         return updatedOnboardingChatHtml;
     }
