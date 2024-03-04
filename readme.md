@@ -9,7 +9,8 @@
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 
-<h3 align="center">Your Flutter AI Copilot powered with Gemini Code & Vision</h3>
+<h3 align="center">Your Flutter AI Autopilot powered with Gemini Code & Vision</h3>
+<img src="/assets/docs/poster.jpg"></a>
 
 -----------------
 Dash AI is an open-source coding assistant being built for Flutter Devs. It is aimed to not only write code, but also run and debug it. **This allows Dash AI to assist beyond code completion, and autopilot routine tasks for you.** 
@@ -82,7 +83,7 @@ This allows us to mimic developer behavior and automate large-scale tasks in the
 
 ## Contributing
 
-A copilot for all is best built when all of us contribute. You can make contributions to the VSCODE or IntelliJ extension or also to [CommandDash CLI](https://github.com/Welltested-AI/commanddash) shared between the extensions.
+A coding assistant for all is best built when all of us contribute. You can make contributions to the VSCODE or IntelliJ extension or also to [CommandDash CLI](https://github.com/Welltested-AI/commanddash) shared between the extensions.
 
 ### Ways to contribute
 
