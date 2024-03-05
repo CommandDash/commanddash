@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import { CacheManager } from '../../utilities/cache-manager';
-import * as os from 'os';
+import { shortcutInlineCodeGeneration } from '../../utilities/shortcut-hint-utils';
 
 
 export async function activateInlineHints(cacheManager: CacheManager) {
     const completionDecoration = vscode.window.createTextEditorDecorationType({
         cursor: 'pointer',
         after: {
-            contentText: getCompletionInlineHintText(),
+            contentText: `Use ${shortcutInlineCodeGeneration()}  to auto complete using CommandDash`,
             color: 'gray',
             fontStyle: 'italic',
             fontWeight: 'bold',
@@ -37,14 +37,14 @@ export async function activateInlineHints(cacheManager: CacheManager) {
             const isComment = activeEditor.document.lineAt(currentLine).text.trim().startsWith('//');
 
             // If the user has not used inline completion for 5 times, show hint for the same
-            if (inlineCount < 5) {
+            // if (inlineCount < 5) {
                 if (lineText.length === 0) {
                     if (isComment || await isFirstLineOfSymbol(activeEditor)) {
                         // Set decoration on the current line
                         const range = new vscode.Range(currentLine + 1, activeEditor.document.lineAt(currentLine).range.end.character, currentLine + 1, activeEditor.document.lineAt(currentLine).range.end.character);
                         activeEditor.setDecorations(completionDecoration, [{ range }]);
                     }
-                }
+                // }
             }
         }
     });
@@ -80,18 +80,4 @@ export async function isFirstLineOfSymbol(editor: vscode.TextEditor): Promise<bo
     }
 
     return false;
-}
-
-function getCompletionInlineHintText(): string {
-    const platform = os.platform();
-    let hintText = 'Use (⌘) + (→) to auto complete using FlutterGPT';
-
-    if (platform === 'win32') {
-        hintText = 'Use (ctrl) + (→) to auto complete using FlutterGPT';
-    } else if (platform === 'darwin') {
-        hintText = 'Use (⌘) + (→) to auto complete using FlutterGPT';
-    } else if (platform === 'linux') {
-        hintText = 'Use (ctrl) + (→) to auto complete using FlutterGPT';
-    }
-    return hintText;
 }

@@ -72,16 +72,16 @@ export async function initCommands(context: vscode.ExtensionContext, geminiRepo:
     const generationRepository: GenerationRepository = await getUserPrefferedModel();
     // List of commands to register, with their names and options.
     const commands = [
-        { name: 'fluttergpt.addToReference', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.createCodeFromBlueprint', handler: () => createCodeFromBlueprint(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.createCodeFromDescription', handler: () => createCodeFromDescription(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'fluttergpt.refactorCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(generationRepository, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'fluttergpt.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'fluttergpt.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'fluttergpt.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } },
-        { name: 'fluttergpt.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({type: 'clearCommandDeck'}), options: {isCommand: true, isMenu: true, isShortcut: false} },
-        { name: 'fluttergpt.profile', handler: () => flutterGPTViewProvider?.postMessageToWebview({type: 'profileCommandDeck'}), options: {isCommand: true, isMenu: true, isShortcut: false} }
+        { name: 'dashai.attachToDash', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
+        { name: 'dashai.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
+        { name: 'dashai.createCodeFromBlueprint', handler: () => createCodeFromBlueprint(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
+        { name: 'dashai.createCodeFromDescription', handler: () => createCodeFromDescription(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
+        { name: 'dashai.refactorCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(generationRepository, context.globalState, range, analyzer, elementName, context, flutterGPTViewProvider, undefined, undefined,), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'dashai.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'dashai.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'dashai.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } },
+        { name: 'dashai.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'dashai.profile', handler: () => flutterGPTViewProvider?.postMessageToWebview({type: 'profileCommandDeck'}), options: {isCommand: true, isMenu: true, isShortcut: false} }
         // Add more commands as needed.
     ];
 

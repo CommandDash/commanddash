@@ -7,6 +7,7 @@ export async function handleDiffViewAndMerge(
     orignalCode: string,
     optimizedCode: string,
     context: vscode.ExtensionContext,
+    showMergeConfimation: boolean = true
 ): Promise<void> {
 
     const posAtTime = editor.selection.active;
@@ -28,42 +29,43 @@ export async function handleDiffViewAndMerge(
         rhsUri,
         "Current Code ↔ Updated Code",
     );
-
-    // Ask user if they want to merge changes
-    let userChoice = await vscode.window.showInformationMessage(
-        'Do you want to merge these changes?',
-        'Yes', 'No'
-    );
-
-    if (!userChoice){
-        return ; 
-    }
-
-    let reopenEditor = async () => {
-        let document = await vscode.workspace.openTextDocument(originalCodeUri);
-        await vscode.window.showTextDocument(document, {
-          viewColumn: editor.viewColumn,
-          preserveFocus: false,
-          selection: new vscode.Range(posAtTime, posAtTime)
-        });
-    };
-    
-   
-    if (userChoice === 'Yes') {
-        vscode.commands.executeCommand('workbench.action.closeActiveEditor'); // assuming apply edit time will be enough for the diff to close so user doesn't see a jank.
-        // Apply the optimized code
-        const workspaceEdit = new vscode.WorkspaceEdit();
-        const entireDocumentRange = new vscode.Range(
-            editor.document.positionAt(0),
-            editor.document.positionAt(editor.document.getText().length)
+    if (showMergeConfimation) {
+        // Ask user if they want to merge changes
+        let userChoice = await vscode.window.showInformationMessage(
+            'Do you want to merge these changes?',
+            'Yes', 'No'
         );
-        workspaceEdit.replace(originalCodeUri, entireDocumentRange, optimizedCode);
-        if (await vscode.workspace.applyEdit(workspaceEdit)) {
+
+        if (!userChoice) {
+            return;
+        }
+
+        let reopenEditor = async () => {
+            let document = await vscode.workspace.openTextDocument(originalCodeUri);
+            await vscode.window.showTextDocument(document, {
+                viewColumn: editor.viewColumn,
+                preserveFocus: false,
+                selection: new vscode.Range(posAtTime, posAtTime)
+            });
+        };
+
+
+        if (userChoice === 'Yes') {
+            vscode.commands.executeCommand('workbench.action.closeActiveEditor'); // assuming apply edit time will be enough for the diff to close so user doesn't see a jank.
+            // Apply the optimized code
+            const workspaceEdit = new vscode.WorkspaceEdit();
+            const entireDocumentRange = new vscode.Range(
+                editor.document.positionAt(0),
+                editor.document.positionAt(editor.document.getText().length)
+            );
+            workspaceEdit.replace(originalCodeUri, entireDocumentRange, optimizedCode);
+            if (await vscode.workspace.applyEdit(workspaceEdit)) {
+                await reopenEditor();
+            }
+        } else {
+            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
             await reopenEditor();
         }
-    } else {
-        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-        await reopenEditor();
     }
 
     // remove the temporary documents

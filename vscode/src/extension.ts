@@ -70,6 +70,20 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
+    // Check if the Gemini API key is set
+    const config = vscode.workspace.getConfiguration('fluttergpt');
+    const apiKey = config.get<string>('apiKey');
+    if (!apiKey || isOldOpenAIKey(apiKey)) {
+        var chatViewProvider = initWebview(context, undefined, analyzer);
+        showMissingApiKey();
+    }
+    console.log('Congratulations, "fluttergpt" is now active!');
+    dotenv.config({ path: path.join(__dirname, '../.env') });
+    activateTelemetry(context);
+    logEvent('activated');
+
+    // Dart-code extenstion stuff
+
     var _inlineErrorCommand: vscode.Disposable;
     try {
         let geminiRepo = await initGemini();
@@ -77,7 +91,7 @@ export async function activate(context: vscode.ExtensionContext) {
     } catch (error) {
         console.error(error);
         // Handle inoine completion shortcut
-        _inlineErrorCommand = vscode.commands.registerCommand('fluttergpt.createInlineCodeCompletion', () => {
+        _inlineErrorCommand = vscode.commands.registerCommand('dashai.createInlineCodeCompletion', () => {
             showMissingApiKey();
         });
     }
@@ -111,9 +125,9 @@ function isOldOpenAIKey(apiKey: string): boolean {
     return apiKey.startsWith('sk-');
 }
 
-function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiRepository) {
+function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiRepository, analyzer?: ILspAnalyzer) {
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
-    const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo);
+    const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo, analyzer);
     // Register the provider with the extension's context
         context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(FlutterGPTViewProvider.viewType, chatProvider,
@@ -134,7 +148,7 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
     if (!chatViewProvider) {
-        chatViewProvider = initWebview(context, geminiRepo);
+        chatViewProvider = initWebview(context, geminiRepo, analyzer);
     }
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);

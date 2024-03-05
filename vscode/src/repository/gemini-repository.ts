@@ -401,7 +401,7 @@ export class GeminiRepository extends GenerationRepository {
     public async refactorCode(finalstring: string, contextualCode: string | undefined, instructions: string, globalState: vscode.Memento): Promise<string | undefined> {
         let referenceEditor = getReferenceEditor(globalState);
         let prompt = 'You are a Flutter/Dart assistant helping user modify code within their editor window.';
-        prompt += `Modification instructions from user: ${instructions}. Please find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalstring + '\n```\n';
+        prompt += `Modification instructions from user:\n${instructions}.\n\nPlease find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n` + '```\n' + finalstring + '\n```\n';
 
         prompt = appendReferences(referenceEditor, prompt);
         if (contextualCode) {
@@ -411,7 +411,11 @@ export class GeminiRepository extends GenerationRepository {
         1. Describe the selected piece of code.
         2. What is the intent of user's modification?
         3. How do you plan to achieve that? [Don't output code yet]
-        4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION. Since this is without human review, you need to output the precise CURSOR_SELECTION`;
+        4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION. Since this is without human review, you need to output the precise CURSOR_SELECTION
+        
+        IMPORTANT NOTE: Please make sure to output the modified code in a single code block.
+        Do not just give explanation prose but also give the final code at last.
+        `;
         console.log(prompt);
         const result = await this.getCompletion([{
             'role': 'user',

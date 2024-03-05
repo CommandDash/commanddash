@@ -28,7 +28,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			refactorCode.isPreferred = true;
 			refactorCode.command = {
 				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
-				command: "fluttergpt.refactorCode",
+				command: "dashai.refactorCode",
 				title: "Refactor code",
 			};
 			functionAction.push(refactorCode);
@@ -39,7 +39,7 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			optimizeFunction.isPreferred = true;
 			optimizeFunction.command = {
 				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
-				command: "fluttergpt.optimizeCode",
+				command: "dashai.optimizeCode",
 				title: "Optimize Function",
 			};
 

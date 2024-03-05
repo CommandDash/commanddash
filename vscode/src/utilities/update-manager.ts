@@ -56,7 +56,7 @@ export class UpdateManager {
                 version = extractedVersion;
             }
         } catch (err) {
-            console.log('version fetch error:', err)
+            console.log('version fetch error:', err);
         }
         // version will be undefined either in case of network failure or version pattern match failure
         return version;
