@@ -1,25 +1,5 @@
 import { DartCLIClient } from "./dart-cli-client";
-const client = new DartCLIClient();
-    const task = client.newTask();
-    // Handle client side steps during task processing. 
-    task.onProcessStep('random_data_kind', (message) => {
-        /// any complex interaction to come up with response data.
-        const additionalData = { value: "unique_value_2" };
-    
-        // Respond back to CLI in every case. Either with data if required or just a confirmation.
-        client.sendProcessStepResponse(message.id, additionalData);
-    
-        // /// [Optional] Listeners are disposed on their own once the task is completed. But if some task is continued for entire lifecycle, we may disconnect the listeners if the one-time process step is handled.
-        // client.eventEmitter.removeListener(`get_additional_data_already_cached_files`, handler);
-        });
 
-    try {
-        /// Request the client to process the task and handle result or error
-        const response = await task.run({ kind: "random_task", data: {current_embeddings: {}} });
-        console.log("Processing completed: ", response);
-    } catch (error) {
-        console.error("Processing error: ", error);
-    }
 export class Task {
     private taskId: number;
     private dartClient: DartCLIClient;
