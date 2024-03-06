@@ -147,7 +147,7 @@
         }
       },
       {
-        "command": "fluttergpt.profile",
+        "command": "dashai.profile",
         "title": "Go to profile",
         "icon": {
           "light": "resources/light/profile.svg",
@@ -229,7 +229,7 @@
           "group": "navigation"
         },
         {
-          "command": "fluttergpt.profile",
+          "command": "dashai.profile",
           "group": "navigation"
         }
       ],

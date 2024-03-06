@@ -28,6 +28,8 @@ export const DART_MODE: vscode.DocumentFilter & { language: string } = { languag
 
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
+var chatViewProvider: any = null;
+
 export async function activate(context: vscode.ExtensionContext) {
 
     (global as any).testExtensionContext = context;
@@ -36,7 +38,7 @@ export async function activate(context: vscode.ExtensionContext) {
     SecretApiKeyManager.instance.loadContext(context);
 
     //check for secret key inside config and shift it to secret storage. For current users
-    await  new ExposedApiKeyManager(SecretApiKeyManager.instance).checkAndShiftConfigApiKey();
+    await new ExposedApiKeyManager(SecretApiKeyManager.instance).checkAndShiftConfigApiKey();
 
 
     //Check for update on activation of extension
@@ -48,12 +50,12 @@ export async function activate(context: vscode.ExtensionContext) {
     activateInlineHints(cacheManager);
 
     // Check if the Gemini API key is set
-    checkForApiKeyAndAskIfMissing(context);
+    // checkForApiKeyAndAskIfMissing(context);
 
-    
+
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
-    
+
     logEvent('activated');
 
     // Dart-code extenstion stuff
@@ -73,10 +75,10 @@ export async function activate(context: vscode.ExtensionContext) {
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
     const apiKey = config.get<string>('apiKey');
-    if (!apiKey || isOldOpenAIKey(apiKey)) {
-        var chatViewProvider = initWebview(context, undefined, analyzer);
-        showMissingApiKey();
-    }
+    // if (!apiKey || isOldOpenAIKey(apiKey)) {
+    //     var chatViewProvider = initWebview(context, undefined, analyzer);
+    //     showMissingApiKey();
+    // }
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
     activateTelemetry(context);
@@ -96,14 +98,14 @@ export async function activate(context: vscode.ExtensionContext) {
         });
     }
     finally {
-        
-        
+
+
         // will only trigger if the apikey is changed so no need to validate again just call necessary functions
         SecretApiKeyManager.instance.onDidChangeApiKey(async event => {
             //TODO: solve view provider already registered error when changing the key in ss
             try {
-                var chatViewProvider = initWebview(context);
-                const geminiRepo =await initGemini();
+                // chatViewProvider = initWebview(context);
+                const geminiRepo = await initGemini();
                 if (_inlineErrorCommand) {
                     // Dispose the error command if it exists
                     _inlineErrorCommand!.dispose();
@@ -111,9 +113,9 @@ export async function activate(context: vscode.ExtensionContext) {
                 if (chatViewProvider) {
                     chatViewProvider.aiRepo = geminiRepo;
                 }
-                initFlutterExtension(context, geminiRepo, analyzer);
+                // initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
             } catch (error) {
-                                console.error(error);
+                console.error(error);
             }
         });
     }
@@ -129,7 +131,7 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
     // Create a new FlutterGPTViewProvider instance and register it with the extension's context
     const chatProvider = new FlutterGPTViewProvider(context.extensionUri, context, geminiRepo, analyzer);
     // Register the provider with the extension's context
-        context.subscriptions.push(
+    context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(FlutterGPTViewProvider.viewType, chatProvider,
             {
                 webviewOptions: { retainContextWhenHidden: true },
@@ -140,30 +142,31 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
     return chatProvider;
 }
 
-function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, chatViewProvider: FlutterGPTViewProvider | undefined = undefined) {
+function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, _chatViewProvider: FlutterGPTViewProvider | undefined = undefined) {
 
     const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
-    if (!chatViewProvider) {
-        chatViewProvider = initWebview(context, geminiRepo, analyzer);
+    if (!_chatViewProvider) {
+        _chatViewProvider = initWebview(context, geminiRepo, analyzer);
+        chatViewProvider = _chatViewProvider;
     }
 
     const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
-    initCommands(context, geminiRepo, analyzer, chatViewProvider);
+    initCommands(context, geminiRepo, analyzer, _chatViewProvider);
 
 }
 
 export async function checkApiKeyAndPrompt(context: vscode.ExtensionContext): Promise<boolean> {
-    
+
     return checkForApiKeyAndAskIfMissing(context);
-    
-// commented below code as logic is very much similar to above func, can revive it if needed. but make changes 
-// acc. to new changes in apiKey storage: ref- above func()  
+
+    // commented below code as logic is very much similar to above func, can revive it if needed. but make changes 
+    // acc. to new changes in apiKey storage: ref- above func()  
 
     // const config = vscode.workspace.getConfiguration('fluttergpt');
     // const apiKey = config.get<string>('apiKey');
@@ -200,9 +203,9 @@ export function promptGithubLogin(context: vscode.ExtensionContext): void {
 }
 
 async function initGemini(): Promise<GeminiRepository> {
-    
+
     console.debug("creating new gemini repo instance");
-   
+
     var apiKey = await SecretApiKeyManager.instance.getApiKey();
 
     if (!apiKey) {
@@ -221,7 +224,7 @@ async function checkForApiKeyAndAskIfMissing(context: vscode.ExtensionContext): 
     // if apikey and apiKeyFromSecretStorage both values are not present then we consider as a new user and show a
     //input box
     if ((!apiKey && !apiKeyFromSecretStorage) || isOldOpenAIKey(apiKey!)) {
-        
+
         initWebview(context);
         //TODO : Maybe Remove this for new api key entering flow
         showMissingApiKey();
@@ -231,7 +234,7 @@ async function checkForApiKeyAndAskIfMissing(context: vscode.ExtensionContext): 
 }
 
 // not being used as new flow of getting api key is introduced
-async function getApiKeyFromUserAndStoreInSecretStorage(context: vscode.ExtensionContext){
+async function getApiKeyFromUserAndStoreInSecretStorage(context: vscode.ExtensionContext) {
     const apiKey = await vscode.window.showInputBox({
         prompt: 'Get API Key from here [link](https://makersuite.google.com/app/apikey)',
         placeHolder: 'API Key',
@@ -240,9 +243,9 @@ async function getApiKeyFromUserAndStoreInSecretStorage(context: vscode.Extensio
     });
 
     if (apiKey) {
-       SecretApiKeyManager.instance.setApiKey(apiKey);
+        SecretApiKeyManager.instance.setApiKey(apiKey);
         vscode.window.showInformationMessage('API key saved successfully!');
-        
+
     }
 }
 

@@ -194,11 +194,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async updateApiKey(apiKey: string){
         //TODO: check for valid key before adding
-        
         SecretApiKeyManager.instance.setApiKey(apiKey);
        let newApiKey = await SecretApiKeyManager.instance.getApiKey();
-       
-       
     }
 
     private _getHtmlForWebview(webview: vscode.Webview) {
