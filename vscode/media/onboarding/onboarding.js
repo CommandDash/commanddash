@@ -242,51 +242,13 @@ let shortCutHints = '';
 //initialising visual studio code library
 let vscode = null;
 
-const properties = [
-    'direction',
-    'boxSizing',
-    'width',
-    'height',
-    'overflowX',
-    'overflowY',
-
-    'borderTopWidth',
-    'borderRightWidth',
-    'borderBottomWidth',
-    'borderLeftWidth',
-    'borderStyle',
-
-    'paddingTop',
-    'paddingRight',
-    'paddingBottom',
-    'paddingLeft',
-
-    'fontStyle',
-    'fontVariant',
-    'fontWeight',
-    'fontStretch',
-    'fontSize',
-    'fontSizeAdjust',
-    'lineHeight',
-    'fontFamily',
-
-    'textAlign',
-    'textTransform',
-    'textIndent',
-    'textDecoration',
-
-    'letterSpacing',
-    'wordSpacing',
-
-    'tabSize',
-    'MozTabSize',
-];
-
-let agents = ['workspace'];
+let agents = ['workspace', 'settings'];
 const commands = ['refactor'];
 
 // Add your additional commands and agents
-const agentCommandsMap = {};
+const agentCommandsMap = {
+    'settings': ['apikey'],
+};
 
 //description for commands and agents
 const description = {
@@ -300,333 +262,67 @@ const commandsExecution = {
             commandEnable = true;
             input.textContent = '';
 
-            let isChipsFocused = false;
-            let isTextRefactorInputFocused = false;
+            const inputJson = {
+                "slug": "/refactor",
+                "field_text": "",
+                "text_field_layout": "<805088184> <736841542>",
+                "inputs": [
+                    {
+                        "id": "805088184",
+                        "display_text": "Code Attachment",
+                        "type": "code_input"
+                    },
+                    {
+                        "id": "736841542",
+                        "display_text": "Refactor instructions",
+                        "type": "string_input"
+                    }
+                ]
+            };
 
-            const command = document.createElement('span');
-            const textRefactorInput = document.createElement('span');
-            const refactor = document.createElement('span');
-            const referenceText = document.createElement('span');
-            const refactorTextNode = document.createElement('span');
-            const referenceIdSpan = document.createElement('span');
-
-            referenceIdSpan.id = "reference-id";
-            referenceIdSpan.contentEditable = "false";
-            referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
-
-            refactorTextNode.textContent = "/refactor\u00A0";
-            refactorTextNode.classList.add("text-pink-400");
-
-            referenceText.id = "add-reference-text";
-            referenceText.contentEditable = "false";
-            referenceText.tabIndex = 0;
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]", "mt-1");
-            referenceText.textContent = "Code Attachment";
-            referenceText.addEventListener("click", function (event) {
-                isChipsFocused = !isChipsFocused;
-                isChipsFocused ? referenceText.classList.add("border-[#497BEF]") : referenceText.classList.remove("border-[#497BEF]");
-                if (isChipsFocused) {
-                    isTextRefactorInputFocused = false;
-                }
-            });
-
-            command.id = "command-span";
-            command.appendChild(refactorTextNode);
-            command.appendChild(referenceText);
-            command.appendChild(referenceIdSpan);
-
-            refactor.id = "text-refactor-container";
-            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">Refactor Instructions</span>`;
-            refactor.classList.add("inline-block");
-
-            textRefactorInput.id = "text-refactor-input";
-            textRefactorInput.contentEditable = "true";
-            textRefactorInput.tabIndex = "0";
-            textRefactorInput.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]");
-            textRefactorInput.addEventListener("focus", function (event) {
-                if (isTextRefactorInputFocused) {
-                    isChipsFocused = false;
-                }
-                referenceText.classList.remove("border-[#497BEF]");
-                isTextRefactorInputFocused = !isTextRefactorInputFocused;
-            });
-
-            textRefactorInput.appendChild(document.createTextNode("\u00A0"));
-
-            refactor.appendChild(textRefactorInput);
-            command.appendChild(refactor);
-            input.appendChild(command);
-
-            setCaretToEnd(textRefactorInput);
-            //TODO[YASH]: Use platform specific shortcut naming. checkout shortcut-hint-utils
-            tippy('#add-reference-text', {
-                content: `Use ${shortCutHints} to attach selected code in editor`,
-                theme: "flutter-blue"
-            });
-
-            input.addEventListener('keydown', function (event) {
-                let keyCaught = false;
-                switch (event.key) {
-                    case "Tab":
-                        if (isTextRefactorInputFocused) {
-                            isTextRefactorInputFocused = false;
-                            isChipsFocused = true;
-                            referenceText.classList.add("border-[#497BEF]");
-                            textRefactorInput.blur();
-                        } else {
-                            isChipsFocused = false;
-                            isTextRefactorInputFocused = true;
-                            textRefactorInput.focus();
-                            setCaretToEnd(textRefactorInput);
-                        }
-                        keyCaught = true;
-                        break;
-
-                    case "Backspace":
-                        if (textRefactorInput.textContent.trim() === "" && textRefactorInput.innerText.trim() === "") {
-                            // Clear the text
-                            input.removeChild(command);
-                            setTimeout(() => {
-                                input.focus();
-                                adjustHeight();
-                            }, 0);
-                        }
-                        break;
-                }
-                if (keyCaught) {
-                    event.preventDefault();
-                }
-            });
+            const agentUIBuilder = new AgentUIBuilder(input, inputJson);
+            agentUIBuilder.buildAgentUI();
 
             setTimeout(() => {
                 adjustHeight();
-                referenceText.focus();
             }, 0);
+        },
+    },
+    'apikey': {
+        'exe': (input) => {
+            input.textContent = "";
 
+            const inputJson = {
+                "slug": "/apikey",
+                "field_text": "",
+                "text_field_layout": "Update your API key <805088184>",
+                "inputs": [
+                    {
+                        "id": "805088184",
+                        "display_text": "API Key",
+                        "type": "string_input"
+                    }
+                ]
+            };
+
+            const agentUIBuilder = new AgentUIBuilder(input, inputJson);
+            agentUIBuilder.buildAgentUI();
+
+            setTimeout(() => {
+                adjustHeight();
+            }, 0);
         }
     }
 };
 
 // Concatenate agent-specific commands to the agents array
-agents = agents.concat(
-    Object.entries(agentCommandsMap).map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`)).flat()
+agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
+    Object.entries(agentCommandsMap)
+        .filter(([agent, cmds]) => cmds.length > 0)
+        .map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`))
+        .flat()
 );
 
-function getCaretCoordinates(element, position) {
-    const div = document.createElement('div');
-    document.body.appendChild(div);
-
-    const style = div.style;
-    const computed = getComputedStyle(element);
-
-    style.whiteSpace = 'pre-wrap';
-    style.wordBreak = 'break-word';
-    style.position = 'absolute';
-    style.visibility = 'hidden';
-    style.overflow = 'hidden';
-
-    properties.forEach(prop => {
-        style[prop] = computed[prop];
-    });
-
-    div.textContent = element.textContent.substring(0, position);
-
-    const span = document.createElement('span');
-    span.textContent = element.textContent.substring(position) || '.';
-    div.appendChild(span);
-
-    const coordinates = {
-        top: span.offsetTop + parseInt(computed['borderTopWidth']),
-        left: span.offsetLeft + parseInt(computed['borderLeftWidth']),
-        // height: parseInt(computed['lineHeight'])
-        height: span.offsetHeight
-    };
-
-    div.remove();
-
-    return coordinates;
-}
-
-class CommandDeck {
-    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn) {
-        this.ref = ref;
-        this.menuRef = menuRef;
-        this.resolveFn = resolveFn;
-        this.replaceFn = replaceFn;
-        this.menuItemFn = menuItemFn;
-        this.options = [];
-
-        this.makeOptions = this.makeOptions.bind(this);
-        this.closeMenu = this.closeMenu.bind(this);
-        this.selectItem = this.selectItem.bind(this);
-        this.onInput = this.onInput.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
-        this.renderMenu = this.renderMenu.bind(this);
-
-        this.ref.addEventListener('input', this.onInput);
-        this.ref.addEventListener('keydown', this.onKeyDown);
-    }
-
-    async makeOptions(query) {
-        let options = [];
-        if (query.startsWith('@')) {
-            options = await this.resolveFn(query.slice(1), 'at');
-        } else if (query.startsWith('/')) {
-            options = await this.resolveFn(query.slice(1), 'slash');
-        }
-        if (options.length !== 0) {
-            this.options = options;
-            this.renderMenu();
-        } else {
-            this.closeMenu();
-        }
-    }
-
-    closeMenu() {
-        setTimeout(() => {
-            this.options = [];
-            this.left = undefined;
-            this.top = undefined;
-            this.triggerIdx = undefined;
-            this.renderMenu();
-        }, 0);
-    }
-
-    selectItem(active) {
-        return () => {
-            const option = this.options[active];
-
-            const isSlashOptionAvailable = commandsExecution.hasOwnProperty(option);
-
-            if (isSlashOptionAvailable) {
-                commandsExecution[option].exe(this.ref);
-            } else {
-                const trigger = this.ref.textContent[this.triggerIdx];
-                this.ref.textContent = "";
-                const mentionNode = document.createElement("span");
-                mentionNode.id = "special-commands";
-                mentionNode.classList.add("text-blue-500", "inline-block");
-                mentionNode.contentEditable = false;
-                mentionNode.textContent = `${trigger}${option}\u200B`;
-                this.ref.appendChild(mentionNode);
-                this.ref.appendChild(document.createTextNode("\u00A0"));
-                setCaretToEnd(this.ref);
-            }
-
-            this.ref.focus();
-            this.closeMenu();
-        };
-    }
-
-    onInput(ev) {
-        const positionIndex = this.ref.selectionStart;
-        const textBeforeCaret = this.ref.textContent.slice(0, positionIndex);
-        const tokens = textBeforeCaret.split(/\s/);
-        const lastToken = tokens[tokens.length - 1];
-        const triggerIdx = textBeforeCaret.endsWith(lastToken)
-            ? textBeforeCaret.length - lastToken.length
-            : -1;
-        const maybeTrigger = textBeforeCaret[triggerIdx];
-        const keystrokeTriggered = maybeTrigger === '@' || maybeTrigger === '/';
-
-        this.ref.style.height = "auto";
-        this.ref.style.height = this.ref.scrollHeight + "px";
-
-        const isTriggerAtStartOfWord = triggerIdx === 0;
-
-        if (!keystrokeTriggered || !isTriggerAtStartOfWord) {
-            this.closeMenu();
-            return;
-        }
-
-        const query = textBeforeCaret.slice(triggerIdx);
-        this.makeOptions(query);
-
-        const coords = getCaretCoordinates(this.ref, positionIndex);
-        const { top, left } = this.ref.getBoundingClientRect();
-
-        const savedCaretPosition = positionIndex;
-
-        setTimeout(() => {
-            this.active = 0;
-            this.left = window.scrollX + coords.left + left + this.ref.scrollLeft;
-            this.top = window.scrollY + coords.top + top + coords.height - this.ref.scrollTop;
-            this.triggerIdx = triggerIdx;
-
-            this.renderMenu();
-
-            this.ref.selectionStart = this.ref.selectionEnd = savedCaretPosition;
-        }, 0);
-    }
-
-    onKeyDown(ev) {
-        let keyCaught = false;
-        if (this.triggerIdx !== undefined) {
-            switch (ev.key) {
-                case 'ArrowDown':
-                    this.active = Math.min(this.active + 1, this.options.length - 1);
-                    this.renderMenu();
-                    keyCaught = true;
-                    break;
-                case 'ArrowUp':
-                    this.active = Math.max(this.active - 1, 0);
-                    this.renderMenu();
-                    keyCaught = true;
-                    break;
-                case 'Enter':
-                case 'Tab':
-                    this.selectItem(this.active)();
-                    keyCaught = true;
-                    break;
-                case 'Backspace':
-                    const selection = window.getSelection();
-                    const range = selection.getRangeAt(0);
-                    const mentionNode = document.getElementById("special-commands");
-
-                    if (mentionNode) {
-                        const prevNode = mentionNode.previousSibling;
-                        const nextNode = mentionNode.nextSibling;
-                        this.ref.removeChild(mentionNode);
-
-                        // Restore the cursor position 
-                        range.setStartAfter(prevNode || nextNode);
-                        range.collapse(true);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
-                    break;
-            }
-        }
-
-        if (keyCaught) {
-            ev.preventDefault();
-        }
-    }
-
-    renderMenu() {
-        if (this.top === undefined) {
-            this.menuRef.hidden = true;
-            return;
-        }
-
-        const caretHeight = this.ref.offsetHeight;
-        this.menuRef.style.left = this.left + 'px';
-        this.menuRef.style.top = (this.top - this.menuRef.offsetHeight - caretHeight) + 'px';
-        this.menuRef.innerHTML = '';
-        this.menuRef.classList.add("p-1");
-
-        this.options.forEach((option, idx) => {
-            const trigger = this.ref.textContent[this.triggerIdx];
-            this.menuRef.appendChild(this.menuItemFn(
-                option,
-                this.selectItem(idx),
-                this.active === idx,
-                trigger));
-        });
-
-        this.menuRef.hidden = false;
-    }
-}
 
 (function () {
     //initialising vscode library
@@ -723,7 +419,7 @@ function submitResponse() {
                     'instructions': instructions
                 }),
             });
-        }        
+        }
 
         if (commandEnable) {
             commandEnable = false;
@@ -774,7 +470,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${trigger}${action} - ${description[action]}`;
+        div.textContent = description[action] ? `${trigger}${action} - ${description[action]}` : `${trigger}${action}`;
         div.onclick = setItem;
         return div;
     };
@@ -960,7 +656,7 @@ function readTriggeredMessage() {
                 createReferenceChips(JSON.parse(message.value));
                 setTimeout(() =>
                     adjustHeight(),
-                0);
+                    0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -970,7 +666,6 @@ function readTriggeredMessage() {
                 }
                 break;
             case 'shortCutHints':
-                debugger;
                 shortCutHints = message.value;
                 //adding tooltips to the elements
                 addToolTipsById();
@@ -1071,7 +766,7 @@ function insertAtReference(chip) {
 
     chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips-reference");
 
-    const referenceChip = document.getElementById("reference-id");
+    const referenceChip = document.getElementById("code-container");
     const referenceText = document.getElementById("add-reference-text");
     const refactorInput = document.getElementById("text-refactor-input");
     if (referenceText) {
@@ -1184,7 +879,6 @@ function displayMessages() {
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            debugger;
             if (message.agent && message.agent?.trim() !== "") {
                 agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
                 agent.textContent = message.agent;
@@ -1200,8 +894,8 @@ function displayMessages() {
             const messageIndex = conversationHistory.indexOf(message);
             message?.buttons.forEach((type) => {
                 const button = document.createElement("div");
-                button.classList.add("px-2.5", "py-1.5",  "text-xs", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
-                if (['disable', 'decline', 'reject', 'cancel', 'dismiss', 'close' ,'delete'].includes(type)) {
+                button.classList.add("px-2.5", "py-1.5", "text-xs", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                if (['disable', 'decline', 'reject', 'cancel', 'dismiss', 'close', 'delete'].includes(type)) {
                     button.classList.add("bg-[#f2f2f2]", "text-black");
                 } else {
                     button.classList.add("bg-pink-400", "text-white");
