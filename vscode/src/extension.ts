@@ -74,11 +74,11 @@ export async function activate(context: vscode.ExtensionContext) {
     const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
     // Check if the Gemini API key is set
     const config = vscode.workspace.getConfiguration('fluttergpt');
-    const apiKey = config.get<string>('apiKey');
-    // if (!apiKey || isOldOpenAIKey(apiKey)) {
-    //     var chatViewProvider = initWebview(context, undefined, analyzer);
-    //     showMissingApiKey();
-    // }
+    const apiKey = await SecretApiKeyManager.instance.getApiKey();
+    if (!apiKey || isOldOpenAIKey(apiKey)) {
+        chatViewProvider = initWebview(context, undefined, analyzer);
+        showMissingApiKey();
+    }
     console.log('Congratulations, "fluttergpt" is now active!');
     dotenv.config({ path: path.join(__dirname, '../.env') });
     activateTelemetry(context);
@@ -99,7 +99,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
     finally {
 
-
+        SecretApiKeyManager.instance.deleteApiKey();
         // will only trigger if the apikey is changed so no need to validate again just call necessary functions
         SecretApiKeyManager.instance.onDidChangeApiKey(async event => {
             //TODO: solve view provider already registered error when changing the key in ss
