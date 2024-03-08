@@ -98,8 +98,6 @@ export async function activate(context: vscode.ExtensionContext) {
         });
     }
     finally {
-
-        SecretApiKeyManager.instance.deleteApiKey();
         // will only trigger if the apikey is changed so no need to validate again just call necessary functions
         SecretApiKeyManager.instance.onDidChangeApiKey(async event => {
             //TODO: solve view provider already registered error when changing the key in ss
