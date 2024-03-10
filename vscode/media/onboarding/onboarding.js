@@ -209,6 +209,7 @@ const activityBarForeground = getComputedStyle(document.documentElement).getProp
 const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
+const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
@@ -262,55 +263,109 @@ const commandsExecution = {
             commandEnable = true;
             input.textContent = '';
 
-            const inputJson = {
-                "slug": "/refactor",
-                "field_text": "",
-                "text_field_layout": "<805088184> <736841542>",
-                "inputs": [
-                    {
-                        "id": "805088184",
-                        "display_text": "Code Attachment",
-                        "type": "code_input"
-                    },
-                    {
-                        "id": "736841542",
-                        "display_text": "Refactor instructions",
-                        "type": "string_input"
-                    }
-                ]
-            };
+            let isChipsFocused = false;
+            let isTextRefactorInputFocused = false;
 
-            const agentUIBuilder = new AgentUIBuilder(input, inputJson);
-            agentUIBuilder.buildAgentUI();
+            const command = document.createElement('span');
+            const textRefactorInput = document.createElement('span');
+            const refactor = document.createElement('span');
+            const referenceText = document.createElement('span');
+            const refactorTextNode = document.createElement('span');
+            const referenceIdSpan = document.createElement('span');
+
+            referenceIdSpan.id = "reference-id";
+            referenceIdSpan.contentEditable = "false";
+            referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
+
+            refactorTextNode.textContent = "/refactor\u00A0";
+            refactorTextNode.classList.add("text-pink-400");
+
+            referenceText.id = "add-reference-text";
+            referenceText.contentEditable = "false";
+            referenceText.tabIndex = 0;
+            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]", "mt-1");
+            referenceText.textContent = "Code Attachment";
+            referenceText.addEventListener("click", function (event) {
+                isChipsFocused = !isChipsFocused;
+                isChipsFocused ? referenceText.classList.add("border-[#497BEF]") : referenceText.classList.remove("border-[#497BEF]");
+                if (isChipsFocused) {
+                    isTextRefactorInputFocused = false;
+                }
+            });
+
+            command.id = "command-span";
+            command.appendChild(refactorTextNode);
+            command.appendChild(referenceText);
+            command.appendChild(referenceIdSpan);
+
+            refactor.id = "text-refactor-container";
+            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">Refactor Instructions</span>`;
+            refactor.classList.add("inline-block");
+
+            textRefactorInput.id = "text-refactor-input";
+            textRefactorInput.contentEditable = "true";
+            textRefactorInput.tabIndex = "0";
+            textRefactorInput.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]");
+            textRefactorInput.addEventListener("focus", function (event) {
+                if (isTextRefactorInputFocused) {
+                    isChipsFocused = false;
+                }
+                referenceText.classList.remove("border-[#497BEF]");
+                isTextRefactorInputFocused = !isTextRefactorInputFocused;
+            });
+
+            textRefactorInput.appendChild(document.createTextNode("\u200B"));
+
+            refactor.appendChild(textRefactorInput);
+            command.appendChild(refactor);
+            input.appendChild(command);
+
+            setCaretToEnd(textRefactorInput);
+            //TODO[YASH]: Use platform specific shortcut naming. checkout shortcut-hint-utils
+            tippy('#add-reference-text', {
+                content: `Use ${shortCutHints} to attach selected code in editor`,
+                theme: "flutter-blue"
+            });
+
+            input.addEventListener('keydown', function (event) {
+                let keyCaught = false;
+                switch (event.key) {
+                    case "Tab":
+                        if (isTextRefactorInputFocused) {
+                            isTextRefactorInputFocused = false;
+                            isChipsFocused = true;
+                            referenceText.classList.add("border-[#497BEF]");
+                            textRefactorInput.blur();
+                        } else {
+                            isChipsFocused = false;
+                            isTextRefactorInputFocused = true;
+                            textRefactorInput.focus();
+                            setCaretToEnd(textRefactorInput);
+                        }
+                        keyCaught = true;
+                        break;
+
+                    case "Backspace":
+                        if (textRefactorInput.textContent.trim() === "" && textRefactorInput.innerText.trim() === "") {
+                            // Clear the text
+                            input.removeChild(command);
+                            setTimeout(() => {
+                                input.focus();
+                                adjustHeight();
+                            }, 0);
+                        }
+                        break;
+                }
+                if (keyCaught) {
+                    event.preventDefault();
+                }
+            });
 
             setTimeout(() => {
                 adjustHeight();
+                referenceText.focus();
             }, 0);
-        },
-    },
-    'apikey': {
-        'exe': (input) => {
-            input.textContent = "";
 
-            const inputJson = {
-                "slug": "/apikey",
-                "field_text": "",
-                "text_field_layout": "Update your API key <805088184>",
-                "inputs": [
-                    {
-                        "id": "805088184",
-                        "display_text": "API Key",
-                        "type": "string_input"
-                    }
-                ]
-            };
-
-            const agentUIBuilder = new AgentUIBuilder(input, inputJson);
-            agentUIBuilder.buildAgentUI();
-
-            setTimeout(() => {
-                adjustHeight();
-            }, 0);
         }
     }
 };
@@ -325,6 +380,9 @@ agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
 
 
 (function () {
+
+    setLoading(true);
+
     //initialising vscode library
     vscode = acquireVsCodeApi();
 
@@ -351,7 +409,18 @@ agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
     textInput.addEventListener("paste", (event) => {
         event.preventDefault();
         const pastedText = event.clipboardData.getData('text/plain');
-        event.target.textContent = pastedText;
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(pastedText));
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        } else {
+            event.target.textContent += pastedText;
+        }
+        adjustHeight();
     });
 
     // event listeners for text input
@@ -361,9 +430,20 @@ agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-
+    setTimeout(() => {
+        setLoading(false);
+    }, 3000);
 })();
 
+function setLoading(isLoading) {
+    if (isLoading) {
+        bodyContainer.classList.add("hidden");
+        loadingContainer.classList.remove("hidden");
+    } else {
+        bodyContainer.classList.remove("hidden");
+        loadingContainer.classList.add("hidden");
+    }
+}
 
 function addToolTipsById() {
 
@@ -386,6 +466,7 @@ function addToolTipsById() {
 function submitResponse() {
 
     const textRefactor = document.getElementById("text-to-refactor-span");
+    const textRefactorInput = document.getElementById("text-refactor-input");
     if (textRefactor) {
         textRefactor.remove();
     }
@@ -409,7 +490,7 @@ function submitResponse() {
             }
         }
 
-        if (chipId.length > 0) {
+        if (chipId.length > 0 && textRefactorInput.textContent.trim().length > 2) {
             vscode.postMessage({
                 type: "action",
                 value: JSON.stringify({
@@ -604,6 +685,7 @@ function readTriggeredMessage() {
                 onboardingArrowIcon.classList.add("hidden");
                 onboardingText.classList.add("hidden");
                 tryFlutterText.classList.add("hidden");
+                setLoading(false);
                 break;
             case 'workspaceLoader':
                 workspaceLoader.style.display = message.value ? 'flex' : 'none';
@@ -656,7 +738,7 @@ function readTriggeredMessage() {
                 createReferenceChips(JSON.parse(message.value));
                 setTimeout(() =>
                     adjustHeight(),
-                    0);
+                0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -669,6 +751,9 @@ function readTriggeredMessage() {
                 shortCutHints = message.value;
                 //adding tooltips to the elements
                 addToolTipsById();
+                break;
+            case 'keyNotExists':
+                setLoading(false);
                 break;
         }
     });
@@ -766,7 +851,7 @@ function insertAtReference(chip) {
 
     chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips-reference");
 
-    const referenceChip = document.getElementById("code-container");
+    const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");
     const refactorInput = document.getElementById("text-refactor-input");
     if (referenceText) {

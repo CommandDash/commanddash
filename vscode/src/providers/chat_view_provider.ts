@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
+import * as os from 'os';
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
@@ -28,6 +29,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     // Public method to post a message to the webview
     public postMessageToWebview(message: any): void {
+        console.log('message check-----------------', message);
         if (this._view) {
             this._view.webview.postMessage(message);
         }
@@ -53,7 +55,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         // add an event listener for messages received by the webview
         webviewView.webview.onDidReceiveMessage(async (data) => {
-            console.log('data', data);
             switch (data.type) {
                 case "codeSelected":
                     {
@@ -112,38 +113,38 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                 case "checkKeyIfExists":
-                    {
-                        this._checkIfKeyExists();
-                        break;
-                    }
+                {
+                    this._checkIfKeyExists();
+                    break;
+                }
                 case "dashResponse":
                     {
                         const { agent, data: _data, messageId, buttonType } = JSON.parse(data.value);
                         console.log('agent', buttonType, _data, messageId, agent);
                         if (agent === "diffView") {
                             const updatedMessage = await DiffViewAgent.handleResponse(buttonType, _data, messageId);
-                            // update the message with messageId
                             if (updatedMessage) {
                                 this._publicConversationHistory[messageId] = updatedMessage;
                                 this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
                             }
                         }
+                        break;
                     }
 
             }
         });
 
         webviewView.onDidChangeVisibility(() => {
+            console.log('webview', webviewView.visible);
             if (webviewView.visible && this._view) {
                 this._view?.webview.postMessage({ type: 'focusChatInput' });
+                this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
             }
         });
 
         vscode.window.onDidChangeActiveColorTheme(() => {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
-
-        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
 
         logEvent('new-chat-start', { from: 'command-deck' });
     }
@@ -153,6 +154,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const apiKey = config.get<string>('apiKey');
         if (apiKey) {
             this._view?.webview.postMessage({ type: "keyExists" });
+        } else {
+            this._view?.webview.postMessage({ type: "keyNotExists" });
         }
     }
     private async handleAction(input: string) {

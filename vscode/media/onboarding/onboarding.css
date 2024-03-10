@@ -193,19 +193,11 @@ p[contenteditable="true"] {
     border-color: var(--vscode-editor-foreground);
 }
 
-.code_input {
+#add-reference-text {
     outline: 1px solid var(--vscode-editor-foreground);
 }
 
-.code_input:focus {
-    outline: 1px solid #497BEF;
-}
-
-.string_input {
-    outline: 1px solid var(--vscode-editor-foreground);
-}
-
-.string_input:focus {
+#add-reference-text:focus {
     outline: 1px solid #497BEF;
 }
 

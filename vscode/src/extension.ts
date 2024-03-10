@@ -119,7 +119,6 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
 }
 
 function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, chatViewProvider: FlutterGPTViewProvider | undefined = undefined) {
-
     const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
@@ -189,4 +188,6 @@ function showMissingApiKey() {
             vscode.commands.executeCommand(FlutterGPTViewProvider.viewType + '.focus');
         }
     });
+
+    
 }
