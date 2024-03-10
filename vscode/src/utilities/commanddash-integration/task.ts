@@ -11,7 +11,7 @@ export class Task {
     }
   
     public onProcessStep(kind: string, handler: (message: any) => void) {
-      const eventName = `process_step_${kind}_${this.taskId}`;
+      const eventName = `step_${kind}_${this.taskId}`;
       this.handlers.set(eventName, handler);
       this.dartClient.eventEmitter.on(eventName, handler);
     }

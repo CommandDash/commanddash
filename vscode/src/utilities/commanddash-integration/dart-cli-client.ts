@@ -13,8 +13,8 @@ export class DartCLIClient {
   }
 
   public connect() {
-    // this.proc = child_process.spawn('path-to-exe/commanddash.exe', ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/samyak/Documents/commanddash/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    // this.proc = child_process.spawn('path-to-file/commanddash.exe', ['process']);
+    this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
 
     this.proc.stdout.on('data', (data) => {
       const message = JSON.parse(data.toString());
@@ -24,9 +24,13 @@ export class DartCLIClient {
         this.eventEmitter.emit(`result_${id}`, params);
       } else if (method==='error'){
         this.eventEmitter.emit(`error_${id}`, params);
-      } else if (method==='process_step') {
+      } else if (method==='step') {
         // Handle additional data requirements from Dart CLI (e.g. get additional data)
-        this.eventEmitter.emit(`process_step_${params.kind}_${id}`, message);
+        this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
+      } else if (method==='operation'){
+        this.eventEmitter.emit(`operation_${params.kind}`, message);
+      } if (method==='log'){
+        console.log(params);
       }
     });
 
@@ -49,14 +53,44 @@ export class DartCLIClient {
       // Perform other cleanup actions here
     });
   }
-  
+  /* For non-task related communication. Like refreshing access token.
+  ```typescript
+    const client = new DartCLIClient();
+    client.onProcessOperation('operation_data_kind', (message)=>{
+      const operationData = { value: "unique_value" };
+      client.sendOperationResponse('operation_data_kind', operationData);
+    });
+    const task = client.newTask();
+
+    try {
+        /// Request the client to process the task and handle result or error
+        const response = await task.run({ kind: "random_task_with_side_operation", data: {} });
+        console.log("Processing completed: ", response);
+    } catch (error) {
+        console.error("Processing error: ", error);
+    }
+    ```*/
+  public onProcessOperation(kind: string, handler: (message: any) => void) {
+    const eventName = `operation_${kind}`;
+    this.eventEmitter.on(eventName, handler);
+  }
 
   /// Send required additional data to the CLI. 
-  public sendProcessStepResponse(id: number, params: any): void {
+  public sendOperationResponse(kind: string, data: any): void {
     // Ensure to use the same 'id' to maintain consistency of the JSON-RPC protocol
-    const method = 'process_step_response';
-    this.proc?.stdin.write(JSON.stringify({ id, method, params }) + "\n");
+    const method = 'operation_response';
+    console.log(JSON.stringify({method, kind, data }));
+    this.proc?.stdin.write(JSON.stringify({method, kind, data }) + "\n");
   }
+
+  /// Send required additional data to the CLI. 
+  public sendStepResponse(id: number, kind: string, data: any): void {
+    // Ensure to use the same 'id' to maintain consistency of the JSON-RPC protocol
+    const method = 'step_response';
+    this.proc?.stdin.write(JSON.stringify({ id, method, kind, data }) + "\n");
+  }
+
+
 
   private send(request: any, id: number): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -88,12 +122,12 @@ export class DartCLIClient {
   const client = new DartCLIClient();
   const task = client.newTask();
   // Handle client side steps during task processing. 
-  task.onProcessStep('random_data_kind', (message) => {
+  task.onProcessStep('step_data_kind', (message) => {
       /// any complex interaction to come up with response data.
       const additionalData = { value: "unique_value_2" };
   
       // Respond back to CLI in every case. Either with data if required or just a confirmation.
-      client.sendProcessStepResponse(message.id, additionalData);
+      client.sendStepResponse(message.id, 'step_data_kind', additionalData);
   
       // /// [Optional] Listeners are disposed on their own once the task is completed. But if some task is continued for entire lifecycle, we may disconnect the listeners if the one-time process step is handled.
       // client.eventEmitter.removeListener(`get_additional_data_already_cached_files`, handler);
@@ -101,7 +135,7 @@ export class DartCLIClient {
 
   try {
       /// Request the client to process the task and handle result or error
-      const response = await task.run({ kind: "random_task", data: {current_embeddings: {}} });
+      const response = await task.run({ kind: "random_task_with_step", data: {current_embeddings: {}} });
       console.log("Processing completed: ", response);
   } catch (error) {
       console.error("Processing error: ", error);
@@ -117,5 +151,51 @@ export class DartCLIClient {
     if (this.proc) {
       this.proc.kill(); // Optionally send a more graceful shutdown command before this
     }
+  }
+}
+
+/// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
+/// [add it to extension.ts activate and run the extension]
+export async function testTaskWithSideOperation() {
+  const client = new DartCLIClient();
+  client.onProcessOperation('operation_data_kind', (message)=>{
+    const operationData = { value: "unique_value" };
+    client.sendOperationResponse('operation_data_kind', operationData);
+  });
+  const task = client.newTask();
+
+  try {
+      /// Request the client to process the task and handle result or error
+      const response = await task.run({ kind: "random_task_with_side_operation", data: {} });
+      console.log("Processing completed: ", response);
+  } catch (error) {
+      console.error("Processing error: ", error);
+  }
+}
+
+
+/// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
+/// [add it to extension.ts activate and run the extension]
+export async function testTaskWithSteps() {
+  const client = new DartCLIClient();
+  const task = client.newTask();
+  // Handle client side steps during task processing. 
+  task.onProcessStep('step_data_kind', (message) => {
+      /// any complex interaction to come up with response data.
+      const additionalData = { value: "unique_value_2" };
+  
+      // Respond back to CLI in every case. Either with data if required or just a confirmation.
+      client.sendStepResponse(message.id, 'step_data_kind', additionalData);
+  
+      // /// [Optional] Listeners are disposed on their own once the task is completed. But if some task is continued for entire lifecycle, we may disconnect the listeners if the one-time process step is handled.
+      // client.eventEmitter.removeListener(`get_additional_data_already_cached_files`, handler);
+      });
+
+  try {
+      /// Request the client to process the task and handle result or error
+      const response = await task.run({ kind: "random_task_with_step", data: {current_embeddings: {}} });
+      console.log("Processing completed: ", response);
+  } catch (error) {
+      console.error("Processing error: ", error);
   }
 }
