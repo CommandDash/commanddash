@@ -4,9 +4,9 @@ on: [pull_request] # Triggers on commits to PRs only.
 
 jobs:
   lint: # Job name.
-    runs-on: ubuntu-latest # Host's operating system.
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout commit # Download the code from triggering commit.
+      - name: Checkout commit
         uses: actions/checkout@v4
       
       - name: Use Node.js
