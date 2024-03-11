@@ -29,7 +29,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     // Public method to post a message to the webview
     public postMessageToWebview(message: any): void {
-        console.log('message check-----------------', message);
         if (this._view) {
             this._view.webview.postMessage(message);
         }

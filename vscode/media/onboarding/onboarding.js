@@ -243,13 +243,11 @@ let shortCutHints = '';
 //initialising visual studio code library
 let vscode = null;
 
-let agents = ['workspace', 'settings'];
+let agents = ['workspace'];
 const commands = ['refactor'];
 
 // Add your additional commands and agents
-const agentCommandsMap = {
-    'settings': ['apikey'],
-};
+const agentCommandsMap = {};
 
 //description for commands and agents
 const description = {
