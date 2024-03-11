@@ -185,7 +185,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
         const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
         const commandDeckJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "command-deck", "command-deck.js"));
-        const agentUIBuilder = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-ui-builder", "agent-ui-builder.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
 
@@ -197,7 +196,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
             .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
-            .replace(/{{agentUIBuilder}}/g, agentUIBuilder.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
