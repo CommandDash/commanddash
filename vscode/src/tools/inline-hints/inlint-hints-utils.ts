@@ -37,14 +37,14 @@ export async function activateInlineHints(cacheManager: CacheManager) {
             const isComment = activeEditor.document.lineAt(currentLine).text.trim().startsWith('//');
 
             // If the user has not used inline completion for 5 times, show hint for the same
-            // if (inlineCount < 5) {
+            if (inlineCount < 5) {
                 if (lineText.length === 0) {
                     if (isComment || await isFirstLineOfSymbol(activeEditor)) {
                         // Set decoration on the current line
                         const range = new vscode.Range(currentLine + 1, activeEditor.document.lineAt(currentLine).range.end.character, currentLine + 1, activeEditor.document.lineAt(currentLine).range.end.character);
                         activeEditor.setDecorations(completionDecoration, [{ range }]);
                     }
-                // }
+                }
             }
         }
     });

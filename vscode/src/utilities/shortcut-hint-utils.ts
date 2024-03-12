@@ -5,9 +5,9 @@ export function shortcutInlineCodeGeneration(minified: boolean = false): string{
     let stringRepresentation;
 
     if (platform === 'win32' || platform === 'linux') {
-        stringRepresentation = minified? 'ctrl+→' : '(ctrl) + (→)';
+        stringRepresentation = minified? 'ctrl+shift+→' : '(ctrl) + (shift) + (→)';
     } else  {
-        stringRepresentation = minified? '⌘+→' : '(⌘) + (→)';
+        stringRepresentation = minified? '⌘+shift+→' : '(⌘) + (shift) + (→)';
     }
     return stringRepresentation;
 }
