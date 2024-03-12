@@ -17,9 +17,9 @@ export function shortcutInlineCodeRefactor(minified: boolean = false): string{
     let stringRepresentation;
 
     if (platform === 'win32' || platform === 'linux') {
-        stringRepresentation = minified? 'ctrl+→' : '(ctrl) + (R)';
+        stringRepresentation = minified? 'ctrl+r' : '(ctrl) + (R)';
     } else  {
-        stringRepresentation = minified? '⌘+→' : '(⌘) + (R)';
+        stringRepresentation = minified? '⌘+r' : '(⌘) + (R)';
     }
     return stringRepresentation;
 }

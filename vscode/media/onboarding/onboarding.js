@@ -209,6 +209,7 @@ const activityBarForeground = getComputedStyle(document.documentElement).getProp
 const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
+const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
@@ -241,46 +242,6 @@ let shortCutHints = '';
 
 //initialising visual studio code library
 let vscode = null;
-
-const properties = [
-    'direction',
-    'boxSizing',
-    'width',
-    'height',
-    'overflowX',
-    'overflowY',
-
-    'borderTopWidth',
-    'borderRightWidth',
-    'borderBottomWidth',
-    'borderLeftWidth',
-    'borderStyle',
-
-    'paddingTop',
-    'paddingRight',
-    'paddingBottom',
-    'paddingLeft',
-
-    'fontStyle',
-    'fontVariant',
-    'fontWeight',
-    'fontStretch',
-    'fontSize',
-    'fontSizeAdjust',
-    'lineHeight',
-    'fontFamily',
-
-    'textAlign',
-    'textTransform',
-    'textIndent',
-    'textDecoration',
-
-    'letterSpacing',
-    'wordSpacing',
-
-    'tabSize',
-    'MozTabSize',
-];
 
 let agents = ['workspace'];
 const commands = ['refactor'];
@@ -351,7 +312,7 @@ const commandsExecution = {
                 isTextRefactorInputFocused = !isTextRefactorInputFocused;
             });
 
-            textRefactorInput.appendChild(document.createTextNode("\u00A0"));
+            textRefactorInput.appendChild(document.createTextNode("\u200B"));
 
             refactor.appendChild(textRefactorInput);
             command.appendChild(refactor);
@@ -408,227 +369,18 @@ const commandsExecution = {
 };
 
 // Concatenate agent-specific commands to the agents array
-agents = agents.concat(
-    Object.entries(agentCommandsMap).map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`)).flat()
+agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
+    Object.entries(agentCommandsMap)
+        .filter(([agent, cmds]) => cmds.length > 0)
+        .map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`))
+        .flat()
 );
 
-function getCaretCoordinates(element, position) {
-    const div = document.createElement('div');
-    document.body.appendChild(div);
-
-    const style = div.style;
-    const computed = getComputedStyle(element);
-
-    style.whiteSpace = 'pre-wrap';
-    style.wordBreak = 'break-word';
-    style.position = 'absolute';
-    style.visibility = 'hidden';
-    style.overflow = 'hidden';
-
-    properties.forEach(prop => {
-        style[prop] = computed[prop];
-    });
-
-    div.textContent = element.textContent.substring(0, position);
-
-    const span = document.createElement('span');
-    span.textContent = element.textContent.substring(position) || '.';
-    div.appendChild(span);
-
-    const coordinates = {
-        top: span.offsetTop + parseInt(computed['borderTopWidth']),
-        left: span.offsetLeft + parseInt(computed['borderLeftWidth']),
-        // height: parseInt(computed['lineHeight'])
-        height: span.offsetHeight
-    };
-
-    div.remove();
-
-    return coordinates;
-}
-
-class CommandDeck {
-    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn) {
-        this.ref = ref;
-        this.menuRef = menuRef;
-        this.resolveFn = resolveFn;
-        this.replaceFn = replaceFn;
-        this.menuItemFn = menuItemFn;
-        this.options = [];
-
-        this.makeOptions = this.makeOptions.bind(this);
-        this.closeMenu = this.closeMenu.bind(this);
-        this.selectItem = this.selectItem.bind(this);
-        this.onInput = this.onInput.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
-        this.renderMenu = this.renderMenu.bind(this);
-
-        this.ref.addEventListener('input', this.onInput);
-        this.ref.addEventListener('keydown', this.onKeyDown);
-    }
-
-    async makeOptions(query) {
-        let options = [];
-        if (query.startsWith('@')) {
-            options = await this.resolveFn(query.slice(1), 'at');
-        } else if (query.startsWith('/')) {
-            options = await this.resolveFn(query.slice(1), 'slash');
-        }
-        if (options.length !== 0) {
-            this.options = options;
-            this.renderMenu();
-        } else {
-            this.closeMenu();
-        }
-    }
-
-    closeMenu() {
-        setTimeout(() => {
-            this.options = [];
-            this.left = undefined;
-            this.top = undefined;
-            this.triggerIdx = undefined;
-            this.renderMenu();
-        }, 0);
-    }
-
-    selectItem(active) {
-        return () => {
-            const option = this.options[active];
-
-            const isSlashOptionAvailable = commandsExecution.hasOwnProperty(option);
-
-            if (isSlashOptionAvailable) {
-                commandsExecution[option].exe(this.ref);
-            } else {
-                const trigger = this.ref.textContent[this.triggerIdx];
-                this.ref.textContent = "";
-                const mentionNode = document.createElement("span");
-                mentionNode.id = "special-commands";
-                mentionNode.classList.add("text-blue-500", "inline-block");
-                mentionNode.contentEditable = false;
-                mentionNode.textContent = `${trigger}${option}\u200B`;
-                this.ref.appendChild(mentionNode);
-                this.ref.appendChild(document.createTextNode("\u00A0"));
-                setCaretToEnd(this.ref);
-            }
-
-            this.ref.focus();
-            this.closeMenu();
-        };
-    }
-
-    onInput(ev) {
-        const positionIndex = this.ref.selectionStart;
-        const textBeforeCaret = this.ref.textContent.slice(0, positionIndex);
-        const tokens = textBeforeCaret.split(/\s/);
-        const lastToken = tokens[tokens.length - 1];
-        const triggerIdx = textBeforeCaret.endsWith(lastToken)
-            ? textBeforeCaret.length - lastToken.length
-            : -1;
-        const maybeTrigger = textBeforeCaret[triggerIdx];
-        const keystrokeTriggered = maybeTrigger === '@' || maybeTrigger === '/';
-
-        this.ref.style.height = "auto";
-        this.ref.style.height = this.ref.scrollHeight + "px";
-
-        const isTriggerAtStartOfWord = triggerIdx === 0;
-
-        if (!keystrokeTriggered || !isTriggerAtStartOfWord) {
-            this.closeMenu();
-            return;
-        }
-
-        const query = textBeforeCaret.slice(triggerIdx);
-        this.makeOptions(query);
-
-        const coords = getCaretCoordinates(this.ref, positionIndex);
-        const { top, left } = this.ref.getBoundingClientRect();
-
-        const savedCaretPosition = positionIndex;
-
-        setTimeout(() => {
-            this.active = 0;
-            this.left = window.scrollX + coords.left + left + this.ref.scrollLeft;
-            this.top = window.scrollY + coords.top + top + coords.height - this.ref.scrollTop;
-            this.triggerIdx = triggerIdx;
-
-            this.renderMenu();
-
-            this.ref.selectionStart = this.ref.selectionEnd = savedCaretPosition;
-        }, 0);
-    }
-
-    onKeyDown(ev) {
-        let keyCaught = false;
-        if (this.triggerIdx !== undefined) {
-            switch (ev.key) {
-                case 'ArrowDown':
-                    this.active = Math.min(this.active + 1, this.options.length - 1);
-                    this.renderMenu();
-                    keyCaught = true;
-                    break;
-                case 'ArrowUp':
-                    this.active = Math.max(this.active - 1, 0);
-                    this.renderMenu();
-                    keyCaught = true;
-                    break;
-                case 'Enter':
-                case 'Tab':
-                    this.selectItem(this.active)();
-                    keyCaught = true;
-                    break;
-                case 'Backspace':
-                    const selection = window.getSelection();
-                    const range = selection.getRangeAt(0);
-                    const mentionNode = document.getElementById("special-commands");
-
-                    if (mentionNode) {
-                        const prevNode = mentionNode.previousSibling;
-                        const nextNode = mentionNode.nextSibling;
-                        this.ref.removeChild(mentionNode);
-
-                        // Restore the cursor position 
-                        range.setStartAfter(prevNode || nextNode);
-                        range.collapse(true);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
-                    break;
-            }
-        }
-
-        if (keyCaught) {
-            ev.preventDefault();
-        }
-    }
-
-    renderMenu() {
-        if (this.top === undefined) {
-            this.menuRef.hidden = true;
-            return;
-        }
-
-        const caretHeight = this.ref.offsetHeight;
-        this.menuRef.style.left = this.left + 'px';
-        this.menuRef.style.top = (this.top - this.menuRef.offsetHeight - caretHeight) + 'px';
-        this.menuRef.innerHTML = '';
-        this.menuRef.classList.add("p-1");
-
-        this.options.forEach((option, idx) => {
-            const trigger = this.ref.textContent[this.triggerIdx];
-            this.menuRef.appendChild(this.menuItemFn(
-                option,
-                this.selectItem(idx),
-                this.active === idx,
-                trigger));
-        });
-
-        this.menuRef.hidden = false;
-    }
-}
 
 (function () {
+
+    setLoading(true);
+
     //initialising vscode library
     vscode = acquireVsCodeApi();
 
@@ -655,7 +407,18 @@ class CommandDeck {
     textInput.addEventListener("paste", (event) => {
         event.preventDefault();
         const pastedText = event.clipboardData.getData('text/plain');
-        event.target.textContent = pastedText;
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(pastedText));
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        } else {
+            event.target.textContent += pastedText;
+        }
+        adjustHeight();
     });
 
     // event listeners for text input
@@ -665,9 +428,20 @@ class CommandDeck {
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-
+    setTimeout(() => {
+        setLoading(false);
+    }, 3000);
 })();
 
+function setLoading(isLoading) {
+    if (isLoading) {
+        bodyContainer.classList.add("hidden");
+        loadingContainer.classList.remove("hidden");
+    } else {
+        bodyContainer.classList.remove("hidden");
+        loadingContainer.classList.add("hidden");
+    }
+}
 
 function addToolTipsById() {
 
@@ -690,6 +464,7 @@ function addToolTipsById() {
 function submitResponse() {
 
     const textRefactor = document.getElementById("text-to-refactor-span");
+    const textRefactorInput = document.getElementById("text-refactor-input");
     if (textRefactor) {
         textRefactor.remove();
     }
@@ -713,7 +488,7 @@ function submitResponse() {
             }
         }
 
-        if (chipId.length > 0) {
+        if (chipId.length > 0 && textRefactorInput.textContent.trim().length > 2) {
             vscode.postMessage({
                 type: "action",
                 value: JSON.stringify({
@@ -723,7 +498,7 @@ function submitResponse() {
                     'instructions': instructions
                 }),
             });
-        }        
+        }
 
         if (commandEnable) {
             commandEnable = false;
@@ -774,7 +549,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${trigger}${action} - ${description[action]}`;
+        div.textContent = description[action] ? `${trigger}${action} - ${description[action]}` : `${trigger}${action}`;
         div.onclick = setItem;
         return div;
     };
@@ -908,6 +683,7 @@ function readTriggeredMessage() {
                 onboardingArrowIcon.classList.add("hidden");
                 onboardingText.classList.add("hidden");
                 tryFlutterText.classList.add("hidden");
+                setLoading(false);
                 break;
             case 'workspaceLoader':
                 workspaceLoader.style.display = message.value ? 'flex' : 'none';
@@ -970,10 +746,12 @@ function readTriggeredMessage() {
                 }
                 break;
             case 'shortCutHints':
-                debugger;
                 shortCutHints = message.value;
                 //adding tooltips to the elements
                 addToolTipsById();
+                break;
+            case 'keyNotExists':
+                setLoading(false);
                 break;
         }
     });
@@ -1250,7 +1028,6 @@ function displayMessages() {
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            debugger;
             if (message.agent && message.agent?.trim() !== "") {
                 agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
                 agent.textContent = message.agent;
@@ -1266,8 +1043,8 @@ function displayMessages() {
             const messageIndex = conversationHistory.indexOf(message);
             message?.buttons.forEach((type) => {
                 const button = document.createElement("div");
-                button.classList.add("px-2.5", "py-1.5",  "text-xs", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
-                if (['disable', 'decline', 'reject', 'cancel', 'dismiss', 'close' ,'delete'].includes(type)) {
+                button.classList.add("px-2.5", "py-1.5", "text-xs", "uppercase", "mr-1", "rounded-[2px]", "cursor-pointer");
+                if (['disable', 'decline', 'reject', 'cancel', 'dismiss', 'close', 'delete'].includes(type)) {
                     button.classList.add("bg-[#f2f2f2]", "text-black");
                 } else {
                     button.classList.add("bg-pink-400", "text-white");
