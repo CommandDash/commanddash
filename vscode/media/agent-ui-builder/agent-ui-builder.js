@@ -2,6 +2,9 @@ class AgentUIBuilder {
     constructor(ref, jsonData) {
         this.ref = ref;
         this.jsonData = jsonData;
+
+        this.onStringInput = this.onStringInput.bind(this);
+
         this.container = document.createElement("div");
     }
 
@@ -19,7 +22,7 @@ class AgentUIBuilder {
     }
 
     createInputElement(input) {
-        const {id, display_text, type} = input;
+        const { id, display_text, type } = input;
         if (type === "string_input") {
             const inputContainer = document.createElement("span");
             const inputSpan = document.createElement("span");
@@ -29,8 +32,10 @@ class AgentUIBuilder {
             inputSpan.id = id;
             inputSpan.contentEditable = true;
             inputSpan.tabIndex = 0;
-            inputSpan.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]", "string_input");
+            inputSpan.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]", "string_input", id);
             inputSpan.textContent = '\u200B';
+
+            this.ref.addEventListener('input', (event) => this.onStringInput(event, inputSpan));
 
             inputContainer.appendChild(inputSpan);
 
@@ -51,5 +56,29 @@ class AgentUIBuilder {
 
             return codeContainer;
         }
+    }
+
+    onStringInput(event, input) {
+        const sel = window.getSelection();
+        const inputSpan = document.getElementById(input.id);
+        if (sel.anchorNode.parentNode.classList.contains(input.id)) {
+            const inputIndex = this.jsonData.inputs.findIndex(_input => _input.id === input.id);
+            if (inputIndex !== -1) {
+                this.jsonData.inputs[inputIndex].value = inputSpan.textContent.trim();
+            }
+        }
+    }
+
+    onCodeInput(chipsData, chipName) {
+        const firstCodeInput = this.jsonData.inputs.find(input => input.type === "code_input" && !input.value);
+        if (firstCodeInput) {
+            const codeInputSpan = document.getElementById(firstCodeInput.id);
+            firstCodeInput.value = JSON.stringify(chipsData);
+            codeInputSpan.textContent = chipName;
+        }
+    }
+
+    getJSONValue() {
+        return this.jsonData;
     }
 }

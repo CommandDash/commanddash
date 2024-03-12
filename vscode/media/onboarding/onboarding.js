@@ -238,6 +238,7 @@ let onboardingCompleted = false;
 let activeAgent;
 let commandEnable = false;
 let shortCutHints = '';
+let agentBuilder = null;
 
 //initialising visual studio code library
 let vscode = null;
@@ -279,9 +280,8 @@ const commandsExecution = {
                     }
                 ]
             };
-
-            const agentUIBuilder = new AgentUIBuilder(input, inputJson);
-            agentUIBuilder.buildAgentUI();
+            agentBuilder = new AgentUIBuilder(input, inputJson);
+            agentBuilder.buildAgentUI();
 
             setTimeout(() => {
                 adjustHeight();
@@ -385,48 +385,50 @@ function addToolTipsById() {
 
 function submitResponse() {
 
-    const textRefactor = document.getElementById("text-to-refactor-span");
-    if (textRefactor) {
-        textRefactor.remove();
-    }
-    let prompt = textInput.textContent;
-    if (!prompt.startsWith('/')) {
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
-    }
-    if (!prompt.startsWith('/') && prompt.length > 0) {
-        vscode.postMessage({ type: "prompt", value: prompt });
-    } else {
-        const chipId = [];
-        const instructions = prompt;
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-                chipId.push(chip);
-            }
-        }
+    // const textRefactor = document.getElementById("text-to-refactor-span");
+    // if (textRefactor) {
+    //     textRefactor.remove();
+    // }
+    // let prompt = textInput.textContent;
+    // if (!prompt.startsWith('/')) {
+    //     for (const chip in chipsData) {
+    //         if (prompt.includes(chip)) {
+    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+    //         }
+    //     }
+    // }
+    // if (!prompt.startsWith('/') && prompt.length > 0) {
+    //     vscode.postMessage({ type: "prompt", value: prompt });
+    // } else {
+    //     const chipId = [];
+    //     const instructions = prompt;
+    //     for (const chip in chipsData) {
+    //         if (prompt.includes(chip)) {
+    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+    //             chipId.push(chip);
+    //         }
+    //     }
 
-        if (chipId.length > 0) {
-            vscode.postMessage({
-                type: "action",
-                value: JSON.stringify({
-                    'message': prompt,
-                    'chipsData': chipsData,
-                    'chipId': chipId,
-                    'instructions': instructions
-                }),
-            });
-        }
+    //     if (chipId.length > 0) {
+    //         vscode.postMessage({
+    //             type: "action",
+    //             value: JSON.stringify({
+    //                 'message': prompt,
+    //                 'chipsData': chipsData,
+    //                 'chipId': chipId,
+    //                 'instructions': instructions
+    //             }),
+    //         });
+    //     }
 
-        if (commandEnable) {
-            commandEnable = false;
-        }
-    }
-    textInput.textContent = "";
-    adjustHeight();
+    //     if (commandEnable) {
+    //         commandEnable = false;
+    //     }
+    // }
+    // textInput.textContent = "";
+    // adjustHeight();
+    const json = agentBuilder.getJSONValue();
+    console.log('json value', json);
 }
 
 function handleSubmit(event) {
@@ -689,7 +691,8 @@ function createReferenceChips(references) {
 
     chipsData = { ...chipsData, [chipId]: references };
     if (commandEnable) {
-        insertAtReference(chip);
+        agentBuilder?.onCodeInput(references, chipId);
+        // insertAtReference(chip);
     } else {
         insertChipAtCursor(chip, textInput);
     }
@@ -801,7 +804,6 @@ function debounce(func, wait, immediate = false) {
         };
     };
 }
-
 
 function clearChat() {
     responseContainer.innerHTML = "";

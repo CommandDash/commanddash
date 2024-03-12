@@ -136,6 +136,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         webviewView.onDidChangeVisibility(() => {
             if (webviewView.visible && this._view) {
                 this._view?.webview.postMessage({ type: 'focusChatInput' });
+                this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
             }
         });
 
@@ -143,7 +144,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
-        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
 
         logEvent('new-chat-start', { from: 'command-deck' });
     }
