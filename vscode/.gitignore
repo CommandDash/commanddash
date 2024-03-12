@@ -28,9 +28,10 @@ dist/
 .env
 user_config.json
 .vscode-test/
-
+*.vsix
 
 #Ignore lock files
 
 package-lock.json
 yarn.lock
+

@@ -7,15 +7,15 @@ jobs:
     runs-on: ubuntu-latest # Host's operating system.
     steps:
       - name: Checkout commit # Download the code from triggering commit.
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: '12.x'
+          node-version: '20.x'
       
       - name: Cache NPM # Leverage npm cache on repeated workflow runs if package.json didn't change.
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/vscode/package-lock.json') }} # Make sure to target the `vscode` directory.

@@ -94,7 +94,6 @@
         "command": "dashai.attachToDash.menu",
         "title": "Attach Snippet to Dash"
       },
-
       {
         "command": "dashai.createInlineCodeCompletion",
         "title": "Dash AI: Inline Code Generation"
@@ -103,7 +102,6 @@
         "command": "dashai.createInlineCodeCompletion.menu",
         "title": "Inline Code Generation"
       },
-
       {
         "command": "dashai.createWidget",
         "title": "Dash AI Create: Widget from Image or Description"
@@ -112,7 +110,6 @@
         "command": "dashai.createWidget.menu",
         "title": "Widget from Image or Description"
       },
-      
       {
         "command": "dashai.createCodeFromBlueprint",
         "title": "Dash AI Create: Code from Blueprint"
@@ -121,7 +118,6 @@
         "command": "dashai.createCodeFromBlueprint.menu",
         "title": "Code from Blueprint"
       },
-
       {
         "command": "dashai.createCodeFromDescription",
         "title": "Dash AI Create: Code From Description"
@@ -181,7 +177,6 @@
           "command": "dashai.createCodeFromBlueprint.menu",
           "when": "false"
         },
-  
         {
           "command": "dashai.createCodeFromDescription",
           "when": "!editorHasSelection && resourceLangId == 'dart'"
@@ -247,9 +242,10 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run -S esbuild-base",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "build": "npm run -S esbuild-base -- --sourcemap",
+    "watch": "npm run -S esbuild-base -- --sourcemap --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
@@ -263,6 +259,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "@vscode/test-electron": "^2.3.0",
+    "esbuild": "^0.20.1",
     "eslint": "^8.39.0",
     "glob": "^10.2.2",
     "mocha": "^10.2.0",

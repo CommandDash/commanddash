@@ -4,7 +4,7 @@ import { extractDartCode } from '../utilities/code-processing';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import path = require('path');
-import { promptGithubLogin } from '../extension'
+import { promptGithubLogin } from '../extension';
 import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-utils';
 import { logEvent } from '../utilities/telemetry-reporter';
 import { GeminiRepository } from '../repository/gemini-repository';
@@ -193,6 +193,6 @@ async function addPebbleUsage(
         method: 'post',
         url: process.env["pebble_used"],
         data: params,
-    }
+    };
     const response = await makeAuthorizedHttpRequest(config, context);
 }
