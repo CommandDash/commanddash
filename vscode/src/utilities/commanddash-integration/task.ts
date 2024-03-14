@@ -15,6 +15,10 @@ export class Task {
       this.handlers.set(eventName, handler);
       this.dartClient.eventEmitter.on(eventName, handler);
     }
+
+    public sendStepResponse(message: any, response: any): any{
+      this.dartClient.sendStepResponse(message.id, message.params['kind'], response);
+    }
   
     public async run(params: any = {}): Promise<any> {
       try {

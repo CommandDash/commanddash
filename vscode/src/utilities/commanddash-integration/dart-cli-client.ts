@@ -1,6 +1,5 @@
 import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
-import { integer } from 'vscode-languageclient';
 import { Task } from './task';
 
 export class DartCLIClient {
@@ -160,7 +159,7 @@ export async function testTaskWithSideOperation() {
   const client = new DartCLIClient();
   client.onProcessOperation('operation_data_kind', (message)=>{
     const operationData = { value: "unique_value" };
-    client.sendOperationResponse('operation_data_kind', operationData);
+    task.sendStepResponse(message,operationData);
   });
   const task = client.newTask();
 
@@ -182,7 +181,7 @@ export async function testTaskWithSteps() {
   // Handle client side steps during task processing. 
   task.onProcessStep('step_data_kind', (message) => {
       /// any complex interaction to come up with response data.
-      const additionalData = { value: "unique_value_2" };
+      const additionalData = { value: "unique_value" };
   
       // Respond back to CLI in every case. Either with data if required or just a confirmation.
       client.sendStepResponse(message.id, 'step_data_kind', additionalData);
@@ -198,4 +197,52 @@ export async function testTaskWithSteps() {
   } catch (error) {
       console.error("Processing error: ", error);
   }
+}
+
+export async function handleAgents() {
+  const client = new DartCLIClient();
+  const task = client.newTask();
+
+  task.onProcessStep('append_to_chat', (message)=>{
+    console.log(`append to chat:\n${message}`);
+    task.sendStepResponse(message, {'result': 'success'});
+  });
+  try {
+    /// Request the client to process the task and handle result or error
+    const response = await task.run({ kind: "agent-execute", data: {
+      "authdetails": {
+        "type": "gemini",
+        "key": "AIzaSyCUgTsTlr_zgfM7eElSYC488j7msF2b948",
+        "githubToken": ""
+      },
+      "inputs": [
+        {
+          "id": "736841542",
+          "type": "string_input",
+          "value":
+              "Where do you think AI is heading in the field of programming? Give a short answer."
+        }
+      ],
+      "outputs": [
+        {"id": "90611917", "type": "default_output"}
+      ],
+      "steps": [
+        {
+          "type": "prompt_query",
+          "query": "736841542",
+          "post_process": {"type": "raw"},
+          "output": "90611917"
+        },
+        {
+          "type": "append_to_chat",
+          "message": "<90611917>",
+        }
+      ]
+    }
+  });
+    console.log("Processing completed: ", response);
+  } catch (error) {
+    console.error("Processing error: ", error);
+  }
+  
 }
