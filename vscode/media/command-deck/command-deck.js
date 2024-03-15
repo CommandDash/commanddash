@@ -75,13 +75,15 @@ function getCaretCoordinates(element, position) {
 }
 
 class CommandDeck {
-    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn) {
+    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn, json, agentUIBuilder) {
         this.ref = ref;
         this.menuRef = menuRef;
         this.resolveFn = resolveFn;
         this.replaceFn = replaceFn;
         this.menuItemFn = menuItemFn;
         this.options = [];
+        this.json = json;
+        this.agentUIBuilder = agentUIBuilder;
 
         this.makeOptions = this.makeOptions.bind(this);
         this.closeMenu = this.closeMenu.bind(this);
@@ -89,6 +91,7 @@ class CommandDeck {
         this.onInput = this.onInput.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.renderMenu = this.renderMenu.bind(this);
+        this.agentProvider = new AgentProvider(this.json);
 
         this.ref.addEventListener('input', this.onInput);
         this.ref.addEventListener('keydown', this.onKeyDown);
@@ -97,9 +100,9 @@ class CommandDeck {
     async makeOptions(query) {
         let options = [];
         if (query.startsWith('@')) {
-            options = await this.resolveFn(query.slice(1), 'at');
+            options = await this.resolveFn(query, 'at');
         } else if (query.startsWith('/')) {
-            options = await this.resolveFn(query.slice(1), 'slash');
+            options = await this.resolveFn(query, 'slash');
         }
         if (options.length !== 0) {
             this.options = options;
@@ -121,28 +124,20 @@ class CommandDeck {
 
     selectItem(active) {
         return () => {
+            this.ref.textContent = '';
             const option = this.options[active];
 
-            const commands = this.extractCommands(option, "/") ?? option;
-            const isSlashOptionAvailable = commandsExecution.hasOwnProperty(commands);
-
-            if (isSlashOptionAvailable) {
-                commandsExecution[commands].exe(this.ref);
-            } else {
-                const trigger = this.ref.textContent[this.triggerIdx];
-                this.ref.textContent = "";
-                const mentionNode = document.createElement("span");
-                mentionNode.id = "special-commands";
-                mentionNode.classList.add("text-blue-500", "inline-block");
-                mentionNode.contentEditable = false;
-                mentionNode.textContent = `${trigger}${option}\u200B`;
-                this.ref.appendChild(mentionNode);
-                this.ref.appendChild(document.createTextNode("\u00A0"));
-                setCaretToEnd(this.ref);
-            }
+            const agentUIBuilder = new AgentUIBuilder(this.ref);
+            agentInputsJson = this.agentProvider.getInputs(option);
+            agentUIBuilder.buildAgentUI(agentInputsJson);
 
             this.ref.focus();
             this.closeMenu();
+
+            setTimeout(() => {
+                adjustHeight();
+                commandEnable = true;
+            }, 0);
         };
     }
 

@@ -209,6 +209,7 @@ const activityBarForeground = getComputedStyle(document.documentElement).getProp
 const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
+const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
@@ -239,92 +240,322 @@ let activeAgent;
 let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
+let agentProvider = null;
+let agentInputsJson = [];
 
 //initialising visual studio code library
 let vscode = null;
 
-let agents = ['workspace', 'settings'];
-const commands = ['refactor'];
+let agents = [];
+let commands = [];
 
-// Add your additional commands and agents
-const agentCommandsMap = {
-    'settings': ['apikey'],
-};
-
-//description for commands and agents
-const description = {
-    'refactor': 'Refactor code with instructions',
-    'workspace': 'Ask questions across your workspace'
-};
-
-const commandsExecution = {
-    'refactor': {
-        'exe': (input) => {
-            commandEnable = true;
-            input.textContent = '';
-
-            const inputJson = {
-                "slug": "/refactor",
-                "field_text": "",
-                "text_field_layout": "<805088184> <736841542>",
-                "inputs": [
-                    {
-                        "id": "805088184",
-                        "display_text": "Code Attachment",
-                        "type": "code_input"
-                    },
-                    {
-                        "id": "736841542",
-                        "display_text": "Refactor instructions",
-                        "type": "string_input"
-                    }
-                ]
-            };
-            agentBuilder = new AgentUIBuilder(input, inputJson);
-            agentBuilder.buildAgentUI();
-
-            setTimeout(() => {
-                adjustHeight();
-            }, 0);
+const data = [
+    {
+      "name": "@workspace",
+      "supported_commands": [
+        {
+          "slug": "/ask",
+          "intent": "Ask me anything",
+          "text_field_layout": "Hi, I'm here to help you. <736841542> <805088184>",
+          "inputs": [
+            {
+              "id": "736841542",
+              "display_text": "Your query",
+              "type": "string_input"
+            },
+            {
+              "id": "805088184",
+              "display_text": "Code Attachment",
+              "type": "code_input"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "422243666",
+              "type": "default_output"
+            },
+            {
+              "id": "436621806",
+              "type": "multi_code_object"
+            },
+            {
+              "id": "90611917",
+              "type": "default_output"
+            }
+          ],
+          "step": [
+            {
+              "type": "search_in_sources",
+              "query": "<736841542><805088184>",
+              "data_sources": [
+                "<643643320>"
+              ],
+              "total_matching_document": 0,
+              "output": "<422243666>"
+            },
+            {
+              "type": "search_in_workspace",
+              "query": "<422243666>",
+              "workspace_object_type": "all",
+              "output": "<436621806>"
+            },
+            {
+              "type": "prompt_query",
+              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
+              "post_process": {
+                "type": "raw"
+              },
+              "output": "<90611917>"
+            },
+            {
+              "type": "append_to_chat",
+              "value": "This was your query: <736841542> and here is your output: <90611917>"
+            }
+          ]
         },
-    },
-    'apikey': {
-        'exe': (input) => {
-            input.textContent = "";
-
-            const inputJson = {
-                "slug": "/apikey",
-                "field_text": "",
-                "text_field_layout": "Update your API key <805088184>",
-                "inputs": [
-                    {
-                        "id": "805088184",
-                        "display_text": "API Key",
-                        "type": "string_input"
-                    }
-                ]
-            };
-
-            const agentUIBuilder = new AgentUIBuilder(input, inputJson);
-            agentUIBuilder.buildAgentUI();
-
-            setTimeout(() => {
-                adjustHeight();
-            }, 0);
+        {
+          "slug": "/search",
+          "intent": "Ask me anything",
+          "text_field_layout": "Hi, I'm here to help you. <736841542>",
+          "inputs": [
+            {
+              "id": "736841542",
+              "display_text": "Your search",
+              "type": "string_input"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "422243666",
+              "type": "default_output"
+            },
+            {
+              "id": "436621806",
+              "type": "multi_code_object"
+            },
+            {
+              "id": "90611917",
+              "type": "default_output"
+            }
+          ],
+          "step": [
+            {
+              "type": "search_in_sources",
+              "query": "<736841542><805088184>",
+              "data_sources": [
+                "<643643320>"
+              ],
+              "total_matching_document": 0,
+              "output": "<422243666>"
+            },
+            {
+              "type": "search_in_workspace",
+              "query": "<422243666>",
+              "workspace_object_type": "all",
+              "output": "<436621806>"
+            },
+            {
+              "type": "prompt_query",
+              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
+              "post_process": {
+                "type": "raw"
+              },
+              "output": "<90611917>"
+            },
+            {
+              "type": "append_to_chat",
+              "value": "This was your query: <736841542> and here is your output: <90611917>"
+            }
+          ]
         }
+      ]
+    },
+    {
+      "name": "@settings",
+      "supported_commands": [
+        {
+          "slug": "/api",
+          "intent": "Ask me anything",
+          "text_field_layout": "Add your Gemini API <736841542>",
+          "inputs": [
+            {
+              "id": "736841542",
+              "display_text": "Add API",
+              "type": "string_input"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "422243666",
+              "type": "default_output"
+            },
+            {
+              "id": "436621806",
+              "type": "multi_code_object"
+            },
+            {
+              "id": "90611917",
+              "type": "default_output"
+            }
+          ],
+          "step": [
+            {
+              "type": "search_in_sources",
+              "query": "<736841542><805088184>",
+              "data_sources": [
+                "<643643320>"
+              ],
+              "total_matching_document": 0,
+              "output": "<422243666>"
+            },
+            {
+              "type": "search_in_workspace",
+              "query": "<422243666>",
+              "workspace_object_type": "all",
+              "output": "<436621806>"
+            },
+            {
+              "type": "prompt_query",
+              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
+              "post_process": {
+                "type": "raw"
+              },
+              "output": "<90611917>"
+            },
+            {
+              "type": "append_to_chat",
+              "value": "This was your query: <736841542> and here is your output: <90611917>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "",
+      "supported_commands": [
+        {
+          "slug": "/refactor",
+          "intent": "Ask me anything",
+          "text_field_layout": "Refactor your code <736841542> <805088184>",
+          "inputs": [
+            {
+              "id": "736841542",
+              "display_text": "Your query",
+              "type": "string_input"
+            },
+            {
+              "id": "805088184",
+              "display_text": "Code Attachment",
+              "type": "code_input"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "422243666",
+              "type": "default_output"
+            },
+            {
+              "id": "436621806",
+              "type": "multi_code_object"
+            },
+            {
+              "id": "90611917",
+              "type": "default_output"
+            }
+          ],
+          "step": [
+            {
+              "type": "search_in_sources",
+              "query": "<736841542><805088184>",
+              "data_sources": [
+                "<643643320>"
+              ],
+              "total_matching_document": 0,
+              "output": "<422243666>"
+            },
+            {
+              "type": "search_in_workspace",
+              "query": "<422243666>",
+              "workspace_object_type": "all",
+              "output": "<436621806>"
+            },
+            {
+              "type": "prompt_query",
+              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
+              "post_process": {
+                "type": "raw"
+              },
+              "output": "<90611917>"
+            },
+            {
+              "type": "append_to_chat",
+              "value": "This was your query: <736841542> and here is your output: <90611917>"
+            }
+          ]
+        },
+        {
+            "slug": "/fig2code",
+            "intent": "Ask me anything",
+            "text_field_layout": "Convert figma to code. <805088184>",
+            "inputs": [
+              {
+                "id": "805088184",
+                "display_text": "Code Attachment",
+                "type": "code_input"
+              }
+            ],
+            "outputs": [
+              {
+                "id": "422243666",
+                "type": "default_output"
+              },
+              {
+                "id": "436621806",
+                "type": "multi_code_object"
+              },
+              {
+                "id": "90611917",
+                "type": "default_output"
+              }
+            ],
+            "step": [
+              {
+                "type": "search_in_sources",
+                "query": "<736841542><805088184>",
+                "data_sources": [
+                  "<643643320>"
+                ],
+                "total_matching_document": 0,
+                "output": "<422243666>"
+              },
+              {
+                "type": "search_in_workspace",
+                "query": "<422243666>",
+                "workspace_object_type": "all",
+                "output": "<436621806>"
+              },
+              {
+                "type": "prompt_query",
+                "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
+                "post_process": {
+                  "type": "raw"
+                },
+                "output": "<90611917>"
+              },
+              {
+                "type": "append_to_chat",
+                "value": "This was your query: <736841542> and here is your output: <90611917>"
+              }
+            ]
+          }
+      ]
     }
-};
-
-// Concatenate agent-specific commands to the agents array
-agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
-    Object.entries(agentCommandsMap)
-        .filter(([agent, cmds]) => cmds.length > 0)
-        .map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`))
-        .flat()
-);
-
+];
 
 (function () {
+
+    setLoading(true);
+
     //initialising vscode library
     vscode = acquireVsCodeApi();
 
@@ -351,7 +582,18 @@ agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
     textInput.addEventListener("paste", (event) => {
         event.preventDefault();
         const pastedText = event.clipboardData.getData('text/plain');
-        event.target.textContent = pastedText;
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(pastedText));
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        } else {
+            event.target.textContent += pastedText;
+        }
+        adjustHeight();
     });
 
     // event listeners for text input
@@ -361,9 +603,20 @@ agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-
+    agentProvider = new AgentProvider(data);
+    agents = [...agentProvider.agents];
+    commands = [...agentProvider.commands];
 })();
 
+function setLoading(isLoading) {
+    if (isLoading) {
+        bodyContainer.classList.add("hidden");
+        loadingContainer.classList.remove("hidden");
+    } else {
+        bodyContainer.classList.remove("hidden");
+        loadingContainer.classList.add("hidden");
+    }
+}
 
 function addToolTipsById() {
 
@@ -427,8 +680,11 @@ function submitResponse() {
     // }
     // textInput.textContent = "";
     // adjustHeight();
-    const json = agentBuilder.getJSONValue();
-    console.log('json value', json);
+
+
+    // const json = agentBuilder.getJSONValue();
+    // console.log('json value', json);
+    console.log('json value', agentInputsJson);
 }
 
 function handleSubmit(event) {
@@ -451,12 +707,6 @@ function handleSubmit(event) {
             if (!activeAgent) {
                 matchingItems = query.length === 0 ? commands : commands.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
             }
-            // If there is an active agent
-            else {
-                matchingItems = query.length === 0
-                    ? agentCommandsMap[activeAgent]
-                    : agentCommandsMap[activeAgent].filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
-            }
         }
 
         return matchingItems;
@@ -472,17 +722,20 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = description[action] ? `${trigger}${action} - ${description[action]}` : `${trigger}${action}`;
+        div.textContent = `${action}`;
         div.onclick = setItem;
         return div;
     };
 
+    agentBuilder = new AgentUIBuilder(this.ref);
     const commandDeck = new CommandDeck(
         textInput,
         textinputMenu,
         resolveFn,
         replaceFn,
-        menuItemFn
+        menuItemFn,
+        data,
+        agentBuilder
     );
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
@@ -606,6 +859,7 @@ function readTriggeredMessage() {
                 onboardingArrowIcon.classList.add("hidden");
                 onboardingText.classList.add("hidden");
                 tryFlutterText.classList.add("hidden");
+                setLoading(false);
                 break;
             case 'workspaceLoader':
                 workspaceLoader.style.display = message.value ? 'flex' : 'none';
@@ -658,7 +912,7 @@ function readTriggeredMessage() {
                 createReferenceChips(JSON.parse(message.value));
                 setTimeout(() =>
                     adjustHeight(),
-                    0);
+                0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -671,6 +925,9 @@ function readTriggeredMessage() {
                 shortCutHints = message.value;
                 //adding tooltips to the elements
                 addToolTipsById();
+                break;
+            case 'keyNotExists':
+                setLoading(false);
                 break;
         }
     });
@@ -769,7 +1026,7 @@ function insertAtReference(chip) {
 
     chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips-reference");
 
-    const referenceChip = document.getElementById("code-container");
+    const referenceChip = document.getElementById("reference-id");
     const referenceText = document.getElementById("add-reference-text");
     const refactorInput = document.getElementById("text-refactor-input");
     if (referenceText) {
@@ -840,6 +1097,72 @@ function isValidGeminiApiKey(apiKey) {
 
     // Check if the API key matches the pattern
     return apiKeyPattern.test(apiKey);
+}
+
+function countLeadingSpacesOfLine(line) {
+    const leadingSpaces = line.match(/^ */);
+    return leadingSpaces ? leadingSpaces[0].length : 0;
+}
+
+function preProcessMarkdown(markdown) {
+    const lines = markdown.split("\n");
+  
+    const processedLines = lines.map(line => {
+        const leadingSpaces = countLeadingSpacesOfLine(line);
+  
+        if (leadingSpaces % 4 !== 0) {
+            const leadingSpacesToAdd = (Math.ceil(leadingSpaces / 4)) * 4 - leadingSpaces;
+            return " ".repeat(leadingSpacesToAdd) + line;
+        } 
+    
+        return line;
+    });
+  
+    return processedLines.join("\n");
+}
+
+function startAttributeExtension() {
+    let startNumbers = [];
+
+    return [
+        {
+            type: "lang", 
+            filter: function (text) {
+                const olMarkdownRegex = /^\s*(\d+)\. /gm;
+
+                const lines = text.split("\n");
+
+                lines.forEach(line => {
+                    const match = olMarkdownRegex.exec(line);
+
+                    if (match) {
+                        startNumbers.push(match[1]);
+                    }
+                });
+
+                return text;
+            }
+        }, 
+        {
+            type: "output", 
+            filter: function (text) {
+                if (startNumbers.length > 0) {
+                    const lines = text.split("\n");
+
+                    lines.forEach((line, index) => {
+                        if (line.includes("<ol>")) {
+                            const startNumber = startNumbers.shift();
+                            lines[index] = line.replace("<ol>", `<ol start="${startNumber}">`);
+                        }
+                    });
+
+                    text = lines.join("\n");
+                }
+
+                return text;
+            }
+        }
+    ];
 }
 
 function displayMessages() {
@@ -1011,9 +1334,11 @@ function markdownToPlain(input) {
         openLinksInNewWindow: true, // Add this option to open links in a new window
         ghCodeBlocks: true, // Enable GitHub-style code blocks (optional for better styling)
         strikethrough: true, // Enable strikethrough syntax (optional)
-        tasklists: true // Enable task list syntax for checkboxes (optional)
+        tasklists: true, // Enable task list syntax for checkboxes (optional)
+        extensions: [startAttributeExtension]
     });
-    html = converter.makeHtml(input);
+    processedInput = preProcessMarkdown(input);
+    html = converter.makeHtml(processedInput);
     return html;
 }
 

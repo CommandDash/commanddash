@@ -1,8 +1,12 @@
 # Change Log
 
-All notable changes to the "fluttergpt" extension will be documented in this file.
+All notable changes to the "commanddash" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+
+## [0.3.0]
+
+- Rebrand to CommandDash (Dash AI)
 
 ## [0.2.10]
 

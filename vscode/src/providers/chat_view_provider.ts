@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
+import * as os from 'os';
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
@@ -53,7 +54,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         // add an event listener for messages received by the webview
         webviewView.webview.onDidReceiveMessage(async (data) => {
-            console.log('data', data);
             switch (data.type) {
                 case "codeSelected":
                     {
@@ -112,31 +112,32 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                 case "checkKeyIfExists":
-                    {
-                        this._checkIfKeyExists();
-                        break;
-                    }
+                {
+                    this._checkIfKeyExists();
+                    break;
+                }
                 case "dashResponse":
                     {
                         const { agent, data: _data, messageId, buttonType } = JSON.parse(data.value);
                         console.log('agent', buttonType, _data, messageId, agent);
                         if (agent === "diffView") {
                             const updatedMessage = await DiffViewAgent.handleResponse(buttonType, _data, messageId);
-                            // update the message with messageId
                             if (updatedMessage) {
                                 this._publicConversationHistory[messageId] = updatedMessage;
                                 this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
                             }
                         }
+                        break;
                     }
 
             }
         });
 
         webviewView.onDidChangeVisibility(() => {
+            console.log('webview', webviewView.visible);
             if (webviewView.visible && this._view) {
                 this._view?.webview.postMessage({ type: 'focusChatInput' });
-                this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+                
             }
         });
 
@@ -144,7 +145,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
-
+        this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
         logEvent('new-chat-start', { from: 'command-deck' });
     }
 
@@ -153,6 +154,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const apiKey = config.get<string>('apiKey');
         if (apiKey) {
             this._view?.webview.postMessage({ type: "keyExists" });
+        } else {
+            this._view?.webview.postMessage({ type: "keyNotExists" });
         }
     }
     private async handleAction(input: string) {
@@ -174,8 +177,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         }
     }
-
-
     private _getHtmlForWebview(webview: vscode.Webview) {
         const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
         const onboardingHtml = fs.readFileSync(onboardingHtmlPath.fsPath, 'utf8');
@@ -183,7 +184,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
         const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
         const commandDeckJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "command-deck", "command-deck.js"));
-        const agentUIBuilder = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-ui-builder", "agent-ui-builder.js"));
+        const agentUIBuilderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-ui-builder", "agent-ui-builder.js"));
+        const agentProviderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-provider", "agent-provider.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
 
@@ -195,7 +197,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
             .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
-            .replace(/{{agentUIBuilder}}/g, agentUIBuilder.toString())
+            .replace(/{{agentUIBuilderUri}}/g, agentUIBuilderUri.toString())
+            .replace(/{{agentProviderUri}}/g, agentProviderUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());

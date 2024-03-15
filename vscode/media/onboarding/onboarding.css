@@ -193,6 +193,14 @@ p[contenteditable="true"] {
     border-color: var(--vscode-editor-foreground);
 }
 
+#add-reference-text {
+    outline: 1px solid var(--vscode-editor-foreground);
+}
+
+#add-reference-text:focus {
+    outline: 1px solid #497BEF;
+}
+
 .code_input {
     outline: 1px solid var(--vscode-editor-foreground);
 }
@@ -206,14 +214,6 @@ p[contenteditable="true"] {
 }
 
 .string_input:focus {
-    outline: 1px solid #497BEF;
-}
-
-#text-refactor-input {
-    outline: 1px solid var(--vscode-editor-foreground);
-}
-
-#text-refactor-input:focus {
     outline: 1px solid #497BEF;
 }
 
