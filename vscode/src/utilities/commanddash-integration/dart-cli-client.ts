@@ -198,13 +198,20 @@ export async function testTaskWithSteps() {
       console.error("Processing error: ", error);
   }
 }
-
+/// There can't be multiple tasks messages in parallel
 export async function handleAgents() {
   const client = new DartCLIClient();
   const task = client.newTask();
 
   task.onProcessStep('append_to_chat', (message)=>{
     console.log(`append to chat:\n${message}`);
+    task.sendStepResponse(message, {'result': 'success'});
+  });
+  task.onProcessStep('loader_update', (message)=>{
+    console.log('Received loader of kind: ' + message['kind']);
+    // message['kind']; // ['loader','message', 'message_with_files_list']
+    // message['data']; // data depending upon kind.
+    console.log(`${message}`);
     task.sendStepResponse(message, {'result': 'success'});
   });
   try {
