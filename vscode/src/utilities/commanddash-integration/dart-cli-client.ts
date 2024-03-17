@@ -1,19 +1,69 @@
 import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
+import * as os from 'os';
+import {promisify} from 'util';
 
 export class DartCLIClient {
   private proc: child_process.ChildProcessWithoutNullStreams | undefined;
   private requestId = 0;
   public eventEmitter = new EventEmitter();
+  private readonly exec: any;
 
   constructor() {
-    this.connect();
+    this.exec = promisify(child_process.exec);
   }
 
-  public connect() {
+  public async ready(): Promise<any> {
+    const platform = os.platform();
+    try {
+      const { stdout, stderr } = await this.exec('dart pub global run commanddash');
+      if (stderr !== '') {
+        let packageNotActivated = stderr.includes('No active package commanddash');
+        let dartNotFound: boolean = platform === 'win32' ? stderr.includes('is not recognized as an internal or external command, operable program or batch file.') : stderr.includes('command not found');
+        if (!dartNotFound && !packageNotActivated) {
+          return {
+            'ready': false,
+            'message': `Unable to activate commanddash CLI: ${stderr}`
+          };
+        }
+        if (dartNotFound) {
+          return {
+            'ready': false,
+            'message': 'Seems like Dart is not installed in the current system.'
+          };
+        }
+        const { stdout: stdout2, stderr: stderr2 } = await this.exec('dart pub global activate commanddash');
+        if (stdout2.includes('Installed executable commanddash')) {
+          return {
+            'ready': true,
+          };
+        } else {
+          let errorMessage = stdout2 !== '' ? stdout2 : stderr2 !== '' ? stderr2 : null;
+          return {
+            'ready': false,
+            'message': `Unable to activate commanddash CLI: ${errorMessage}`
+          };
+        }
+      }
+      if (!stdout.includes('Usage: commanddash <command> [arguments]')){
+        return {
+          'ready': false,
+          'message': `Unable to use commanddash CLI: ${stdout}`
+        };
+      }
+    } catch (error) {
+      return {
+        'ready': false,
+        'message': `An error occurred: ${error}`
+      };
+    }
+  }
+
+  public async connect() {
     // this.proc = child_process.spawn('path-to-file/commanddash.exe', ['process']);
-    this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
+    // this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
+    this.proc = child_process.spawn('dart', ['pub', 'global', 'run', 'commanddash', 'process']);
 
     this.proc.stdout.on('data', (data) => {
       const message = JSON.parse(data.toString());
