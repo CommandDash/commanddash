@@ -1,19 +1,61 @@
 import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
+import {join} from 'path';
+import {chmod, existsSync} from 'fs';
+import { downloadFile, makeHttpRequest } from '../../repository/http-utils';
+import { AxiosRequestConfig } from 'axios';
+import * as vscode from 'vscode';
+import path = require('path');
+import * as os from 'os';
+
+export async function installExecutable(clientVersion: string, executablePath: string, onProgress: (progress: number) => void) {
+  const platform = os.platform();
+  const slug = platform==='win32'?'windows':platform==='darwin'?'macos':platform==='linux'?'linux':'unsupported';
+  const config: AxiosRequestConfig = {
+      method: 'get',
+      url: `http://api.commanddash.dev/executable/get-update/${clientVersion}/${slug}`
+  };
+  let response = await makeHttpRequest<{url: string, version: string}>(config);
+  await downloadFile(response['url'], executablePath, onProgress);
+}
 
 export class DartCLIClient {
   private proc: child_process.ChildProcessWithoutNullStreams | undefined;
   private requestId = 0;
   public eventEmitter = new EventEmitter();
+  private static instance: DartCLIClient;
+  private executablePath: string;
 
-  constructor() {
+  private constructor(executablePath: string){
+    this.executablePath = executablePath;
     this.connect();
   }
+  
+  public static async init(context: vscode.ExtensionContext, onProgress: (progress: number) => void): Promise<DartCLIClient> {
+    const platform = os.platform();
+    const globalStoragePath = context.globalStorageUri;
+    const fileName = platform==='win32'?'commanddash.exe':'commanddash';
+    const executablePath = path.dirname(join(globalStoragePath.path, fileName));
+    if(existsSync(executablePath)){
+      //TODO: Return true and check for updates in background
+      // Replace the existing executable which will hence be spwaned in the next activation
+      DartCLIClient.instance = new DartCLIClient(executablePath);
+      return DartCLIClient.instance;
+    }
+    await installExecutable('0.0.1', executablePath, onProgress);
+    DartCLIClient.instance = new DartCLIClient(executablePath);
+    return DartCLIClient.instance;
+  }
+
+  public static getInstance(): DartCLIClient {
+    return DartCLIClient.instance;
+  }
+
 
   public connect() {
-    // this.proc = child_process.spawn('path-to-file/commanddash.exe', ['process']);
-    this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
+    this.proc = child_process.spawn(this.executablePath, ['process']);
+    // this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
 
     this.proc.stdout.on('data', (data) => {
       const message = JSON.parse(data.toString());
@@ -155,8 +197,8 @@ export class DartCLIClient {
 
 /// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
 /// [add it to extension.ts activate and run the extension]
-export async function testTaskWithSideOperation() {
-  const client = new DartCLIClient();
+export async function testTaskWithSideOperation(context: vscode.ExtensionContext) {
+  const client = await DartCLIClient.init(context, (_)=>{});
   client.onProcessOperation('operation_data_kind', (message)=>{
     const operationData = { value: "unique_value" };
     task.sendStepResponse(message,operationData);
@@ -175,8 +217,8 @@ export async function testTaskWithSideOperation() {
 
 /// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
 /// [add it to extension.ts activate and run the extension]
-export async function testTaskWithSteps() {
-  const client = new DartCLIClient();
+export async function testTaskWithSteps(context: vscode.ExtensionContext) {
+  const client = await DartCLIClient.init(context, (_)=>{});
   const task = client.newTask();
   // Handle client side steps during task processing. 
   task.onProcessStep('step_data_kind', (message) => {
@@ -199,8 +241,8 @@ export async function testTaskWithSteps() {
   }
 }
 /// There can't be multiple tasks messages in parallel
-export async function handleAgents() {
-  const client = new DartCLIClient();
+export async function handleAgents(context: vscode.ExtensionContext) {
+  const client = await DartCLIClient.init(context, (_)=>{});
   const task = client.newTask();
 
   task.onProcessStep('append_to_chat', (message)=>{

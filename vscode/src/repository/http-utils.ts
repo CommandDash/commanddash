@@ -1,5 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export async function makeHttpRequest<T>(config: AxiosRequestConfig): Promise<T> {
     try {
@@ -58,3 +60,32 @@ async function getNewAccessToken(refreshToken:string): Promise<string>{
 });
     return response.accessToken;
 }
+
+
+export async function downloadFile(url: string, destinationPath: string, onProgress: (progress: number) => void): Promise<void> {
+    const response = await axios({
+    url,
+    method: 'GET',
+    responseType: 'stream',
+    onDownloadProgress: (progressEvent) => {
+        const total = progressEvent.total ? progressEvent.total : 9999999;
+        const progress = Math.round((progressEvent.loaded * 100) / total);
+        onProgress(Math.min(progress, 100));
+    },
+    });
+
+    const directory = path.dirname(destinationPath);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
+
+    const writer = fs.createWriteStream(destinationPath);
+
+    response.data.pipe(writer);
+
+    return new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+    });
+}
+
