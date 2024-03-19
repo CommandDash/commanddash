@@ -74,7 +74,7 @@ export async function createInlineCodeCompletion() {
     vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         cancellable: false,
-        title: 'FlutterGPT: Generating code, please wait.'
+        title: 'Dash AI: Generating code, please wait.'
     }, async (progress, token: vscode.CancellationToken) => {
         const cacheManager = CacheManager.getInstance();
         cacheManager.incrementInlineCompletionCount();

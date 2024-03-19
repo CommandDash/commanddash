@@ -16,6 +16,7 @@ export async function createWidgetFromDescription(geminiRepo: GeminiRepository, 
                 canSelectFolders: false,
                 canSelectMany: false,
                 filters: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     Images: ['png', 'jpg', 'jpeg', 'gif', 'bmp']
                 }
             });

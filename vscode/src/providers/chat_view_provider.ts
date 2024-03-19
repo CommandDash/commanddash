@@ -1,37 +1,45 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
+import * as os from 'os';
 import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
-
+import { refactorCode } from "../tools/refactor/refactor_from_instructions";
+import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
+import { RefactorActionManager } from "../action-managers/refactor-agent";
+import { DiffViewAgent } from "../action-managers/diff-view-agent";
+import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "fluttergpt.chatView";
+    public static readonly viewType = "dashai.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     aiRepo?: GeminiRepository;
+    analyzer?: ILspAnalyzer;
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
         private context: vscode.ExtensionContext,
         aiRepo?: GeminiRepository,
+        analyzer?: ILspAnalyzer,
     ) {
         this.aiRepo = aiRepo;
+        this.analyzer = analyzer;
     }
-    
-	// Public method to post a message to the webview
-	public postMessageToWebview(message: any): void {
-		if (this._view) {
-			this._view.webview.postMessage(message);
-		}
-	}
 
-	public resolveWebviewView(
-		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext,
-		_token: vscode.CancellationToken,
-	) {
-		this._view = webviewView;
+    // Public method to post a message to the webview
+    public postMessageToWebview(message: any): void {
+        if (this._view) {
+            this._view.webview.postMessage(message);
+        }
+    }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
 
         // set options for the webview, allow scripts
         webviewView.webview.options = {
@@ -46,12 +54,17 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         // add an event listener for messages received by the webview
         webviewView.webview.onDidReceiveMessage(async (data) => {
-            console.log('data', data);
             switch (data.type) {
                 case "codeSelected":
                     {
                         break;
                     }
+                case "action":
+                    {
+                        this.handleAction(data.value);
+                        break;
+                    }
+
                 case "prompt":
                     {
                         this.getResponse(data.value);
@@ -70,12 +83,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                                 }
                             });
                         }
-                        logEvent('merge-code', {from: 'command-deck'});
+                        logEvent('merge-code', { from: 'command-deck' });
                         break;
                     }
-                    case "copyCode":
+                case "copyCode":
                     {
-                        logEvent('copy-code', {from: 'command-deck'});
+                        logEvent('copy-code', { from: 'command-deck' });
                         break;
                     }
                 case "clearChat":
@@ -85,11 +98,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "validate":
                     {
-                        webviewView.webview.postMessage({type: "showValidationLoader"});
+                        webviewView.webview.postMessage({ type: "showValidationLoader" });
                         this.aiRepo = this.initGemini(data.value);
                         await this._validateApiKey(data.value);
                         await this._validateFlutterExtension();
-                        webviewView.webview.postMessage({type: "hideValidationLoader"});
+                        webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
                 case "updateSettings":
@@ -98,43 +111,80 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
                         break;
                     }
-                case "checkKeyIfExists": 
+                case "checkKeyIfExists":
                 {
                     this._checkIfKeyExists();
                     break;
                 }
+                case "dashResponse":
+                    {
+                        const { agent, data: _data, messageId, buttonType } = JSON.parse(data.value);
+                        console.log('agent', buttonType, _data, messageId, agent);
+                        if (agent === "diffView") {
+                            const updatedMessage = await DiffViewAgent.handleResponse(buttonType, _data, messageId);
+                            if (updatedMessage) {
+                                this._publicConversationHistory[messageId] = updatedMessage;
+                                this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+                            }
+                        }
+                        break;
+                    }
 
             }
         });
 
-		webviewView.onDidChangeVisibility(() => {
-			if (webviewView.visible && this._view) {
-				this._view?.webview.postMessage({ type: 'focusChatInput' });
-			}
-		});
+        webviewView.onDidChangeVisibility(() => {
+            console.log('webview', webviewView.visible);
+            if (webviewView.visible && this._view) {
+                this._view?.webview.postMessage({ type: 'focusChatInput' });
+                
+            }
+        });
 
-		vscode.window.onDidChangeActiveColorTheme(() => {
-			webviewView.webview.postMessage({ type: 'updateTheme' });
-		});
+        vscode.window.onDidChangeActiveColorTheme(() => {
+            webviewView.webview.postMessage({ type: 'updateTheme' });
+        });
 
-        logEvent('new-chat-start', {from: 'command-deck'});
-	}
+        this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+        logEvent('new-chat-start', { from: 'command-deck' });
+    }
 
     private _checkIfKeyExists() {
         const config = vscode.workspace.getConfiguration('fluttergpt');
         const apiKey = config.get<string>('apiKey');
         if (apiKey) {
-            this._view?.webview.postMessage({type: "keyExists"});
+            this._view?.webview.postMessage({ type: "keyExists" });
+        } else {
+            this._view?.webview.postMessage({ type: "keyNotExists" });
         }
     }
+    private async handleAction(input: string) {
+        const data = JSON.parse(input);
+        const actionType = data.message.startsWith('/') ? data.message.split('\u00A0')[0].substring(1) : '';
+        const chipsData: object = data.chipsData;
+        data.message = data.message.replace(`/${actionType}`, '').trim();
+        data.instructions = data.instructions.replace(`/${actionType}`, '').trim();
+        const chipIds: string[] = data.chipId;
+        if (actionType === 'refactor') {
+            this._publicConversationHistory.push({ role: 'user', parts: data.message, agent: '/refactor' });
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
+            const result = await RefactorActionManager.handleRequest(chipsData, chipIds, data, this.aiRepo!, this.context, this.analyzer!, this);
+            this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+            this._publicConversationHistory.push(result);
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
 
+        }
+    }
     private _getHtmlForWebview(webview: vscode.Webview) {
         const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
         const onboardingHtml = fs.readFileSync(onboardingHtmlPath.fsPath, 'utf8');
         const onboardingCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.css"));
         const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
         const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
-        const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
+        const commandDeckJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "command-deck", "command-deck.js"));
+        const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "icon.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
 
         // Modify your Content-Security-Policy
@@ -144,9 +194,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{cspSource}}/g, cspSource)
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
+            .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
+        
 
         return updatedOnboardingChatHtml;
     }
@@ -200,12 +252,17 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return new GeminiRepository(apiKey);
     }
 
-    private _publicConversationHistory: Array<{ role: string, parts: string }> = [];
-    private _privateConversationHistory: Array<{ role: string, parts: string }> = [];
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }> = [];
+    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
+
+    public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {
+        this._publicConversationHistory.push(message);
+        this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+    }
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('fluttergpt.chatView.focus');
+            await vscode.commands.executeCommand('dashai.chatView.focus');
         } else {
             this._view?.show?.(true);
         }
@@ -256,7 +313,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
-            logEvent('follow-up-message', {from: 'command-deck'});
+            logEvent('follow-up-message', { from: 'command-deck' });
             this._view?.webview.postMessage({ type: 'stepLoader', value: { creatingResultLoader: true } });
             this._view?.webview.postMessage({ type: 'addResponse', value: '' });
 

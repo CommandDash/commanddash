@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import { CacheManager } from '../../utilities/cache-manager';
-import * as os from 'os';
+import { shortcutInlineCodeGeneration } from '../../utilities/shortcut-hint-utils';
 
 
 export async function activateInlineHints(cacheManager: CacheManager) {
     const completionDecoration = vscode.window.createTextEditorDecorationType({
         cursor: 'pointer',
         after: {
-            contentText: getCompletionInlineHintText(),
+            contentText: `Use ${shortcutInlineCodeGeneration()}  to auto complete using CommandDash`,
             color: 'gray',
             fontStyle: 'italic',
             fontWeight: 'bold',
@@ -80,18 +80,4 @@ export async function isFirstLineOfSymbol(editor: vscode.TextEditor): Promise<bo
     }
 
     return false;
-}
-
-function getCompletionInlineHintText(): string {
-    const platform = os.platform();
-    let hintText = 'Use (⌘) + (→) to auto complete using FlutterGPT';
-
-    if (platform === 'win32') {
-        hintText = 'Use (ctrl) + (→) to auto complete using FlutterGPT';
-    } else if (platform === 'darwin') {
-        hintText = 'Use (⌘) + (→) to auto complete using FlutterGPT';
-    } else if (platform === 'linux') {
-        hintText = 'Use (ctrl) + (→) to auto complete using FlutterGPT';
-    }
-    return hintText;
 }

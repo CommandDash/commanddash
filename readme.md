@@ -1,157 +1,98 @@
-<p align="center">
-  <a href="" rel="noopener">
- <img height=200px src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/develop/vscode/media/icon.png"></a>
+
+<p  align="center">
+<a  href=""  rel="noopener">
+<img  height=200px  src="assets/commanddash-logo.png"></a>
 </p>
-<h1 align="center">FlutterGPT</h1>
-<div align="center">
+<h1 align="center">Dash AI</h1>
+<div align = "center">
 
-[![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview)
-[![VScode version](https://img.shields.io/visual-studio-marketplace/v/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview)
-[![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
-
-<h4> Your Flutter AI Copilot powered with Gemini Code & Vision.</h4>
+[![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 
------------------
-FlutterGPT is an open-source coding assistant specifically designed for Flutter Engineers. The assistant allows you to chat with Gemini inside VSCODE and create, refactor and debug code. 
-
-##### ✨ Powered by Gemini 
-##### 🤝 Dart Analyzer Inside
-##### 👨🏼‍💻 For and by Flutter Engineers
-
-Our vision is to make Flutter development faster and easily adoptable by automating low-level workflows that we as developers work on a daily basis.
+<h3 align="center">Your Flutter AI Autopilot powered with Gemini Code & Vision</h3>
+<img src="/assets/docs/poster.jpg"></a>
 
 -----------------
-## Getting Started
+Dash AI is an open-source coding assistant being built for Flutter Devs. It is aimed to not only write code, but also run and debug it. **This allows Dash AI to assist beyond code completion, and autopilot routine tasks for you.** 
 
-##### 1. Create Free Gemini API Key
-Visit [Makersuite by Google](https://makersuite.google.com/) and create your free API Key.
-##### 2. Add the key in chat view
-Open the FlutterGPT chat view, and paste your API key in the input field.
-##### 3. Run your first command.
-To get started, right-click on your editor in a dart project. Checkout all features below. 🔽
 
-## Features
-
-### 🚀 Chat
+- ✨ Powered by Gemini
+- 🤝 Integrated Dart Analyzer
+- 👨🏼‍💻 For and by Flutter Engineers
 <p align="center">
 <img src="https://media.giphy.com/media/T4ZnPW67QbajS5z4nU/giphy.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
 
-Chat with Gemini Pro right from your IDE. Ask anything related to Flutter or Dart and get instant answers. Query your workspace using `@workspace` command.
+Our vision is to build a single-command assistant that automates tedious development tasks. Enabling both seasoned and beginner Flutter devs to focus on the creativity and innovation, bringing their app ideas to life faster.
 
-### 💬 Generate
-<p align="center">
-<img src="https://media.giphy.com/media/Xv31gFGTcseEta3jTD/giphy.gif" alt="Generate code with Gemini inside VSCODE" width="500"/>
-</p>
+## The Mini-Engineer Vision
 
-Generate code snippets directly in your IDE with the inline code generation feature. Simply type your request and let Gemini provide you with instant code solutions. 
+Engineering a feature for an app requires multiple iterations of writing code, running tests and debugging to meet the end-user requirements. Dash AI is designed to assist you through the entire process.
 
-### 💡 Create
-<p align="center">
-<img src="https://media.giphy.com/media/ytNTZHcMLFYmwbrgcA/giphy.gif" alt="Creating Widget using FlutterGPT" width="500"/>
-</p>
+Imagine asking: *"Implement this JIRA ticket for me"*
 
-#### 1. **Widget from Image or Description**
+```mermaid
+graph TD
+A(Dash AI)
+A --> |Select relevant code| B(Break the task into steps)
+B --> |For each step|C{Refactor code}
+C --> |Generate| D(Exploratory Tests)
+D --> |Tests Fail| C
+D --> |Fails  > 3 times| E(Human Overrides)
+E -->|Passes| F(Move to next step)
+D -->|Passes| F(Move to next step)
+F -->|All completed| G(Voila! Task Accomplished)
+```
 
-Use Gemini's multimodal capabilities to create widget from a image with added description. 
-
-Command: `FlutterGPT Create: Widget from Image or Description`
-
-#### 2. **Complete Code from BluePrint**
-
-Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
-
-Command: `FlutterGPT Create: Code from Blueprint`
-
-#### 3. **Complete Code from Description**
-
-Generate complete classes from your description.
-
-Command: `FlutterGPT Create: Code from Description`
-
-
-### ✨ Refactor
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/Welltested-AI/fluttergpt/develop/vscode/media/refactor.png" alt="Refactoring Code using FlutterGPT" width="500"/>
-</p>
-
-#### 1. **From Instruction**
-
-Refactor widgets and logic both with this command.
-
-Command: `FlutterGPT Refactor: From Instructions`
-
-#### 2. **Optimize Code**
-
-Pass your runtime errors and get fixed code back.
-
-Command: `FlutterGPT Refactor: Optimize`
-
-#### 3. **Auto Fix**
-
-Select any method or code with errors, run Auto Fix .
-
-Command: `FlutterGPT Refactor: Fix Errors`
-
-### 📝 Add to Reference
-
-LLM's work great when provided with references along with the instructions. FlutterGPT users can now add any piece of code or customized descriptions as reference and they'll be passed to model for any command being used.
-
-**Practical usecases:**
-
-1. Having widgets follow a state management and use a view model already defined in your code.
-
-2. Use snippets as a reference while refactoring large part of projects to use the same style and structure.
-
-3. In, `codeFromBluePrint` to generate full-fledged classes taking state management, architecture and style as reference from an existing class.
-
-## FAQs
-
-1. **How safe and secure is it to use, and can you explain why?**
-- FlutterGPT is powered by Google's  Gemini Models and is secure to use for personal usage or work - [Safety and Security Guidelines](https://blog.google/technology/ai/google-gemini-ai/#responsibility-safety)
-
-2. **Do I need to pay to use FlutterGPT?**
-
-- Gemini PRO is currently in early access and is completely free to use for upto 60 requests for minute. Please check the [pricing](https://ai.google.dev/pricing) here.
-
-3. **I am an Android Studio user. Can I use FlutterGPT?**
-- FlutterGPT is available for IntelliJ-based IDEs and can be downloaded from the plugin marketplace. Please follow this link: [https://plugins.jetbrains.com/plugin/21568-fluttergpt]
-
-
-
-## Contributing
-
-FlutterGPT 💙 is community centric and any contribution is most welcome to make it useful for you!
-
-### Ways to contribute
-
-- **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
-- **Pick up open issues**: Pick up and fix existing issues in [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
-- **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://github.com/Welltested-AI/fluttergpt/discussions/182). 
-
-To contribute, please follow the guidelines in our [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
-## Community
-
-We have friendly mentors and a supportive community ready to guide you every step of the way [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA)
-
-## Running Locally for Contribution
- 1. Clone the repository.
- 2. Run `npm install`
- 3. Use the `Run Extension` command from launch.json for running the extension.
- 4. Ensure you've specified the Gemini API key in the settings.
+We have been able to build internal MVPs of such capablilties in a copilot. And are now sharing a roadmap with the community to make it available in production for everyone.
 
 ## Roadmap
 
-To get a sense of direction of where we're heading, please check out our [Roadmap](ROADMAP.md).
+To build a mini-engineer with human developer like abilities, we need to provide Gemini LLMs the same access and information that we human devs have. This includes:
 
-## Known Issues
+<img src="assets/llm-matching-human-capabilities.png"></a>
 
-This is the beta version and can be unstable. Please check our [issues board](https://github.com/Welltested-AI/fluttergpt/issues) for any known issues.
+**1. Full Contextual Knowledge**
+To perform a task, humans or LLMs both need to understand the complete contextual code. This could be accomplished by integrating with Dart analyzer and embedding matching.
 
+ - [x] Dart Analyzer Integration 
+ - [x] Manually attach code objects.
+ - [x] Basic auto code extraction.
+ - [x] Semantic match similar documents.
+ - [ ] Advanced auto code extraction.  
+ - [ ] Auto identify file groups based on command.
 
-## License
+**2. Latest Syntax and Dependencies Data**
+To keep up with evolving programming languages and coding practices, we'll use Retrieval Augmented Generation (RAG). This will ensure our Language Models can produce up-to-date code. By integrating the latest information and working with the community, we aim to build the most robust Flutter dataset.
 
-FlutterGPT is released under the Apache License Version 2.0. See the [LICENSE](LICENSE) file for more information.
+ - [ ] Allow generative search across pub.dev.
+ - [ ] Refer latest trusted sources for documentation. 
+ - [ ] Output code for the dependency version installed in the project. 
+ - [ ] Allow mechanism to update to latest dependency versions. 
+ - [ ] Choose from a range of trusted code practices and architecture styles.
+
+**3. Ability to Write, Run and Debug Code**
+Modern LLMs are multimodal, understanding text, code, visuals, and even audio. When connected to Dart Tools (analyzer, debugger, devtools) and Dart Runtime (VM), they can leverage their multimodal capabilities to not only write code but also:
+
+ - [ ] Write code across multiple files.
+ - [ ] Run the tests or app by itself. 
+ - [ ] Read the console logs and iterate code.
+ - [ ] Observe to device screen (multimodality) and interact with the app, to verify if features are met.
+
+This allows us to mimic developer behavior and automate large-scale tasks in their entirety. We are setting a timeline of 4-6 months to achieve all of the above milestones.
+
+## Contributing
+
+A coding assistant for all is best built when all of us contribute. You can make contributions to the VSCODE or IntelliJ extension or also to [CommandDash CLI](https://github.com/Welltested-AI/commanddash) shared between the extensions.
+
+### Ways to contribute
+
+-  **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+
+-  **Pick up open issues**: Pick up and fix existing issues open to the community in [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+
+-  **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) in our community slack.
+
+## Community
+
+Connect with like minded people building with Flutter and using AI to do so, every step of the way :D [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA)

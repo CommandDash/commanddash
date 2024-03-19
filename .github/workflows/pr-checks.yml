@@ -1,0 +1,33 @@
+name: PR Check
+
+on: [pull_request] # Triggers on commits to PRs only.
+
+jobs:
+  lint: # Job name.
+    runs-on: ubuntu-latest # Host's operating system.
+    steps:
+      - name: Checkout commit # Download the code from triggering commit.
+        uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Cache NPM # Leverage npm cache on repeated workflow runs if package.json didn't change.
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/vscode/package-lock.json') }} # Make sure to target the `vscode` directory.
+          restore-keys: |
+            ${{ runner.os }}-node-
+      
+      - name: Install Dependencies
+        run: |
+          cd vscode # Change directory to `vscode`.
+          npm ci
+          
+      - name: Run linter
+        run: |
+          cd vscode # Again, ensure we're inside the `vscode` directory.
+          npm run lint
