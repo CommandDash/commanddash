@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
-export class SecretManager {
 
+export class Auth {
     private constructor() { }
 
-    private static instance: SecretManager;
+    private static instance: Auth;
 
-    public static getInstance(): SecretManager {
-        if (!SecretManager.instance) {
-            SecretManager.instance = new SecretManager();
+    public static getInstance(): Auth {
+        if (!Auth.instance) {
+            Auth.instance = new Auth();
         }
 
-        return SecretManager.instance;
+        return Auth.instance;
     }
 
     public getApiKey(): string | undefined {
@@ -23,4 +23,7 @@ export class SecretManager {
         return config.get<string>('accessToken');
     }
 
+    public async signInWithGithub(): Promise<void> {}
+
+    public async setApiKey(apiKey: string): Promise<void> {}
 }

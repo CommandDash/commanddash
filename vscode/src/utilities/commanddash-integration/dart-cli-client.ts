@@ -1,24 +1,27 @@
 import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
-import {join} from 'path';
-import {chmod, existsSync} from 'fs';
+import { join } from 'path';
+import { chmod, existsSync } from 'fs';
 import { downloadFile, makeHttpRequest } from '../../repository/http-utils';
 import { AxiosRequestConfig } from 'axios';
 import * as vscode from 'vscode';
 import path = require('path');
 import * as os from 'os';
+import { promisify } from 'util';
 
 export async function installExecutable(clientVersion: string, executablePath: string, onProgress: (progress: number) => void) {
   const platform = os.platform();
-  const slug = platform==='win32'?'windows':platform==='darwin'?'macos':platform==='linux'?'linux':'unsupported';
+  const slug = platform === 'win32' ? 'windows' : platform === 'darwin' ? 'macos' : platform === 'linux' ? 'linux' : 'unsupported';
   const config: AxiosRequestConfig = {
-      method: 'get',
-      url: `http://api.commanddash.dev/executable/get-update/${clientVersion}/${slug}`
+    method: 'get',
+    url: `http://api.commanddash.dev/executable/get-update/${clientVersion}/${slug}`
   };
-  let response = await makeHttpRequest<{url: string, version: string}>(config);
+  let response = await makeHttpRequest<{ url: string, version: string }>(config);
   await downloadFile(response['url'], executablePath, onProgress);
 }
+
+const exec = promisify(require('node:child_process').exec);
 
 export class DartCLIClient {
   private proc: child_process.ChildProcessWithoutNullStreams | undefined;
@@ -27,30 +30,40 @@ export class DartCLIClient {
   private static instance: DartCLIClient;
   private executablePath: string;
 
-  private constructor(executablePath: string){
+  private constructor(executablePath: string) {
     this.executablePath = executablePath;
-    this.connect();
-  }
-  
-  public static async init(context: vscode.ExtensionContext, onProgress: (progress: number) => void): Promise<DartCLIClient> {
-    const platform = os.platform();
-    const globalStoragePath = context.globalStorageUri;
-    const fileName = platform==='win32'?'commanddash.exe':'commanddash';
-    const executablePath = path.dirname(join(globalStoragePath.path, fileName));
-    if(existsSync(executablePath)){
-      //TODO: Return true and check for updates in background
-      // Replace the existing executable which will hence be spwaned in the next activation
-      DartCLIClient.instance = new DartCLIClient(executablePath);
-      return DartCLIClient.instance;
-    }
-    await installExecutable('0.0.1', executablePath, onProgress);
-    DartCLIClient.instance = new DartCLIClient(executablePath);
-    return DartCLIClient.instance;
   }
 
   public static getInstance(): DartCLIClient {
     return DartCLIClient.instance;
   }
+
+  public static init(context: vscode.ExtensionContext): DartCLIClient {
+    const platform = os.platform();
+    const globalStoragePath = context.globalStorageUri;
+    const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';
+    const executablePath = path.dirname(join(globalStoragePath.path, fileName));
+    DartCLIClient.instance = new DartCLIClient(executablePath);
+    return DartCLIClient.instance;
+  }
+
+  public async executableVersion(): Promise<string | undefined> {
+    if (!existsSync(this.executablePath)) {
+      return;
+    }
+    const { stdout, stderr } = await exec(`${this.executablePath} --version`);
+    if (stderr) {
+      return;
+    }
+    const version = stdout?.toString().match(/(\d+\.\d+\.\d+)/);
+    return version ? version[1] : undefined;
+  }
+
+  public async installExecutable(onProgress: (progress: number) => void) {
+    await installExecutable('0.0.1', this.executablePath, onProgress);
+  }
+
+  public async backgroundUpdateExecutable(): Promise<void> {}
 
 
   public connect() {
@@ -61,16 +74,16 @@ export class DartCLIClient {
       const message = JSON.parse(data.toString());
       const { id, method, params } = message;
 
-      if (method==='result') {
+      if (method === 'result') {
         this.eventEmitter.emit(`result_${id}`, params);
-      } else if (method==='error'){
+      } else if (method === 'error') {
         this.eventEmitter.emit(`error_${id}`, params);
-      } else if (method==='step') {
+      } else if (method === 'step') {
         // Handle additional data requirements from Dart CLI (e.g. get additional data)
         this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
-      } else if (method==='operation'){
+      } else if (method === 'operation') {
         this.eventEmitter.emit(`operation_${params.kind}`, message);
-      } if (method==='log'){
+      } if (method === 'log') {
         console.log(params);
       }
     });
@@ -120,8 +133,8 @@ export class DartCLIClient {
   public sendOperationResponse(kind: string, data: any): void {
     // Ensure to use the same 'id' to maintain consistency of the JSON-RPC protocol
     const method = 'operation_response';
-    console.log(JSON.stringify({method, kind, data }));
-    this.proc?.stdin.write(JSON.stringify({method, kind, data }) + "\n");
+    console.log(JSON.stringify({ method, kind, data }));
+    this.proc?.stdin.write(JSON.stringify({ method, kind, data }) + "\n");
   }
 
   /// Send required additional data to the CLI. 
@@ -136,14 +149,14 @@ export class DartCLIClient {
   private send(request: any, id: number): Promise<any> {
     return new Promise((resolve, reject) => {
       const requestPayload = JSON.stringify({ ...request, id });
-      
+
       // Listen for a response to this specific request
       this.eventEmitter.once(`result_${id}`, (response) => {
         resolve(response);
       });
 
       this.eventEmitter.once(`error_${id}`, (response) => {
-          reject(response);
+        reject(response);
       });
 
       // Send the request to the Dart CLI
@@ -198,19 +211,19 @@ export class DartCLIClient {
 /// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
 /// [add it to extension.ts activate and run the extension]
 export async function testTaskWithSideOperation(context: vscode.ExtensionContext) {
-  const client = await DartCLIClient.init(context, (_)=>{});
-  client.onProcessOperation('operation_data_kind', (message)=>{
+  const client = DartCLIClient.getInstance();
+  client.onProcessOperation('operation_data_kind', (message) => {
     const operationData = { value: "unique_value" };
-    task.sendStepResponse(message,operationData);
+    task.sendStepResponse(message, operationData);
   });
   const task = client.newTask();
 
   try {
-      /// Request the client to process the task and handle result or error
-      const response = await task.run({ kind: "random_task_with_side_operation", data: {} });
-      console.log("Processing completed: ", response);
+    /// Request the client to process the task and handle result or error
+    const response = await task.run({ kind: "random_task_with_side_operation", data: {} });
+    console.log("Processing completed: ", response);
   } catch (error) {
-      console.error("Processing error: ", error);
+    console.error("Processing error: ", error);
   }
 }
 
@@ -218,80 +231,81 @@ export async function testTaskWithSideOperation(context: vscode.ExtensionContext
 /// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
 /// [add it to extension.ts activate and run the extension]
 export async function testTaskWithSteps(context: vscode.ExtensionContext) {
-  const client = await DartCLIClient.init(context, (_)=>{});
+  const client = DartCLIClient.getInstance();
   const task = client.newTask();
   // Handle client side steps during task processing. 
   task.onProcessStep('step_data_kind', (message) => {
-      /// any complex interaction to come up with response data.
-      const additionalData = { value: "unique_value" };
-  
-      // Respond back to CLI in every case. Either with data if required or just a confirmation.
-      client.sendStepResponse(message.id, 'step_data_kind', additionalData);
-  
-      // /// [Optional] Listeners are disposed on their own once the task is completed. But if some task is continued for entire lifecycle, we may disconnect the listeners if the one-time process step is handled.
-      // client.eventEmitter.removeListener(`get_additional_data_already_cached_files`, handler);
-      });
+    /// any complex interaction to come up with response data.
+    const additionalData = { value: "unique_value" };
 
-  try {
-      /// Request the client to process the task and handle result or error
-      const response = await task.run({ kind: "random_task_with_step", data: {current_embeddings: {}} });
-      console.log("Processing completed: ", response);
-  } catch (error) {
-      console.error("Processing error: ", error);
-  }
-}
-/// There can't be multiple tasks messages in parallel
-export async function handleAgents(context: vscode.ExtensionContext) {
-  const client = await DartCLIClient.init(context, (_)=>{});
-  const task = client.newTask();
+    // Respond back to CLI in every case. Either with data if required or just a confirmation.
+    client.sendStepResponse(message.id, 'step_data_kind', additionalData);
 
-  task.onProcessStep('append_to_chat', (message)=>{
-    console.log(`append to chat:\n${message}`);
-    task.sendStepResponse(message, {'result': 'success'});
+    // /// [Optional] Listeners are disposed on their own once the task is completed. But if some task is continued for entire lifecycle, we may disconnect the listeners if the one-time process step is handled.
+    // client.eventEmitter.removeListener(`get_additional_data_already_cached_files`, handler);
   });
-  task.onProcessStep('loader_update', (message)=>{
-    console.log('Received loader of kind: ' + message['kind']);
-    // message['kind']; // ['loader','message', 'message_with_files_list']
-    // message['data']; // data depending upon kind.
-    console.log(`${message}`);
-    task.sendStepResponse(message, {'result': 'success'});
-  });
+
   try {
     /// Request the client to process the task and handle result or error
-    const response = await task.run({ kind: "agent-execute", data: {
-      "authdetails": {
-        "type": "gemini",
-        "key": "AIzaSyCUgTsTlr_zgfM7eElSYC488j7msF2b948",
-        "githubToken": ""
-      },
-      "inputs": [
-        {
-          "id": "736841542",
-          "type": "string_input",
-          "value":
-              "Where do you think AI is heading in the field of programming? Give a short answer."
-        }
-      ],
-      "outputs": [
-        {"id": "90611917", "type": "default_output"}
-      ],
-      "steps": [
-        {
-          "type": "prompt_query",
-          "query": "736841542",
-          "post_process": {"type": "raw"},
-          "output": "90611917"
-        },
-        {
-          "type": "append_to_chat",
-          "message": "<90611917>",
-        }
-      ]
-    }
-  });
+    const response = await task.run({ kind: "random_task_with_step", data: { current_embeddings: {} } });
     console.log("Processing completed: ", response);
   } catch (error) {
     console.error("Processing error: ", error);
   }
-  
+}
+/// There can't be multiple tasks messages in parallel
+export async function handleAgents(context: vscode.ExtensionContext) {
+  const client = DartCLIClient.getInstance();
+  const task = client.newTask();
+
+  task.onProcessStep('append_to_chat', (message) => {
+    console.log(`append to chat:\n${message}`);
+    task.sendStepResponse(message, { 'result': 'success' });
+  });
+  task.onProcessStep('loader_update', (message) => {
+    console.log('Received loader of kind: ' + message['kind']);
+    // message['kind']; // ['loader','message', 'message_with_files_list']
+    // message['data']; // data depending upon kind.
+    console.log(`${message}`);
+    task.sendStepResponse(message, { 'result': 'success' });
+  });
+  try {
+    /// Request the client to process the task and handle result or error
+    const response = await task.run({
+      kind: "agent-execute", data: {
+        "authdetails": {
+          "type": "gemini",
+          "key": "AIzaSyCUgTsTlr_zgfM7eElSYC488j7msF2b948",
+          "githubToken": ""
+        },
+        "inputs": [
+          {
+            "id": "736841542",
+            "type": "string_input",
+            "value":
+              "Where do you think AI is heading in the field of programming? Give a short answer."
+          }
+        ],
+        "outputs": [
+          { "id": "90611917", "type": "default_output" }
+        ],
+        "steps": [
+          {
+            "type": "prompt_query",
+            "query": "736841542",
+            "post_process": { "type": "raw" },
+            "output": "90611917"
+          },
+          {
+            "type": "append_to_chat",
+            "message": "<90611917>",
+          }
+        ]
+      }
+    });
+    console.log("Processing completed: ", response);
+  } catch (error) {
+    console.error("Processing error: ", error);
+  }
+
 }
