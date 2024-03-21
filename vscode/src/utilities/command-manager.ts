@@ -69,7 +69,7 @@ export function registerCommand(
 }
 
 export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
-    const generationRepository: GenerationRepository = getUserPrefferedModel();
+    const generationRepository: GenerationRepository =  geminiRepo; //TODO: Use up in the tree getUserPrefferedModel();
     // List of commands to register, with their names and options.
     const commands = [
         { name: 'dashai.attachToDash', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
@@ -81,6 +81,7 @@ export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, 
         { name: 'dashai.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dashai.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(geminiRepo), options: { isCommand: true, isMenu: true, isShortcut: true } },
         { name: 'dashai.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: false, isShortcut: false } }
+
         // Add more commands as needed.
     ];
 
