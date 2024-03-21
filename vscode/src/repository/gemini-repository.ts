@@ -8,6 +8,8 @@ import { getReferenceEditor } from "../utilities/state-objects";
 import { GenerationRepository } from "./generation-repository";
 import { extractReferenceTextFromEditor } from "../utilities/code-processing";
 import { logError } from "../utilities/telemetry-reporter";
+import { CacheManager } from "../utilities/cache-manager";
+import { computeCodehash } from "../shared/utils";
 
 function handleError(error: Error, userFriendlyMessage: string): never {
     console.error(error);
@@ -22,10 +24,35 @@ export class GeminiRepository extends GenerationRepository {
     constructor(apiKey: string) {
         super(apiKey);
         this.genAI = new GoogleGenerativeAI(apiKey);
-        this.ensureCacheDirExists().catch(error => {
-            handleError(error, 'Failed to initialize the cache directory.');
-        });
+        this.migrateCache();
         GeminiRepository._instance = this;
+    }
+
+    /**
+     * Migrates the cache from the operating system's temporary directory to the extension's cache directory.
+     * 
+     * The cache was previously stored in the operating system's temporary directory, but it is now being moved to the extension's cache directory.
+     * This migration ensures that the cache is stored in a secure location and avoids potential issues with file permissions.
+     * 
+     * This is a one-time operation and will be removed in future releases.
+     */
+    private async migrateCache() {
+        try {
+            // TODO: Need to update the migration logic for the new cache structure
+            // Check if the cache file exists in the old location
+            if (fs.existsSync(this.cacheFilePath)) {
+                // Move the cache file to the CacheManager
+                const cacheData = await fs.promises.readFile(this.cacheFilePath, 'utf8');
+                console.log(cacheData);
+                if (cacheData.length > 0) {
+                    await CacheManager.getInstance().setGeminiCache(this.codehashCache);
+                }
+                // Delete the old cache file
+                await fs.promises.unlink(this.cacheFilePath);
+            }
+        } catch (error) {
+            console.error('Failed to migrate the cache:', error);
+        }
     }
 
     public static getInstance(): GeminiRepository {
@@ -124,7 +151,7 @@ export class GeminiRepository extends GenerationRepository {
             throw new Error('No workspace folders found.');
         }
         const projectFolder = workspaceFolders[0].uri.fsPath; // Assuming single root workspace
-        const hash = this.computeCodehash(projectFolder); // Hash the path for uniqueness
+        const hash = computeCodehash(projectFolder); // Hash the path for uniqueness
         // Use os.tmpdir() to get the system's temporary directory
         const tempDir = require('os').tmpdir();
         return require('path').join(tempDir, 'flutterGPT', `${hash}.codehashCache.json`);
@@ -135,8 +162,7 @@ export class GeminiRepository extends GenerationRepository {
     private async saveCache() {
         try {
             const cacheData = JSON.stringify(this.codehashCache);
-            const cachePath = this.cacheFilePath;
-            await fs.promises.writeFile(cachePath, cacheData, { encoding: 'utf8', mode: 0o600 }); // Sets the file mode to read/write for the owner only
+            await CacheManager.getInstance().setGeminiCache(this.codehashCache);
         } catch (error) {
             if (error instanceof Error) {
                 handleError(error, 'Failed to save the cache data.');
@@ -148,35 +174,16 @@ export class GeminiRepository extends GenerationRepository {
 
     private async loadCache() {
         try {
-            if (fs.existsSync(this.cacheFilePath)) {
-                const cacheData = await fs.promises.readFile(this.cacheFilePath, 'utf8');
+            const cacheData = await CacheManager.getInstance().getGeminiCache();
+            if (cacheData) {
                 this.codehashCache = JSON.parse(cacheData);
+            }
+            else {
+                this.codehashCache = {};
             }
         } catch (error) {
             console.error("Error loading cache: ", error);
         }
-    }
-
-    // Ensure the directory exists and has the correct permissions
-    private async ensureCacheDirExists() {
-        const cacheDir = path.dirname(this.cacheFilePath);
-        try {
-            // Create the directory if it doesn't exist
-            if (!fs.existsSync(cacheDir)) {
-                await fs.promises.mkdir(cacheDir, { recursive: true, mode: 0o700 }); // Sets the directory mode to read/write/execute for the owner only
-            }
-        } catch (error: any) {
-            if (error.code !== 'EEXIST') {
-                handleError(error as Error, 'Failed to create a secure cache directory.');
-            }
-        }
-    }
-
-    // Compute a codehash for file contents
-    private computeCodehash(fileContents: string): string {
-        // Normalize the file content by removing whitespace and newlines
-        const normalizedContent = fileContents.replace(/\s+/g, '');
-        return crypto.createHash('sha256').update(normalizedContent).digest('hex');
     }
 
     // Find 5 closest dart files for query
@@ -219,7 +226,7 @@ export class GeminiRepository extends GenerationRepository {
                     const document = await vscode.workspace.openTextDocument(file);
                     const relativePath = vscode.workspace.asRelativePath(file, false);
                     const text = `File name: ${file.path.split('/').pop()}\nFile path: ${relativePath}\nFile code:\n\n\`\`\`dart\n${document.getText()}\`\`\`\n\n------\n\n`;
-                    const codehash = this.computeCodehash(text);
+                    const codehash = computeCodehash(text);
                     return {
                         text,
                         path: file.path,
