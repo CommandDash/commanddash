@@ -3,7 +3,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { createInlineCodeCompletion } from './tools/create/inline_code_completion';
 import { makeHttpRequest, refreshAccessToken } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
