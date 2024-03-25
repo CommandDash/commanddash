@@ -9,11 +9,13 @@ import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
 import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
+import { SetupManager } from "../utilities/setup-manager/setup-manager";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dashai.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
+    private setupManager = SetupManager.getInstance();
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
 

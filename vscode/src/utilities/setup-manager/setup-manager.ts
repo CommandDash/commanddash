@@ -9,6 +9,8 @@ export class SetupManager {
     private auth = Auth.getInstance();
     private dartClient : DartCLIClient | undefined;
     private context: vscode.ExtensionContext | undefined;
+    private _onDidChangeSetup = new vscode.EventEmitter<SetupStep>();
+    public onDidChangeSetup = this._onDidChangeSetup.event;
     private constructor() { }
 
     private static instance: SetupManager;
@@ -41,14 +43,17 @@ export class SetupManager {
 
     public async setupGithub() {
         await this.auth.signInWithGithub(this.context!);
+        this._onDidChangeSetup.fire(SetupStep.github);
     }
     
     public async setupApiKey(apiKey: string) {
         await this.auth.setApiKey(apiKey);
+        this._onDidChangeSetup.fire(SetupStep.apiKey);
     }
 
     public async setupExecutable(onProgress: (progress: number) => void) {
         await this.dartClient!.installExecutable(onProgress);
+        this._onDidChangeSetup.fire(SetupStep.executable);
         this.dartClient!.connect();
     }
 }

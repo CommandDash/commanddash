@@ -17,9 +17,13 @@ export class Auth {
         return Auth.instance;
     }
 
-    public  getApiKey(): string | undefined {
+    public getApiKey(): string | undefined {
         const config = vscode.workspace.getConfiguration('fluttergpt');
-        return config.get<string>('apiKey');
+        const apiKey = config.get<string>('apiKey');
+        if (apiKey?.startsWith('sk-')){ // Don't account the old API Keys
+            return ;
+        }
+        return apiKey;
     }
 
     public async setApiKey(apiKey: string): Promise<void> {
