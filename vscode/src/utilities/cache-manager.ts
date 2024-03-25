@@ -22,15 +22,15 @@ export class CacheManager {
         return CacheManager.instance;
     }
 
-    private async getGlobalValue<T>(key: string): Promise<T | undefined> {
+    public getGlobalValue<T>(key: string): T | undefined {
         return this.globalState.get<T>(key);
     }
 
-    private async setGlobalValue<T>(key: string, value: T): Promise<void> {
+    public async setGlobalValue<T>(key: string, value: T): Promise<void> {
         await this.globalState.update(key, value);
     }
 
-    private async getWorkspaceValue<T>(key: string): Promise<T | undefined> {
+    private getWorkspaceValue<T>(key: string): T | undefined {
         return this.workspaceState.get<T>(key);
     }
 
@@ -40,7 +40,7 @@ export class CacheManager {
 
     async incrementInlineCompletionCount() {
         try {
-            let currentCount: number = await this.getGlobalValue<number | undefined>("inline-count") ?? 0;
+            let currentCount: number = this.getGlobalValue<number | undefined>("inline-count") ?? 0;
             currentCount++;
             await this.setGlobalValue<number>("inline-count", currentCount);
         } catch (error) {
@@ -49,9 +49,9 @@ export class CacheManager {
         }
     }
 
-    async getInlineCompletionCount(): Promise<number> {
+    public getInlineCompletionCount(): number {
         try {
-            return await this.getGlobalValue<number | undefined>("inline-count") ?? 0;
+            return this.getGlobalValue<number | undefined>("inline-count") ?? 0;
         } catch (error) {
             logError('getInlineCompletionCount', error);
             console.log("Failed updating cache for FlutterGpt!!");

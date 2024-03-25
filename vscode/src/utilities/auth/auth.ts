@@ -1,9 +1,13 @@
 import * as vscode from 'vscode';
+import { CacheManager } from '../cache-manager';
+import { makeHttpRequest } from '../../repository/http-utils';
 
 export class Auth {
-    private constructor() { }
+    private constructor() {}
 
     private static instance: Auth;
+
+    private cacheManager = CacheManager.getInstance();
 
     public static getInstance(): Auth {
         if (!Auth.instance) {
@@ -13,17 +17,52 @@ export class Auth {
         return Auth.instance;
     }
 
-    public getApiKey(): string | undefined {
+    public  getApiKey(): string | undefined {
         const config = vscode.workspace.getConfiguration('fluttergpt');
         return config.get<string>('apiKey');
     }
 
-    public getGithubAccessToken(): string | undefined {
-        const config = vscode.workspace.getConfiguration('fluttergpt');
-        return config.get<string>('accessToken');
+    public async setApiKey(apiKey: string): Promise<void> {
+    
     }
 
-    public async signInWithGithub(): Promise<void> {}
+    public getGithubRefreshToken(): string | undefined {
+        return this.cacheManager.getGlobalValue<string>('refresh_token');
+    }
 
-    public async setApiKey(apiKey: string): Promise<void> {}
+    public getGithubAccessToken(): string | undefined {
+        return this.cacheManager.getGlobalValue<string>('access_token');
+    }
+
+    public async signInWithGithub(context: vscode.ExtensionContext): Promise<void> {
+        const url = '/account/github/url/vscode';
+        const { github_oauth_url } = await makeHttpRequest<{ github_oauth_url: string }>({ url: url });
+        vscode.env.openExternal(vscode.Uri.parse(github_oauth_url));
+        
+
+        // Create a promise to handle the authentication callback
+        const authPromise = new Promise<{ accessToken: string; refreshToken: string }>(
+            (resolve, reject) => {
+                context.subscriptions.push(
+                    vscode.window.registerUriHandler({
+                        handleUri(uri: vscode.Uri): vscode.ProviderResult<any> {
+                            if (uri.path === '/login-success') {
+                                const query = uri.query.split('&');
+                                const accessToken = query[0].split('=')[1];
+                                const refreshToken = query[1].split('=')[1];
+                                resolve({ accessToken, refreshToken });
+                            } else {
+                                reject(new Error('Authentication Failed'));
+                            }
+                        },
+                    })
+                );
+            }
+        );
+
+        // Wait for the promise to resolve and update the global state with the access and refresh tokens
+        const { accessToken, refreshToken } = await authPromise;
+        await context.globalState.update('access_token', accessToken);
+        await context.globalState.update('refresh_token', refreshToken);
+    }
 }

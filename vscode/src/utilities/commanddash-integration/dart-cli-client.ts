@@ -38,7 +38,7 @@ export class DartCLIClient {
     return DartCLIClient.instance;
   }
 
-  public static init(context: vscode.ExtensionContext): DartCLIClient {
+public static init(context: vscode.ExtensionContext): DartCLIClient {
     const platform = os.platform();
     const globalStoragePath = context.globalStorageUri;
     const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';

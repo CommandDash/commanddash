@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 
 import { createInlineCodeCompletion } from './tools/create/inline_code_completion';
-import { makeHttpRequest } from './repository/http-utils';
+import { makeHttpRequest, refreshAccessToken } from './repository/http-utils';
 import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
@@ -21,17 +21,24 @@ import { initCommands, registerCommand } from './utilities/command-manager';
 import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
 import { tempScheme, virtualDocumentProvider } from './utilities/virtual-document-provider';
+import { Auth } from './utilities/auth/auth';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
+    
+   
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
 
     // Initiate cache manager
     const cacheManager = CacheManager.getInstance(context.globalState, context.workspaceState);
+
+    await Auth.getInstance().signInWithGithub(context);
+    refreshAccessToken(context.globalState.get('refresh_token')!);
+
     // Activate inline hints
     activateInlineHints(cacheManager);
 

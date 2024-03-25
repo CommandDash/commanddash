@@ -8,6 +8,7 @@ export class SetupManager {
     public pendingSetupSteps: SetupStep[] = [];
     private auth = Auth.getInstance();
     private dartClient : DartCLIClient | undefined;
+    private context: vscode.ExtensionContext | undefined;
     private constructor() { }
 
     private static instance: SetupManager;
@@ -21,13 +22,14 @@ export class SetupManager {
     }
 
     public async init(context: vscode.ExtensionContext): Promise<void> {
+        this.context = context;
         if(!this.auth.getGithubAccessToken()){
             this.pendingSetupSteps.push(SetupStep.github);
         }
         if(!this.auth.getApiKey()){
             this.pendingSetupSteps.push(SetupStep.apiKey);
         }
-        this.dartClient = DartCLIClient.init(context);
+        this.dartClient = DartCLIClient.init(this.context);
         const version = await this.dartClient.executableVersion();
         if(!version){
             this.pendingSetupSteps.push(SetupStep.executable);
@@ -38,8 +40,9 @@ export class SetupManager {
     }
 
     public async setupGithub() {
-        await this.auth.signInWithGithub();
+        await this.auth.signInWithGithub(this.context!);
     }
+    
     public async setupApiKey(apiKey: string) {
         await this.auth.setApiKey(apiKey);
     }
