@@ -36,17 +36,9 @@ jobs:
           npm ci
 
       - name: Publish Release
-        if: startsWith(github.ref, 'refs/tags/') && github.event.release.prerelease == false
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           cd vscode
           npx vsce publish
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      - name: Publish Pre-Release
-        if: startsWith(github.ref, 'refs/tags/') && github.event.release.prerelease == true
-        run: |
-          cd vscode
-          npx vsce publish --pre-release
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
