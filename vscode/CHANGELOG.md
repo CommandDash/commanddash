@@ -4,6 +4,11 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.3.1]
+
+- Fix: Pasting text into field erases existing input.
+- Enhanced: Embedding caching mechanism
+
 ## [0.3.0]
 
 - Rebrand to CommandDash (Dash AI)

@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "CommandDash: Your Flutter AI Autopilot with Gemini",
   "description": "Agents that assist you build entire features on autopilot.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
