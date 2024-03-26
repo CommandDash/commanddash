@@ -21,7 +21,6 @@
  Note: The `handler` function can be an async function if needed.
 */
 import * as vscode from 'vscode';
-import { checkApiKeyAndPrompt } from '../extension';
 import { addToReference } from '../tools/reference/add_reference';
 import { createWidgetFromDescription } from '../tools/create/widget_from_description';
 import { createCodeFromBlueprint } from '../tools/create/code_from_blueprint';

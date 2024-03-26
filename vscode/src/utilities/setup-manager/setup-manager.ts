@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { DartCLIClient } from "../commanddash-integration/dart-cli-client";
 import { Auth } from "../auth/auth";
 
-enum SetupStep { github, apiKey, executable }
+export enum SetupStep { github, apiKey, executable }
 
 export class SetupManager {
     public pendingSetupSteps: SetupStep[] = [];

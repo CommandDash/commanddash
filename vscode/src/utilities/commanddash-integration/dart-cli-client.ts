@@ -19,6 +19,16 @@ export async function installExecutable(clientVersion: string, executablePath: s
   };
   let response = await makeHttpRequest<{ url: string, version: string }>(config);
   await downloadFile(response['url'], executablePath, onProgress);
+  if (platform==='darwin' || platform==='linux'){
+    // Downloaded file is required to be coverted to an executable.
+    return new Promise<void>((resolve, reject) => {
+      chmod(executablePath, '755', (err) => {
+          if (err) { reject(err); }
+          console.log('The permissions for the executable have been set');
+          resolve();
+      });
+    });
+  }
 }
 
 const exec = promisify(require('node:child_process').exec);
@@ -42,7 +52,7 @@ public static init(context: vscode.ExtensionContext): DartCLIClient {
     const platform = os.platform();
     const globalStoragePath = context.globalStorageUri;
     const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';
-    const executablePath = path.dirname(join(globalStoragePath.path, fileName));
+    const executablePath = join(globalStoragePath.path, fileName);
     DartCLIClient.instance = new DartCLIClient(executablePath);
     return DartCLIClient.instance;
   }
