@@ -2,18 +2,22 @@
 name: VSCode Publish
 
 on:
-  release:
-    types:
-    - created
+  push:
+    tags:
+      - '**'  # Trigger the workflow for any tag push
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout commit
+      - name: Checkout repo at the pushed tag
         uses: actions/checkout@v4
+        with:
+          # This configures the action to checkout the commit that was tagged,
+          # which is effectively the code state you want to work with.
+          ref: ${{ github.ref }}
       
-      - name: Use Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
