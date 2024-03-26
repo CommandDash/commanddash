@@ -4,7 +4,7 @@ name: VSCode Publish
 on:
   push:
     tags:
-      - '**'  # Trigger the workflow for any tag push
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 jobs:
   build:
