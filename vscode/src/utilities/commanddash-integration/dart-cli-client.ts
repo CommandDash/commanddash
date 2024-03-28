@@ -2,15 +2,16 @@ import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
 import { join } from 'path';
-import { chmod, existsSync } from 'fs';
+import { chmod, existsSync, unlink } from 'fs';
 import { downloadFile, makeHttpRequest } from '../../repository/http-utils';
 import { AxiosRequestConfig } from 'axios';
 import * as vscode from 'vscode';
 import path = require('path');
 import * as os from 'os';
 import { promisify } from 'util';
+import { ExtensionVersionManager } from '../update-check';
 
-export async function installExecutable(clientVersion: string, executablePath: string, onProgress: (progress: number) => void) {
+async function installExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
   const platform = os.platform();
   const slug = platform === 'win32' ? 'windows' : platform === 'darwin' ? 'macos' : platform === 'linux' ? 'linux' : 'unsupported';
   const config: AxiosRequestConfig = {
@@ -18,17 +19,41 @@ export async function installExecutable(clientVersion: string, executablePath: s
     url: `http://api.commanddash.dev/executable/get-update/${clientVersion}/${slug}`
   };
   let response = await makeHttpRequest<{ url: string, version: string }>(config);
+  if (executableVersion && compareVersions(response['version'], executableVersion) <= 0) {
+    console.log('Executable is already up to date.');
+    return;
+  }
   await downloadFile(response['url'], executablePath, onProgress);
-  if (platform==='darwin' || platform==='linux'){
+  if (platform === 'darwin' || platform === 'linux') {
     // Downloaded file is required to be coverted to an executable.
     return new Promise<void>((resolve, reject) => {
       chmod(executablePath, '755', (err) => {
-          if (err) { reject(err); }
-          console.log('The permissions for the executable have been set');
-          resolve();
+        if (err) { reject(err); }
+        console.log('The permissions for the executable have been set');
+        resolve();
       });
     });
   }
+}
+
+export async function deleteExecutable(executablePath: string): Promise<void> {
+  return new Promise((resolve, _) => {
+    unlink(executablePath, (_) => {
+      resolve();
+    });
+  });
+}
+
+function compareVersions(v1: string, v2: string) {
+  const v1Arr = v1.split('.');
+  const v2Arr = v2.split('.');
+  for (let i = 0; i < Math.max(v1Arr.length, v2Arr.length); i++) {
+    const n1 = parseInt(v1Arr[i] || '0', 10);
+    const n2 = parseInt(v2Arr[i] || '0', 10);
+    if (n1 > n2) { return 1; }
+    if (n2 > n1) { return -1; }
+  }
+  return 0;
 }
 
 const exec = promisify(require('node:child_process').exec);
@@ -48,7 +73,14 @@ export class DartCLIClient {
     return DartCLIClient.instance;
   }
 
-public static init(context: vscode.ExtensionContext): DartCLIClient {
+  public executableExists(): boolean {
+    if (existsSync(this.executablePath)) {
+      return true;
+    }
+    return false;
+  }
+
+  public static init(context: vscode.ExtensionContext): DartCLIClient {
     const platform = os.platform();
     const globalStoragePath = context.globalStorageUri;
     const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';
@@ -58,22 +90,30 @@ public static init(context: vscode.ExtensionContext): DartCLIClient {
   }
 
   public async executableVersion(): Promise<string | undefined> {
-    if (!existsSync(this.executablePath)) {
+    if (!this.executableExists()) {
       return;
     }
-    const { stdout, stderr } = await exec(`${this.executablePath} --version`);
+    const { stdout, stderr } = await exec(`${this.executablePath} version`);
     if (stderr) {
       return;
     }
-    const version = stdout?.toString().match(/(\d+\.\d+\.\d+)/);
-    return version ? version[1] : undefined;
+    let executableVersion = stdout?.toString().match(/(\d+\.\d+\.\d+)/);
+
+    return executableVersion ? executableVersion[1] : undefined;
   }
 
   public async installExecutable(onProgress: (progress: number) => void) {
-    await installExecutable('0.0.1', this.executablePath, onProgress);
+    await installExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, undefined, onProgress);
   }
 
-  public async backgroundUpdateExecutable(): Promise<void> {}
+  // Install the updated executable in the background which will be kicked off on next extension activation.
+  public async backgroundUpdateExecutable(): Promise<void> {
+    await installExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, await this.executableVersion(), () => { });
+  }
+
+  public async deleteExecutable(): Promise<void> {
+    await deleteExecutable(this.executablePath);
+  }
 
 
   public connect() {

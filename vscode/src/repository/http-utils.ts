@@ -83,6 +83,10 @@ export async function downloadFile(url: string, destinationPath: string, onProgr
         fs.mkdirSync(directory, { recursive: true });
     }
 
+    if (fs.existsSync(destinationPath)) {
+        fs.truncateSync(destinationPath, 0);
+    }
+
     const writer = fs.createWriteStream(destinationPath);
 
     response.data.pipe(writer);
@@ -92,4 +96,3 @@ export async function downloadFile(url: string, destinationPath: string, onProgr
         writer.on('error', reject);
     });
 }
-

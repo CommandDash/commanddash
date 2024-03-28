@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DartCLIClient } from "../commanddash-integration/dart-cli-client";
+import { DartCLIClient, deleteExecutable } from "../commanddash-integration/dart-cli-client";
 import { Auth } from "../auth/auth";
 
 export enum SetupStep { github, apiKey, executable }
@@ -32,8 +32,8 @@ export class SetupManager {
             this.pendingSetupSteps.push(SetupStep.apiKey);
         }
         this.dartClient = DartCLIClient.init(this.context);
-        const version = await this.dartClient.executableVersion();
-        if(!version){
+
+        if(!this.dartClient.executableExists()){
             this.pendingSetupSteps.push(SetupStep.executable);
         } else {
             this.dartClient.connect();
