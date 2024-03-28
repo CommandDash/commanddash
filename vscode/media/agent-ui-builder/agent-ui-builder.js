@@ -32,10 +32,11 @@ class AgentUIBuilder {
             inputSpan.id = id;
             inputSpan.contentEditable = true;
             inputSpan.tabIndex = 0;
-            inputSpan.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]", "string_input", id);
+            inputSpan.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]", "string_input", id, "mb-1", "ml-[1px]", "mr-[1px]");
             inputSpan.textContent = '\u200B';
 
-            this.ref.addEventListener('input', (event) => this.onStringInput(event, inputSpan));
+            this.ref.addEventListener('input', (event) => this.onStringInput(event, id));
+            this.ref.addEventListener('paste', () => this.onTextPaste(id));
 
             inputContainer.appendChild(inputSpan);
 
@@ -49,7 +50,7 @@ class AgentUIBuilder {
             codePlaceholder.id = id;
             codePlaceholder.contentEditable = "false";
             codePlaceholder.tabIndex = 0;
-            codePlaceholder.classList.add("ml-1", "mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]", "mt-1", "code_input");
+            codePlaceholder.classList.add("ml-1", "mb-1", "px-[7px]", "inline-flex", "cursor-pointer", "rounded-[4px]", "mt-1", "code_input", "items-center");
             codePlaceholder.textContent = display_text;
             codeContainer.id = "code-container";
             codeContainer.appendChild(codePlaceholder);
@@ -58,11 +59,16 @@ class AgentUIBuilder {
         }
     }
 
-    onStringInput(event, input) {
+    onTextPaste(id) {
+        const inputSpan = document.getElementById(id);
+        inputSpan.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    onStringInput(event, id) {
         const sel = window.getSelection();
-        const inputSpan = document.getElementById(input.id);
-        if (sel.anchorNode.parentNode.classList.contains(input.id)) {
-            const inputIndex = agentInputsJson.inputs.findIndex(_input => _input.id === input.id);
+        const inputSpan = document.getElementById(id);
+        if (event.target === inputSpan || (sel.anchorNode && sel.anchorNode.parentNode && sel.anchorNode.parentNode.classList.contains(id))) {
+            const inputIndex = agentInputsJson.inputs.findIndex(_input => _input.id === id);
             if (inputIndex !== -1) {
                 agentInputsJson.inputs[inputIndex].value = inputSpan.textContent.trim();
             }
@@ -70,11 +76,11 @@ class AgentUIBuilder {
     }
 
     onCodeInput(chipsData, chipName) {
-        const firstCodeInput = agentInputsJson.inputs.find(input => input.type === "code_input" && !input.value);
+        const firstCodeInput = agentInputsJson.inputs.find(input => input.type === "code_input");
         if (firstCodeInput) {
             const codeInputSpan = document.getElementById(firstCodeInput.id);
             firstCodeInput.value = JSON.stringify(chipsData);
-            codeInputSpan.textContent = chipName;
+            codeInputSpan.innerHTML = `${dartIcon}<span class="ml-1">${chipName}</span>`;
         }
     }
 }

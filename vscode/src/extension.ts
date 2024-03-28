@@ -20,12 +20,14 @@ import { initCommands, registerCommand } from './utilities/command-manager';
 import { activateInlineHints, isFirstLineOfSymbol } from './tools/inline-hints/inlint-hints-utils';
 import { CacheManager } from './utilities/cache-manager';
 import { tempScheme, virtualDocumentProvider } from './utilities/virtual-document-provider';
+import { handleAgents } from './utilities/commanddash-integration/dart-cli-client';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
 const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
+    // handleAgents();
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
 

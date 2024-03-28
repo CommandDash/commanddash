@@ -39,4 +39,8 @@ export class Task {
         this.dartClient.eventEmitter.removeListener(eventName, handler);
       });
     }
+
+    public getTaskId(): number {
+      return this.taskId;
+    }
   }

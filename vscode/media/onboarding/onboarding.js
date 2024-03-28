@@ -241,7 +241,9 @@ let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
 let agentProvider = null;
-let agentInputsJson = [];
+let agentInputsJson = {};
+let currentActiveAgent = '';
+let currentActiveSlug = '';
 
 //initialising visual studio code library
 let vscode = null;
@@ -251,304 +253,127 @@ let commands = [];
 
 const data = [
     {
-      "name": "@workspace",
-      "supported_commands": [
-        {
-          "slug": "/ask",
-          "intent": "Ask me anything",
-          "text_field_layout": "Hi, I'm here to help you. <736841542> <805088184>",
-          "inputs": [
+        "name": "@workspace",
+        "supported_commands": [
             {
-              "id": "736841542",
-              "display_text": "Your query",
-              "type": "string_input"
+                "slug": "/query",
+                "intent": "Ask me anything",
+                "text_field_layout": "Hi, I'm here to help you. <736841542>",
+                "inputs": [
+                    {
+                        "id": "736841542",
+                        "display_text": "Your query",
+                        "type": "string_input",
+                    }
+                ],
+                "outputs": [
+                    { "id": "436621806", "type": "default_output" },
+                    { "id": "90611917", "type": "default_output" }
+                ],
+                "steps": [
+                    {
+                        "type": "search_in_workspace",
+                        "query": "<422243666>",
+                        "workspace_object_type": "all",
+                        "workspacePath":
+                            "/Users/fisclouds/Documents/smooth-app/packages/smooth_app/lib/test",
+                        "output": "436621806"
+                    },
+                    {
+                        "type": "prompt_query",
+                        "query":
+                            "Here are the related references from user's project:\n <436621806>. Answer the user's query. Query: <736841542>",
+                        "post_process": { "type": "raw" },
+                        "output": "90611917"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "message": "<90611917>",
+                        "post_process": { "type": "raw" },
+                    }
+                ]
             },
             {
-              "id": "805088184",
-              "display_text": "Code Attachment",
-              "type": "code_input"
+                "slug": "/search",
+                "intent": "Ask me anything",
+                "text_field_layout": "Hi, I'm here to help you. <736841542>",
+                "inputs": [
+                    {
+                        "id": "736841542",
+                        "display_text": "Your query",
+                        "type": "string_input",
+                    }
+                ],
+                "outputs": [
+                    { "id": "436621806", "type": "default_output" },
+                    { "id": "90611917", "type": "default_output" }
+                ],
+                "steps": [
+                    {
+                        "type": "search_in_workspace",
+                        "query": "<422243666>",
+                        "workspace_object_type": "all",
+                        "workspacePath":
+                            "/Users/fisclouds/Documents/smooth-app/packages/smooth_app/lib/test",
+                        "output": "436621806"
+                    },
+                    {
+                        "type": "prompt_query",
+                        "query":
+                            "Here are the related references from user's project:\n <436621806>. Answer the user's query. Query: <736841542>",
+                        "post_process": { "type": "raw" },
+                        "output": "90611917"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "message": "<90611917>",
+                        "post_process": { "type": "raw" },
+                    }
+                ]
             }
-          ],
-          "outputs": [
-            {
-              "id": "422243666",
-              "type": "default_output"
-            },
-            {
-              "id": "436621806",
-              "type": "multi_code_object"
-            },
-            {
-              "id": "90611917",
-              "type": "default_output"
-            }
-          ],
-          "step": [
-            {
-              "type": "search_in_sources",
-              "query": "<736841542><805088184>",
-              "data_sources": [
-                "<643643320>"
-              ],
-              "total_matching_document": 0,
-              "output": "<422243666>"
-            },
-            {
-              "type": "search_in_workspace",
-              "query": "<422243666>",
-              "workspace_object_type": "all",
-              "output": "<436621806>"
-            },
-            {
-              "type": "prompt_query",
-              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
-              "post_process": {
-                "type": "raw"
-              },
-              "output": "<90611917>"
-            },
-            {
-              "type": "append_to_chat",
-              "value": "This was your query: <736841542> and here is your output: <90611917>"
-            }
-          ]
-        },
-        {
-          "slug": "/search",
-          "intent": "Ask me anything",
-          "text_field_layout": "Hi, I'm here to help you. <736841542>",
-          "inputs": [
-            {
-              "id": "736841542",
-              "display_text": "Your search",
-              "type": "string_input"
-            }
-          ],
-          "outputs": [
-            {
-              "id": "422243666",
-              "type": "default_output"
-            },
-            {
-              "id": "436621806",
-              "type": "multi_code_object"
-            },
-            {
-              "id": "90611917",
-              "type": "default_output"
-            }
-          ],
-          "step": [
-            {
-              "type": "search_in_sources",
-              "query": "<736841542><805088184>",
-              "data_sources": [
-                "<643643320>"
-              ],
-              "total_matching_document": 0,
-              "output": "<422243666>"
-            },
-            {
-              "type": "search_in_workspace",
-              "query": "<422243666>",
-              "workspace_object_type": "all",
-              "output": "<436621806>"
-            },
-            {
-              "type": "prompt_query",
-              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
-              "post_process": {
-                "type": "raw"
-              },
-              "output": "<90611917>"
-            },
-            {
-              "type": "append_to_chat",
-              "value": "This was your query: <736841542> and here is your output: <90611917>"
-            }
-          ]
-        }
-      ]
+        ]
     },
     {
-      "name": "@settings",
-      "supported_commands": [
-        {
-          "slug": "/api",
-          "intent": "Ask me anything",
-          "text_field_layout": "Add your Gemini API <736841542>",
-          "inputs": [
+        "name": "",
+        "supported_commands": [
             {
-              "id": "736841542",
-              "display_text": "Add API",
-              "type": "string_input"
-            }
-          ],
-          "outputs": [
-            {
-              "id": "422243666",
-              "type": "default_output"
-            },
-            {
-              "id": "436621806",
-              "type": "multi_code_object"
-            },
-            {
-              "id": "90611917",
-              "type": "default_output"
-            }
-          ],
-          "step": [
-            {
-              "type": "search_in_sources",
-              "query": "<736841542><805088184>",
-              "data_sources": [
-                "<643643320>"
-              ],
-              "total_matching_document": 0,
-              "output": "<422243666>"
-            },
-            {
-              "type": "search_in_workspace",
-              "query": "<422243666>",
-              "workspace_object_type": "all",
-              "output": "<436621806>"
-            },
-            {
-              "type": "prompt_query",
-              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
-              "post_process": {
-                "type": "raw"
-              },
-              "output": "<90611917>"
-            },
-            {
-              "type": "append_to_chat",
-              "value": "This was your query: <736841542> and here is your output: <90611917>"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "",
-      "supported_commands": [
-        {
-          "slug": "/refactor",
-          "intent": "Ask me anything",
-          "text_field_layout": "Refactor your code <736841542> <805088184>",
-          "inputs": [
-            {
-              "id": "736841542",
-              "display_text": "Your query",
-              "type": "string_input"
-            },
-            {
-              "id": "805088184",
-              "display_text": "Code Attachment",
-              "type": "code_input"
-            }
-          ],
-          "outputs": [
-            {
-              "id": "422243666",
-              "type": "default_output"
-            },
-            {
-              "id": "436621806",
-              "type": "multi_code_object"
-            },
-            {
-              "id": "90611917",
-              "type": "default_output"
-            }
-          ],
-          "step": [
-            {
-              "type": "search_in_sources",
-              "query": "<736841542><805088184>",
-              "data_sources": [
-                "<643643320>"
-              ],
-              "total_matching_document": 0,
-              "output": "<422243666>"
-            },
-            {
-              "type": "search_in_workspace",
-              "query": "<422243666>",
-              "workspace_object_type": "all",
-              "output": "<436621806>"
-            },
-            {
-              "type": "prompt_query",
-              "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
-              "post_process": {
-                "type": "raw"
-              },
-              "output": "<90611917>"
-            },
-            {
-              "type": "append_to_chat",
-              "value": "This was your query: <736841542> and here is your output: <90611917>"
-            }
-          ]
-        },
-        {
-            "slug": "/fig2code",
+                "slug": "/refactor",
             "intent": "Ask me anything",
-            "text_field_layout": "Convert figma to code. <805088184>",
+            "text_field_layout":
+                "\nRefactor your code <736841542> <805088184>",
             "inputs": [
+              {
+                "id": "736841542",
+                "display_text": "Your query",
+                "type": "string_input",
+              },
               {
                 "id": "805088184",
                 "display_text": "Code Attachment",
-                "type": "code_input"
+                "type": "code_input",
+                "generate_full_string": true,
               }
             ],
             "outputs": [
-              {
-                "id": "422243666",
-                "type": "default_output"
-              },
-              {
-                "id": "436621806",
-                "type": "multi_code_object"
-              },
-              {
-                "id": "90611917",
-                "type": "default_output"
-              }
+              {"id": "436621806", "type": "default_output"}
             ],
-            "step": [
-              {
-                "type": "search_in_sources",
-                "query": "<736841542><805088184>",
-                "data_sources": [
-                  "<643643320>"
-                ],
-                "total_matching_document": 0,
-                "output": "<422243666>"
-              },
-              {
-                "type": "search_in_workspace",
-                "query": "<422243666>",
-                "workspace_object_type": "all",
-                "output": "<436621806>"
-              },
+            "steps": [
               {
                 "type": "prompt_query",
-                "prompt": "You are an X agent. Here is the <736841542>, here is the <436621806> and the document references: <422243666>. Answer the user's query.",
-                "post_process": {
-                  "type": "raw"
-                },
-                "output": "<90611917>"
+                "query": "Proceed step by step: 1. Describe the selected piece of code. 2. What are the possible optimizations? 3. How do you plan to achieve that ? [Dont output code yet] 4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.Since this is without human review, you need to output the precise CURSOR_SELECTION" +
+                    "You are a Flutter/Dart assistant helping user modify code within their editor window.\nRefactor the given code according to user instruction. User instruction <736841542>. \n Code: <805088184>",
+                "post_process": {"type": "code"},
+                "output": "436621806"
               },
               {
-                "type": "append_to_chat",
-                "value": "This was your query: <736841542> and here is your output: <90611917>"
+                "type": "replace_in_file",
+                "query": "<436621806>",
+                "replaceInFile": "805088184",
+                "continue_if_declined": true,
               }
             ]
-          }
-      ]
+            }
+        ]
     }
 ];
 
@@ -637,54 +462,30 @@ function addToolTipsById() {
 }
 
 function submitResponse() {
+    toggleLoader(true);
+    let prompt = textInput.textContent;
+    if (commandEnable) {
+        currentActiveSlug = agentInputsJson?.slug;
+        currentActiveAgent = data.find(obj => {
+            return obj.supported_commands.some(cmd => {
+                return cmd.slugs === currentActiveSlug;
+            });
+        });
+        
+        vscode.postMessage({ type: "agents", value: agentInputsJson });
+        commandEnable = false;
+    } else {
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
+        }
+        vscode.postMessage({ type: "prompt", value: prompt });
+    }
 
-    // const textRefactor = document.getElementById("text-to-refactor-span");
-    // if (textRefactor) {
-    //     textRefactor.remove();
-    // }
-    // let prompt = textInput.textContent;
-    // if (!prompt.startsWith('/')) {
-    //     for (const chip in chipsData) {
-    //         if (prompt.includes(chip)) {
-    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-    //         }
-    //     }
-    // }
-    // if (!prompt.startsWith('/') && prompt.length > 0) {
-    //     vscode.postMessage({ type: "prompt", value: prompt });
-    // } else {
-    //     const chipId = [];
-    //     const instructions = prompt;
-    //     for (const chip in chipsData) {
-    //         if (prompt.includes(chip)) {
-    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-    //             chipId.push(chip);
-    //         }
-    //     }
+    textInput.textContent = "";
+    adjustHeight();
 
-    //     if (chipId.length > 0) {
-    //         vscode.postMessage({
-    //             type: "action",
-    //             value: JSON.stringify({
-    //                 'message': prompt,
-    //                 'chipsData': chipsData,
-    //                 'chipId': chipId,
-    //                 'instructions': instructions
-    //             }),
-    //         });
-    //     }
-
-    //     if (commandEnable) {
-    //         commandEnable = false;
-    //     }
-    // }
-    // textInput.textContent = "";
-    // adjustHeight();
-
-
-    // const json = agentBuilder.getJSONValue();
-    // console.log('json value', json);
-    console.log('json value', agentInputsJson);
 }
 
 function handleSubmit(event) {
@@ -840,12 +641,10 @@ function readTriggeredMessage() {
                 textInput.addEventListener("keydown", handleSubmit);
                 break;
             case "showValidationLoader":
-                validationLoadingIndicator.classList.add("block");
-                validationLoadingIndicator.classList.remove("hidden");
+                toggleLoader(true);
                 break;
             case "hideValidationLoader":
-                validationLoadingIndicator.classList.add("hidden");
-                validationLoadingIndicator.classList.remove("block");
+                toggleLoader(false);
                 break;
             case "keyExists":
                 onboardingCompleted = true;
@@ -906,13 +705,12 @@ function readTriggeredMessage() {
             case 'clearCommandDeck':
                 clearChat();
                 break;
-
             case 'addToReference':
                 removePlaceholder();
                 createReferenceChips(JSON.parse(message.value));
                 setTimeout(() =>
                     adjustHeight(),
-                0);
+                    0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -929,8 +727,47 @@ function readTriggeredMessage() {
             case 'keyNotExists':
                 setLoading(false);
                 break;
+            case 'loaderUpdate':
+                const _message = JSON.parse(message.value);
+                const loaderKind = _message['kind'];
+                const loaderMessage = _message['message'];
+                setLoader(loaderKind, loaderMessage);
+                break;
         }
     });
+}
+
+function setLoader(loaderKind, loaderMessage) {
+    switch (loaderKind) {
+        case "message":
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("block");
+            workspaceLoader.style.display = 'flex';
+            workspaceLoader.classList.remove("animate__slideOutDown");
+            workspaceLoader.classList.add("animate__slideInUp");
+            workspaceLoaderText.textContent = loaderMessage;
+            sendButton.classList.add("disabled");
+            break;
+        case "processingFiles":
+            break;
+        case "circular":
+            toggleLoader(true);
+            break;
+        case "none":
+            toggleLoader(false);
+            break;
+    }
+}
+
+function toggleLoader(isShowLoader) {
+    if (isShowLoader) {
+        loadingIndicator.classList.add("block");
+        loadingIndicator.classList.remove("hidden");
+    } else {
+        loadingIndicator.classList.add("hidden");
+        loadingIndicator.classList.remove("block");
+        workspaceLoader.style.display = 'none';
+    }
 }
 
 function createReferenceChips(references) {
@@ -1106,18 +943,18 @@ function countLeadingSpacesOfLine(line) {
 
 function preProcessMarkdown(markdown) {
     const lines = markdown.split("\n");
-  
+
     const processedLines = lines.map(line => {
         const leadingSpaces = countLeadingSpacesOfLine(line);
-  
+
         if (leadingSpaces % 4 !== 0) {
             const leadingSpacesToAdd = (Math.ceil(leadingSpaces / 4)) * 4 - leadingSpaces;
             return " ".repeat(leadingSpacesToAdd) + line;
-        } 
-    
+        }
+
         return line;
     });
-  
+
     return processedLines.join("\n");
 }
 
@@ -1126,7 +963,7 @@ function startAttributeExtension() {
 
     return [
         {
-            type: "lang", 
+            type: "lang",
             filter: function (text) {
                 const olMarkdownRegex = /^\s*(\d+)\. /gm;
 
@@ -1142,9 +979,9 @@ function startAttributeExtension() {
 
                 return text;
             }
-        }, 
+        },
         {
-            type: "output", 
+            type: "output",
             filter: function (text) {
                 if (startNumbers.length > 0) {
                     const lines = text.split("\n");
@@ -1201,13 +1038,19 @@ function displayMessages() {
             }
         } else if (message.role === "user") {
             roleElement.innerHTML = "<strong>You</strong>";
-            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message", "inline-flex", "flex-col");
+            const agents = document.createElement("div");
+            agents.classList.add("inline-flex", "flex-col");
+            roleElement.appendChild(agents);
+            agents.innerHTML = `<span class="text-[#497BEF]">${currentActiveAgent ? currentActiveAgent : ""}</span><span class="text-rose-500">${currentActiveSlug ? currentActiveSlug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
             if (message.agent && message.agent?.trim() !== "") {
                 agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
                 agent.textContent = message.agent;
             }
+            currentActiveAgent = '';
+            currentActiveSlug = '';
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";

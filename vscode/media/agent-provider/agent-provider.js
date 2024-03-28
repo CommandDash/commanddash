@@ -6,11 +6,8 @@ class AgentProvider {
 
     this.json.forEach(agent => {
       if (agent.name.trim().length > 0) {
-        agent.supported_commands.forEach(commands => {
-          this.agents.push(`${agent.name} - ${commands.slug}`);
-        });
+        this.agents.push(agent.name);
       } else {
-        this.commands.push();
         agent.supported_commands.forEach(commands => {
           this.commands.push(commands.slug);
         });
@@ -19,22 +16,13 @@ class AgentProvider {
   }
 
   getInputs(inputString) {
-    const [agent, command] = inputString.split(' - ');
-    if (agent && command) {
-      const agentData = data.find(item => item.name === agent);
-      if (agentData) {
-        const commandData = agentData.supported_commands.find(cmd => cmd.slug === command);
-        if (commandData) {
-          return commandData;
+    for (const item of data) {
+      for (const command of item.supported_commands) {
+        if (command.slug === inputString) {
+          return command;
         }
       }
-    } else if (inputString.startsWith('/')) {
-      const commandData = data.find(item => item.name.trim().length === 0).supported_commands.find(cmd => cmd.slug === inputString);
-      if (commandData) {
-        return commandData;
-      }
     }
-
-    return [];
+    return []; // Return null if no matching slug is found
   }
 }

@@ -13,7 +13,7 @@ export class DartCLIClient {
 
   public connect() {
     // this.proc = child_process.spawn('path-to-file/commanddash.exe', ['process']);
-    this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
+    this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
     this.proc.stdout.on('data', (data) => {
       const message = JSON.parse(data.toString());
@@ -208,6 +208,7 @@ export async function handleAgents() {
     task.sendStepResponse(message, {'result': 'success'});
   });
   task.onProcessStep('loader_update', (message)=>{
+    debugger;
     console.log('Received loader of kind: ' + message['kind']);
     // message['kind']; // ['loader','message', 'message_with_files_list']
     // message['data']; // data depending upon kind.
@@ -248,8 +249,10 @@ export async function handleAgents() {
     }
   });
     console.log("Processing completed: ", response);
+    // debugger;
   } catch (error) {
     console.error("Processing error: ", error);
+    // debugger;
   }
   
 }

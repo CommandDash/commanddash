@@ -124,20 +124,44 @@ class CommandDeck {
 
     selectItem(active) {
         return () => {
-            this.ref.textContent = '';
+            debugger;
             const option = this.options[active];
+            if (!option.startsWith('/')) {
+                this.ref.textContent = '';
+            }
+            if (option.startsWith('/')) {
+                const textContent = this.ref.innerHTML;
+                const atIndex = textContent.lastIndexOf('/');
+                this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
+            }
+            if (option.startsWith('@')) {
+                const agentSpan = document.createElement('span');
+                agentSpan.classList.add("inline-block", "text-[#287CEB]");
+                agentSpan.contentEditable = false;
+                agentSpan.textContent = `${option}\u200B`;
+                this.ref.appendChild(agentSpan);
+                const name = option;
+                const item = this.json.find(item => item.name === name);
+                if (item && item.supported_commands) {
+                    this.options = item.supported_commands.map(command => command.slug);
+                    this.renderMenu();
+                } else {
+                    this.options = [];
+                    this.closeMenu();
+                }
+            } else {
+                const agentUIBuilder = new AgentUIBuilder(this.ref);
+                agentInputsJson = this.agentProvider.getInputs(option);
+                agentUIBuilder.buildAgentUI(agentInputsJson);
 
-            const agentUIBuilder = new AgentUIBuilder(this.ref);
-            agentInputsJson = this.agentProvider.getInputs(option);
-            agentUIBuilder.buildAgentUI(agentInputsJson);
+                this.ref.focus();
+                this.closeMenu();
 
-            this.ref.focus();
-            this.closeMenu();
-
-            setTimeout(() => {
-                adjustHeight();
-                commandEnable = true;
-            }, 0);
+                setTimeout(() => {
+                    adjustHeight();
+                    commandEnable = true;
+                }, 0);
+            }
         };
     }
 
