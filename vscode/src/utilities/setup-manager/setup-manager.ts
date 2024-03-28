@@ -7,7 +7,7 @@ export enum SetupStep { github, apiKey, executable }
 export class SetupManager {
     public pendingSetupSteps: SetupStep[] = [];
     private auth = Auth.getInstance();
-    private dartClient : DartCLIClient | undefined;
+    private dartClient: DartCLIClient | undefined;
     private context: vscode.ExtensionContext | undefined;
     private _onDidChangeSetup = new vscode.EventEmitter<SetupStep>();
     public onDidChangeSetup = this._onDidChangeSetup.event;
@@ -25,15 +25,15 @@ export class SetupManager {
 
     public async init(context: vscode.ExtensionContext): Promise<void> {
         this.context = context;
-        if(!this.auth.getGithubAccessToken()){
+        if (!this.auth.getGithubAccessToken()) {
             this.pendingSetupSteps.push(SetupStep.github);
         }
-        if(!this.auth.getApiKey()){
+        if (!this.auth.getApiKey()) {
             this.pendingSetupSteps.push(SetupStep.apiKey);
         }
         this.dartClient = DartCLIClient.init(this.context);
 
-        if(!this.dartClient.executableExists()){
+        if (!this.dartClient.executableExists()) {
             this.pendingSetupSteps.push(SetupStep.executable);
         } else {
             this.dartClient.connect();
@@ -45,7 +45,7 @@ export class SetupManager {
         await this.auth.signInWithGithub(this.context!);
         this._onDidChangeSetup.fire(SetupStep.github);
     }
-    
+
     public async setupApiKey(apiKey: string) {
         await this.auth.setApiKey(apiKey);
         this._onDidChangeSetup.fire(SetupStep.apiKey);
