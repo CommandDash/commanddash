@@ -11,7 +11,7 @@ import * as os from 'os';
 import { promisify } from 'util';
 import { ExtensionVersionManager } from '../update-check';
 
-async function installExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
+async function setupExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
   const platform = os.platform();
   const slug = platform === 'win32' ? 'windows' : platform === 'darwin' ? 'macos' : platform === 'linux' ? 'linux' : 'unsupported';
   const config: AxiosRequestConfig = {
@@ -84,7 +84,7 @@ export class DartCLIClient {
     const platform = os.platform();
     const globalStoragePath = context.globalStorageUri;
     const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';
-    const executablePath = join(globalStoragePath.path, fileName);
+    const executablePath = join(globalStoragePath.path, fileName);;
     DartCLIClient.instance = new DartCLIClient(executablePath);
     return DartCLIClient.instance;
   }
@@ -93,22 +93,20 @@ export class DartCLIClient {
     if (!this.executableExists()) {
       return;
     }
-    const { stdout, stderr } = await exec(`${this.executablePath} version`);
+    const { stdout, stderr } = await exec(`${this.executablePath.replace(/ /g, '\\ ')} version`);
     if (stderr) {
       return;
     }
-    let executableVersion = stdout?.toString().match(/(\d+\.\d+\.\d+)/);
-
-    return executableVersion ? executableVersion[1] : undefined;
+    return stdout?.toString().replace(/\n$/, '');
   }
 
   public async installExecutable(onProgress: (progress: number) => void) {
-    await installExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, undefined, onProgress);
+    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, undefined, onProgress);
   }
 
   // Install the updated executable in the background which will be kicked off on next extension activation.
   public async backgroundUpdateExecutable(): Promise<void> {
-    await installExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, await this.executableVersion(), () => { });
+    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, await this.executableVersion(), () => { });
   }
 
   public async deleteExecutable(): Promise<void> {
