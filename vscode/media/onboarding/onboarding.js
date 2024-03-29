@@ -338,40 +338,42 @@ const data = [
         "supported_commands": [
             {
                 "slug": "/refactor",
-            "intent": "Ask me anything",
-            "text_field_layout":
-                "\nRefactor your code <736841542> <805088184>",
-            "inputs": [
-              {
-                "id": "736841542",
-                "display_text": "Your query",
-                "type": "string_input",
-              },
-              {
-                "id": "805088184",
-                "display_text": "Code Attachment",
-                "type": "code_input",
-                "generate_full_string": true,
-              }
-            ],
-            "outputs": [
-              {"id": "436621806", "type": "default_output"}
-            ],
-            "steps": [
-              {
-                "type": "prompt_query",
-                "query": "Proceed step by step: 1. Describe the selected piece of code. 2. What are the possible optimizations? 3. How do you plan to achieve that ? [Dont output code yet] 4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.Since this is without human review, you need to output the precise CURSOR_SELECTION" +
-                    "You are a Flutter/Dart assistant helping user modify code within their editor window.\nRefactor the given code according to user instruction. User instruction <736841542>. \n Code: <805088184>",
-                "post_process": {"type": "code"},
-                "output": "436621806"
-              },
-              {
-                "type": "replace_in_file",
-                "query": "<436621806>",
-                "replaceInFile": "805088184",
-                "continue_if_declined": true,
-              }
-            ]
+                "intent": "Ask me anything",
+                "text_field_layout":
+                    "\nRefactor your code <736841542> <805088184>",
+                "inputs": [
+                    {
+                        "id": "736841542",
+                        "display_text": "Your query",
+                        "type": "string_input",
+                    },
+                    {
+                        "id": "805088184",
+                        "display_text": "Code Attachment",
+                        "type": "code_input",
+                        "generate_full_string": true,
+                    }
+                ],
+                "outputs": [
+                    { "id": "436621806", "type": "default_output" }
+                ],
+                "steps": [
+                    {
+                        "type": "prompt_query",
+                        "query": "You are a Flutter/Dart assistant helping user modify code within their editor window.\nModification instructions from user: <736841542> .\n\nPlease find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n <805088184> \n\n" +
+                            "Proceed step by step: 1. Describe the selected piece of code.\n2. What are the possible optimizations?\n3. How do you plan to achieve that ? [Dont output code yet]\n4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.\nSince this is without human review, you need to output the precise CURSOR_SELECTION" +
+                            " IMPORTANT NOTE: Please make sure to output the modified code in a single code block." +
+                            "Do not just give explanation prose but also give the final code at last.",
+                        "post_process": { "type": "code" },
+                        "output": "436621806"
+                    },
+                    {
+                        "type": "replace_in_file",
+                        "query": "<436621806>",
+                        "replaceInFile": "805088184",
+                        "continue_if_declined": true,
+                    }
+                ]
             }
         ]
     }
@@ -471,7 +473,7 @@ function submitResponse() {
                 return cmd.slugs === currentActiveSlug;
             });
         });
-        
+
         vscode.postMessage({ type: "agents", value: agentInputsJson });
         commandEnable = false;
     } else {

@@ -127,11 +127,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         const message = _data.message;
 
                         if (buttonType === 'accept') {
-                            task.sendStepResponse(message, {'value': true});
+                            task.sendStepResponse(message, { 'value': true });
                         } else {
-                            task.sendStepResponse(message, {'value': false});
+                            task.sendStepResponse(message, { 'value': false });
                         }
-                        const updatedMessage = await DiffViewAgent.handleResponse(buttonType, _data, messageId);
+                        const fileData = _data.message.params.args.file;
+                        const updatedMessage = await DiffViewAgent.handleResponse(buttonType, fileData, messageId);
                         if (updatedMessage) {
                             this._publicConversationHistory[messageId] = updatedMessage;
                             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
@@ -195,11 +196,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         task.onProcessStep('replace_in_file', (message) => {
             const { originalCode, path, optimizedCode } = message.params.args.file;
             const editor = vscode.window.activeTextEditor;
-            
+
             if (editor) {
-                this.tasksMap = {[task.getTaskId()] : task};
+                this.tasksMap = { [task.getTaskId()]: task };
                 handleDiffViewAndMerge(editor, path, originalCode, optimizedCode, this.context);
-                this._publicConversationHistory.push({ role: "dash", parts: "Do you want to merge these changes?", buttons: ["accept", "decline"], data: {taskId: task.getTaskId(), message} });
+                this._publicConversationHistory.push({ role: "dash", parts: "Do you want to merge these changes?", buttons: ["accept", "decline"], data: { taskId: task.getTaskId(), message } });
                 this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             }
         });
@@ -208,12 +209,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         this._publicConversationHistory.push({ role: 'user', parts: prompt });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         try {
+            const config = vscode.workspace.getConfiguration('fluttergpt');
+            var apiKey = config.get<string>('apiKey');
             /// Request the client to process the task and handle result or error
             const response = await task.run({
                 kind: "agent-execute", data: {
                     "authdetails": {
                         "type": "gemini",
-                        "key": "AIzaSyCUgTsTlr_zgfM7eElSYC488j7msF2b948",
+                        "key": apiKey,
                         "githubToken": ""
                     },
                     ...agentResponse,
