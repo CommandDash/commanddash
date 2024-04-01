@@ -124,7 +124,6 @@ class CommandDeck {
 
     selectItem(active) {
         return () => {
-            debugger;
             const option = this.options[active];
             if (!option.startsWith('/')) {
                 this.ref.textContent = '';
@@ -150,6 +149,7 @@ class CommandDeck {
                     this.closeMenu();
                 }
             } else {
+                this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
                 agentInputsJson = this.agentProvider.getInputs(option);
                 agentUIBuilder.buildAgentUI(agentInputsJson);
