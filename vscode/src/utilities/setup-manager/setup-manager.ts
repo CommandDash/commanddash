@@ -56,4 +56,12 @@ export class SetupManager {
         this._onDidChangeSetup.fire(SetupStep.executable);
         this.dartClient!.connect();
     }
+
+    public async deleteExecutable() {
+        return this.dartClient?.deleteExecutable();
+    }
+
+    public async deleteGithub() {
+        return this.auth.signOutFromGithub(this.context!);
+    }
 }

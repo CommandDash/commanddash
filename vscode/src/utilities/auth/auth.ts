@@ -3,7 +3,7 @@ import { CacheManager } from '../cache-manager';
 import { makeHttpRequest } from '../../repository/http-utils';
 
 export class Auth {
-    private constructor() {}
+    private constructor() { }
 
     private static instance: Auth;
 
@@ -20,14 +20,14 @@ export class Auth {
     public getApiKey(): string | undefined {
         const config = vscode.workspace.getConfiguration('fluttergpt');
         const apiKey = config.get<string>('apiKey');
-        if (apiKey?.startsWith('sk-')){ // Don't account the old API Keys
-            return ;
+        if (apiKey?.startsWith('sk-')) { // Don't account the old API Keys
+            return;
         }
         return apiKey;
     }
 
     public async setApiKey(apiKey: string): Promise<void> {
-    
+        return vscode.workspace.getConfiguration().update("fluttergpt.apiKey", apiKey, vscode.ConfigurationTarget.Global);
     }
 
     public getGithubRefreshToken(): string | undefined {
@@ -42,7 +42,7 @@ export class Auth {
         const url = '/account/github/url/vscode';
         const { github_oauth_url } = await makeHttpRequest<{ github_oauth_url: string }>({ url: url });
         vscode.env.openExternal(vscode.Uri.parse(github_oauth_url));
-        
+
 
         // Create a promise to handle the authentication callback
         const authPromise = new Promise<{ accessToken: string; refreshToken: string }>(
@@ -68,5 +68,17 @@ export class Auth {
         const { accessToken, refreshToken } = await authPromise;
         await context.globalState.update('access_token', accessToken);
         await context.globalState.update('refresh_token', refreshToken);
+    }
+
+    public async signOutFromGithub(context: vscode.ExtensionContext): Promise<void> {
+        // Remove the access and refresh tokens from the global state
+        await context.globalState.update('access_token', undefined);
+        await context.globalState.update('refresh_token', undefined);
+    
+        // Additional cleanup code if needed
+        // For example, you might want to unregister the URI handler
+        // context.subscriptions.forEach((subscription) => {
+        //     subscription.dispose();
+        // });
     }
 }
