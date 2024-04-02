@@ -67,6 +67,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
 
 
 export async function downloadFile(url: string, destinationPath: string, onProgress: (progress: number) => void): Promise<void> {
+    const tempFilePath = `${destinationPath}.tmp`;
+
     const response = await axios({
         url,
         method: 'GET',
@@ -83,16 +85,18 @@ export async function downloadFile(url: string, destinationPath: string, onProgr
         fs.mkdirSync(directory, { recursive: true });
     }
 
-    if (fs.existsSync(destinationPath)) {
-        fs.truncateSync(destinationPath, 0);
+    if (fs.existsSync(tempFilePath)) {
+        fs.truncateSync(tempFilePath, 0);
     }
 
-    const writer = fs.createWriteStream(destinationPath);
+    const writer = fs.createWriteStream(tempFilePath);
 
     response.data.pipe(writer);
 
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         writer.on('finish', resolve);
         writer.on('error', reject);
     });
+
+    fs.renameSync(tempFilePath, destinationPath); // Only write file to destination path once download finishes
 }

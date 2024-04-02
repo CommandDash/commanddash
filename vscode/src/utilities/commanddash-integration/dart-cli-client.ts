@@ -16,7 +16,7 @@ async function setupExecutable(clientVersion: string, executablePath: string, ex
   const slug = platform === 'win32' ? 'windows' : platform === 'darwin' ? 'macos' : platform === 'linux' ? 'linux' : 'unsupported';
   const config: AxiosRequestConfig = {
     method: 'get',
-    url: `http://api.commanddash.dev/executable/get-update/${clientVersion}/${slug}`
+    url: `https://api.commanddash.dev/executable/get-update/${clientVersion}/${slug}`
   };
   let response = await makeHttpRequest<{ url: string, version: string }>(config);
   if (executableVersion && compareVersions(response['version'], executableVersion) <= 0) {
