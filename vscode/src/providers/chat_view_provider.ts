@@ -12,11 +12,13 @@ import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
 import { DartCLIClient } from "../utilities/commanddash-integration/dart-cli-client";
 import { CacheManager } from "../utilities/cache-manager";
 import { handleDiffViewAndMerge } from "../utilities/diff-utils";
+import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manager";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dashai.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
+    private setupManager = SetupManager.getInstance();
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
@@ -100,19 +102,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this.clearConversationHistory();
                         break;
                     }
-                case "validate":
+                case "updateApiKey":
                     {
-                        webviewView.webview.postMessage({ type: "showValidationLoader" });
-                        this.aiRepo = this.initGemini(data.value);
-                        await this._validateApiKey(data.value);
-                        await this._validateFlutterExtension();
-                        webviewView.webview.postMessage({ type: "hideValidationLoader" });
-                        break;
-                    }
-                case "updateSettings":
-                    {
-                        vscode.workspace.getConfiguration().update("fluttergpt.apiKey", data.value, vscode.ConfigurationTarget.Global);
-                        vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
+                        this.setupManager.setupApiKey(data.value);
                         break;
                     }
                 case "checkKeyIfExists":
@@ -144,6 +136,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this.handleAgents(data.value);
                         break;
                     }
+                case "githubLogin":
+                    {
+                        this.setupManager.setupGithub();
+                        break;
+                    }
 
             }
         });
@@ -159,8 +156,46 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
-        this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+
+        // setting up onboarding setup manager to check the credentails required by user
+        setTimeout(() => {
+            this._setupManager();
+        }, 1000);
+
         logEvent('new-chat-start', { from: 'command-deck' });
+
+    }
+
+    private async _setupManager() {
+
+
+        this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
+            if (steps === SetupStep.executable) {
+                this.setupManager.setupExecutable((progress: number) => {
+                    this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+                });
+            }
+        });
+
+        this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
+
+        this.setupManager.onDidChangeSetup(event => {
+            switch (event) {
+                case SetupStep.github:
+                    console.log('github');
+                    this._view?.webview.postMessage({ type: 'githubLoggedIn' });
+                    break;
+                case SetupStep.apiKey:
+                    console.log('apikey');
+                    this._view?.webview.postMessage({ type: 'apiKeySet' });
+                    break;
+                case SetupStep.executable:
+                    console.log('executable');
+                    this._view?.webview.postMessage({ type: 'executableDownloaded' });
+                    break;
+            }
+        });
     }
 
     private _checkIfKeyExists() {
@@ -175,7 +210,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async handleAgents(response: any) {
         const agentResponse = response;
-        const client = new DartCLIClient();
+        const client = DartCLIClient.init(this.context);
         const task = client.newTask();
 
         task.onProcessStep('append_to_chat', (message) => {

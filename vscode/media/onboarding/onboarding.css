@@ -251,3 +251,22 @@ p[contenteditable="true"] {
 .tippy-box[data-theme~='flutter-blue'][data-placement^='right']>.tippy-arrow::before {
     border-right-color: #287CEB;
 }
+
+progress {
+    height: 7px;
+}
+
+@keyframes progress-animation {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+progress::-webkit-progress-value {
+    background-color: #287CEB;
+    animation: progress-animation 2s linear forwards;
+}

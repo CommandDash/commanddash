@@ -1,8 +1,13 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const baseUrl = 'https://api.commanddash.dev';
 
 export async function makeHttpRequest<T>(config: AxiosRequestConfig): Promise<T> {
     try {
+        config.baseURL = baseUrl;
         const response: AxiosResponse<T> = await axios(config);
         return response.data;
     } catch (error) {
@@ -19,13 +24,13 @@ export async function makeHttpRequest<T>(config: AxiosRequestConfig): Promise<T>
 // make a request to the server to get a new access key if the current one is expired
 // update the config with the new access key
 // make the request again
-export async function makeAuthorizedHttpRequest<T>(config:AxiosRequestConfig,context:vscode.ExtensionContext): Promise<T>{
+export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, context: vscode.ExtensionContext): Promise<T> {
     // add base url localhost:5000
-    config.baseURL =process.env["HOST"]!;
-    const accessToken = context.globalState.get('access_token');
+    config.baseURL = baseUrl;
+    const accessToken = context.globalState.get<string>('access_token');
     const refreshToken = context.globalState.get<string>('refresh_token');
-    if (!refreshToken){
-        throw new Error("Please login to FlutterGpt to use this feature");
+    if (!refreshToken) {
+        throw new Error("Please login to CommandDash to use this feature");
     }
     config.headers = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -36,10 +41,10 @@ export async function makeAuthorizedHttpRequest<T>(config:AxiosRequestConfig,con
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            if (error.response?.status === 401||error.response?.status === 422){
-                const newAccessToken = await getNewAccessToken(refreshToken);
-                context.globalState.update('access_token',newAccessToken);
-                return makeAuthorizedHttpRequest<T>(config,context);
+            if (error.response?.status === 401 || error.response?.status === 422) {
+                const newAccessToken = await refreshAccessToken(refreshToken);
+                context.globalState.update('access_token', newAccessToken);
+                return makeAuthorizedHttpRequest<T>(config, context);
             }
             throw new Error(`Error: ${error.response?.data.error.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data.error.message}`);
         } else {
@@ -49,12 +54,49 @@ export async function makeAuthorizedHttpRequest<T>(config:AxiosRequestConfig,con
 }
 
 
-async function getNewAccessToken(refreshToken:string): Promise<string>{
-    const response = await makeHttpRequest<{accessToken:string}>({url:"http://localhost:5000/token/refresh",method:'POST',
-    headers:{
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        Authorization:`Bearer ${refreshToken}` 
-    }
-});
+export async function refreshAccessToken(refreshToken: string): Promise<string> {
+    const response = await makeHttpRequest<{ accessToken: string }>({
+        url: baseUrl + '/account/github/refresh', method: 'POST',
+        headers: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            Authorization: `Bearer ${refreshToken}`
+        }
+    });
     return response.accessToken;
+}
+
+
+export async function downloadFile(url: string, destinationPath: string, onProgress: (progress: number) => void): Promise<void> {
+    const tempFilePath = `${destinationPath}.tmp`;
+
+    const response = await axios({
+        url,
+        method: 'GET',
+        responseType: 'stream',
+        onDownloadProgress: (progressEvent) => {
+            const total = progressEvent.total ? progressEvent.total : 9999999;
+            const progress = Math.round((progressEvent.loaded * 100) / total);
+            onProgress(Math.min(progress, 100));
+        },
+    });
+
+    const directory = path.dirname(destinationPath);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
+
+    if (fs.existsSync(tempFilePath)) {
+        fs.truncateSync(tempFilePath, 0);
+    }
+
+    const writer = fs.createWriteStream(tempFilePath);
+
+    response.data.pipe(writer);
+
+    await new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+    });
+
+    fs.renameSync(tempFilePath, destinationPath); // Only write file to destination path once download finishes
 }

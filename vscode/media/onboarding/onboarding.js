@@ -215,19 +215,25 @@ const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
 const textInput = document.getElementById("text-input");
 const responseContainer = document.getElementById("response");
-const onboardingText = document.getElementById("onboarding-text");
-const onboardingArrowIcon = document.getElementById("onboarding-arrow-icon");
-const tryFlutterText = document.getElementById("try-flutter-text");
 const textinputMenu = document.getElementById("menu");
 const loadingIndicator = document.getElementById('loader');
 const validationLoadingIndicator = document.getElementById('validation-loader');
-const workspaceLoader = document.getElementById('workspace-loader');
-const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
+const executableProgress = document.getElementById("executable-progress");
+const githubLogin = document.getElementById("github-sign-in");
+const githubTick = document.getElementById("github-tick");
+const githubCross = document.getElementById("github-cross");
+const apiKeyTick = document.getElementById("apiKey-tick");
+const apiKeyCross = document.getElementById("apiKey-cross");
+const executableTick = document.getElementById("executable-tick");
+const executableCross = document.getElementById("executable-cross");
+const onboardingSetup = document.getElementById("onboarding-setup");
+const apiKeyContainer = document.getElementById("apikey-container");
+const executableContainer = document.getElementById("executable-container");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -241,15 +247,24 @@ let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
 let agentProvider = null;
-let agentInputsJson = {};
+let agentInputsJson = [];
 let currentActiveAgent = '';
 let currentActiveSlug = '';
+let isGithubLoginPending = false;
+let isApiKeyPending = false;
+let isExecutableDownloadPending = false;
 
 //initialising visual studio code library
 let vscode = null;
 
 let agents = [];
 let commands = [];
+
+const SetupStep = {
+    0: "github",
+    1: "apiKey",
+    2: "executable"
+};
 
 const data = [
     {
@@ -386,15 +401,8 @@ const data = [
     //initialising vscode library
     vscode = acquireVsCodeApi();
 
-    //check if key exists
-    ifKeyExists();
-
     //reading vscode triggered messages to webview
     readTriggeredMessage();
-
-    if (!onboardingCompleted) {
-        textInput.textContent = 'How to wait for forEach to complete with asynchronous callbacks?';
-    }
 
     googleApiKeyTextInput.addEventListener("input", (event) => {
         const apiKey = event.target.value.trim();
@@ -430,10 +438,18 @@ const data = [
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
+    githubLogin.addEventListener("click", githubListener);
+
     agentProvider = new AgentProvider(data);
     agents = [...agentProvider.agents];
     commands = [...agentProvider.commands];
 })();
+
+function githubListener() {
+    vscode.postMessage({
+        type: "githubLogin",
+    });
+}
 
 function setLoading(isLoading) {
     if (isLoading) {
@@ -576,12 +592,6 @@ function handleSubmit(event) {
     }
 }
 
-function ifKeyExists() {
-    vscode.postMessage({
-        type: "checkKeyIfExists",
-    });
-}
-
 function setCaretToEnd(target) {
     const range = document.createRange();
     const sel = window.getSelection();
@@ -642,68 +652,6 @@ function readTriggeredMessage() {
                 sendButton.classList.remove("disabled");
                 textInput.addEventListener("keydown", handleSubmit);
                 break;
-            case "showValidationLoader":
-                toggleLoader(true);
-                break;
-            case "hideValidationLoader":
-                toggleLoader(false);
-                break;
-            case "keyExists":
-                onboardingCompleted = true;
-                stepOneCompleted = true;
-                modelCount = 3;
-                googleApiKeyHeader.classList.add("hidden");
-                bottomContainer.classList.remove("hidden");
-                bottomContainer.classList.add("flex");
-                textInput.textContent = "";
-                textInput.contentEditable = true;
-                onboardingArrowIcon.classList.add("hidden");
-                onboardingText.classList.add("hidden");
-                tryFlutterText.classList.add("hidden");
-                setLoading(false);
-                break;
-            case 'workspaceLoader':
-                workspaceLoader.style.display = message.value ? 'flex' : 'none';
-                if (message.value) {
-                    workspaceLoader.classList.remove("animate__slideOutDown");
-                    workspaceLoader.classList.add("animate__slideInUp");
-                    sendButton.classList.add("disabled");
-                    textInput.removeEventListener("keydown", handleSubmit);
-                } else {
-                    workspaceLoader.classList.remove("animate__slideInUp");
-                    workspaceLoader.classList.add("animate__slideOutDown");
-                    sendButton.classList.remove("disabled");
-                    textInput.addEventListener("keydown", handleSubmit);
-                }
-                if (!message.value) {
-                    fileNameContainer.innerHTML = '';
-                    workspaceLoaderText.textContent = "Finding the most relevant files";
-                }
-                break;
-            case 'stepLoader':
-                if (message.value?.fetchingFileLoader) {
-                    workspaceLoaderText.textContent = "Finding most relevant files\n(this may take a while for first time)";
-                } else if (message.value?.creatingResultLoader) {
-                    fileNameContainer.style.display = "inline-flex";
-                    workspaceLoaderText.textContent = "Preparing a result";
-                    message.value?.filePaths?.forEach((_filePath) => {
-                        const divBlock = document.createElement("div");
-                        divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
-                        divBlock.id = "divBlock";
-                        const fileNames = document.createElement("span");
-                        const _dartIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        _dartIcon.innerHTML = dartIcon;
-                        _dartIcon.classList.add("h-3", "w-3", "mx-1");
-                        _dartIcon.id = "dartIcon";
-                        fileNames.textContent = _filePath;
-                        fileNames.classList.add("file-path");
-                        fileNames.id = "fileNames";
-                        divBlock.appendChild(_dartIcon);
-                        divBlock.appendChild(fileNames);
-                        fileNameContainer.appendChild(divBlock);
-                    });
-                }
-                break;
             case 'clearCommandDeck':
                 clearChat();
                 break;
@@ -734,6 +682,85 @@ function readTriggeredMessage() {
                 const loaderKind = _message['kind'];
                 const loaderMessage = _message['message'];
                 setLoader(loaderKind, loaderMessage);
+                break;
+            case 'pendingSteps':
+                const pendingStepsArr = JSON.parse(message.value);
+                if (pendingStepsArr?.length > 0) {
+                    pendingStepsArr?.forEach((steps) => {
+                        switch (steps) {
+                            case 0:
+                                isGithubLoginPending = true;
+                                githubCross.classList.remove('hidden');
+                                githubTick.classList.add('hidden');
+                                githubLogin.classList.remove("hidden");
+                                apiKeyContainer.classList.remove("hidden");
+                                break;
+
+                            case 1:
+                                isApiKeyPending = true;
+                                apiKeyCross.classList.remove('hidden');
+                                apiKeyTick.classList.add('hidden');
+                                googleApiKeyTextInput.classList.remove("hidden");
+                                executableContainer.classList.remove("hidden");
+                                break;
+
+                            case 2:
+                                isExecutableDownloadPending = true;
+                                executableCross.classList.remove('hidden');
+                                executableTick.classList.add('hidden');
+                                executableProgress.classList.remove("hidden");
+                                break;
+                        }
+                    });
+                }
+
+                if (!isGithubLoginPending) {
+                    isGithubLoginPending = false;
+                    githubCross.classList.add("hidden");
+                    githubTick.classList.remove("hidden");
+                    githubLogin.classList.add("hidden");
+                }
+                if (!isApiKeyPending) {
+                    isApiKeyPending = false;
+                    apiKeyCross.classList.add("hidden");
+                    apiKeyTick.classList.remove("hidden");
+                    googleApiKeyTextInput.classList.add("hidden");
+                    
+                }
+                if (!isExecutableDownloadPending) {
+                    isExecutableDownloadPending = false;
+                    executableCross.classList.add("hidden");
+                    executableTick.classList.remove("hidden");
+                    executableProgress.classList.add("hidden");
+                }
+
+                // Example logic to determine overall status
+                allStepsCompleted();
+                setLoading(false);
+                break;
+            case 'executableDownloadProgress':
+                executableProgress.value = message.value;
+                break;
+            case 'executableDownloaded':
+                isExecutableDownloadPending = false;
+                executableCross.classList.add("hidden");
+                executableTick.classList.remove("hidden");
+                executableProgress.classList.add("hidden");
+                allStepsCompleted();
+                break;
+            case 'apiKeySet':
+                isApiKeyPending = false;
+                apiKeyCross.classList.add("hidden");
+                apiKeyTick.classList.remove("hidden");
+                googleApiKeyTextInput.classList.add("hidden");
+                allStepsCompleted();
+                break;
+            case 'githubLoggedIn':
+                isGithubLoginPending = false;
+                githubCross.classList.add("hidden");
+                githubTick.classList.remove("hidden");
+                githubLogin.classList.add("hidden");
+                allStepsCompleted();
                 break;
         }
     });
@@ -772,6 +799,16 @@ function toggleLoader(isShowLoader) {
     }
 }
 
+function allStepsCompleted() {
+    if (!isGithubLoginPending && !isApiKeyPending && !isExecutableDownloadPending) {
+        onboardingSetup.classList.add("hidden");
+        bottomContainer.classList.add("flex");
+        bottomContainer.classList.remove("hidden");
+        onboardingCompleted = true;
+        stepOneCompleted = true;
+        modelCount = 3;
+    }
+}
 function createReferenceChips(references) {
 
     const chip = document.createElement("span");
@@ -922,11 +959,9 @@ function scrollToBottom() {
 function validateApiKey(apiKey) {
     if (isValidGeminiApiKey(apiKey)) {
         vscode.postMessage({
-            type: "validate",
+            type: "updateApiKey",
             value: apiKey,
         });
-    } else {
-        console.log('not valid api key');
     }
 }
 
@@ -1022,22 +1057,7 @@ function displayMessages() {
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            if (modelCount === 1 && !stepOneCompleted) {
-                stepOneCompleted = true;
-                // Update UI or perform actions for Step One completion
-                onboardingText.textContent = "That is insightful, isn't it? Now lets try something related to your workspace using @workspace annotation.";
-                textInput.textContent = "@workspace help me find router code and it's location.";
-
-            } else if (modelCount === 2 && !onboardingCompleted) {
-                onboardingCompleted = true;
-                // Update UI or perform actions for Onboarding completion
-                onboardingText.textContent = "Awesome! You can watch more use cases here.";
-                textInput.textContent = "";
-                textInput.contentEditable = true;
-                onboardingArrowIcon.classList.add("hidden");
-                onboardingText.classList.add("hidden");
-                tryFlutterText.classList.add("hidden");
-            }
+            
         } else if (message.role === "user") {
             roleElement.innerHTML = "<strong>You</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message", "inline-flex", "flex-col");
@@ -1231,8 +1251,8 @@ async function updateValidationList(message) {
     // Check if both conditions are met, add "All permissions look good"
     if (isApiKeyValid && areDependenciesInstalled) {
         bodyContainer.classList.add("flex", "flex-col");
-        bottomContainer.classList.remove("hidden");
-        bottomContainer.classList.add("flex");
+        // bottomContainer.classList.remove("hidden");
+        // bottomContainer.classList.add("flex");
         setAPIKeyInSettings();
 
     } else {
@@ -1247,7 +1267,7 @@ async function updateValidationList(message) {
 function setAPIKeyInSettings() {
     const geminiAPIKey = googleApiKeyTextInput.value;
     vscode.postMessage({
-        type: "updateSettings",
+        type: "updateApiKey",
         value: geminiAPIKey
     });
 }

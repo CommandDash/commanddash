@@ -17,9 +17,9 @@ export class ExtensionVersionManager {
         );
     }
 
-    public getExtensionVersion(): string {
+    public static getExtensionVersion(): string {
         const extension = extensions.getExtension("WelltestedAI.fluttergpt");
-        return extension?.packageJSON.version ?? "0.0.0";
+        return extension?.packageJSON.version ?? "0.3.0"; // TODO: Try to always keep this updated as a fallback
     }
 
     public getVersionFromUserConfigFile(): string {
@@ -45,7 +45,7 @@ export class ExtensionVersionManager {
 
 
     public async isExtensionUpdated() {
-        const currentVersion = this.getExtensionVersion();
+        const currentVersion = ExtensionVersionManager.getExtensionVersion();
         const previousVersion = this.getVersionFromUserConfigFile();
         if (currentVersion !== previousVersion) {
             // first update packageJSON
