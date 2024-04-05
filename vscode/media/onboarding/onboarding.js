@@ -396,7 +396,7 @@ const data = [
 
 (function () {
 
-    setLoading(true);
+    // setLoading(true);
 
     //initialising vscode library
     vscode = acquireVsCodeApi();
@@ -525,6 +525,10 @@ function handleSubmit(event) {
             // If no agent selected yet
             if (!activeAgent) {
                 matchingItems = query.length === 0 ? commands : commands.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+            } else {
+                const agentSlugs = data.find(item => item.name === currentActiveAgent);
+                const slugs = agentSlugs.supported_commands.map(command => command.slug);
+                matchingItems = slugs.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -686,6 +690,8 @@ function readTriggeredMessage() {
             case 'pendingSteps':
                 const pendingStepsArr = JSON.parse(message.value);
                 if (pendingStepsArr?.length > 0) {
+                    onboardingSetup.classList.remove("hidden");
+                    bottomContainer.classList.add("hidden");
                     pendingStepsArr?.forEach((steps) => {
                         switch (steps) {
                             case 0:
@@ -941,6 +947,7 @@ function debounce(func, wait, immediate = false) {
 function clearChat() {
     responseContainer.innerHTML = "";
     conversationHistory = [];
+    loadingIndicator.classList.add("hidden");
 
     vscode.postMessage({
         type: "clearChat",
