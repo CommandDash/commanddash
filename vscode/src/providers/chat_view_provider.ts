@@ -210,7 +210,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async handleAgents(response: any) {
         const agentResponse = response;
-        const client = DartCLIClient.init(this.context);
+        const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
         task.onProcessStep('append_to_chat', (message) => {
