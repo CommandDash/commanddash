@@ -268,6 +268,61 @@ const SetupStep = {
 
 const data = [
     {
+        "name": "@flutter",
+        "supported_commands": [
+            {
+                "slug": "/doc",
+                "intent": "Your Flutter doc expert",
+                "registered_inputs": [
+                    {
+                        "display_text": "Your query",
+                        "id": "14340369",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "897806645",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "81443790",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "steps": [
+                    {
+                        "data_sources": [
+                            "816647033"
+                        ],
+                        "output": "897806645",
+                        "query": "<14340369>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "prompt_query",
+                        "query":
+                            "You are an Flutter expert who answers user's queries related to the framework. \n\n Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n\n Query: <14340369>, \nReferences: <897806645>. Please respond to the user's query!",
+                        "output": "81443790",
+                      },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<81443790>",
+                        "version": "0.0.1"
+                    }
+                ],
+                // "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question:"
+                "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question: <14340369>"
+            }
+        ],
+        "version": "1.0.0"
+    },
+    {
         "name": "@workspace",
         "supported_commands": [
             {
@@ -585,7 +640,7 @@ function handleSubmit(event) {
                 // Perform some action
                 commandEnable = false;
             }
-        }, 500);
+        }, 2500);
 
     }
 
