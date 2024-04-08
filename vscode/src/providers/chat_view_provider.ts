@@ -213,22 +213,22 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
-        task.onProcessStep('append_to_chat', (message) => {
+        task.onProcessStep('append_to_chat', async (message) => {
             this._publicConversationHistory.push({ role: 'model', parts: message.params.args.message });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
 
-            task.sendStepResponse(message, { 'result': 'success' });
+            task.sendStepResponse(message, {});
         });
-        task.onProcessStep('loader_update', (message) => {
-            task.sendStepResponse(message, { 'result': 'success' });
+        task.onProcessStep('loader_update', async (message) => {
+            task.sendStepResponse(message, {});
             this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
         });
         task.onProcessStep('cache', async (message) => {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
         });
-        task.onProcessStep('replace_in_file', (message) => {
+        task.onProcessStep('replace_in_file', async (message) => {
             const { originalCode, path, optimizedCode } = message.params.args.file;
             const editor = vscode.window.activeTextEditor;
 
@@ -260,6 +260,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log("Processing completed: ", response);
         } catch (error) {
             console.error("Processing error: ", error);
+            /// TODO:[YASH] Please also show the error message back to client.
             this?._view?.webview?.postMessage({ type: 'hideLoadingIndicator' });
         }
     }

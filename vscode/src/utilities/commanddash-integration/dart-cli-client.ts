@@ -127,31 +127,44 @@ export class DartCLIClient {
       } else if (method === 'error') {
         this.eventEmitter.emit(`error_${id}`, params);
       } else if (method === 'step') {
-        // Handle additional data requirements from Dart CLI (e.g. get additional data)
+
+        // Validate if a handler is available to process the fetch step request.
+        if (!this.eventEmitter.eventNames().includes(`step_${params.kind}_${id}`)) {
+          console.log(`No handler found for fetch: step_${params.kind}_${id}`);
+          // Inform CLI that there was no available handler to proess it's request
+          this.sendStepResponse(message.id, message.params['kind'], { 'result': 'error', 'message': `Step kind: ${message.params['kind']} is missing a handler.` }, true);
+        }
+
+        // Handle task specific process requests from Dart CLI (e.g. get additional data)
         this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
+
       } else if (method === 'operation') {
+
+        // Validate if a handler is available to process the fetch operation request.
+        if (!this.eventEmitter.eventNames().includes(`operation_${params.kind}`)) {
+          // Inform CLI that there was no available handler to proess it's request
+          console.log(`No handler found for fetch: operation_${params.kind}`);
+          this.sendOperationResponse(message.params['kind'], { 'result': 'error', 'message': `Process Operation kind: ${message.params['kind']} is missing a handler.` });
+        }
+
+        // Handle task independent process requests from Dart CLI (e.g. get additional data)
         this.eventEmitter.emit(`operation_${params.kind}`, message);
+
       } if (method === 'log') {
         console.log(params);
       }
     });
 
     this.proc.stderr.on('data', (data) => {
-      // TODO: Emit another error event (inability to find a task ID here)
-      /// Pay high focus here since this could lead to ambigious and untracked failures
-      /// The CLI should handle every error and report it with it's task ID.
+      /// Failures from CLI that couldn't be mapped to a specific task.
+      this.eventEmitter.emit('global_error', data.toString());
       console.error('stderr -' + data.toString());
-    });
-
-    this.proc.on('error', (err) => {
-      // Listens to the `error` event on the child process to catch spawning errors, such as the command not being found.
-      // TODO: Show an error message on the UI
-      console.error('Failed to start subprocess.', err);
     });
 
     this.proc.on('exit', (code) => {
       console.log(`Child process exited with code ${code}`);
       this.eventEmitter.removeAllListeners();
+      this.connect(); // Reconnect if CLI exited due to unhandled failures.
       // Perform other cleanup actions here
     });
   }
@@ -178,20 +191,25 @@ export class DartCLIClient {
   }
 
   /// Send required additional data to the CLI. 
-  public sendOperationResponse(kind: string, data: any): void {
+  public sendOperationResponse(message: any, response: any, error: boolean = false): void {
     // Ensure to use the same 'id' to maintain consistency of the JSON-RPC protocol
     const method = 'operation_response';
-    console.log(JSON.stringify({ method, kind, data }));
-    this.proc?.stdin.write(JSON.stringify({ method, kind, data }) + "\n");
+    let data = { 'result': error ? 'error' : 'success', ...response };
+    console.log(JSON.stringify({ method, kind: message.params['kind'], data }));
+    this.proc?.stdin.write(JSON.stringify({ method, kind: message.params['kind'], data }) + "\n");
   }
 
+  /// TODO: Warn user about a global error 
+  public onGlobalError(handler: (error: string) => void) {
+    this.eventEmitter.on('global_error', handler);
+  }
   /// Send required additional data to the CLI. 
-  public sendStepResponse(id: number, kind: string, data: any): void {
+  public sendStepResponse(id: number, kind: string, response: any, error: boolean = false): void {
     // Ensure to use the same 'id' to maintain consistency of the JSON-RPC protocol
     const method = 'step_response';
+    let data = { 'result': error ? 'error' : 'success', ...response };
     this.proc?.stdin.write(JSON.stringify({ id, method, kind, data }) + "\n");
   }
-
 
 
   private send(request: any, id: number): Promise<any> {
@@ -207,6 +225,7 @@ export class DartCLIClient {
         reject(response);
       });
 
+      console.log(requestPayload);
       // Send the request to the Dart CLI
       this.proc?.stdin.write(requestPayload + "\n");
     });
@@ -258,17 +277,17 @@ export class DartCLIClient {
 
 /// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
 /// [add it to extension.ts activate and run the extension]
-export async function testTaskWithSideOperation(context: vscode.ExtensionContext) {
+export async function testTaskWithSideOperation() {
   const client = DartCLIClient.getInstance();
   client.onProcessOperation('operation_data_kind', (message) => {
     const operationData = { value: "unique_value" };
-    task.sendStepResponse(message, operationData);
+    client.sendOperationResponse(message, operationData);
   });
   const task = client.newTask();
 
   try {
     /// Request the client to process the task and handle result or error
-    const response = await task.run({ kind: "random_task_with_side_operation", data: {} });
+    const response = await task.run({ kind: "random_task_with_side_operation", data: { 'success': true } });
     console.log("Processing completed: ", response);
   } catch (error) {
     console.error("Processing error: ", error);
@@ -278,11 +297,11 @@ export async function testTaskWithSideOperation(context: vscode.ExtensionContext
 
 /// To be used for quick understanding of the integration with the CLI. Move to the test suite later.
 /// [add it to extension.ts activate and run the extension]
-export async function testTaskWithSteps(context: vscode.ExtensionContext) {
+export async function testTaskWithSteps() {
   const client = DartCLIClient.getInstance();
   const task = client.newTask();
   // Handle client side steps during task processing. 
-  task.onProcessStep('step_data_kind', (message) => {
+  task.onProcessStep('step_data_kind', async (message) => {
     /// any complex interaction to come up with response data.
     const additionalData = { value: "unique_value" };
 
@@ -308,16 +327,16 @@ export async function handleAgents(context: vscode.ExtensionContext) {
   const client = DartCLIClient.getInstance();
   const task = client.newTask();
 
-  task.onProcessStep('append_to_chat', (message) => {
+  task.onProcessStep('append_to_chat', async (message) => {
     console.log(`append to chat:\n${message}`);
-    task.sendStepResponse(message, { 'result': 'success' });
+    task.sendStepResponse(message, {});
   });
-  task.onProcessStep('loader_update', (message) => {
+  task.onProcessStep('loader_update', async (message) => {
     console.log('Received loader of kind: ' + message['kind']);
     // message['kind']; // ['loader','message', 'message_with_files_list']
     // message['data']; // data depending upon kind.
     console.log(`${message}`);
-    task.sendStepResponse(message, { 'result': 'success' });
+    task.sendStepResponse(message, {});
   });
   try {
     /// Request the client to process the task and handle result or error
@@ -357,5 +376,26 @@ export async function handleAgents(context: vscode.ExtensionContext) {
   } catch (error) {
     console.error("Processing error: ", error);
   }
-
 }
+
+/// TODO:[YASH] Please setup this handler for dart client globally.
+export async function testGlobalErrorReporting() {
+  const client = DartCLIClient.getInstance();
+  client.onGlobalError((error) => {
+
+    vscode.window.showInformationMessage('Error processing an open task. Please consider closing existing tasks or restart IDE if there is trouble using CommandDash', {
+      detail: error
+    });
+    console.log(error);
+  });
+  const task = client.newTask();
+
+  try {
+    /// Request the client to process the task and handle result or error
+    const response = await task.run({ kind: "random_task_global_error", data: { 'success': true } });
+    console.log("Processing completed: ", response);
+  } catch (error) {
+    console.error("Processing error: ", error);
+  }
+}
+
