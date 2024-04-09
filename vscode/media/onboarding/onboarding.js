@@ -832,10 +832,10 @@ function setLoader(loaderKind, loaderMessage) {
         case "message":
             loadingIndicator.classList.add("hidden");
             loadingIndicator.classList.remove("block");
-            workspaceLoader.style.display = 'flex';
-            workspaceLoader.classList.remove("animate__slideOutDown");
-            workspaceLoader.classList.add("animate__slideInUp");
-            workspaceLoaderText.textContent = loaderMessage;
+            // workspaceLoader.style.display = 'flex';
+            // workspaceLoader.classList.remove("animate__slideOutDown");
+            // workspaceLoader.classList.add("animate__slideInUp");
+            // workspaceLoaderText.textContent = loaderMessage;
             sendButton.classList.add("disabled");
             break;
         case "processingFiles":
@@ -1156,6 +1156,12 @@ function displayMessages() {
                 button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, messageIndex, type));
                 buttonContainer.appendChild(button);
             });
+        } else if (message.role === "error") {
+            roleElement.innerHTML = "<strong class='text-white'>Error</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-red-700");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-red-700", "text-white");
+            const error = JSON.parse(message.parts);
+            contentElement.innerHTML = markdownToPlain(error.message);
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(roleElement);

@@ -32,6 +32,13 @@ export class SetupManager {
             this.pendingSetupSteps.push(SetupStep.apiKey);
         }
         this.dartClient = DartCLIClient.init(this.context);
+        this.dartClient.onGlobalError((error) => {
+
+            vscode.window.showInformationMessage('Error processing an open task. Please consider closing existing tasks or restart IDE if there is trouble using CommandDash', {
+              detail: error
+            });
+            console.log(error);
+          });
 
         if (!this.dartClient.executableExists()) {
             this.pendingSetupSteps.push(SetupStep.executable);
