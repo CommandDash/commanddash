@@ -207,7 +207,7 @@ const activityBarForeground = getComputedStyle(document.documentElement).getProp
 const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
-// const loadingContainer = document.getElementById("loading-container");
+const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
@@ -530,10 +530,10 @@ function githubListener() {
 function setLoading(isLoading) {
     if (isLoading) {
         bodyContainer.classList.add("hidden");
-        // loadingContainer.classList.remove("hidden");
+        loadingContainer.classList.remove("hidden");
     } else {
         bodyContainer.classList.remove("hidden");
-        // loadingContainer.classList.add("hidden");
+        loadingContainer.classList.add("hidden");
     }
 }
 
