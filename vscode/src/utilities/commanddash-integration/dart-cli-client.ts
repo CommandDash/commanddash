@@ -378,7 +378,6 @@ export async function handleAgents(context: vscode.ExtensionContext) {
   }
 }
 
-/// TODO:[YASH] Please setup this handler for dart client globally.
 export async function testGlobalErrorReporting() {
   const client = DartCLIClient.getInstance();
   client.onGlobalError((error) => {

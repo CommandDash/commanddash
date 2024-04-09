@@ -260,7 +260,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log("Processing completed: ", response);
         } catch (error) {
             console.error("Processing error: ", error);
-            /// TODO:[YASH] Please also show the error message back to client.
+            this._publicConversationHistory.push({role: 'error', parts: JSON.stringify(error)});
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this?._view?.webview?.postMessage({ type: 'hideLoadingIndicator' });
         }
     }
