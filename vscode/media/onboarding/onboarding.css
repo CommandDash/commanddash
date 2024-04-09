@@ -231,6 +231,11 @@ p[contenteditable="true"] {
     z-index: 98;
 }
 
+.questionnaire-card {
+    background-color: var(--vscode-editor-foreground);
+    color: var(--vscode-editor-background);
+}
+
 .tippy-box[data-theme~='flutter-blue'] {
     background-color: #287CEB;
     color: white;

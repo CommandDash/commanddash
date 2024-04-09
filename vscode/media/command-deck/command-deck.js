@@ -199,7 +199,7 @@ class CommandDeck {
         this.ref.style.height = "auto";
         this.ref.style.height = this.ref.scrollHeight + "px";
 
-        // const isTriggerAtStartOfWord = triggerIdx === 0;
+        // const iscoAtStartOfWord = triggerIdx === 0;
 
         if (!keystrokeTriggered) {
             this.closeMenu();
@@ -228,9 +228,6 @@ class CommandDeck {
 
     onKeyDown(ev) {
         let keyCaught = false;
-        setTimeout(() => {
-            console.log(this.ref.textContent, ev.key, "++++", this.triggerIdx);
-        }, 0);
         if (this.triggerIdx !== undefined) {
             switch (ev.key) {
                 case 'ArrowDown':
@@ -253,7 +250,6 @@ class CommandDeck {
 
         if (ev.key === "Backspace") {
             setTimeout(() => {
-                console.log(this.ref.textContent, ev.key);
                 if (this.ref.textContent.trim() === "") {
                     activeAgent = false;
                 }

@@ -1,4 +1,3 @@
-//declaring svg icons
 const copyIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path clip-rule="evenodd" d="M6 6L7.5 4.5H15.621L21 9.879V21L19.5 22.5H7.5L6 21V6ZM19.5 10.5L15 6H7.5V21H19.5V10.5Z" />
 <path clip-rule="evenodd" d="M4.5 1.5L3 3V18L4.5 19.5V3H14.121L12.621 1.5H4.5Z" />
@@ -12,7 +11,7 @@ const mergeIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http:/
 </svg>
 `;
 
-const dartIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+const dartIcon = `
 <g clip-path="url(#clip0_1896_4)">
 <path d="M2.44739 9.55215L0.395172 7.49993C0.150814 7.2496 0 6.89595 0 6.55185C0 6.3922 0.0899636 6.14236 0.157973 5.99942L2.05222 2.05176L2.44739 9.55215Z" fill="#01579B"/>
 <path d="M9.47344 2.44739L7.42122 0.395172C7.24201 0.214767 6.86879 0 6.55285 0C6.28128 0 6.01473 0.0546463 5.84268 0.157973L2.05371 2.05222L9.47344 2.44739Z" fill="#40C4FF"/>
@@ -33,7 +32,6 @@ const dartIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xm
 <rect width="12" height="12" fill="white"/>
 </clipPath>
 </defs>
-</svg>
 `;
 
 const dashAI = `<svg width="34" height="29" viewBox="0 0 791 669" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -209,7 +207,7 @@ const activityBarForeground = getComputedStyle(document.documentElement).getProp
 const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
-const loadingContainer = document.getElementById("loading-container");
+// const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
@@ -233,6 +231,9 @@ const executableTick = document.getElementById("executable-tick");
 const executableCross = document.getElementById("executable-cross");
 const onboardingSetup = document.getElementById("onboarding-setup");
 const apiKeyContainer = document.getElementById("apikey-container");
+const workspaceLoader = document.getElementById('workspace-loader');
+const workspaceLoaderText = document.getElementById('workspace-loader-text');
+const questionnaireContainer = document.getElementById("questionaire-container");
 const executableContainer = document.getElementById("executable-container");
 
 //initialising variables
@@ -269,14 +270,17 @@ const SetupStep = {
 const data = [
     {
         "name": "@flutter",
+        "description": "A sample command-line application.",
+        "min_cli_version": "0.0.1",
+        "pk": "9191c011f84343fea4a32dfc0b53a766",
+        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
         "supported_commands": [
             {
-                "slug": "/doc",
                 "intent": "Your Flutter doc expert",
                 "registered_inputs": [
                     {
                         "display_text": "Your query",
-                        "id": "14340369",
+                        "id": "827782934",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
@@ -284,43 +288,47 @@ const data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "897806645",
+                        "id": "184274299",
                         "type": "match_document_output",
                         "version": "0.0.1"
                     },
                     {
-                        "id": "81443790",
+                        "id": "977235258",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
                 ],
+                "slug": "/doc",
                 "steps": [
                     {
                         "data_sources": [
-                            "816647033"
+                            "1052200504"
                         ],
-                        "output": "897806645",
-                        "query": "<14340369>",
+                        "outputs": [
+                            "184274299"
+                        ],
+                        "query": "<827782934>",
                         "type": "search_in_sources",
                         "version": "0.0.1"
                     },
                     {
+                        "outputs": [
+                            "977235258"
+                        ],
+                        "query": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <827782934>\n            \n            References: \n            <184274299>.\n            \n            Please respond to the user's query!\n           **Note**: Please be specific and concise to the user's query and minimise prose",
                         "type": "prompt_query",
-                        "query":
-                            "You are an Flutter expert who answers user's queries related to the framework. \n\n Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n\n Query: <14340369>, \nReferences: <897806645>. Please respond to the user's query!",
-                        "output": "81443790",
-                      },
+                        "version": "0.0.1"
+                    },
                     {
                         "type": "append_to_chat",
-                        "value": "<81443790>",
+                        "value": "<977235258>",
                         "version": "0.0.1"
                     }
                 ],
-                // "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question:"
-                "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question: <14340369>"
+                "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question: <827782934>"
             }
         ],
-        "version": "1.0.0"
+        "version": "1.1.0"
     },
     {
         "name": "@workspace",
@@ -329,52 +337,14 @@ const data = [
                 "slug": "/query",
                 "intent": "Ask me anything",
                 "text_field_layout": "Hi, I'm here to help you. <736841542>",
-                "inputs": [
+                "registered_inputs": [
                     {
                         "id": "736841542",
                         "display_text": "Your query",
                         "type": "string_input",
                     }
                 ],
-                "outputs": [
-                    { "id": "436621806", "type": "default_output" },
-                    { "id": "90611917", "type": "default_output" }
-                ],
-                "steps": [
-                    {
-                        "type": "search_in_workspace",
-                        "query": "<422243666>",
-                        "workspace_object_type": "all",
-                        "workspacePath":
-                            "/Users/fisclouds/Documents/smooth-app/packages/smooth_app/lib/test",
-                        "output": "436621806"
-                    },
-                    {
-                        "type": "prompt_query",
-                        "query":
-                            "Here are the related references from user's project:\n <436621806>. Answer the user's query. Query: <736841542>",
-                        "post_process": { "type": "raw" },
-                        "output": "90611917"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "message": "<90611917>",
-                        "post_process": { "type": "raw" },
-                    }
-                ]
-            },
-            {
-                "slug": "/search",
-                "intent": "Ask me anything",
-                "text_field_layout": "Hi, I'm here to help you. <736841542>",
-                "inputs": [
-                    {
-                        "id": "736841542",
-                        "display_text": "Your query",
-                        "type": "string_input",
-                    }
-                ],
-                "outputs": [
+                "registered_outputs": [
                     { "id": "436621806", "type": "default_output" },
                     { "id": "90611917", "type": "default_output" }
                 ],
@@ -411,7 +381,7 @@ const data = [
                 "intent": "Ask me anything",
                 "text_field_layout":
                     "\nRefactor your code <736841542> <805088184>",
-                "inputs": [
+                "registered_inputs": [
                     {
                         "id": "736841542",
                         "display_text": "Your query",
@@ -424,7 +394,7 @@ const data = [
                         "generate_full_string": true,
                     }
                 ],
-                "outputs": [
+                "registered_outputs": [
                     { "id": "436621806", "type": "default_output" }
                 ],
                 "steps": [
@@ -446,6 +416,37 @@ const data = [
                 ]
             }
         ]
+    }
+];
+
+const questionnaire = [
+    {
+        id: "refactor-code-questionaire",
+        message: "Refactor your code",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson = agentProvider.getInputs("/refactor");
+            agentUIBuilder.buildAgentUI(agentInputsJson);
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<span class="font-bold text-xs">&lt;/&gt;</span>`
+    },
+    {
+        id: "workspace-questionaire",
+        message: "Search files or query your workspace",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson = agentProvider.getInputs("/query");
+            agentUIBuilder.buildAgentUI(agentInputsJson);
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
     }
 ];
 
@@ -498,7 +499,27 @@ const data = [
     agentProvider = new AgentProvider(data);
     agents = [...agentProvider.agents];
     commands = [...agentProvider.commands];
+
+    new Questionnaire(questionnaire, textInput).buildQuestionnaire();
 })();
+
+function workspaceQuestionnaireOnClick() {
+    textInput.textContent = '';
+    const agentUIBuilder = new AgentUIBuilder(textInput);
+    const agentProvider = new AgentProvider(data);
+    agentInputsJson = agentProvider.getInputs("/query");
+    agentUIBuilder.buildAgentUI(agentInputsJson);
+    setTimeout(() => adjustHeight(), 0);
+}
+
+function refactorCodeQuestionnaireOnClick() {
+    textInput.textContent = '';
+    const agentUIBuilder = new AgentUIBuilder(textInput);
+    const agentProvider = new AgentProvider(data);
+    agentInputsJson = agentProvider.getInputs("/refactor");
+    agentUIBuilder.buildAgentUI(agentInputsJson);
+    setTimeout(() => adjustHeight(), 0);
+}
 
 function githubListener() {
     vscode.postMessage({
@@ -509,10 +530,10 @@ function githubListener() {
 function setLoading(isLoading) {
     if (isLoading) {
         bodyContainer.classList.add("hidden");
-        loadingContainer.classList.remove("hidden");
+        // loadingContainer.classList.remove("hidden");
     } else {
         bodyContainer.classList.remove("hidden");
-        loadingContainer.classList.add("hidden");
+        // loadingContainer.classList.add("hidden");
     }
 }
 
@@ -539,14 +560,16 @@ function submitResponse() {
     let prompt = textInput.textContent;
     if (commandEnable) {
         currentActiveSlug = agentInputsJson?.slug;
-        currentActiveAgent = data.find(obj => {
+        const agentObject = data.find(obj => {
             return obj.supported_commands.some(cmd => {
-                return cmd.slugs === currentActiveSlug;
+                return cmd.slug === currentActiveSlug;
             });
         });
+        currentActiveAgent = agentObject.name;
 
-        vscode.postMessage({ type: "agents", value: agentInputsJson });
+        vscode.postMessage({ type: "agents", value: { ...agentInputsJson, agent: currentActiveAgent } });
         commandEnable = false;
+        activeAgent = false;
     } else {
         for (const chip in chipsData) {
             if (prompt.includes(chip)) {
@@ -558,7 +581,7 @@ function submitResponse() {
 
     textInput.textContent = "";
     adjustHeight();
-
+    questionnaireContainer.classList.add("hidden");
 }
 
 function handleSubmit(event) {
@@ -786,7 +809,7 @@ function readTriggeredMessage() {
                     apiKeyCross.classList.add("hidden");
                     apiKeyTick.classList.remove("hidden");
                     googleApiKeyTextInput.classList.add("hidden");
-                    
+
                 }
                 if (!isExecutableDownloadPending) {
                     isExecutableDownloadPending = false;
@@ -879,7 +902,7 @@ function createReferenceChips(references) {
         return;
     }
 
-    chip.innerHTML = `${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
+    chip.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span></svg>`;
     chip.id = chipId;
     chip.setAttribute("contenteditable", "false");
 
@@ -1003,10 +1026,14 @@ function clearChat() {
     responseContainer.innerHTML = "";
     conversationHistory = [];
     loadingIndicator.classList.add("hidden");
+    workspaceLoader.style.display = 'none';
+    workspaceLoaderText.classList.add("hidden");
 
     vscode.postMessage({
         type: "clearChat",
     });
+
+    questionnaireContainer.classList.remove("hidden");
 }
 
 function scrollToBottom() {
@@ -1119,22 +1146,20 @@ function displayMessages() {
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            
+
         } else if (message.role === "user") {
             roleElement.innerHTML = "<strong>You</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message", "inline-flex", "flex-col");
             const agents = document.createElement("div");
             agents.classList.add("inline-flex", "flex-col");
             roleElement.appendChild(agents);
-            agents.innerHTML = `<span class="text-[#497BEF]">${currentActiveAgent ? currentActiveAgent : ""}</span><span class="text-rose-500">${currentActiveSlug ? currentActiveSlug : ""}</span>`;
+            agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            if (message.agent && message.agent?.trim() !== "") {
-                agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
-                agent.textContent = message.agent;
-            }
-            currentActiveAgent = '';
-            currentActiveSlug = '';
+            // if (message.agent && message.agent?.trim() !== "") {
+            //     agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
+            //     agent.textContent = message.agent;
+            // }
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
@@ -1328,7 +1353,6 @@ async function updateValidationList(message) {
         bodyContainer.classList.remove("flex", "flex-col");
         bottomContainer.classList.add("hidden");
         bottomContainer.classList.remove("flex");
-
     }
 }
 

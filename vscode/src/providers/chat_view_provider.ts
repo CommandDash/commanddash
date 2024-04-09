@@ -171,12 +171,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 
         this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
-            if (steps === SetupStep.executable) {
-                this.setupManager.setupExecutable((progress: number) => {
-                    this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
-                });
-            }
+            //TODO: Uncomment while pushing to repo
+            // if (steps === SetupStep.executable) {
+            //     this.setupManager.setupExecutable((progress: number) => {
+            //         this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+            //     });
+            // }
         });
+        // this.setupManager.deleteExecutable();
 
         this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
 
@@ -210,6 +212,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async handleAgents(response: any) {
         const agentResponse = response;
+        console.log('agent response', agentResponse);
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
@@ -224,6 +227,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
             this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
         });
+
         task.onProcessStep('cache', async (message) => {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
@@ -241,7 +245,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         });
 
         const prompt = this.formatPrompt(agentResponse);
-        this._publicConversationHistory.push({ role: 'user', parts: prompt });
+        this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         try {
             const config = vscode.workspace.getConfiguration('fluttergpt');
@@ -309,6 +313,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const commandDeckJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "command-deck", "command-deck.js"));
         const agentUIBuilderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-ui-builder", "agent-ui-builder.js"));
         const agentProviderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-provider", "agent-provider.js"));
+        const questionnaireUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "questionnaire", "questionnaire.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
 
@@ -322,6 +327,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
             .replace(/{{agentUIBuilderUri}}/g, agentUIBuilderUri.toString())
             .replace(/{{agentProviderUri}}/g, agentProviderUri.toString())
+            .replace(/{{questionnaireUri}}/g, questionnaireUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
@@ -379,7 +385,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return new GeminiRepository(apiKey);
     }
 
-    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }> = [];
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
     private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {

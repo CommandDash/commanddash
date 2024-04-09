@@ -115,8 +115,8 @@ export class DartCLIClient {
 
 
   public connect() {
-    this.proc = child_process.spawn(this.executablePath, ['process']);
-    // this.proc = child_process.spawn('dart', ['run', 'path-to-file/commanddash.dart', 'process']);
+    // this.proc = child_process.spawn(this.executablePath, ['process']);
+    this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
     this.proc.stdout.on('data', (data) => {
       const message = JSON.parse(data.toString());

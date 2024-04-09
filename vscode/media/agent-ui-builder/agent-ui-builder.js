@@ -35,10 +35,23 @@ class AgentUIBuilder {
             inputSpan.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]", "string_input", id, "mb-1", "ml-[1px]", "mr-[1px]");
             inputSpan.textContent = '\u200B';
 
+            inputSpan.addEventListener("load", () => console.log('data loaded successfully'));
+
             this.ref.addEventListener('input', (event) => this.onStringInput(event, id));
             this.ref.addEventListener('paste', () => this.onTextPaste(id));
 
             inputContainer.appendChild(inputSpan);
+
+            requestAnimationFrame(() => {
+                const input = document.getElementById(id);
+                input.focus();
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(input);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
 
             return inputContainer;
         }
