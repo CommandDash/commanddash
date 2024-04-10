@@ -252,6 +252,9 @@ class CommandDeck {
             setTimeout(() => {
                 if (this.ref.textContent.trim() === "") {
                     activeAgent = false;
+                    commandEnable = false;
+                    currentActiveAgent = '';
+                    currentActiveSlug = '';
                 }
             }, 0);
         }
