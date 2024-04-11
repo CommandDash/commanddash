@@ -235,6 +235,7 @@ const workspaceLoader = document.getElementById('workspace-loader');
 const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const questionnaireContainer = document.getElementById("questionaire-container");
 const executableContainer = document.getElementById("executable-container");
+const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -708,8 +709,7 @@ function readTriggeredMessage() {
         const message = event.data;
         switch (message.type) {
             case "apiKeyValidation":
-            case "dependencyValidation":
-                updateValidationList(message);
+                updateValidationList(message.value);
                 break;
             case "displayMessages":
                 conversationHistory = message.value;
@@ -764,6 +764,14 @@ function readTriggeredMessage() {
                 const loaderKind = _message['kind'];
                 const loaderMessage = _message['message'];
                 setLoader(loaderKind, loaderMessage);
+                break;
+            case "showValidationLoader":
+                toggleLoader(true);
+                validationLoadingIndicator.classList.remove("hidden");
+                break;
+            case "hideValidationLoader":
+                toggleLoader(false);
+                validationLoadingIndicator.classList.add("hidden");
                 break;
             case 'pendingSteps':
                 const pendingStepsArr = JSON.parse(message.value);
@@ -1048,7 +1056,7 @@ function scrollToBottom() {
 function validateApiKey(apiKey) {
     if (isValidGeminiApiKey(apiKey)) {
         vscode.postMessage({
-            type: "updateApiKey",
+            type: "validate",
             value: apiKey,
         });
     }
@@ -1301,67 +1309,21 @@ function markdownToPlain(input) {
 }
 
 async function updateValidationList(message) {
-    const existingListItem = document.querySelector(`li[data-type="${message.type}"]`);
-
-    if (existingListItem) {
-        existingListItem.textContent = message.value;
-    } else {
-        const listItem = document.createElement('li');
-        listItem.textContent = message.value;
-        listItem.setAttribute('data-type', message.type);
-        if (message.value.includes("invalid") || message.value.includes("not")) {
-            listItem.classList.add("invalid");
-        } else {
-            listItem.classList.add("valid");
-        }
-        validationList.appendChild(listItem);
+    debugger;
+    if (message === "Gemini API Key is invalid") {
+        isApiKeyPending = true;
+        apiKeyCross.classList.remove('hidden');
+        apiKeyTick.classList.add('hidden');
+    } else if (message === "Gemini API Key is valid"){
+        isApiKeyPending = false;
+        apiKeyCross.classList.add('hidden');
+        apiKeyTick.classList.remove('hidden');
+        const geminiAPIKey = googleApiKeyTextInput.value;
+        vscode.postMessage({
+            type: "updateApiKey",
+            value: geminiAPIKey,
+        });
     }
-
-    // Check for specific messages to update flags
-    switch (message.type) {
-        case "apiKeyValidation":
-            isApiKeyValid = message.value === "Gemini API Key is valid";
-            if (!isApiKeyValid) {
-                existingListItem.classList.add("invalid");
-                existingListItem.classList.remove("valid");
-            } else {
-                existingListItem?.classList.add("valid");
-                existingListItem?.classList.remove("invalid");
-            }
-            break;
-        case "dependencyValidation":
-            areDependenciesInstalled = message.value === "All dependencies are installed";
-            if (!areDependenciesInstalled) {
-                existingListItem.classList.add("invalid");
-                existingListItem.classList.remove("valid");
-            } else {
-                existingListItem?.classList.add("valid");
-                existingListItem?.classList.remove("invalid");
-            }
-            break;
-    }
-
-    // Check if both conditions are met, add "All permissions look good"
-    if (isApiKeyValid && areDependenciesInstalled) {
-        bodyContainer.classList.add("flex", "flex-col");
-        // bottomContainer.classList.remove("hidden");
-        // bottomContainer.classList.add("flex");
-        setAPIKeyInSettings();
-
-    } else {
-        // Remove "All permissions look good" item if conditions are not met
-        bodyContainer.classList.remove("flex", "flex-col");
-        bottomContainer.classList.add("hidden");
-        bottomContainer.classList.remove("flex");
-    }
-}
-
-function setAPIKeyInSettings() {
-    const geminiAPIKey = googleApiKeyTextInput.value;
-    vscode.postMessage({
-        type: "updateApiKey",
-        value: geminiAPIKey
-    });
 }
 
 function adjustHeight() {

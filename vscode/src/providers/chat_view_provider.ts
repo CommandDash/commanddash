@@ -141,7 +141,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this.setupManager.setupGithub();
                         break;
                     }
-
+                case "validate":
+                    {
+                        webviewView.webview.postMessage({ type: "showValidationLoader" });
+                        this.aiRepo = this.initGemini(data.value);
+                        await this._validateApiKey(data.value);
+                        webviewView.webview.postMessage({ type: "hideValidationLoader" });
+                        break;
+                    }
             }
         });
 
@@ -169,16 +176,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async _setupManager() {
 
-
         this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
-            //TODO: Uncomment while pushing to repo
-            // if (steps === SetupStep.executable) {
-            //     this.setupManager.setupExecutable((progress: number) => {
-            //         this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
-            //     });
-            // }
+            if (steps === SetupStep.executable) {
+                this.setupManager.setupExecutable((progress: number) => {
+                    this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+                });
+            }
         });
-        // this.setupManager.deleteExecutable();
 
         this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
 
@@ -212,7 +216,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async handleAgents(response: any) {
         const agentResponse = response;
-        console.log('agent response', agentResponse);
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
@@ -264,7 +267,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log("Processing completed: ", response);
         } catch (error) {
             console.error("Processing error: ", error);
-            this._publicConversationHistory.push({role: 'error', parts: JSON.stringify(error)});
+            this._publicConversationHistory.push({ role: 'error', parts: JSON.stringify(error) });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this?._view?.webview?.postMessage({ type: 'hideLoadingIndicator' });
         }
@@ -346,14 +349,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _validateFlutterExtension() {
-        const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
-        if (!dartExt) {
-            this._view?.webview.postMessage({ type: 'dependencyValidation', value: 'All dependencies are not installed' });
-        } else {
-            this._view?.webview.postMessage({ type: 'dependencyValidation', value: 'All dependencies are installed' });
-        }
-    }
 
     private _getChatWebview(webview: vscode.Webview) {
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));

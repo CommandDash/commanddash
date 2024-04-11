@@ -93,7 +93,7 @@ class AgentUIBuilder {
         if (firstCodeInput) {
             const codeInputSpan = document.getElementById(firstCodeInput.id);
             firstCodeInput.value = JSON.stringify(chipsData);
-            codeInputSpan.innerHTML = `${dartIcon}<span class="ml-1">${chipName}</span>`;
+            codeInputSpan.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg><span class="ml-1">${chipName}</span>`;
         }
     }
 }

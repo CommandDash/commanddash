@@ -107,7 +107,7 @@ export class GeminiRepository extends GenerationRepository {
         try {
             const _genAI = new GoogleGenerativeAI(apiKey);
             const model = _genAI.getGenerativeModel({ model: 'gemini-pro' });
-            const result = await model.generateContent('Test message');
+            const result = await model.generateContent('Hi');
             return result.response.text;
         } catch (error) {
             // Check if the error is related to an invalid API key

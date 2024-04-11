@@ -36,7 +36,7 @@
             </div>
         </a>
 
-        <div class="py-3 my-2 px-5 hidden" id="onboarding-setup">
+        <div class="py-3 my-2 px-5" id="onboarding-setup">
             <p class="text-lg font-bold mb-5">Let's get started</span>
             <div class="space-y-4">
                 <div id="github-sign-in-container">
@@ -82,6 +82,9 @@
                                     fill="#CB4343" />
                             </svg>
                         </div>
+                        <dotlottie-player src="{{loadingAnimationUri}}" class="hidden" id="validation-loader"
+                            background="transparent" speed="1" style="width: 50px; height: 50px" direction="1"
+                            playMode="normal" loop autoplay></dotlottie-player>
                     </div>
                     <p class="break-words mb-5">Visit <a class="underline cursor-pointer"
                             href="https://makersuite.google.com/app/apikey">Markesuite by Google</a> and create
@@ -90,7 +93,6 @@
 
                     <input type="text" id="google-api-key-text-input"
                         class="bg-white/[.1] border text-sm block w-full p-2.5 mb-2 rounded-[2px]" required>
-
                 </div>
                 <div id="executable-container">
                     <div class="inline-flex flex-row items-center">
