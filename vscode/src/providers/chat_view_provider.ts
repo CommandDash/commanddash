@@ -276,7 +276,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     private formatPrompt(response: any) {
         let prompt: string = '';
         response?.registered_inputs?.forEach(({ type, value }: { type: string, value: string }) => {
-            if (type === "string_input") {
+            if (type === "string_input" && value) {
                 prompt += value;
             }
             if (type === "code_input") {

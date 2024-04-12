@@ -22,11 +22,12 @@ class AgentUIBuilder {
     }
 
     createInputElement(input) {
-        const { id, display_text, type } = input;
+        const { id, display_text, type, optional } = input;
+        const _optional = optional ? "(O)" : "";
         if (type === "string_input") {
             const inputContainer = document.createElement("span");
             const inputSpan = document.createElement("span");
-            inputContainer.innerHTML = `<span contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">${display_text}</span>`;
+            inputContainer.innerHTML = `<span contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">${_optional} ${display_text}</span>`;
             inputContainer.classList.add("inline-block");
 
             inputSpan.id = id;
@@ -43,14 +44,15 @@ class AgentUIBuilder {
             inputContainer.appendChild(inputSpan);
 
             requestAnimationFrame(() => {
-                const input = document.getElementById(id);
-                input.focus();
-                const selection = window.getSelection();
-                const range = document.createRange();
-                range.selectNodeContents(input);
-                range.collapse(false);
-                selection.removeAllRanges();
-                selection.addRange(range);
+                if (!optional) {
+                    const input = document.getElementById(id);
+                    const selection = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(input);
+                    range.collapse(false);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
             });
 
             return inputContainer;
@@ -64,7 +66,7 @@ class AgentUIBuilder {
             codePlaceholder.contentEditable = "false";
             codePlaceholder.tabIndex = 0;
             codePlaceholder.classList.add("ml-1", "mb-1", "px-[7px]", "inline-flex", "cursor-pointer", "rounded-[4px]", "mt-1", "code_input", "items-center");
-            codePlaceholder.textContent = display_text;
+            codePlaceholder.textContent = `${_optional} ${display_text}`;
             codeContainer.id = "code-container";
             codeContainer.appendChild(codePlaceholder);
 
@@ -89,7 +91,8 @@ class AgentUIBuilder {
     }
 
     onCodeInput(chipsData, chipName) {
-        const firstCodeInput = agentInputsJson.registered_inputs.find(input => input.type === "code_input");
+        const firstCodeInput = agentInputsJson.registered_inputs.find(input => input.type === "code_input" && input.value === undefined);
+
         if (firstCodeInput) {
             const codeInputSpan = document.getElementById(firstCodeInput.id);
             firstCodeInput.value = JSON.stringify(chipsData);

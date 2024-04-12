@@ -863,10 +863,10 @@ function setLoader(loaderKind, loaderMessage) {
         case "message":
             loadingIndicator.classList.add("hidden");
             loadingIndicator.classList.remove("block");
-            // workspaceLoader.style.display = 'flex';
-            // workspaceLoader.classList.remove("animate__slideOutDown");
-            // workspaceLoader.classList.add("animate__slideInUp");
-            // workspaceLoaderText.textContent = loaderMessage;
+            workspaceLoader.style.display = 'flex';
+            workspaceLoader.classList.remove("animate__slideOutDown");
+            workspaceLoader.classList.add("animate__slideInUp");
+            workspaceLoaderText.textContent = loaderMessage;
             sendButton.classList.add("disabled");
             break;
         case "processingFiles":
@@ -1159,9 +1159,9 @@ function displayMessages() {
             roleElement.innerHTML = "<strong>You</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message", "inline-flex", "flex-col");
             const agents = document.createElement("div");
-            agents.classList.add("inline-flex", "flex-col");
+            agents.classList.add("inline-flex", "flex-row");
             roleElement.appendChild(agents);
-            agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500">${message.slug ? message.slug : ""}</span>`;
+            agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
             // if (message.agent && message.agent?.trim() !== "") {
