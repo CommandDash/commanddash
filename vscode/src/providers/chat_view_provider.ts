@@ -150,6 +150,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
+                case "initialized":
+                    {
+                        this._setupManager();
+                        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+                    }
             }
         });
 
@@ -163,13 +168,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         vscode.window.onDidChangeActiveColorTheme(() => {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
-
-        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
-
-        // setting up onboarding setup manager to check the credentails required by user
-        setTimeout(() => {
-            this._setupManager();
-        }, 1000);
 
         logEvent('new-chat-start', { from: 'command-deck' });
 

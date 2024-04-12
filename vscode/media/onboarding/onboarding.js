@@ -611,6 +611,11 @@ const questionnaire = [
     commands = [...agentProvider.commands];
 
     new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+
+    vscode.postMessage({
+        type: "initialized",
+    });
+
 })();
 
 function workspaceQuestionnaireOnClick() {
@@ -1418,7 +1423,6 @@ function markdownToPlain(input) {
 }
 
 async function updateValidationList(message) {
-    debugger;
     if (message === "Gemini API Key is invalid") {
         isApiKeyPending = true;
         apiKeyCross.classList.remove('hidden');
