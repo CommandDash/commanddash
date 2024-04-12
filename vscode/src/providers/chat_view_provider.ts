@@ -13,6 +13,7 @@ import { DartCLIClient } from "../utilities/commanddash-integration/dart-cli-cli
 import { CacheManager } from "../utilities/cache-manager";
 import { handleDiffViewAndMerge } from "../utilities/diff-utils";
 import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manager";
+import { ContextualCodeProvider } from "../utilities/contextual-code";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dashai.chatView";
@@ -279,7 +280,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             if (type === "string_input" && value) {
                 prompt += value;
             }
-            if (type === "code_input") {
+            if (type === "code_input" && value) {
                 const parsedValue = JSON.parse(value);
                 prompt += `\n ${parsedValue?.referenceContent}`;
             }
