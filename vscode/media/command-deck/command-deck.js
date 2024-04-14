@@ -75,14 +75,13 @@ function getCaretCoordinates(element, position) {
 }
 
 class CommandDeck {
-    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn, json, agentUIBuilder) {
+    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn, agentUIBuilder) {
         this.ref = ref;
         this.menuRef = menuRef;
         this.resolveFn = resolveFn;
         this.replaceFn = replaceFn;
         this.menuItemFn = menuItemFn;
         this.options = [];
-        this.json = json;
         this.agentUIBuilder = agentUIBuilder;
 
         this.makeOptions = this.makeOptions.bind(this);
@@ -91,7 +90,6 @@ class CommandDeck {
         this.onInput = this.onInput.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.renderMenu = this.renderMenu.bind(this);
-        this.agentProvider = new AgentProvider(this.json);
 
         this.ref.addEventListener('input', this.onInput);
         this.ref.addEventListener('keydown', this.onKeyDown);
@@ -161,8 +159,9 @@ class CommandDeck {
             } else {
                 this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
-                agentInputsJson = this.agentProvider.getInputs(option);
-                agentUIBuilder.buildAgentUI(agentInputsJson);
+                const agentProvider = new AgentProvider();
+                agentInputsJson = agentProvider.getInputs(option);
+                agentUIBuilder.buildAgentUI();
 
                 this.ref.focus();
                 this.closeMenu();
@@ -255,6 +254,9 @@ class CommandDeck {
                     commandEnable = false;
                     currentActiveAgent = '';
                     currentActiveSlug = '';
+                    data = resetData();
+                    
+                    agentInputsJson = [];
                 }
             }, 0);
         }

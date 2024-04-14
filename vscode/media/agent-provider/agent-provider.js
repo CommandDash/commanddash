@@ -1,10 +1,9 @@
 class AgentProvider {
-  constructor(json) {
+  constructor() {
     this.agents = [];
     this.commands = [];
-    this.json = json;
 
-    this.json.forEach(agent => {
+    data.forEach(agent => {
       if (agent.name.trim().length > 0) {
         this.agents.push(agent.name);
       } else {

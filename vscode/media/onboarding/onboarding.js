@@ -268,7 +268,7 @@ const SetupStep = {
     2: "executable"
 };
 
-const data = [
+let data = [
     {
         "name": "@flutter",
         "description": "A sample command-line application.",
@@ -527,6 +527,7 @@ const data = [
     },
 ];
 
+
 const questionnaire = [
     {
         id: "refactor-code-questionaire",
@@ -534,7 +535,7 @@ const questionnaire = [
         onclick: (_textInput) => {
             _textInput.textContent = '';
             const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider(data);
+            const agentProvider = new AgentProvider();
             agentInputsJson = agentProvider.getInputs("/refactor");
             agentUIBuilder.buildAgentUI(agentInputsJson);
             setTimeout(() => adjustHeight(), 0);
@@ -548,7 +549,7 @@ const questionnaire = [
         onclick: (_textInput) => {
             _textInput.textContent = '';
             const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider(data);
+            const agentProvider = new AgentProvider();
             agentInputsJson = agentProvider.getInputs("/query");
             agentUIBuilder.buildAgentUI(agentInputsJson);
             setTimeout(() => adjustHeight(), 0);
@@ -604,7 +605,7 @@ const questionnaire = [
 
     githubLogin.addEventListener("click", githubListener);
 
-    agentProvider = new AgentProvider(data);
+    agentProvider = new AgentProvider();
     agents = [...agentProvider.agents];
     commands = [...agentProvider.commands];
 
@@ -615,24 +616,6 @@ const questionnaire = [
     });
 
 })();
-
-function workspaceQuestionnaireOnClick() {
-    textInput.textContent = '';
-    const agentUIBuilder = new AgentUIBuilder(textInput);
-    const agentProvider = new AgentProvider(data);
-    agentInputsJson = agentProvider.getInputs("/query");
-    agentUIBuilder.buildAgentUI(agentInputsJson);
-    setTimeout(() => adjustHeight(), 0);
-}
-
-function refactorCodeQuestionnaireOnClick() {
-    textInput.textContent = '';
-    const agentUIBuilder = new AgentUIBuilder(textInput);
-    const agentProvider = new AgentProvider(data);
-    agentInputsJson = agentProvider.getInputs("/refactor");
-    agentUIBuilder.buildAgentUI(agentInputsJson);
-    setTimeout(() => adjustHeight(), 0);
-}
 
 function githubListener() {
     vscode.postMessage({
@@ -666,6 +649,266 @@ function addToolTipsById() {
         content: `Use 'Attach Snippet to Dash' or ${shortCutHints} after selecting the code in editor`,
         theme: "flutter-blue"
     });
+}
+
+function resetData() {
+    return [{
+        "name": "@flutter",
+        "description": "A sample command-line application.",
+        "min_cli_version": "0.0.1",
+        "pk": "9191c011f84343fea4a32dfc0b53a766",
+        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
+        "supported_commands": [
+            {
+                "intent": "Your Flutter doc expert",
+                "registered_inputs": [
+                    {
+                        "display_text": "Your query",
+                        "id": "827782934",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "184274299",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "977235258",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/doc",
+                "steps": [
+                    {
+                        "data_sources": [
+                            "1052200504"
+                        ],
+                        "outputs": [
+                            "184274299"
+                        ],
+                        "query": "<827782934>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "977235258"
+                        ],
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <827782934>\n            \n            References: \n            <184274299>.\n            \n            Please respond to the user's query!\n           **Note**: Please be specific and concise to the user's query and minimise prose",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<977235258>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question: <827782934>"
+            }
+        ],
+        "version": "1.1.0"
+    },
+    {
+        "name": "@workspace",
+        "supported_commands": [
+            {
+                "slug": "/query",
+                "intent": "Ask me anything",
+                "text_field_layout": "Hi, I'm here to help you. <736841542>.",
+                "registered_inputs": [
+                    {
+                        "id": "736841542",
+                        "display_text": "Your query",
+                        "type": "string_input",
+                    }
+                ],
+                "registered_outputs": [
+                    { "id": "436621806", "type": "default_output" },
+                    { "id": "90611917", "type": "default_output" }
+                ],
+                "steps": [
+                    {
+                        "type": "search_in_workspace",
+                        "query": "<422243666>",
+                        "workspace_object_type": "all",
+                        "outputs": ["436621806"]
+                    },
+                    {
+                        "type": "prompt_query",
+                        "prompt":
+                            "Here are the related references from user's project:\n <436621806>. Answer the user's query. Query: <736841542>.",
+                        "post_process": { "type": "raw" },
+                        "outputs": ["90611917"]
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<90611917>",
+                        "post_process": { "type": "raw" },
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "",
+        "supported_commands": [
+            {
+                "slug": "/refactor",
+                "intent": "Ask me anything",
+                "text_field_layout":
+                    "\nRefactor your code <736841542> <805088184>",
+                "registered_inputs": [
+                    {
+                        "id": "736841542",
+                        "display_text": "Your query",
+                        "type": "string_input",
+                    },
+                    {
+                        "id": "805088184",
+                        "display_text": "Code Attachment",
+                        "type": "code_input",
+                        "generate_full_string": true,
+                    }
+                ],
+                "registered_outputs": [
+                    { "id": "436621806", "type": "default_output" }
+                ],
+                "steps": [
+                    {
+                        "type": "prompt_query",
+                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\nModification instructions from user: <736841542> .\n\nPlease find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n <805088184> \n\n" +
+                            "Proceed step by step: 1. Describe the selected piece of code.\n2. What are the possible optimizations?\n3. How do you plan to achieve that ? [Dont output code yet]\n4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.\nSince this is without human review, you need to output the precise CURSOR_SELECTION" +
+                            " IMPORTANT NOTE: Please make sure to output the modified code in a single code block." +
+                            "Do not just give explanation prose but also give the final code at last.",
+                        "post_process": { "type": "code" },
+                        "outputs": ["436621806"]
+                    },
+                    {
+                        "type": "replace_in_file",
+                        "query": "<436621806>",
+                        "replaceInFile": "805088184",
+                        "continue_if_declined": true,
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "description": "A sample command-line application.",
+        "min_cli_version": "0.0.1",
+        "name": "@test",
+        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
+        "supported_commands": [
+            {
+                "intent": "Generate unit test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Additional Details",
+                        "id": "532854029",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Testable code",
+                        "id": "686996455",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing References",
+                        "id": "182018511",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "932964762",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/unit",
+                "steps": [
+                    {
+                        "outputs": [
+                            "932964762"
+                        ],
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\n            Generate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n            ```dart\n            <686996455>\n            ```\n\n            Important instructions shared below:\n            <532854029>\n\n            Please find additional references that you can use to generate unit tests as well:\n            ```dart\n            <182018511>\n            ```\n            ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<932964762>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating unit test. \nCode: <686996455> \nAdditional Details[Optional] <532854029> \nReference[Optional]: <182018511>"
+            },
+            {
+                "intent": "Generate widget test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Additional Details",
+                        "id": "113190543",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Testable code",
+                        "id": "943720337",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing References",
+                        "id": "653547540",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "71397614",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/widget",
+                "steps": [
+                    {
+                        "outputs": [
+                            "71397614"
+                        ],
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\n            Generate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n            ```dart\n            <943720337>\n            ```\n\n            Important instructions shared below:\n            <113190543>\n\n            Please find additional references that you can use to generate unit tests as well:\n            ```dart\n            <653547540>\n            ```\n            ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<71397614>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating widget test. \nCode: <943720337> \nAdditional Details[Optional] <113190543> \nReference[Optional]: <653547540>"
+            }
+        ],
+        "version": "1.0.0"
+    },
+    ];
 }
 
 function submitResponse() {
