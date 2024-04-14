@@ -222,7 +222,7 @@ export class DartCLIClient {
       });
 
       this.eventEmitter.once(`error_${id}`, (response) => {
-        reject(response);
+        reject(Error(response['message']));
       });
 
       console.log(requestPayload);

@@ -234,6 +234,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
         });
+        task.onProcessStep('workspace_details', async (message) => {
+            const workspaceFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
+            if (!workspaceFolder) {
+                task.sendStepResponse(message, { path: null });
+                return;
+            }
+            task.sendStepResponse(message, { path: workspaceFolder.uri.fsPath });
+        });
+        
         task.onProcessStep('replace_in_file', async (message) => {
             const { originalCode, path, optimizedCode } = message.params.args.file;
             const editor = vscode.window.activeTextEditor;
@@ -266,7 +275,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log("Processing completed: ", response);
         } catch (error) {
             console.error("Processing error: ", error);
-            this._publicConversationHistory.push({ role: 'error', parts: JSON.stringify(error) });
+            this._publicConversationHistory.push({ role: 'error', parts: error instanceof Error ? (error as Error).message : (error as any).toString() });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this?._view?.webview?.postMessage({ type: 'hideLoadingIndicator' });
         }
@@ -397,8 +406,17 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         // Initialize conversation history if it's the first time
         if (this._privateConversationHistory.length === 0) {
             this._privateConversationHistory.push(
-                { role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response from you must be STRICTLY under 8192 characters. DO NOT MENTION EXTRA DETAILS APART FROMT THE QUERY ASKED BY THE USER.\n\n" },
-                { role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response of mine will be STRICTLY under 8192 characters. How can I help you?\n\n" }
+
+
+                {
+                    role: 'user', parts: `You are a Flutter/Dart coding assistant specializing in providing well-formatted, production-ready code. Here is what I can do with you:
+
+                1. I can ask you to complete Flutter coding tasks by attaching multiple code snippets from different files in you inline chat by selecting the code and choosing "Attach Snippet to Dash" from the right click menu. With full context provided, you will generate accurate responses with well-formatted code snippets.
+                
+                2. You offer specialized agents for specific tasks. I can initialize an agent by typing "@" followed by the agent's name. Each agent has its own set of slash commands for specific tasks.
+                
+                If I greet you or ask you what you can do for me, tell me about the above abilities. Be concise and don't hallucinate about the agents.`},
+                { role: 'model', parts: "Noted, I will be responding as per your instructions. Let's get started." }
             );
         }
         let workspacePrompt = "";
@@ -437,6 +455,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 this._privateConversationHistory.push({ role: 'user', parts: prompt });
                 this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
             }
+
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
@@ -446,10 +465,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         } catch (error) {
             console.error(error);
-            const response = error instanceof Error ? error.message : 'An unexpected error occurred.';
             logError('command-deck-conversation-error', error);
-            this._view?.webview.postMessage({ type: 'displaySnackbar', value: response });
-            this._view?.webview.postMessage({ type: 'addResponse', value: '' });
+            this._publicConversationHistory.push({ role: 'error', parts: error instanceof Error ? (error as Error).message : (error as any).toString() });
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         } finally {
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
             this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });

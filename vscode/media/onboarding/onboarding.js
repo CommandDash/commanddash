@@ -337,7 +337,7 @@ const data = [
             {
                 "slug": "/query",
                 "intent": "Ask me anything",
-                "text_field_layout": "Hi, I'm here to help you. <736841542>. <736841543>",
+                "text_field_layout": "Hi, I'm here to help you. <736841542>.",
                 "registered_inputs": [
                     {
                         "id": "736841542",
@@ -354,8 +354,6 @@ const data = [
                         "type": "search_in_workspace",
                         "query": "<422243666>",
                         "workspace_object_type": "all",
-                        "workspacePath":
-                            "/Users/keval/Desktop/dev/welltested/projects/dart_files",
                         "outputs": ["436621806"]
                     },
                     {
@@ -1307,8 +1305,7 @@ function displayMessages() {
             roleElement.innerHTML = "<strong class='text-white'>Error</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-red-700");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-red-700", "text-white");
-            const error = JSON.parse(message.parts);
-            contentElement.innerHTML = markdownToPlain(error.message);
+            contentElement.innerHTML = markdownToPlain(message.parts);
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(roleElement);
