@@ -236,6 +236,7 @@ const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const questionnaireContainer = document.getElementById("questionaire-container");
 const executableContainer = document.getElementById("executable-container");
 const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
+const googleApiKeyError = document.getElementById("google-api-key-error");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -1094,7 +1095,14 @@ function readTriggeredMessage() {
                 break;
             case 'addToReference':
                 removePlaceholder();
-                createReferenceChips(JSON.parse(message.value));
+                createReferenceChips(JSON.parse(message.value), false);
+                setTimeout(() =>
+                    adjustHeight(),
+                    0);
+                break;
+            case 'commandActionRefactor':
+                removePlaceholder();
+                createReferenceChips(JSON.parse(message.value), true);
                 setTimeout(() =>
                     adjustHeight(),
                     0);
@@ -1256,7 +1264,7 @@ function allStepsCompleted() {
         modelCount = 3;
     }
 }
-function createReferenceChips(references) {
+function createReferenceChips(references, commandAction) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
@@ -1272,7 +1280,18 @@ function createReferenceChips(references) {
     chipsData = { ...chipsData, [chipId]: references };
     if (commandEnable) {
         agentBuilder?.onCodeInput(references, chipId);
-        // insertAtReference(chip);
+        
+    } else if (commandAction) {
+
+        textInput.textContent = '';
+        const agentProvider = new AgentProvider();
+        agentInputsJson = agentProvider.getInputs("/refactor");
+        
+        const agentUIBuilder = new AgentUIBuilder(textInput);
+        agentUIBuilder.buildAgentUI(agentInputsJson);
+
+        agentUIBuilder?.onCodeInput(references, chipId);
+
     } else {
         insertChipAtCursor(chip, textInput);
     }
@@ -1667,6 +1686,7 @@ async function updateValidationList(message) {
         isApiKeyPending = true;
         apiKeyCross.classList.remove('hidden');
         apiKeyTick.classList.add('hidden');
+        googleApiKeyError.textContent = "Error: Gemini API Key is invalid";
     } else if (message === "Gemini API Key is valid") {
         isApiKeyPending = false;
         apiKeyCross.classList.add('hidden');
@@ -1676,6 +1696,7 @@ async function updateValidationList(message) {
             type: "updateApiKey",
             value: geminiAPIKey,
         });
+        googleApiKeyError.textContent = "";
     }
 }
 
