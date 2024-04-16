@@ -9,7 +9,7 @@ class AgentUIBuilder {
     }
 
     buildAgentUI() {
-        const { text_field_layout, registered_inputs, slug } = agentInputsJson;
+        const { text_field_layout, registered_inputs, slug } = agentInputsJson[0];
         let textHtml = text_field_layout;
         registered_inputs.forEach(input => {
             const inputElement = this.createInputElement(input);
@@ -83,15 +83,15 @@ class AgentUIBuilder {
         const sel = window.getSelection();
         const inputSpan = document.getElementById(id);
         if (event.target === inputSpan || (sel.anchorNode && sel.anchorNode.parentNode && sel.anchorNode.parentNode.classList.contains(id))) {
-            const inputIndex = agentInputsJson.registered_inputs.findIndex(_input => _input.id === id);
+            const inputIndex = agentInputsJson[0].registered_inputs.findIndex(_input => _input.id === id);
             if (inputIndex !== -1) {
-                agentInputsJson.registered_inputs[inputIndex].value = inputSpan.textContent.trim();
+                agentInputsJson[0].registered_inputs[inputIndex].value = inputSpan.textContent.trim();
             }
         }
     }
 
     onCodeInput(chipsData, chipName) {
-        const firstCodeInput = agentInputsJson.registered_inputs.find(input => input.type === "code_input" && input.value === undefined);
+        const firstCodeInput = agentInputsJson[0].registered_inputs.find(input => input.type === "code_input" && input.value === undefined);
 
         if (firstCodeInput) {
             const codeInputSpan = document.getElementById(firstCodeInput.id);

@@ -159,8 +159,9 @@ class CommandDeck {
             } else {
                 this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
-                const agentProvider = new AgentProvider();
-                agentInputsJson = agentProvider.getInputs(option);
+                const agentProvider = new AgentProvider(data);
+                // agentInputsJson = agentProvider.getInputs(option);
+                agentInputsJson.push(agentProvider.getInputs(option));
                 agentUIBuilder.buildAgentUI();
 
                 this.ref.focus();
@@ -254,9 +255,7 @@ class CommandDeck {
                     commandEnable = false;
                     currentActiveAgent = '';
                     currentActiveSlug = '';
-                    data = resetData();
-                    
-                    agentInputsJson = [];
+                    agentInputsJson.length = 0;
                 }
             }, 0);
         }

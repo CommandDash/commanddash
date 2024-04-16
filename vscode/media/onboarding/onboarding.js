@@ -250,7 +250,7 @@ let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
 let agentProvider = null;
-let agentInputsJson = [];
+const agentInputsJson = [];
 let currentActiveAgent = '';
 let currentActiveSlug = '';
 let isGithubLoginPending = false;
@@ -260,16 +260,13 @@ let isExecutableDownloadPending = false;
 //initialising visual studio code library
 let vscode = null;
 
-let agents = [];
-let commands = [];
-
 const SetupStep = {
     0: "github",
     1: "apiKey",
     2: "executable"
 };
 
-let data = [
+let data = Object.freeze([
     {
         "name": "@flutter",
         "description": "A sample command-line application.",
@@ -526,7 +523,7 @@ let data = [
         ],
         "version": "1.0.0"
     },
-];
+]);
 
 
 const questionnaire = [
@@ -536,9 +533,9 @@ const questionnaire = [
         onclick: (_textInput) => {
             _textInput.textContent = '';
             const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider();
-            agentInputsJson = agentProvider.getInputs("/refactor");
-            agentUIBuilder.buildAgentUI(agentInputsJson);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/refactor"));
+            agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
         },
@@ -550,9 +547,9 @@ const questionnaire = [
         onclick: (_textInput) => {
             _textInput.textContent = '';
             const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider();
-            agentInputsJson = agentProvider.getInputs("/query");
-            agentUIBuilder.buildAgentUI(agentInputsJson);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
         },
@@ -605,10 +602,6 @@ const questionnaire = [
     textInput.addEventListener("drop", drop);
 
     githubLogin.addEventListener("click", githubListener);
-
-    agentProvider = new AgentProvider();
-    agents = [...agentProvider.agents];
-    commands = [...agentProvider.commands];
 
     new Questionnaire(questionnaire, textInput).buildQuestionnaire();
 
@@ -916,7 +909,7 @@ function submitResponse() {
     toggleLoader(true);
     let prompt = textInput.textContent;
     if (commandEnable) {
-        currentActiveSlug = agentInputsJson?.slug;
+        currentActiveSlug = agentInputsJson[0]?.slug;
         const agentObject = data.find(obj => {
             return obj.supported_commands.some(cmd => {
                 return cmd.slug === currentActiveSlug;
@@ -924,10 +917,10 @@ function submitResponse() {
         });
         currentActiveAgent = agentObject.name;
 
-        vscode.postMessage({ type: "agents", value: { ...agentInputsJson, agent: currentActiveAgent } });
+        vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent } });
         commandEnable = false;
         activeAgent = false;
-    } else {
+    } else if (prompt.length > 1) {
         for (const chip in chipsData) {
             if (prompt.includes(chip)) {
                 prompt = prompt.replace(chip, chipsData[chip].referenceContent);
@@ -949,9 +942,9 @@ function handleSubmit(event) {
         // When triggered with @
         if (type === 'at') {
             if (query.length === 0) {
-                matchingItems = agents;
+                matchingItems = getAgents();
             } else {
-                matchingItems = agents.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = getAgents().filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -959,7 +952,7 @@ function handleSubmit(event) {
         else if (type === 'slash') {
             // If no agent selected yet
             if (!activeAgent) {
-                matchingItems = query.length === 0 ? commands : commands.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = query.length === 0 ? getCommands() : getCommands().filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
             } else {
                 const agentSlugs = data.find(item => item.name === currentActiveAgent);
                 const slugs = agentSlugs.supported_commands.map(command => command.slug);
@@ -1029,6 +1022,29 @@ function handleSubmit(event) {
         // Redirect editing focus to the parent p tag
         target.parentNode.focus();
     }
+}
+
+function getAgents() {
+    const agents = [];
+    data.forEach(agent => {
+        if (agent.name.trim().length > 0) {
+            agents.push(agent.name);
+        }
+    });
+
+    return agents;
+}
+
+function getCommands() {
+    const commands = [];
+    data.forEach(agent => {
+        if (agent.name.trim().length === 0) {
+            agent.supported_commands.forEach(_commands => {
+                commands.push(_commands.slug);
+            });
+        }
+    });
+    return commands;
 }
 
 function setCaretToEnd(target) {
@@ -1280,15 +1296,15 @@ function createReferenceChips(references, commandAction) {
     chipsData = { ...chipsData, [chipId]: references };
     if (commandEnable) {
         agentBuilder?.onCodeInput(references, chipId);
-        
+
     } else if (commandAction) {
 
         textInput.textContent = '';
-        const agentProvider = new AgentProvider();
-        agentInputsJson = agentProvider.getInputs("/refactor");
-        
+        const agentProvider = new AgentProvider(data);
+        agentInputsJson.push(agentProvider.getInputs("/refactor"));
+
         const agentUIBuilder = new AgentUIBuilder(textInput);
-        agentUIBuilder.buildAgentUI(agentInputsJson);
+        agentUIBuilder.buildAgentUI();
 
         agentUIBuilder?.onCodeInput(references, chipId);
 

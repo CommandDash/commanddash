@@ -1,27 +1,15 @@
 class AgentProvider {
-  constructor() {
-    this.agents = [];
-    this.commands = [];
-
-    data.forEach(agent => {
-      if (agent.name.trim().length > 0) {
-        this.agents.push(agent.name);
-      } else {
-        agent.supported_commands.forEach(commands => {
-          this.commands.push(commands.slug);
-        });
-      }
-    });
+  constructor(json) {
+    this.json = json;
   }
-
   getInputs(inputString) {
-    for (const item of data) {
+    for (const item of this.json) {
       for (const command of item.supported_commands) {
         if (command.slug === inputString) {
-          return command;
+          return JSON.parse(JSON.stringify(command));
         }
       }
     }
-    return []; // Return null if no matching slug is found
+    return [];
   }
 }
