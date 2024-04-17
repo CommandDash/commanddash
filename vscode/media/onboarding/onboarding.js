@@ -268,18 +268,17 @@ const SetupStep = {
 
 let data = Object.freeze([
     {
-        "name": "@flutter",
-        "description": "A sample command-line application.",
+        "description": "Get Flutter specific help like asking questions across documentation.",
         "min_cli_version": "0.0.1",
-        "pk": "9191c011f84343fea4a32dfc0b53a766",
+        "name": "@flutter",
         "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
         "supported_commands": [
             {
-                "intent": "Your Flutter doc expert",
+                "intent": "Ask across Flutter docs",
                 "registered_inputs": [
                     {
-                        "display_text": "Your query",
-                        "id": "827782934",
+                        "display_text": "Query",
+                        "id": "574080592",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
@@ -287,12 +286,12 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "184274299",
+                        "id": "1061920203",
                         "type": "match_document_output",
                         "version": "0.0.1"
                     },
                     {
-                        "id": "977235258",
+                        "id": "611475404",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -301,30 +300,30 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "data_sources": [
-                            "1052200504"
+                            "1065294335"
                         ],
                         "outputs": [
-                            "184274299"
+                            "1061920203"
                         ],
-                        "query": "<827782934>",
+                        "query": "<574080592>",
                         "type": "search_in_sources",
                         "version": "0.0.1"
                     },
                     {
                         "outputs": [
-                            "977235258"
+                            "611475404"
                         ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <827782934>\n            \n            References: \n            <184274299>.\n            \n            Please respond to the user's query!\n           **Note**: Please be specific and concise to the user's query and minimise prose",
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <574080592>\n            \n            References: \n            <1061920203>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and on point with your responses and include code snippets wherever required.",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<977235258>",
+                        "value": "<611475404>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question: <827782934>"
+                "text_field_layout": "Hi! Ask me anything from Flutter docs: <574080592>"
             }
         ],
         "version": "1.1.0"
@@ -425,21 +424,35 @@ let data = Object.freeze([
                 "registered_inputs": [
                     {
                         "display_text": "Additional Details",
-                        "id": "532854029",
+                        "id": "498215150",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Testable code",
-                        "id": "686996455",
+                        "id": "463948597",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing References",
-                        "id": "182018511",
+                        "display_text": "Existing Reference",
+                        "id": "706044548",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "590143637",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "348147042",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -447,7 +460,7 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "932964762",
+                        "id": "881697164",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -456,40 +469,54 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "932964762"
+                            "881697164"
                         ],
-                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\n            Generate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n            ```dart\n            <686996455>\n            ```\n\n            Important instructions shared below:\n            <532854029>\n\n            Please find additional references that you can use to generate unit tests as well:\n            ```dart\n            <182018511>\n            ```\n            ",
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<463948597>\n```\n\nImportant instructions shared below:\n<498215150>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<706044548>\n\n// Reference 2\n<590143637>\n\n// Reference 3\n<348147042>\n```\n\nSharing unit test template that you can use to generate unit test:\n```dart\nimport 'university_remote_data_source_test.mocks.dart';\n\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n    late UniversityEndpoint endpoint;\n    late UniversityRemoteDataSource dataSource;\n\n    group(\"Test function calls\", () {\n        setUp(() {\n            endpoint = MockUniversityEndpoint();\n            dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n        });\n\n        test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n            when(endpoint.getUniversitiesByCountry(\"test\"))\n                    .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n            dataSource.getUniversitiesByCountry(\"test\");\n            verify(endpoint.getUniversitiesByCountry(\"test\"));\n        });\n\n        test('Test dataSource maps getUniversitiesByCountry response to Stream',\n                () {\n            when(endpoint.getUniversitiesByCountry(\"test\"))\n                    .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n            expect(\n                dataSource.getUniversitiesByCountry(\"test\"),\n                emitsInOrder([\n                    const AppResult<List<University>>.loading(),\n                    const AppResult<List<University>>.data([])\n                ]),\n            );\n        });\n\n        test(\n                'Test dataSource maps getUniversitiesByCountry response to Stream with error',\n                () {\n            ApiError mockApiError = ApiError(\n                statusCode: 400,\n                message: \"error\",\n                errors: null,\n            );\n            when(endpoint.getUniversitiesByCountry(\"test\"))\n                    .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n            expect(\n                dataSource.getUniversitiesByCountry(\"test\"),\n                emitsInOrder([\n                    const AppResult<List<University>>.loading(),\n                    AppResult<List<University>>.apiError(mockApiError)\n                ]),\n            );\n        });\n    });\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability\n2. State any assumption made or libraries used while creating unit tests\n3. Brief about the test cases considered while generating code and how they are helping in generating a full code coverage\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<932964762>",
+                        "value": "<881697164>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating unit test. \nCode: <686996455> \nAdditional Details[Optional] <532854029> \nReference[Optional]: <182018511>"
+                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating unit test. \nCode: <463948597> \nAdditional Details[Optional] <498215150> \nReference 1[Optional]: <706044548> \nReference 2[Optional]: <590143637> \nReference 3[Optional]: <348147042>"
             },
             {
                 "intent": "Generate widget test",
                 "registered_inputs": [
                     {
                         "display_text": "Additional Details",
-                        "id": "113190543",
+                        "id": "25429804",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Testable code",
-                        "id": "943720337",
+                        "id": "946845793",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing References",
-                        "id": "653547540",
+                        "display_text": "Existing Reference",
+                        "id": "845537218",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "988215821",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "986488799",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -497,7 +524,7 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "71397614",
+                        "id": "582246780",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -506,23 +533,23 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "71397614"
+                            "582246780"
                         ],
-                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\n            Generate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n            ```dart\n            <943720337>\n            ```\n\n            Important instructions shared below:\n            <113190543>\n\n            Please find additional references that you can use to generate unit tests as well:\n            ```dart\n            <653547540>\n            ```\n            ",
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<946845793>\n```\n\nImportant instructions shared below:\n<25429804>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<845537218>\n\n// Reference 2\n<988215821>\n\n// Reference 3\n<986488799>\n```\n\nSharing widget test template that you can use to generate widget test:\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability\n2. State any assumption made while creating widget tests\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<71397614>",
+                        "value": "<582246780>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating widget test. \nCode: <943720337> \nAdditional Details[Optional] <113190543> \nReference[Optional]: <653547540>"
+                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating widget test. \nCode: <946845793> \nAdditional Details[Optional] <25429804> \nReference 1[Optional]: <845537218> \nReference 2[Optional]: <988215821> \nReference 3[Optional]: <986488799>"
             }
         ],
-        "version": "1.0.0"
-    },
+        "version": "1.1.0"
+    }
 ]);
 
 
