@@ -944,7 +944,7 @@ function submitResponse() {
         });
         currentActiveAgent = agentObject.name;
 
-        vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent } });
+        vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
         commandEnable = false;
         activeAgent = false;
     } else if (prompt.length > 1) {
@@ -982,7 +982,7 @@ function handleSubmit(event) {
                 matchingItems = query.length === 0 ? getCommands() : getCommands().filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             } else {
                 const agentSlugs = data.find(item => item.name === currentActiveAgent);
-                const slugs = agentSlugs.supported_commands.map(command => ({name: command.slug}));
+                const slugs = agentSlugs.supported_commands.map(command => ({ name: command.slug }));
                 matchingItems = slugs.filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
@@ -1067,7 +1067,7 @@ function getCommands() {
     data.forEach(agent => {
         if (agent.name.trim().length === 0) {
             agent.supported_commands.forEach(_commands => {
-                commands.push({name: _commands.slug});
+                commands.push({ name: _commands.slug });
             });
         }
     });

@@ -270,6 +270,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         "githubToken": ""
                     },
                     ...agentResponse,
+                    agent_name: (agentResponse['agent'] as string).substring(1) // remove the '@'
                 }
             });
             console.log("Processing completed: ", response);
