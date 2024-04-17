@@ -124,27 +124,27 @@ class CommandDeck {
     selectItem(active) {
         return () => {
             const option = this.options[active];
-            if (!option.startsWith('/')) {
+            if (!option?.name.startsWith('/')) {
                 this.ref.textContent = '';
             }
-            if (option.startsWith('/')) {
+            if (option?.name.startsWith('/')) {
                 const textContent = this.ref.innerHTML;
                 const atIndex = textContent.lastIndexOf('/');
                 this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
             }
-            if (option.startsWith('@')) {
+            if (option?.name.startsWith('@')) {
                 const agentSpan = document.createElement('span');
                 const slugSpan = document.createElement('span');
                 agentSpan.classList.add("inline-block", "text-[#287CEB]");
                 agentSpan.contentEditable = false;
-                agentSpan.textContent = `${option}\u00A0`;
+                agentSpan.textContent = `${option?.name}\u00A0`;
                 slugSpan.classList.add("inline-block");
                 slugSpan.contentEditable = false;
                 slugSpan.textContent = "/";
                 this.ref.appendChild(agentSpan);
                 this.ref.appendChild(slugSpan);
                 activeAgent = true;
-                currentActiveAgent = option;
+                currentActiveAgent = option.name;
                 // this.closeMenu();
                 this.makeOptions("/");
                 // Move the cursor to the end of the word
@@ -161,7 +161,7 @@ class CommandDeck {
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
                 const agentProvider = new AgentProvider(data);
                 // agentInputsJson = agentProvider.getInputs(option);
-                agentInputsJson.push(agentProvider.getInputs(option));
+                agentInputsJson.push(agentProvider.getInputs(option.name));
                 agentUIBuilder.buildAgentUI();
 
                 this.ref.focus();

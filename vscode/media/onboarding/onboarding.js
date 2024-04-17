@@ -944,7 +944,7 @@ function handleSubmit(event) {
             if (query.length === 0) {
                 matchingItems = getAgents();
             } else {
-                matchingItems = getAgents().filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = getAgents().filter(item => item.name?.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -952,11 +952,11 @@ function handleSubmit(event) {
         else if (type === 'slash') {
             // If no agent selected yet
             if (!activeAgent) {
-                matchingItems = query.length === 0 ? getCommands() : getCommands().filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = query.length === 0 ? getCommands() : getCommands().filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             } else {
                 const agentSlugs = data.find(item => item.name === currentActiveAgent);
-                const slugs = agentSlugs.supported_commands.map(command => command.slug);
-                matchingItems = slugs.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                const slugs = agentSlugs.supported_commands.map(command => ({name: command.slug}));
+                matchingItems = slugs.filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -973,7 +973,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action}`;
+        div.textContent = `${action.name} - ${action.description}`;
         div.onclick = setItem;
         return div;
     };
@@ -1028,7 +1028,7 @@ function getAgents() {
     const agents = [];
     data.forEach(agent => {
         if (agent.name.trim().length > 0) {
-            agents.push(agent.name);
+            agents.push({ name: agent.name, description: agent.description });
         }
     });
 
@@ -1040,7 +1040,7 @@ function getCommands() {
     data.forEach(agent => {
         if (agent.name.trim().length === 0) {
             agent.supported_commands.forEach(_commands => {
-                commands.push(_commands.slug);
+                commands.push({name: _commands.slug});
             });
         }
     });
