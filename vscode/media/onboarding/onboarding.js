@@ -968,7 +968,7 @@ function handleSubmit(event) {
     const menuItemFn = (action, setItem, selected, trigger) => {
         const div = document.createElement('div');
         div.setAttribute('role', 'option');
-        div.className = `menu-item ${trigger === '@' ? 'text-blue-500' : 'text-rose-500'}`;
+        div.className = `menu-item ${action?.name?.startsWith('@') ? 'text-blue-500' : 'text-rose-500'}`;
         if (selected) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
