@@ -36,8 +36,6 @@ class AgentUIBuilder {
             inputSpan.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]", "string_input", id, "mb-1", "ml-[1px]", "mr-[1px]");
             inputSpan.textContent = '\u200B';
 
-            inputSpan.addEventListener("load", () => console.log('data loaded successfully'));
-
             this.ref.addEventListener('input', (event) => this.onStringInput(event, id));
             this.ref.addEventListener('paste', () => this.onTextPaste(id));
 
@@ -62,6 +60,8 @@ class AgentUIBuilder {
             const codeContainer = document.createElement("span");
             const codePlaceholder = document.createElement("span");
 
+            codeContainer.classList.add("code-input-container");
+
             codePlaceholder.id = id;
             codePlaceholder.contentEditable = "false";
             codePlaceholder.tabIndex = 0;
@@ -70,6 +70,8 @@ class AgentUIBuilder {
             codeContainer.id = "code-container";
             codeContainer.appendChild(codePlaceholder);
 
+            this.ref.addEventListener("click", (event) => this.onCodeInputClick(event, id));
+
             return codeContainer;
         }
     }
@@ -77,6 +79,14 @@ class AgentUIBuilder {
     onTextPaste(id) {
         const inputSpan = document.getElementById(id);
         inputSpan.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    onCodeInputClick(event, id) {
+        
+        const _id = event.target.closest(".code_input").id;
+        if (_id === id) {
+            codeInputId = id;
+        }
     }
 
     onStringInput(event, id) {
@@ -91,12 +101,13 @@ class AgentUIBuilder {
     }
 
     onCodeInput(chipsData, chipName) {
-        const firstCodeInput = agentInputsJson[0].registered_inputs.find(input => input.type === "code_input" && input.value === undefined);
+        const firstCodeInput = agentInputsJson[0].registered_inputs.find(input => input.type === "code_input" && (input.id === codeInputId || input.value === undefined));
 
         if (firstCodeInput) {
             const codeInputSpan = document.getElementById(firstCodeInput.id);
             firstCodeInput.value = JSON.stringify(chipsData);
-            codeInputSpan.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg><span class="ml-1">${chipName}</span>`;
+            codeInputSpan.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg><span class="ml-1" id="${firstCodeInput.id}">${chipName}</span>`;
+            codeInputId = 0;
         }
     }
 }

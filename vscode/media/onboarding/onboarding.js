@@ -250,12 +250,14 @@ let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
 let agentProvider = null;
-const agentInputsJson = [];
 let currentActiveAgent = '';
 let currentActiveSlug = '';
 let isGithubLoginPending = false;
 let isApiKeyPending = false;
 let isExecutableDownloadPending = false;
+let codeInputId = 0;
+
+const agentInputsJson = [];
 
 //initialising visual studio code library
 let vscode = null;
@@ -947,6 +949,7 @@ function submitResponse() {
         vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
         commandEnable = false;
         activeAgent = false;
+        agentInputsJson.length = 0;
     } else if (prompt.length > 1) {
         for (const chip in chipsData) {
             if (prompt.includes(chip)) {
@@ -1145,10 +1148,12 @@ function readTriggeredMessage() {
                 break;
             case 'commandActionRefactor':
                 removePlaceholder();
+                
                 createReferenceChips(JSON.parse(message.value), true);
+
                 setTimeout(() =>
                     adjustHeight(),
-                    0);
+                0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -1307,7 +1312,7 @@ function allStepsCompleted() {
         modelCount = 3;
     }
 }
-function createReferenceChips(references, commandAction) {
+function createReferenceChips(references, isCommandAction) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
@@ -1321,19 +1326,20 @@ function createReferenceChips(references, commandAction) {
     chip.setAttribute("contenteditable", "false");
 
     chipsData = { ...chipsData, [chipId]: references };
-    if (commandEnable) {
+    if (commandEnable && !isCommandAction) {
         agentBuilder?.onCodeInput(references, chipId);
-
-    } else if (commandAction) {
-
+    } else if (isCommandAction) {
         textInput.textContent = '';
+        agentInputsJson.length = 0;
         const agentProvider = new AgentProvider(data);
         agentInputsJson.push(agentProvider.getInputs("/refactor"));
 
         const agentUIBuilder = new AgentUIBuilder(textInput);
         agentUIBuilder.buildAgentUI();
-
         agentUIBuilder?.onCodeInput(references, chipId);
+
+        setTimeout(() => adjustHeight(), 0);
+        commandEnable = true;
 
     } else {
         insertChipAtCursor(chip, textInput);
