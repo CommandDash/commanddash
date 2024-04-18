@@ -118,41 +118,58 @@ export class DartCLIClient {
     // this.proc = child_process.spawn(this.executablePath, ['process']);
     this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
+    let buffer = '';
     this.proc.stdout.on('data', (data) => {
-      const message = JSON.parse(data.toString());
-      const { id, method, params } = message;
+      buffer += data.toString();
 
-      if (method === 'result') {
-        this.eventEmitter.emit(`result_${id}`, params);
-      } else if (method === 'error') {
-        this.eventEmitter.emit(`error_${id}`, params);
-      } else if (method === 'step') {
-
-        // Validate if a handler is available to process the fetch step request.
-        if (!this.eventEmitter.eventNames().includes(`step_${params.kind}_${id}`)) {
-          console.log(`No handler found for fetch: step_${params.kind}_${id}`);
-          // Inform CLI that there was no available handler to proess it's request
-          this.sendStepResponse(message.id, message.params['kind'], { 'result': 'error', 'message': `Step kind: ${message.params['kind']} is missing a handler.` }, true);
-        }
-
-        // Handle task specific process requests from Dart CLI (e.g. get additional data)
-        this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
-
-      } else if (method === 'operation') {
-
-        // Validate if a handler is available to process the fetch operation request.
-        if (!this.eventEmitter.eventNames().includes(`operation_${params.kind}`)) {
-          // Inform CLI that there was no available handler to proess it's request
-          console.log(`No handler found for fetch: operation_${params.kind}`);
-          this.sendOperationResponse(message.params['kind'], { 'result': 'error', 'message': `Process Operation kind: ${message.params['kind']} is missing a handler.` });
-        }
-
-        // Handle task independent process requests from Dart CLI (e.g. get additional data)
-        this.eventEmitter.emit(`operation_${params.kind}`, message);
-
-      } if (method === 'log') {
-        console.log(params);
+      let incoming = buffer.split(/\r?\n/);
+      try {
+        // verifies if the last message is a complete JSON
+        JSON.parse(incoming[incoming.length - 1]);
+        buffer = '';
+      } catch {
+        /// [rare case] handles if an incomplete JSON is received in received.
+        buffer = incoming.pop() ?? '';
       }
+
+      incoming = incoming.filter(m => m); // remove any empty strings
+      for (const incomingMessage of incoming) {
+        const message = JSON.parse(incomingMessage);
+        const { id, method, params } = message;
+
+        if (method === 'result') {
+          this.eventEmitter.emit(`result_${id}`, params);
+        } else if (method === 'error') {
+          this.eventEmitter.emit(`error_${id}`, params);
+        } else if (method === 'step') {
+
+          // Validate if a handler is available to process the fetch step request.
+          if (!this.eventEmitter.eventNames().includes(`step_${params.kind}_${id}`)) {
+            console.log(`No handler found for fetch: step_${params.kind}_${id}`);
+            // Inform CLI that there was no available handler to proess it's request
+            this.sendStepResponse(message.id, message.params['kind'], { 'result': 'error', 'message': `Step kind: ${message.params['kind']} is missing a handler.` }, true);
+          }
+
+          // Handle task specific process requests from Dart CLI (e.g. get additional data)
+          this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
+
+        } else if (method === 'operation') {
+
+          // Validate if a handler is available to process the fetch operation request.
+          if (!this.eventEmitter.eventNames().includes(`operation_${params.kind}`)) {
+            // Inform CLI that there was no available handler to proess it's request
+            console.log(`No handler found for fetch: operation_${params.kind}`);
+            this.sendOperationResponse(message.params['kind'], { 'result': 'error', 'message': `Process Operation kind: ${message.params['kind']} is missing a handler.` });
+          }
+
+          // Handle task independent process requests from Dart CLI (e.g. get additional data)
+          this.eventEmitter.emit(`operation_${params.kind}`, message);
+
+        } if (method === 'log') {
+          console.log(params);
+        }
+      }
+
     });
 
     this.proc.stderr.on('data', (data) => {
