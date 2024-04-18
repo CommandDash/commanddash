@@ -6,6 +6,8 @@ class AgentUIBuilder {
         this.buildAgentUI = this.buildAgentUI.bind(this);
 
         this.container = document.createElement("div");
+
+        this.codeInputIds = [];
     }
 
     buildAgentUI() {
@@ -19,6 +21,7 @@ class AgentUIBuilder {
 
         this.container.innerHTML = `<span class="inline-block text-pink-500" contenteditable="false">${slug}&nbsp;</span>${textHtml}`;
         this.ref.appendChild(this.container);
+        this.registerCodeInputListener();
     }
 
     createInputElement(input) {
@@ -69,24 +72,26 @@ class AgentUIBuilder {
             codePlaceholder.textContent = `${_optional} ${display_text}`;
             codeContainer.id = "code-container";
             codeContainer.appendChild(codePlaceholder);
+            this.codeInputIds.push(id);
 
-            this.ref.addEventListener("click", (event) => this.onCodeInputClick(event, id));
+            // this.ref.addEventListener("click", this.onCodeInputClick);
 
             return codeContainer;
         }
     }
 
+    registerCodeInputListener() {
+        this.codeInputIds.forEach((_codeInputId) => {
+            const codeInput = document.getElementById(_codeInputId);
+            codeInput.addEventListener("focus", () => {
+                codeInputId = _codeInputId;
+            });
+        });
+    }
+
     onTextPaste(id) {
         const inputSpan = document.getElementById(id);
         inputSpan.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    onCodeInputClick(event, id) {
-        
-        const _id = event.target.closest(".code_input").id;
-        if (_id === id) {
-            codeInputId = id;
-        }
     }
 
     onStringInput(event, id) {
@@ -101,7 +106,7 @@ class AgentUIBuilder {
     }
 
     onCodeInput(chipsData, chipName) {
-        const firstCodeInput = agentInputsJson[0].registered_inputs.find(input => input.type === "code_input" && (input.id === codeInputId || input.value === undefined));
+        const firstCodeInput = agentInputsJson[0].registered_inputs.find(input => input.type === "code_input" && ( codeInputId === 0 ? input.value === undefined : input.id === codeInputId));
 
         if (firstCodeInput) {
             const codeInputSpan = document.getElementById(firstCodeInput.id);
