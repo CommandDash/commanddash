@@ -270,194 +270,45 @@ const SetupStep = {
 
 let data = Object.freeze([
     {
-        "description": "Get Flutter specific help like asking questions across documentation.",
-        "min_cli_version": "0.0.1",
-        "name": "@flutter",
-        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
-        "supported_commands": [
-            {
-                "intent": "Ask across Flutter docs",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "574080592",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "1061920203",
-                        "type": "match_document_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "611475404",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/doc",
-                "steps": [
-                    {
-                        "data_sources": [
-                            "1065294335"
-                        ],
-                        "outputs": [
-                            "1061920203"
-                        ],
-                        "query": "<574080592>",
-                        "type": "search_in_sources",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "611475404"
-                        ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <574080592>\n            \n            References: \n            <1061920203>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and on point with your responses and include code snippets wherever required.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<611475404>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi! Ask me anything from Flutter docs: <574080592>"
-            }
-        ],
-        "version": "1.1.0"
-    },
-    {
-        "name": "@workspace",
-        "supported_commands": [
-            {
-                "slug": "/query",
-                "intent": "Ask me anything",
-                "text_field_layout": "Hi, I'm here to help you. <736841542>.",
-                "registered_inputs": [
-                    {
-                        "id": "736841542",
-                        "display_text": "Your query",
-                        "type": "string_input",
-                    }
-                ],
-                "registered_outputs": [
-                    { "id": "436621806", "type": "default_output" },
-                    { "id": "90611917", "type": "default_output" }
-                ],
-                "steps": [
-                    {
-                        "type": "search_in_workspace",
-                        "query": "<422243666>",
-                        "workspace_object_type": "all",
-                        "outputs": ["436621806"]
-                    },
-                    {
-                        "type": "prompt_query",
-                        "prompt":
-                            "Here are the related references from user's project:\n <436621806>. Answer the user's query. Query: <736841542>.",
-                        "post_process": { "type": "raw" },
-                        "outputs": ["90611917"]
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<90611917>",
-                        "post_process": { "type": "raw" },
-                    }
-                ]
-            }
-        ],
-        "version": "1.0.0"
-    },
-    {
-        "name": "",
-        "supported_commands": [
-            {
-                "slug": "/refactor",
-                "intent": "Ask me anything",
-                "text_field_layout":
-                    "\nRefactor your code <736841542> <805088184>",
-                "registered_inputs": [
-                    {
-                        "id": "736841542",
-                        "display_text": "Your query",
-                        "type": "string_input",
-                    },
-                    {
-                        "id": "805088184",
-                        "display_text": "Code Attachment",
-                        "type": "code_input",
-                        "generate_full_string": true,
-                    }
-                ],
-                "registered_outputs": [
-                    { "id": "436621806", "type": "default_output" }
-                ],
-                "steps": [
-                    {
-                        "type": "prompt_query",
-                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\nRefactor the given code according to user instruction. User instruction <736841542>. \n User selected code: <805088184>" +
-                            ```Proceed step by step:
-                        1. Describe the selected piece of code.
-                        2. What are the possible optimizations?
-                        3. How do you plan to achieve that? [Don't output code yet]
-                        4. Output the modified code to be be programatically replaced in the editor in place of the user selection.Since this is without human review, you need to output the precise code to replace in file```,
-                        "post_process": { "type": "code" },
-                        "outputs": ["436621806"]
-                    },
-                    {
-                        "type": "replace_in_file",
-                        "query": "<436621806>",
-                        "replaceInFile": "805088184",
-                        "continue_if_declined": true,
-                    }
-                ]
-            }
-        ]
-    },
-    {
         "description": "A sample command-line application.",
         "min_cli_version": "0.0.1",
         "name": "@test",
-        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
                 "intent": "Generate unit test",
                 "registered_inputs": [
                     {
                         "display_text": "Additional Details",
-                        "id": "105210749",
+                        "id": "951332168",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Testable code",
-                        "id": "943645241",
+                        "id": "659675789",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "197457130",
+                        "id": "618548494",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "1066096388",
+                        "id": "830421465",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "816204364",
+                        "id": "58522844",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -465,7 +316,7 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "1065757817",
+                        "id": "911364231",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -474,54 +325,54 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "1065757817"
+                            "911364231"
                         ],
-                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<943645241>\n```\n\nImportant instructions shared below:\n<105210749>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<197457130>\n\n// Reference 2\n<1066096388>\n\n// Reference 3\n<816204364>\n```\n\nSharing unit test template that you can use to generate unit test:\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n4. Brief about the test cases considered while generating code and how they are helping in generating a full code coverage.\n            ",
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<659675789>\n```\n\nImportant instructions shared below:\n<951332168>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<618548494>\n\n// Reference 2\n<830421465>\n\n// Reference 3\n<58522844>\n```\n\nSharing unit test template that you can use to generate unit test:\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n4. Brief about the test cases considered while generating code and how they are helping in generating a full code coverage.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<1065757817>",
+                        "value": "<911364231>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you generate unit tests for your codebase. Please share the following info: <943645241> \n <105210749> \nReferences [Optional]: <197457130> <1066096388> <816204364>"
+                "text_field_layout": "Hi, I'm here to help you generate unit tests for your codebase. Please share the following info: <659675789> \n <951332168> \nReferences [Optional]: <618548494> <830421465> <58522844>"
             },
             {
                 "intent": "Generate widget test",
                 "registered_inputs": [
                     {
                         "display_text": "Additional Details",
-                        "id": "395429259",
+                        "id": "378053691",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Testable code",
-                        "id": "400757807",
+                        "id": "549022744",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "583813207",
+                        "id": "572441453",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "876356820",
+                        "id": "858685241",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "2015118",
+                        "id": "534412546",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -529,7 +380,7 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "796101413",
+                        "id": "376012813",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -538,96 +389,96 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "796101413"
+                            "376012813"
                         ],
-                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<400757807>\n```\n\nImportant instructions shared below:\n<395429259>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<583813207>\n\n// Reference 2\n<876356820>\n\n// Reference 3\n<2015118>\n```\n\nSharing widget test template that you can use to generate widget test:\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<549022744>\n```\n\nImportant instructions shared below:\n<378053691>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<572441453>\n\n// Reference 2\n<858685241>\n\n// Reference 3\n<534412546>\n```\n\nSharing widget test template that you can use to generate widget test:\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<796101413>",
+                        "value": "<376012813>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you generate widget tests for your codebase. Please share the following info: <400757807> \n <395429259> \nReferences [Optional]: <583813207> <876356820> <2015118>"
+                "text_field_layout": "Hi, I'm here to help you generate widget tests for your codebase. Please share the following info: <549022744> \n <378053691> \nReferences [Optional]: <572441453> <858685241> <534412546>"
             },
             {
                 "intent": "Generate integration test",
                 "registered_inputs": [
                     {
                         "display_text": "Test Flow",
-                        "id": "339666879",
+                        "id": "886174473",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 1",
-                        "id": "81979067",
+                        "id": "803414260",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 2",
-                        "id": "1073247081",
+                        "id": "587015762",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 3",
-                        "id": "551874197",
+                        "id": "505304773",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 4",
-                        "id": "994877352",
+                        "id": "194687236",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 5",
-                        "id": "960128408",
+                        "id": "225758428",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 6",
-                        "id": "1062761146",
+                        "id": "242455516",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code 7",
-                        "id": "414595497",
+                        "id": "525150526",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Additional Details",
-                        "id": "227721565",
+                        "id": "239981268",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "265623972",
+                        "id": "915469522",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Existing Reference",
-                        "id": "916882012",
+                        "id": "132295015",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -635,22 +486,7 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "311289641",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "84353968",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "720779088",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "1847003",
+                        "id": "638842459",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -659,38 +495,244 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "311289641"
+                            "638842459"
                         ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task is to assist in generating integration tests by completing one of the many tasks given below that will be help in generating reliable integration tests.\n  \n  Prepare execution steps for the below integration test scenario:\n  \n  Test Flow: <339666879>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <81979067>\n\n  // contextual code 2\n  <1073247081>\n\n  // contextual code 3\n  <551874197>\n\n  // contextual code 4\n  <994877352>\n\n  // contextual code 5\n  <960128408>\n\n  // contextual code 6\n  <1062761146>\n\n  // contextual code 7\n  <414595497>\n  ````\n  \n  Additional Instruction from User:\n  <227721565>\n\n  Existing Integration Test from User's project:\n  ```dart\n  // integration test reference 1\n  <265623972>\n\n  // integration test referece 2\n  <916882012>\n  ```\n\n  You may reuse or refer the above tests to:\n  1. Fill in steps for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output steps that match user's test writing pattern.\n  \n  Sample Execution Steps (Unrelated to above test flow):\n  - Launch the app and wait for the Login screen to be displayed\n  - Wait for the Login screen to be displayed\n  - Submit the credentials in the Login Page and attempt to login\n  - Check if successful login takes user to Home Page or else error dialog is displayed\n\n  Note:\n  1. Only generate execution steps at the moment and nothing else.\n  2. Be clear and concise with the steps. As this steps will help in generating integration test code in further steps.\n  ",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "84353968"
-                        ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task is to assist in generating integration tests by completing one of the many tasks given below that will be help in generating reliable integration tests.\n\n  Generate a starter template for integration test using the testflow <Test Flow> and execution steps <Execution Steps> generated by other assistant:\n\n  Test Flow: <339666879>\n  \n  Execution Steps:\n  <311289641>\n  \n  Sample example for generating starter template when having <Execution Steps> and <Test Flow>:\n\n  Test Flow: On the Login Screen, entering credentials and logging in takes user to the main screen\n\n  Sample Execution Steps Response:\n  \"Some verbose information [Not a Execution Step]\n  - Launch the app and wait for the Login screen to be displayed [Execution Step]\n  - Submit the credentials in the Login Page and attempt to login [Execution Step]\n  - Check if successful login takes user to Home Page or else error dialog is displayed [Execution Step]\n  Some verbose information [Not a Execution Step]\"\n  \n  In the above sample execution example, lines having [Execution Step] at the end represnt an execution steps and rest should not be treated as an execution steps.\n\n  Sample started template based on the Sample Execution Step Response:\n  ```dart\n  void main() {\n    testWidgets('On the Login Screen, entering credentials and logging in takes user to the main screen',\n      (WidgetTester tester) {\n    // Launch the app and wait for the Login screen to be displayed\n    // TODO: Implement the execution step\n\n    // Submit the credentials in the Login Page and attempt to login\n    // TODO: Implement the execution step\n\n    // Check if successful login takes user to Home Page or else error dialog is displayed\n    // TODO: Implement the execution step\n\n    });\n  }\n  ```\n\n  Note:\n  1. Only generate starter template for integration test as described in the instructions at the moment and nothing else.\n  ",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "1847003"
-                        ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task is to assist in generating integration tests by completing one of the many tasks given below that will be help in generating reliable integration tests.\n   \n   You have been provided an starter template for integration test <Starter Template>. Finish the TODO steps from the shared contextual code from user's project <Contextual Code> and existing integration test references from user's project <References>:\n   \n   Starter Template:\n   ```dart\n   <84353968>\n   ```\n   \n   Contextual Code:\n   ```dart\n  // contextual code 1\n  <81979067>\n\n  // contextual code 2\n  <1073247081>\n\n  // contextual code 3\n  <551874197>\n\n  // contextual code 4\n  <994877352>\n\n  // contextual code 5\n  <960128408>\n\n  // contextual code 6\n  <1062761146>\n\n  // contextual code 7\n  <414595497>\n  ````\nReferences:\n  ```dart\n  // integration test reference 1\n  <265623972>\n\n  // integration test referece 2\n  <916882012>\n  ```\n  ",
+                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <886174473>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <803414260>\n\n  // contextual code 2\n  <587015762>\n\n  // contextual code 3\n  <505304773>\n\n  // contextual code 4\n  <194687236>\n\n  // contextual code 5\n  <225758428>\n\n  // contextual code 6\n  <242455516>\n\n  // contextual code 7\n  <525150526>\n  ````\n  \n  Additional Instruction from User:\n  <239981268>\n\n  Existing Integration Test from User's project:\n  ```dart\n  // integration test reference 1\n  <915469522>\n\n  // integration test referece 2\n  <132295015>\n  ```\n\n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n\n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand, workds and is reliable.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<1847003>",
+                        "value": "<638842459>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you generate integration test for your code base. Please share the following info: <339666879>\nWidget Codes: <81979067> <1073247081> <551874197> <994877352> <960128408> <1062761146> <414595497> \nReferences: <265623972> <916882012> \n <227721565>"
+                "text_field_layout": "Hi, I'm here to help you generate integration test for your code base. Please share the following info: <886174473>\nWidget Codes: <803414260> <587015762> <505304773> <194687236> <225758428> <242455516> <525150526> \nReferences: <915469522> <132295015> \n <239981268>"
             }
         ],
         "version": "1.2.0"
+    },
+    {
+        "description": "Get Flutter specific help like asking questions across documentation.",
+        "min_cli_version": "0.0.1",
+        "name": "@flutter",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Ask across Flutter docs",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "828494489",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "492011444",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "688942371",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/doc",
+                "steps": [
+                    {
+                        "data_sources": [
+                            "1068419102"
+                        ],
+                        "outputs": [
+                            "492011444"
+                        ],
+                        "query": "<828494489>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "688942371"
+                        ],
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<688942371>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
+            }
+        ],
+        "version": "1.1.0"
+    },
+    {
+        "description": "Get answer to your workspace related info/queries.",
+        "min_cli_version": "0.0.1",
+        "name": "@workspace",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Answer to queries related to your project",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "835164438",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "312430668",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "439982682",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/query",
+                "steps": [
+                    {
+                        "outputs": [
+                            "312430668"
+                        ],
+                        "query": "<835164438>",
+                        "type": "search_in_workspace",
+                        "workspace_object_type": "all",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "439982682"
+                        ],
+                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<439982682>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Please share your query: <835164438>"
+            }
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "description": "",
+        "min_cli_version": "0.0.1",
+        "name": "",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Generates inline documentation[code comments] for your code",
+                "registered_inputs": [
+                    {
+                        "display_text": "Code",
+                        "id": "606180200",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Additional Instrunction",
+                        "id": "474917076",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Reference Code",
+                        "id": "305491004",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "519294379",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/document",
+                "steps": [
+                    {
+                        "outputs": [
+                            "519294379"
+                        ],
+                        "prompt": "You are an Flutter expert and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <606180200>\n    ```\n    \n    References:\n    ```dart\n    <305491004>\n    ```\n    \n    Additional Instructions: <474917076>\n    \n    Note:\n    1. Only share the updated code with proper comments back. Keep it as information as possible for other developers to understand.\n    2. Make sure to refer to [Effective Dart: Documentation](https://dart.dev/effective-dart/documentation) to create effective inline documentation that follow official Dart guidelines",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<519294379>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
+            },
+            {
+                "intent": "Refactor your code",
+                "registered_inputs": [
+                    {
+                        "display_text": "Instruction",
+                        "id": "640160831",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code",
+                        "id": "555878446",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "651573210",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/refactor",
+                "steps": [
+                    {
+                        "outputs": [
+                            "651573210"
+                        ],
+                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\n\n            Refactor the given code according to user instruction. User instruction <640160831>\n\n            User selected code:\n            <555878446>\n \n           Proceed step by step: \n           1. Describe the selected piece of code.\n           2. What are the possible optimizations?\n           3. How do you plan to achieve that ? [Don't output code yet]\n           4. Output the modified code to be be programatically replaced in the editor in place of the user selection.Since this is without human review, you need to output the precise code to replace in file.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<651573210>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Please share the following info for refactoring: <640160831> <555878446>"
+            }
+        ],
+        "version": "1.0.0"
     }
 ]);
 
