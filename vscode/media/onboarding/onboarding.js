@@ -369,7 +369,8 @@ let data = Object.freeze([
                     }
                 ]
             }
-        ]
+        ], 
+        "version": "1.0.0"
     },
     {
         "name": "",
@@ -672,17 +673,9 @@ let data = Object.freeze([
                     },
                     {
                         "outputs": [
-                            "720779088"
-                        ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task is to assist in generating integration tests by completing one of the many tasks given below that will be help in generating reliable integration tests.\n            \n  Take a look at the existing integration test references from user's project <References> and clearly fill any existing step (TODO comments) in the starter template for integration test <Starter Template>:\n  \n  Starter Template:\n  ```dart\n  <84353968>\n  ```\n  \n  References:\n  ```dart\n  // integration test reference 1\n  <265623972>\n\n  // integration test referece 2\n  <916882012>\n  ```\n  \n  Note:\n  1. Only share the Starter Template with filled execution steps with user shared reference.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
                             "1847003"
                         ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task is to assist in generating integration tests by completing one of the many tasks given below that will be help in generating reliable integration tests.\n   \n   You have been provided an integration test with few pre-filled steps <Current Test> from integration references form user's project. Finish the remaining TODO steps from the shared contextual code from user's project <Contextual Code>:\n   \n   Current Test:\n   ```dart\n   <720779088>\n   ```\n   \n   Contextual Code:\n   ```dart\n  // contextual code 1\n  <81979067>\n\n  // contextual code 2\n  <1073247081>\n\n  // contextual code 3\n  <551874197>\n\n  // contextual code 4\n  <994877352>\n\n  // contextual code 5\n  <960128408>\n\n  // contextual code 6\n  <1062761146>\n\n  // contextual code 7\n  <414595497>\n  ````\n  ",
+                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task is to assist in generating integration tests by completing one of the many tasks given below that will be help in generating reliable integration tests.\n   \n   You have been provided an starter template for integration test <Starter Template>. Finish the TODO steps from the shared contextual code from user's project <Contextual Code> and existing integration test references from user's project <References>:\n   \n   Starter Template:\n   ```dart\n   <84353968>\n   ```\n   \n   Contextual Code:\n   ```dart\n  // contextual code 1\n  <81979067>\n\n  // contextual code 2\n  <1073247081>\n\n  // contextual code 3\n  <551874197>\n\n  // contextual code 4\n  <994877352>\n\n  // contextual code 5\n  <960128408>\n\n  // contextual code 6\n  <1062761146>\n\n  // contextual code 7\n  <414595497>\n  ````\nReferences:\n  ```dart\n  // integration test reference 1\n  <265623972>\n\n  // integration test referece 2\n  <916882012>\n  ```\n  ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
@@ -1293,12 +1286,12 @@ function readTriggeredMessage() {
                 break;
             case 'commandActionRefactor':
                 removePlaceholder();
-                
+
                 createReferenceChips(JSON.parse(message.value), true);
 
                 setTimeout(() =>
                     adjustHeight(),
-                0);
+                    0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
