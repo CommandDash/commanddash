@@ -1011,6 +1011,8 @@ function readTriggeredMessage() {
                 sendButton.classList.remove("cursor-not-allowed");
                 loadingIndicator.classList.add("hidden");
                 loadingIndicator.classList.remove("block");
+                workspaceLoader.classList.add("hidden");
+                workspaceLoader.classList.remove("flex");
                 sendButton.classList.remove("disabled");
                 textInput.addEventListener("keydown", handleSubmit);
                 break;
