@@ -1011,8 +1011,9 @@ function readTriggeredMessage() {
                 sendButton.classList.remove("cursor-not-allowed");
                 loadingIndicator.classList.add("hidden");
                 loadingIndicator.classList.remove("block");
-                workspaceLoader.classList.add("hidden");
-                workspaceLoader.classList.remove("flex");
+                workspaceLoader.style.display = 'none';
+                workspaceLoaderText.classList.add("hidden");
+                
                 sendButton.classList.remove("disabled");
                 textInput.addEventListener("keydown", handleSubmit);
                 break;
@@ -1153,9 +1154,11 @@ function setLoader(loaderKind, loaderMessage) {
         case "message":
             loadingIndicator.classList.add("hidden");
             loadingIndicator.classList.remove("block");
+            workspaceLoader.classList.remove("hidden");
             workspaceLoader.style.display = 'flex';
             workspaceLoader.classList.remove("animate__slideOutDown");
             workspaceLoader.classList.add("animate__slideInUp");
+            workspaceLoaderText.classList.remove("hidden");
             workspaceLoaderText.textContent = loaderMessage;
             sendButton.classList.add("disabled");
             break;
