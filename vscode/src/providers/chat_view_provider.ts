@@ -220,6 +220,28 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
+        task.onProcessStep('context', async (message) => {
+            const args = message.params.args;
+            let uri: vscode.Uri = vscode.Uri.parse(args.filePath);
+            let document = await vscode.workspace.openTextDocument(uri);
+
+
+            let range = new vscode.Range(
+                new vscode.Position(args.range.start.line, args.range.start.character),
+                new vscode.Position(args.range.end.line, args.range.end.character),
+            );
+            try {
+                let contextualCode = await new ContextualCodeProvider().getContextualCodeInput(
+                    document, range, this.analyzer!, undefined
+                );
+                task.sendStepResponse(message, {
+                    "context": contextualCode,
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        });
+
         task.onProcessStep('append_to_chat', async (message) => {
             this._publicConversationHistory.push({ role: 'model', parts: message.params.args.message });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });

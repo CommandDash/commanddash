@@ -84,7 +84,7 @@ export class DartCLIClient {
     const platform = os.platform();
     const globalStoragePath = context.globalStorageUri;
     const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';
-    const executablePath = join(globalStoragePath.path, fileName);;
+    const executablePath = join(globalStoragePath.fsPath, fileName);;
     DartCLIClient.instance = new DartCLIClient(executablePath);
     return DartCLIClient.instance;
   }
@@ -116,7 +116,7 @@ export class DartCLIClient {
 
   public connect() {
     // this.proc = child_process.spawn(this.executablePath, ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    this.proc = child_process.spawn('dart', ['run', '/Users/keval/Desktop/dev/welltested/cli/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
     this.proc.stdout.on('data', (data) => {
       const message = JSON.parse(data.toString());

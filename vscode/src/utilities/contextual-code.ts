@@ -8,6 +8,58 @@ import { getCodeForRange, isPositionInElementDefinitionRange } from '../shared/u
 import { Token } from '../shared/types/token';
 export class ContextualCodeProvider {
 
+    // This should return code, filepath and range for the contextual code
+    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<Map<String, any>[] | undefined> {
+        const checkSymbols = (symbols: Outline[]): Outline | undefined => {
+            for (const symbol of symbols) {
+                if (isPositionInElementDefinitionRange(symbol, range.start)) {
+                    return symbol;
+                }
+                if (symbol.children) {
+                    const result = checkSymbols(symbol.children);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                }
+            }
+            return undefined;
+        };
+
+        // get the target symbol if the elementname is not provided. This is the case when the user selects a range of code.
+        // The elementName is used to avoid adding target symbol in the contextual code.
+        if (elementname === undefined) {
+            const outline = await analyzer.fileTracker.waitForOutline(document);
+
+            if (outline === undefined) {
+                return undefined;
+            }
+            const outlineSymbols = outline?.children || [];
+            // parse the outline to get all top level symbols
+            const symbol = checkSymbols(outlineSymbols);
+            if (symbol !== undefined) {
+                elementname = symbol.element.name;
+            }
+        }
+        const docTokens = await this.getDocumentTokens(document, analyzer, range);
+
+
+        const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
+
+        // Iterate over the new Map to construct the desired string
+        let codes: Map<String, any>[] = [];
+        for (const [filePath, tokenCodes] of tokensByFilePath) {
+            let code = new Map<String, any>();
+            code.set("filePath", filePath);
+            let content = '';
+            for (const token of tokenCodes) {
+                const symbolCode = "```dart\n" + token + "\n```";
+                content += symbolCode + "\n";
+            }
+            code.set("content", content);
+        }
+        return codes;
+    }
+
     // gets the contextual code for the given range.
     // Contextual code is the code for all the symbols referenced in the range.
     public async getContextualCode(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<string | undefined> {
