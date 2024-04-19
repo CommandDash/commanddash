@@ -333,10 +333,8 @@ export async function testTaskWithSteps() {
     /// Request the client to process the task and handle result or error
     const response = await task.run({ kind: "random_task_with_step", data: { current_embeddings: {} } });
     console.log("Processing completed: ", response);
-    // debugger;
   } catch (error) {
     console.error("Processing error: ", error);
-    // debugger;
   }
 }
 /// There can't be multiple tasks messages in parallel

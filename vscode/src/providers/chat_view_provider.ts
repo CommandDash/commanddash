@@ -328,6 +328,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const questionnaireUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "questionnaire", "questionnaire.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
+        const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
 
         // Modify your Content-Security-Policy
         const cspSource = webview.cspSource;
@@ -335,6 +336,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const updatedOnboardingChatHtml = onboardingHtml
             .replace(/{{cspSource}}/g, cspSource)
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
+            .replace(/{{outputCssUri}}/g, outputCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
             .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
             .replace(/{{agentUIBuilderUri}}/g, agentUIBuilderUri.toString())
