@@ -14,6 +14,7 @@ import { CacheManager } from "../utilities/cache-manager";
 import { handleDiffViewAndMerge } from "../utilities/diff-utils";
 import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manager";
 import { ContextualCodeProvider } from "../utilities/contextual-code";
+import { Auth } from "../utilities/auth/auth";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dashai.chatView";
@@ -259,15 +260,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         try {
-            const config = vscode.workspace.getConfiguration('fluttergpt');
-            var apiKey = config.get<string>('apiKey');
+            let auth = Auth.getInstance();
             /// Request the client to process the task and handle result or error
             const response = await task.run({
                 kind: "agent-execute", data: {
-                    "authdetails": {
+                    "auth_details": {
                         "type": "gemini",
-                        "key": apiKey,
-                        "githubToken": ""
+                        "key": auth.getApiKey(),
+                        "github_token": auth.getGithubAccessToken()
                     },
                     ...agentResponse,
                     agent_name: (agentResponse['agent'] as string).substring(1) // remove the '@'

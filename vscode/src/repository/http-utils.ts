@@ -55,14 +55,14 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
 
 
 export async function refreshAccessToken(refreshToken: string): Promise<string> {
-    const response = await makeHttpRequest<{ accessToken: string }>({
+    const response = await makeHttpRequest<{ access_token: string }>({
         url: baseUrl + '/account/github/refresh', method: 'POST',
         headers: {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             Authorization: `Bearer ${refreshToken}`
         }
     });
-    return response.accessToken;
+    return response.access_token;
 }
 
 
