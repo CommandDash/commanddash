@@ -369,7 +369,7 @@ let data = Object.freeze([
                     }
                 ]
             }
-        ], 
+        ],
         "version": "1.0.0"
     },
     {
@@ -399,10 +399,12 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "type": "prompt_query",
-                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\nModification instructions from user: <736841542> .\n\nPlease find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n <805088184> \n\n" +
-                            "Proceed step by step: 1. Describe the selected piece of code.\n2. What are the possible optimizations?\n3. How do you plan to achieve that ? [Dont output code yet]\n4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.\nSince this is without human review, you need to output the precise CURSOR_SELECTION" +
-                            " IMPORTANT NOTE: Please make sure to output the modified code in a single code block." +
-                            "Do not just give explanation prose but also give the final code at last.",
+                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\nRefactor the given code according to user instruction. User instruction <736841542>. \n User selected code: <805088184>" +
+                            ```Proceed step by step:
+                        1. Describe the selected piece of code.
+                        2. What are the possible optimizations?
+                        3. How do you plan to achieve that? [Don't output code yet]
+                        4. Output the modified code to be be programatically replaced in the editor in place of the user selection.Since this is without human review, you need to output the precise code to replace in file```,
                         "post_process": { "type": "code" },
                         "outputs": ["436621806"]
                     },
@@ -1013,7 +1015,7 @@ function readTriggeredMessage() {
                 loadingIndicator.classList.remove("block");
                 workspaceLoader.style.display = 'none';
                 workspaceLoaderText.classList.add("hidden");
-                
+
                 sendButton.classList.remove("disabled");
                 textInput.addEventListener("keydown", handleSubmit);
                 break;
