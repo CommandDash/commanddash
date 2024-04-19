@@ -84,7 +84,7 @@ export class DartCLIClient {
     const platform = os.platform();
     const globalStoragePath = context.globalStorageUri;
     const fileName = platform === 'win32' ? 'commanddash.exe' : 'commanddash';
-    const executablePath = join(globalStoragePath.path, fileName);;
+    const executablePath = join(globalStoragePath.fsPath, fileName);;
     DartCLIClient.instance = new DartCLIClient(executablePath);
     return DartCLIClient.instance;
   }
