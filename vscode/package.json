@@ -25,13 +25,13 @@
     "flutter",
     "dart",
     "copilot",
-    "autopilot",
     "gpt",
     "dash",
     "ai",
-    "assistant",
     "chat",
-    "coding"
+    "coding",
+    "commandash",
+    "command"
   ],
   "activationEvents": [
     "onLanguage:dart"
