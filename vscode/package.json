@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "CommandDash: Your Flutter AI Autopilot with Gemini",
   "description": "Agents that assist you build entire features on autopilot.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -57,13 +57,13 @@
       "webview": [
         {
           "type": "webview",
-          "id": "dashai.chatView",
+          "id": "dash.chatView",
           "name": "Panel"
         }
       ]
     },
     "configuration": {
-      "title": "Dash AI",
+      "title": "CommandDash",
       "type": "object",
       "properties": {
         "fluttergpt.apiKey": {
@@ -74,12 +74,12 @@
     },
     "keybindings": [
       {
-        "command": "dashai.attachToDash.menu",
+        "command": "dash.attachToDash.menu",
         "key": "ctrl+R",
         "mac": "cmd+R"
       },
       {
-        "command": "dashai.createInlineCodeCompletion.menu",
+        "command": "dash.createInlineCodeCompletion.menu",
         "key": "ctrl+shift+right",
         "mac": "cmd+shift+right",
         "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
@@ -87,55 +87,55 @@
     ],
     "commands": [
       {
-        "command": "dashai.attachToDash",
-        "title": "Dash AI: Attach Snippet to Dash"
+        "command": "dash.attachToDash",
+        "title": "Dash: Attach Snippet to Dash"
       },
       {
-        "command": "dashai.attachToDash.menu",
+        "command": "dash.attachToDash.menu",
         "title": "Attach Snippet to Dash"
       },
       {
-        "command": "dashai.createInlineCodeCompletion",
-        "title": "Dash AI: Inline Code Generation"
+        "command": "dash.createInlineCodeCompletion",
+        "title": "Dash: Inline Code Generation"
       },
       {
-        "command": "dashai.createInlineCodeCompletion.menu",
+        "command": "dash.createInlineCodeCompletion.menu",
         "title": "Inline Code Generation"
       },
       {
-        "command": "dashai.createWidget",
-        "title": "Dash AI Create: Widget from Image or Description"
+        "command": "dash.createWidget",
+        "title": "Dash Create: Widget from Image or Description"
       },
       {
-        "command": "dashai.createWidget.menu",
+        "command": "dash.createWidget.menu",
         "title": "Widget from Image or Description"
       },
       {
-        "command": "dashai.createCodeFromBlueprint",
-        "title": "Dash AI Create: Code from Blueprint"
+        "command": "dash.createCodeFromBlueprint",
+        "title": "Dash Create: Code from Blueprint"
       },
       {
-        "command": "dashai.createCodeFromBlueprint.menu",
+        "command": "dash.createCodeFromBlueprint.menu",
         "title": "Code from Blueprint"
       },
       {
-        "command": "dashai.createCodeFromDescription",
-        "title": "Dash AI Create: Code From Description"
+        "command": "dash.createCodeFromDescription",
+        "title": "Dash Create: Code From Description"
       },
       {
-        "command": "dashai.createCodeFromDescription.menu",
+        "command": "dash.createCodeFromDescription.menu",
         "title": "Code From Description"
       },
       {
-        "command": "dashai.fixErrors",
-        "title": "Dash AI Refactor: Fix Errors"
+        "command": "dash.fixErrors",
+        "title": "Dash Refactor: Fix Errors"
       },
       {
-        "command": "dashai.optimizeCode",
-        "title": "Dash AI Refactor: Optimize"
+        "command": "dash.optimizeCode",
+        "title": "Dash Refactor: Optimize"
       },
       {
-        "command": "dashai.clearChat",
+        "command": "dash.clearChat",
         "title": "Clear Chat",
         "icon": {
           "light": "resources/light/trash.svg",
@@ -146,98 +146,98 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "dashai.attachToDash",
+          "command": "dash.attachToDash",
           "when": "editorHasSelection && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.attachToDash.menu",
+          "command": "dash.attachToDash.menu",
           "when": "false"
         },
         {
-          "command": "dashai.createInlineCodeCompletion",
+          "command": "dash.createInlineCodeCompletion",
           "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.createInlineCodeCompletion.menu",
+          "command": "dash.createInlineCodeCompletion.menu",
           "when": "false"
         },
         {
-          "command": "dashai.createWidget",
+          "command": "dash.createWidget",
           "when": "!editorHasSelection && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.createWidget.menu",
+          "command": "dash.createWidget.menu",
           "when": "false"
         },
         {
-          "command": "dashai.createCodeFromBlueprint",
+          "command": "dash.createCodeFromBlueprint",
           "when": "editorHasSelection && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.createCodeFromBlueprint.menu",
+          "command": "dash.createCodeFromBlueprint.menu",
           "when": "false"
         },
         {
-          "command": "dashai.createCodeFromDescription",
+          "command": "dash.createCodeFromDescription",
           "when": "!editorHasSelection && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.createCodeFromDescription.menu",
+          "command": "dash.createCodeFromDescription.menu",
           "when": "false"
         },
         {
-          "command": "dashai.fixErrors",
+          "command": "dash.fixErrors",
           "when": "editorHasSelection && resourceLangId == 'dart'"
         },
         {
-          "command": "dashai.optimizeCode",
+          "command": "dash.optimizeCode",
           "when": "editorHasSelection && resourceLangId == 'dart'"
         }
       ],
       "editor/context": [
         {
-          "submenu": "dashai.createMenu",
-          "group": "dashai-menu-group@1"
+          "submenu": "dash.createMenu",
+          "group": "dash-menu-group@1"
         },
         {
-          "command": "dashai.createInlineCodeCompletion.menu",
+          "command": "dash.createInlineCodeCompletion.menu",
           "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'",
-          "group": "dashai-menu-group@2"
+          "group": "dash-menu-group@2"
         },
         {
-          "command": "dashai.attachToDash.menu",
+          "command": "dash.attachToDash.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "dashai-menu-group@3"
+          "group": "dash-menu-group@3"
         }
       ],
       "view/title": [
         {
-          "command": "dashai.clearChat",
+          "command": "dash.clearChat",
           "group": "navigation"
         }
       ],
-      "dashai.createMenu": [
+      "dash.createMenu": [
         {
-          "command": "dashai.createCodeFromBlueprint.menu",
+          "command": "dash.createCodeFromBlueprint.menu",
           "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "dashai-menu-group@1"
+          "group": "dash-menu-group@1"
         },
         {
-          "command": "dashai.createCodeFromDescription.menu",
+          "command": "dash.createCodeFromDescription.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
-          "group": "dashai-menu-group@2"
+          "group": "dash-menu-group@2"
         },
         {
-          "command": "dashai.createWidget.menu",
+          "command": "dash.createWidget.menu",
           "when": "!editorHasSelection && resourceLangId == 'dart'",
-          "group": "dashai-menu-group@3"
+          "group": "dash-menu-group@3"
         }
       ]
     },
     "submenus": [
       {
-        "id": "dashai.createMenu",
-        "label": "Dash AI: Create"
+        "id": "dash.createMenu",
+        "label": "CommandDash: Create"
       }
     ]
   },
@@ -271,6 +271,7 @@
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
     "js-yaml": "^4.1.0",
+    "tailwindcss": "^3.4.3",
     "url-metadata": "^3.3.1",
     "vscode-languageclient": "^9.0.1"
   }

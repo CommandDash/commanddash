@@ -9,13 +9,21 @@ import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
 import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
+import { DartCLIClient } from "../utilities/commanddash-integration/dart-cli-client";
+import { CacheManager } from "../utilities/cache-manager";
+import { handleDiffViewAndMerge } from "../utilities/diff-utils";
+import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manager";
+import { ContextualCodeProvider } from "../utilities/contextual-code";
+import { Auth } from "../utilities/auth/auth";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "dashai.chatView";
+    public static readonly viewType = "dash.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
+    private setupManager = SetupManager.getInstance();
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
+    private tasksMap: any = {};
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
@@ -96,40 +104,58 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this.clearConversationHistory();
                         break;
                     }
+                case "updateApiKey":
+                    {
+                        this.setupManager.setupApiKey(data.value);
+                        break;
+                    }
+                case "checkKeyIfExists":
+                    {
+                        this._checkIfKeyExists();
+                        break;
+                    }
+                case "dashResponse":
+                    {
+                        const { data: _data, messageId, buttonType } = JSON.parse(data.value);
+                        const task = this.tasksMap[_data.taskId];
+                        const message = _data.message;
+
+                        if (buttonType === 'accept') {
+                            task.sendStepResponse(message, { 'value': true });
+                        } else {
+                            task.sendStepResponse(message, { 'value': false });
+                        }
+                        const fileData = _data.message.params.args.file;
+                        const updatedMessage = await DiffViewAgent.handleResponse(buttonType, fileData, messageId);
+                        if (updatedMessage) {
+                            this._publicConversationHistory[messageId] = updatedMessage;
+                            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+                        }
+                        break;
+                    }
+                case "agents":
+                    {
+                        this.handleAgents(data.value);
+                        break;
+                    }
+                case "githubLogin":
+                    {
+                        this.setupManager.setupGithub();
+                        break;
+                    }
                 case "validate":
                     {
                         webviewView.webview.postMessage({ type: "showValidationLoader" });
                         this.aiRepo = this.initGemini(data.value);
                         await this._validateApiKey(data.value);
-                        await this._validateFlutterExtension();
                         webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
-                case "updateSettings":
+                case "initialized":
                     {
-                        vscode.workspace.getConfiguration().update("fluttergpt.apiKey", data.value, vscode.ConfigurationTarget.Global);
-                        vscode.window.showInformationMessage(`Settings updated: Gemini API Key set`);
-                        break;
+                        this._setupManager();
+                        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
                     }
-                case "checkKeyIfExists":
-                {
-                    this._checkIfKeyExists();
-                    break;
-                }
-                case "dashResponse":
-                    {
-                        const { agent, data: _data, messageId, buttonType } = JSON.parse(data.value);
-                        console.log('agent', buttonType, _data, messageId, agent);
-                        if (agent === "diffView") {
-                            const updatedMessage = await DiffViewAgent.handleResponse(buttonType, _data, messageId);
-                            if (updatedMessage) {
-                                this._publicConversationHistory[messageId] = updatedMessage;
-                                this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
-                            }
-                        }
-                        break;
-                    }
-
             }
         });
 
@@ -137,7 +163,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log('webview', webviewView.visible);
             if (webviewView.visible && this._view) {
                 this._view?.webview.postMessage({ type: 'focusChatInput' });
-                
             }
         });
 
@@ -145,8 +170,38 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
-        this._view?.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
         logEvent('new-chat-start', { from: 'command-deck' });
+
+    }
+
+    private async _setupManager() {
+
+        this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
+            if (steps === SetupStep.executable) {
+                this.setupManager.setupExecutable((progress: number) => {
+                    this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+                });
+            }
+        });
+
+        this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
+
+        this.setupManager.onDidChangeSetup(event => {
+            switch (event) {
+                case SetupStep.github:
+                    console.log('github');
+                    this._view?.webview.postMessage({ type: 'githubLoggedIn' });
+                    break;
+                case SetupStep.apiKey:
+                    console.log('apikey');
+                    this._view?.webview.postMessage({ type: 'apiKeySet' });
+                    break;
+                case SetupStep.executable:
+                    console.log('executable');
+                    this._view?.webview.postMessage({ type: 'executableDownloaded' });
+                    break;
+            }
+        });
     }
 
     private _checkIfKeyExists() {
@@ -158,6 +213,97 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._view?.webview.postMessage({ type: "keyNotExists" });
         }
     }
+
+    private async handleAgents(response: any) {
+        const agentResponse = response;
+        const client = DartCLIClient.getInstance();
+        const task = client.newTask();
+
+        task.onProcessStep('append_to_chat', async (message) => {
+            this._publicConversationHistory.push({ role: 'model', parts: message.params.args.message });
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
+
+            task.sendStepResponse(message, {});
+        });
+        task.onProcessStep('loader_update', async (message) => {
+            task.sendStepResponse(message, {});
+            this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
+        });
+
+        task.onProcessStep('cache', async (message) => {
+            const cache = await CacheManager.getInstance().getGeminiCache();
+            task.sendStepResponse(message, { value: cache });
+        });
+        task.onProcessStep('workspace_details', async (message) => {
+            const workspaceFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
+            if (!workspaceFolder) {
+                task.sendStepResponse(message, { path: null });
+                return;
+            }
+            task.sendStepResponse(message, { path: workspaceFolder.uri.fsPath });
+        });
+        
+        task.onProcessStep('replace_in_file', async (message) => {
+            const { originalCode, path, optimizedCode } = message.params.args.file;
+            const editor = vscode.window.activeTextEditor;
+
+            if (editor) {
+                this.tasksMap = { [task.getTaskId()]: task };
+                handleDiffViewAndMerge(editor, path, originalCode, optimizedCode, this.context);
+                this._publicConversationHistory.push({ role: "dash", parts: "Do you want to merge these changes?", buttons: ["accept", "decline"], data: { taskId: task.getTaskId(), message } });
+                this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            }
+        });
+
+        const prompt = this.formatPrompt(agentResponse);
+        this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });
+        this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+        try {
+            let auth = Auth.getInstance();
+            /// Request the client to process the task and handle result or error
+            let agentTrackData = {
+                'agent_name': (agentResponse['agent'] as string).substring(1),
+                'slash_command': agentResponse['slug'],
+                'agent_version': agentResponse['agent_version']
+            };
+            logEvent('agent_start', agentTrackData);
+            const response = await task.run({
+                kind: "agent-execute", data: {
+                    "auth_details": {
+                        "type": "gemini",
+                        "key": auth.getApiKey(),
+                        "github_token": auth.getGithubAccessToken()
+                    },
+                    ...agentResponse,
+                    agent_name: (agentResponse['agent'] as string).substring(1) // remove the '@'
+                }
+            });
+            logEvent('agent_success', agentTrackData);
+            console.log("Processing completed: ", response);
+        } catch (error) {
+            console.error("Processing error: ", error);
+            this._publicConversationHistory.push({ role: 'error', parts: error instanceof Error ? (error as Error).message : (error as any).toString() });
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
+            this?._view?.webview?.postMessage({ type: 'hideLoadingIndicator' });
+        }
+    }
+
+    private formatPrompt(response: any) {
+        let prompt: string = '';
+        response?.registered_inputs?.forEach(({ type, value }: { type: string, value: string }) => {
+            if (type === "string_input" && value) {
+                prompt += value;
+            }
+            if (type === "code_input" && value) {
+                const parsedValue = JSON.parse(value);
+                prompt += `\n ${parsedValue?.referenceContent}`;
+            }
+        });
+
+        return prompt;
+    }
+
     private async handleAction(input: string) {
         const data = JSON.parse(input);
         const actionType = data.message.startsWith('/') ? data.message.split('\u00A0')[0].substring(1) : '';
@@ -184,8 +330,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
         const onboardingJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "onboarding", "onboarding.js"));
         const commandDeckJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "command-deck", "command-deck.js"));
-        const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "icon.png"));
+        const agentUIBuilderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-ui-builder", "agent-ui-builder.js"));
+        const agentProviderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-provider", "agent-provider.js"));
+        const questionnaireUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "questionnaire", "questionnaire.js"));
+        const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
+        const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
 
         // Modify your Content-Security-Policy
         const cspSource = webview.cspSource;
@@ -193,12 +343,16 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const updatedOnboardingChatHtml = onboardingHtml
             .replace(/{{cspSource}}/g, cspSource)
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
+            .replace(/{{outputCssUri}}/g, outputCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
             .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
+            .replace(/{{agentUIBuilderUri}}/g, agentUIBuilderUri.toString())
+            .replace(/{{agentProviderUri}}/g, agentProviderUri.toString())
+            .replace(/{{questionnaireUri}}/g, questionnaireUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
-        
+
 
         return updatedOnboardingChatHtml;
     }
@@ -213,14 +367,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _validateFlutterExtension() {
-        const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
-        if (!dartExt) {
-            this._view?.webview.postMessage({ type: 'dependencyValidation', value: 'All dependencies are not installed' });
-        } else {
-            this._view?.webview.postMessage({ type: 'dependencyValidation', value: 'All dependencies are installed' });
-        }
-    }
 
     private _getChatWebview(webview: vscode.Webview) {
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
@@ -252,7 +398,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return new GeminiRepository(apiKey);
     }
 
-    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }> = [];
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
     private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {
@@ -262,7 +408,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('dashai.chatView.focus');
+            await vscode.commands.executeCommand('dash.chatView.focus');
         } else {
             this._view?.show?.(true);
         }
@@ -270,8 +416,34 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         // Initialize conversation history if it's the first time
         if (this._privateConversationHistory.length === 0) {
             this._privateConversationHistory.push(
-                { role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response from you must be STRICTLY under 8192 characters. DO NOT MENTION EXTRA DETAILS APART FROMT THE QUERY ASKED BY THE USER.\n\n" },
-                { role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response of mine will be STRICTLY under 8192 characters. How can I help you?\n\n" }
+
+                //TODO: Fetch and insert the available agents dynamically 
+                {
+                    role: 'user', parts: `You are a Flutter/Dart coding assistant specializing in providing well-formatted, production-ready code. Here is what I can do with you:
+
+                1. I can ask you to complete Flutter coding tasks by attaching multiple code snippets from different files in you inline chat by selecting the code and choosing "Attach Snippet to Dash" from the right click menu. With full context provided, you will generate accurate responses with well-formatted code snippets.
+                
+                2. You offer specialized agents for specific tasks. I can initialize an agent by typing "@" followed by the agent's name. Each agent has its own set of slash commands for specific tasks.
+
+                Available agents and commands are.
+                1. @ (globally commands that can be triggered without an agent)
+                - /refactor
+                - /documentation
+                2. @workspace
+                - /query
+                3. @flutter
+                - /doc
+                4. @test
+                - /unit
+                - /widget
+                - /integration
+                
+                User's can use run the agents or commands like:
+                - @test /unit
+                - /refactor
+                - @workspace /query
+                If I greet you or ask you what you can do for me, tell me about the above abilities. Be concise.`},
+                { role: 'model', parts: "Noted, I will be responding as per your instructions. Let's get started." }
             );
         }
         let workspacePrompt = "";
@@ -310,6 +482,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 this._privateConversationHistory.push({ role: 'user', parts: prompt });
                 this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
             }
+
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
@@ -319,10 +492,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         } catch (error) {
             console.error(error);
-            const response = error instanceof Error ? error.message : 'An unexpected error occurred.';
             logError('command-deck-conversation-error', error);
-            this._view?.webview.postMessage({ type: 'displaySnackbar', value: response });
-            this._view?.webview.postMessage({ type: 'addResponse', value: '' });
+            this._publicConversationHistory.push({ role: 'error', parts: error instanceof Error ? (error as Error).message : (error as any).toString() });
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         } finally {
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
             this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });

@@ -1,4 +1,3 @@
-//declaring svg icons
 const copyIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path clip-rule="evenodd" d="M6 6L7.5 4.5H15.621L21 9.879V21L19.5 22.5H7.5L6 21V6ZM19.5 10.5L15 6H7.5V21H19.5V10.5Z" />
 <path clip-rule="evenodd" d="M4.5 1.5L3 3V18L4.5 19.5V3H14.121L12.621 1.5H4.5Z" />
@@ -12,7 +11,7 @@ const mergeIcon = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http:/
 </svg>
 `;
 
-const dartIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+const dartIcon = `
 <g clip-path="url(#clip0_1896_4)">
 <path d="M2.44739 9.55215L0.395172 7.49993C0.150814 7.2496 0 6.89595 0 6.55185C0 6.3922 0.0899636 6.14236 0.157973 5.99942L2.05222 2.05176L2.44739 9.55215Z" fill="#01579B"/>
 <path d="M9.47344 2.44739L7.42122 0.395172C7.24201 0.214767 6.86879 0 6.55285 0C6.28128 0 6.01473 0.0546463 5.84268 0.157973L2.05371 2.05222L9.47344 2.44739Z" fill="#40C4FF"/>
@@ -33,7 +32,6 @@ const dartIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xm
 <rect width="12" height="12" fill="white"/>
 </clipPath>
 </defs>
-</svg>
 `;
 
 const dashAI = `<svg width="34" height="29" viewBox="0 0 791 669" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -215,19 +213,30 @@ const bottomContainer = document.getElementById("bottom-container");
 const sendButton = document.getElementById("send-chat");
 const textInput = document.getElementById("text-input");
 const responseContainer = document.getElementById("response");
-const onboardingText = document.getElementById("onboarding-text");
-const onboardingArrowIcon = document.getElementById("onboarding-arrow-icon");
-const tryFlutterText = document.getElementById("try-flutter-text");
 const textinputMenu = document.getElementById("menu");
 const loadingIndicator = document.getElementById('loader');
 const validationLoadingIndicator = document.getElementById('validation-loader');
-const workspaceLoader = document.getElementById('workspace-loader');
-const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
+const executableProgress = document.getElementById("executable-progress");
+const githubLogin = document.getElementById("github-sign-in");
+const githubTick = document.getElementById("github-tick");
+const githubCross = document.getElementById("github-cross");
+const apiKeyTick = document.getElementById("apiKey-tick");
+const apiKeyCross = document.getElementById("apiKey-cross");
+const executableTick = document.getElementById("executable-tick");
+const executableCross = document.getElementById("executable-cross");
+const onboardingSetup = document.getElementById("onboarding-setup");
+const apiKeyContainer = document.getElementById("apikey-container");
+const workspaceLoader = document.getElementById('workspace-loader');
+const workspaceLoaderText = document.getElementById('workspace-loader-text');
+const questionnaireContainer = document.getElementById("questionaire-container");
+const executableContainer = document.getElementById("executable-container");
+const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
+const googleApiKeyError = document.getElementById("google-api-key-error");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -239,160 +248,563 @@ let onboardingCompleted = false;
 let activeAgent;
 let commandEnable = false;
 let shortCutHints = '';
+let agentBuilder = null;
+let agentProvider = null;
+let currentActiveAgent = '';
+let currentActiveSlug = '';
+let isGithubLoginPending = false;
+let isApiKeyPending = false;
+let isExecutableDownloadPending = false;
+let codeInputId = 0;
+
+const agentInputsJson = [];
 
 //initialising visual studio code library
 let vscode = null;
 
-let agents = ['workspace'];
-const commands = ['refactor'];
-
-// Add your additional commands and agents
-const agentCommandsMap = {};
-
-//description for commands and agents
-const description = {
-    'refactor': 'Refactor code with instructions',
-    'workspace': 'Ask questions across your workspace'
+const SetupStep = {
+    0: "github",
+    1: "apiKey",
+    2: "executable"
 };
 
-const commandsExecution = {
-    'refactor': {
-        'exe': (input) => {
-            commandEnable = true;
-            input.textContent = '';
-
-            let isChipsFocused = false;
-            let isTextRefactorInputFocused = false;
-
-            const command = document.createElement('span');
-            const textRefactorInput = document.createElement('span');
-            const refactor = document.createElement('span');
-            const referenceText = document.createElement('span');
-            const refactorTextNode = document.createElement('span');
-            const referenceIdSpan = document.createElement('span');
-
-            referenceIdSpan.id = "reference-id";
-            referenceIdSpan.contentEditable = "false";
-            referenceIdSpan.appendChild(document.createTextNode('\u00A0'));
-
-            refactorTextNode.textContent = "/refactor\u00A0";
-            refactorTextNode.classList.add("text-pink-400");
-
-            referenceText.id = "add-reference-text";
-            referenceText.contentEditable = "false";
-            referenceText.tabIndex = 0;
-            referenceText.classList.add("mb-1", "px-[7px]", "inline-block", "cursor-pointer", "rounded-[4px]", "mt-1");
-            referenceText.textContent = "Code Attachment";
-            referenceText.addEventListener("click", function (event) {
-                isChipsFocused = !isChipsFocused;
-                isChipsFocused ? referenceText.classList.add("border-[#497BEF]") : referenceText.classList.remove("border-[#497BEF]");
-                if (isChipsFocused) {
-                    isTextRefactorInputFocused = false;
-                }
-            });
-
-            command.id = "command-span";
-            command.appendChild(refactorTextNode);
-            command.appendChild(referenceText);
-            command.appendChild(referenceIdSpan);
-
-            refactor.id = "text-refactor-container";
-            refactor.innerHTML = `<span id="text-to-refactor-span" contenteditable="false" class="bg-black text-white px-[7px] border border-black rounded-tl-[4px] rounded-bl-[4px] inline-block">Refactor Instructions</span>`;
-            refactor.classList.add("inline-block");
-
-            textRefactorInput.id = "text-refactor-input";
-            textRefactorInput.contentEditable = "true";
-            textRefactorInput.tabIndex = "0";
-            textRefactorInput.classList.add("px-2", "inline-block", "rounded-tr-[4px]", "rounded-br-[4px]");
-            textRefactorInput.addEventListener("focus", function (event) {
-                if (isTextRefactorInputFocused) {
-                    isChipsFocused = false;
-                }
-                referenceText.classList.remove("border-[#497BEF]");
-                isTextRefactorInputFocused = !isTextRefactorInputFocused;
-            });
-
-            textRefactorInput.appendChild(document.createTextNode("\u200B"));
-
-            refactor.appendChild(textRefactorInput);
-            command.appendChild(refactor);
-            input.appendChild(command);
-
-            setCaretToEnd(textRefactorInput);
-            //TODO[YASH]: Use platform specific shortcut naming. checkout shortcut-hint-utils
-            tippy('#add-reference-text', {
-                content: `Use ${shortCutHints} to attach selected code in editor`,
-                theme: "flutter-blue"
-            });
-
-            input.addEventListener('keydown', function (event) {
-                let keyCaught = false;
-                switch (event.key) {
-                    case "Tab":
-                        if (isTextRefactorInputFocused) {
-                            isTextRefactorInputFocused = false;
-                            isChipsFocused = true;
-                            referenceText.classList.add("border-[#497BEF]");
-                            textRefactorInput.blur();
-                        } else {
-                            isChipsFocused = false;
-                            isTextRefactorInputFocused = true;
-                            textRefactorInput.focus();
-                            setCaretToEnd(textRefactorInput);
-                        }
-                        keyCaught = true;
-                        break;
-
-                    case "Backspace":
-                        if (textRefactorInput.textContent.trim() === "" && textRefactorInput.innerText.trim() === "") {
-                            // Clear the text
-                            input.removeChild(command);
-                            setTimeout(() => {
-                                input.focus();
-                                adjustHeight();
-                            }, 0);
-                        }
-                        break;
-                }
-                if (keyCaught) {
-                    event.preventDefault();
-                }
-            });
-
-            setTimeout(() => {
-                adjustHeight();
-                referenceText.focus();
-            }, 0);
-
-        }
+let data = Object.freeze([
+    {
+        "description": "A sample command-line application.",
+        "min_cli_version": "0.0.1",
+        "name": "@test",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Generate unit test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Additional Details",
+                        "id": "951332168",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Testable code",
+                        "id": "659675789",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "618548494",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "830421465",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "58522844",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "911364231",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/unit",
+                "steps": [
+                    {
+                        "outputs": [
+                            "911364231"
+                        ],
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<659675789>\n```\n\nImportant instructions shared below:\n<951332168>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<618548494>\n\n// Reference 2\n<830421465>\n\n// Reference 3\n<58522844>\n```\n\nSharing unit test template that you can use to generate unit test:\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n4. Brief about the test cases considered while generating code and how they are helping in generating a full code coverage.\n            ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<911364231>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, I'm here to help you generate unit tests for your codebase. Please share the following info: <659675789> \n <951332168> \nReferences [Optional]: <618548494> <830421465> <58522844>"
+            },
+            {
+                "intent": "Generate widget test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Additional Details",
+                        "id": "378053691",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Testable code",
+                        "id": "549022744",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "572441453",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "858685241",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "534412546",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "376012813",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/widget",
+                "steps": [
+                    {
+                        "outputs": [
+                            "376012813"
+                        ],
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<549022744>\n```\n\nImportant instructions shared below:\n<378053691>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<572441453>\n\n// Reference 2\n<858685241>\n\n// Reference 3\n<534412546>\n```\n\nSharing widget test template that you can use to generate widget test:\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<376012813>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, I'm here to help you generate widget tests for your codebase. Please share the following info: <549022744> \n <378053691> \nReferences [Optional]: <572441453> <858685241> <534412546>"
+            },
+            {
+                "intent": "Generate integration test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Test Flow",
+                        "id": "886174473",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 1",
+                        "id": "803414260",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 2",
+                        "id": "587015762",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 3",
+                        "id": "505304773",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 4",
+                        "id": "194687236",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 5",
+                        "id": "225758428",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 6",
+                        "id": "242455516",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code 7",
+                        "id": "525150526",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Additional Details",
+                        "id": "239981268",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "915469522",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Reference",
+                        "id": "132295015",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "638842459",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/integration",
+                "steps": [
+                    {
+                        "outputs": [
+                            "638842459"
+                        ],
+                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <886174473>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <803414260>\n\n  // contextual code 2\n  <587015762>\n\n  // contextual code 3\n  <505304773>\n\n  // contextual code 4\n  <194687236>\n\n  // contextual code 5\n  <225758428>\n\n  // contextual code 6\n  <242455516>\n\n  // contextual code 7\n  <525150526>\n  ````\n  \n  Additional Instruction from User:\n  <239981268>\n\n  Existing Integration Test from User's project:\n  ```dart\n  // integration test reference 1\n  <915469522>\n\n  // integration test referece 2\n  <132295015>\n  ```\n\n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n\n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand, workds and is reliable.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<638842459>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, I'm here to help you generate integration test for your code base. Please share the following info: <886174473>\nWidget Codes: <803414260> <587015762> <505304773> <194687236> <225758428> <242455516> <525150526> \nReferences: <915469522> <132295015> \n <239981268>"
+            }
+        ],
+        "version": "1.2.0"
+    },
+    {
+        "description": "Get Flutter specific help like asking questions across documentation.",
+        "min_cli_version": "0.0.1",
+        "name": "@flutter",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Ask across Flutter docs",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "828494489",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "492011444",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "688942371",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/doc",
+                "steps": [
+                    {
+                        "data_sources": [
+                            "1068419102"
+                        ],
+                        "outputs": [
+                            "492011444"
+                        ],
+                        "query": "<828494489>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "688942371"
+                        ],
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<688942371>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
+            }
+        ],
+        "version": "1.1.0"
+    },
+    {
+        "description": "Get answer to your workspace related info/queries.",
+        "min_cli_version": "0.0.1",
+        "name": "@workspace",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Answer to queries related to your project",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "835164438",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "312430668",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "439982682",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/query",
+                "steps": [
+                    {
+                        "outputs": [
+                            "312430668"
+                        ],
+                        "query": "<835164438>",
+                        "type": "search_in_workspace",
+                        "workspace_object_type": "all",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "439982682"
+                        ],
+                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<439982682>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Please share your query: <835164438>"
+            }
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "description": "",
+        "min_cli_version": "0.0.1",
+        "name": "",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Generates inline documentation[code comments] for your code",
+                "registered_inputs": [
+                    {
+                        "display_text": "Code",
+                        "id": "606180200",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Additional Instrunction",
+                        "id": "474917076",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Reference Code",
+                        "id": "305491004",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "519294379",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/document",
+                "steps": [
+                    {
+                        "outputs": [
+                            "519294379"
+                        ],
+                        "prompt": "You are an Flutter expert and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <606180200>\n    ```\n    \n    References:\n    ```dart\n    <305491004>\n    ```\n    \n    Additional Instructions: <474917076>\n    \n    Note:\n    1. Only share the updated code with proper comments back. Keep it as information as possible for other developers to understand.\n    2. Make sure to refer to [Effective Dart: Documentation](https://dart.dev/effective-dart/documentation) to create effective inline documentation that follow official Dart guidelines",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<519294379>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
+            },
+            {
+                "intent": "Refactor your code",
+                "registered_inputs": [
+                    {
+                        "display_text": "Instructions",
+                        "id": "640160831",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code",
+                        "id": "555878446",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "651573210",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/refactor",
+                "steps": [
+                    {
+                        "outputs": [
+                            "651573210"
+                        ],
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that is need to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\n\nNote:\nState any assumption made and improvements introduced used while modification.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<651573210>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Please share the following info for refactoring: <640160831> <555878446>"
+            }
+        ],
+        "version": "1.0.0"
     }
-};
+]);
 
-// Concatenate agent-specific commands to the agents array
-agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
-    Object.entries(agentCommandsMap)
-        .filter(([agent, cmds]) => cmds.length > 0)
-        .map(([agent, cmds]) => cmds.map(cmd => `${agent} /${cmd}`))
-        .flat()
-);
 
+const questionnaire = [
+    {
+        id: "refactor-code-questionaire",
+        message: "Refactor your code",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/refactor"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "workspace-questionaire",
+        message: "Search files or query your workspace",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "flutter-doc-search",
+        message: "Query official Flutter Docs",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/doc"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "unit-test",
+        message: "Generate unit tests for your methods",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/unit"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    }
+];
 
 (function () {
 
-    setLoading(true);
+    // setLoading(true);
 
     //initialising vscode library
     vscode = acquireVsCodeApi();
 
-    //check if key exists
-    ifKeyExists();
-
     //reading vscode triggered messages to webview
     readTriggeredMessage();
-
-    if (!onboardingCompleted) {
-        textInput.textContent = 'How to wait for forEach to complete with asynchronous callbacks?';
-    }
 
     googleApiKeyTextInput.addEventListener("input", (event) => {
         const apiKey = event.target.value.trim();
@@ -428,10 +840,21 @@ agents = agents.filter(agent => !(agent in agentCommandsMap)).concat(
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
 
-    setTimeout(() => {
-        setLoading(false);
-    }, 3000);
+    githubLogin.addEventListener("click", githubListener);
+
+    new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+
+    vscode.postMessage({
+        type: "initialized",
+    });
+
 })();
+
+function githubListener() {
+    vscode.postMessage({
+        type: "githubLogin",
+    });
+}
 
 function setLoading(isLoading) {
     if (isLoading) {
@@ -462,50 +885,33 @@ function addToolTipsById() {
 }
 
 function submitResponse() {
-
-    const textRefactor = document.getElementById("text-to-refactor-span");
-    const textRefactorInput = document.getElementById("text-refactor-input");
-    if (textRefactor) {
-        textRefactor.remove();
-    }
+    toggleLoader(true);
     let prompt = textInput.textContent;
-    if (!prompt.startsWith('/')) {
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
-        }
-    }
-    if (!prompt.startsWith('/') && prompt.length > 0) {
-        vscode.postMessage({ type: "prompt", value: prompt });
-    } else {
-        const chipId = [];
-        const instructions = prompt;
-        for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-                chipId.push(chip);
-            }
-        }
-
-        if (chipId.length > 0 && textRefactorInput.textContent.trim().length > 2) {
-            vscode.postMessage({
-                type: "action",
-                value: JSON.stringify({
-                    'message': prompt,
-                    'chipsData': chipsData,
-                    'chipId': chipId,
-                    'instructions': instructions
-                }),
+    if (commandEnable) {
+        currentActiveSlug = agentInputsJson[0]?.slug;
+        const agentObject = data.find(obj => {
+            return obj.supported_commands.some(cmd => {
+                return cmd.slug === currentActiveSlug;
             });
-        }
+        });
+        currentActiveAgent = agentObject.name;
 
-        if (commandEnable) {
-            commandEnable = false;
+        vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
+        commandEnable = false;
+        activeAgent = false;
+        agentInputsJson.length = 0;
+    } else if (prompt.length > 1) {
+        for (const chip in chipsData) {
+            if (prompt.includes(chip)) {
+                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+            }
         }
+        vscode.postMessage({ type: "prompt", value: prompt });
     }
+
     textInput.textContent = "";
     adjustHeight();
+    questionnaireContainer.classList.add("hidden");
 }
 
 function handleSubmit(event) {
@@ -516,9 +922,9 @@ function handleSubmit(event) {
         // When triggered with @
         if (type === 'at') {
             if (query.length === 0) {
-                matchingItems = agents;
+                matchingItems = getAgents();
             } else {
-                matchingItems = agents.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = getAgents().filter(item => item.name?.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -526,13 +932,11 @@ function handleSubmit(event) {
         else if (type === 'slash') {
             // If no agent selected yet
             if (!activeAgent) {
-                matchingItems = query.length === 0 ? commands : commands.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
-            }
-            // If there is an active agent
-            else {
-                matchingItems = query.length === 0
-                    ? agentCommandsMap[activeAgent]
-                    : agentCommandsMap[activeAgent].filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = query.length === 0 ? getCommands() : getCommands().filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
+            } else {
+                const agentSlugs = data.find(item => item.name === currentActiveAgent);
+                const slugs = agentSlugs.supported_commands.map(command => ({ name: command.slug, description: command.intent }));
+                matchingItems = slugs.filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -544,22 +948,25 @@ function handleSubmit(event) {
     const menuItemFn = (action, setItem, selected, trigger) => {
         const div = document.createElement('div');
         div.setAttribute('role', 'option');
-        div.className = `menu-item ${trigger === '@' ? 'text-blue-500' : 'text-rose-500'}`;
+        div.className = `menu-item ${action?.name?.startsWith('@') ? 'text-blue-500' : 'text-rose-500'}`;
         if (selected) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = description[action] ? `${trigger}${action} - ${description[action]}` : `${trigger}${action}`;
+        div.textContent = `${action.name} - ${action.description}`;
         div.onclick = setItem;
         return div;
     };
 
+    agentBuilder = new AgentUIBuilder(this.ref);
     const commandDeck = new CommandDeck(
         textInput,
         textinputMenu,
         resolveFn,
         replaceFn,
-        menuItemFn
+        menuItemFn,
+        data,
+        agentBuilder
     );
 
     if (event.key === "Enter" && !event.shiftKey && commandDeck.menuRef?.hidden) {
@@ -586,7 +993,7 @@ function handleSubmit(event) {
                 // Perform some action
                 commandEnable = false;
             }
-        }, 500);
+        }, 2500);
 
     }
 
@@ -597,10 +1004,27 @@ function handleSubmit(event) {
     }
 }
 
-function ifKeyExists() {
-    vscode.postMessage({
-        type: "checkKeyIfExists",
+function getAgents() {
+    const agents = [];
+    data.forEach(agent => {
+        if (agent.name.trim().length > 0) {
+            agents.push({ name: agent.name, description: agent.description });
+        }
     });
+
+    return agents;
+}
+
+function getCommands() {
+    const commands = [];
+    data.forEach(agent => {
+        if (agent.name.trim().length === 0) {
+            agent.supported_commands.forEach(_commands => {
+                commands.push({ name: _commands.slug, description: _commands.intent });
+            });
+        }
+    });
+    return commands;
 }
 
 function setCaretToEnd(target) {
@@ -618,7 +1042,7 @@ function setCaretToEnd(target) {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Ask Dash AI") {
+    if (textInput.textContent.trim() === "# Ask Dash") {
         textInput.textContent = '';
         textInput.classList.remove('placeholder');
     }
@@ -627,7 +1051,7 @@ function removePlaceholder() {
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Ask Dash AI';
+        textInput.textContent = '# Ask Dash';
         textInput.classList.add('placeholder');
     }
 }
@@ -637,8 +1061,7 @@ function readTriggeredMessage() {
         const message = event.data;
         switch (message.type) {
             case "apiKeyValidation":
-            case "dependencyValidation":
-                updateValidationList(message);
+                updateValidationList(message.value);
                 break;
             case "displayMessages":
                 conversationHistory = message.value;
@@ -660,83 +1083,30 @@ function readTriggeredMessage() {
                 sendButton.classList.remove("cursor-not-allowed");
                 loadingIndicator.classList.add("hidden");
                 loadingIndicator.classList.remove("block");
+                workspaceLoader.style.display = 'none';
+                workspaceLoaderText.classList.add("hidden");
+
                 sendButton.classList.remove("disabled");
                 textInput.addEventListener("keydown", handleSubmit);
-                break;
-            case "showValidationLoader":
-                validationLoadingIndicator.classList.add("block");
-                validationLoadingIndicator.classList.remove("hidden");
-                break;
-            case "hideValidationLoader":
-                validationLoadingIndicator.classList.add("hidden");
-                validationLoadingIndicator.classList.remove("block");
-                break;
-            case "keyExists":
-                onboardingCompleted = true;
-                stepOneCompleted = true;
-                modelCount = 3;
-                googleApiKeyHeader.classList.add("hidden");
-                bottomContainer.classList.remove("hidden");
-                bottomContainer.classList.add("flex");
-                textInput.textContent = "";
-                textInput.contentEditable = true;
-                onboardingArrowIcon.classList.add("hidden");
-                onboardingText.classList.add("hidden");
-                tryFlutterText.classList.add("hidden");
-                setLoading(false);
-                break;
-            case 'workspaceLoader':
-                workspaceLoader.style.display = message.value ? 'flex' : 'none';
-                if (message.value) {
-                    workspaceLoader.classList.remove("animate__slideOutDown");
-                    workspaceLoader.classList.add("animate__slideInUp");
-                    sendButton.classList.add("disabled");
-                    textInput.removeEventListener("keydown", handleSubmit);
-                } else {
-                    workspaceLoader.classList.remove("animate__slideInUp");
-                    workspaceLoader.classList.add("animate__slideOutDown");
-                    sendButton.classList.remove("disabled");
-                    textInput.addEventListener("keydown", handleSubmit);
-                }
-                if (!message.value) {
-                    fileNameContainer.innerHTML = '';
-                    workspaceLoaderText.textContent = "Finding the most relevant files";
-                }
-                break;
-            case 'stepLoader':
-                if (message.value?.fetchingFileLoader) {
-                    workspaceLoaderText.textContent = "Finding most relevant files\n(this may take a while for first time)";
-                } else if (message.value?.creatingResultLoader) {
-                    fileNameContainer.style.display = "inline-flex";
-                    workspaceLoaderText.textContent = "Preparing a result";
-                    message.value?.filePaths?.forEach((_filePath) => {
-                        const divBlock = document.createElement("div");
-                        divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
-                        divBlock.id = "divBlock";
-                        const fileNames = document.createElement("span");
-                        const _dartIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        _dartIcon.innerHTML = dartIcon;
-                        _dartIcon.classList.add("h-3", "w-3", "mx-1");
-                        _dartIcon.id = "dartIcon";
-                        fileNames.textContent = _filePath;
-                        fileNames.classList.add("file-path");
-                        fileNames.id = "fileNames";
-                        divBlock.appendChild(_dartIcon);
-                        divBlock.appendChild(fileNames);
-                        fileNameContainer.appendChild(divBlock);
-                    });
-                }
                 break;
             case 'clearCommandDeck':
                 clearChat();
                 break;
-
             case 'addToReference':
                 removePlaceholder();
-                createReferenceChips(JSON.parse(message.value));
+                createReferenceChips(JSON.parse(message.value), false);
                 setTimeout(() =>
                     adjustHeight(),
-                0);
+                    0);
+                break;
+            case 'commandActionRefactor':
+                removePlaceholder();
+
+                createReferenceChips(JSON.parse(message.value), true);
+
+                setTimeout(() =>
+                    adjustHeight(),
+                    0);
                 break;
             case 'setInput':
                 textInput.textContent = message.value;
@@ -753,11 +1123,150 @@ function readTriggeredMessage() {
             case 'keyNotExists':
                 setLoading(false);
                 break;
+            case 'loaderUpdate':
+                const _message = JSON.parse(message.value);
+                const loaderKind = _message['kind'];
+                const loaderMessage = _message['message'];
+                setLoader(loaderKind, loaderMessage);
+                break;
+            case "showValidationLoader":
+                toggleLoader(true);
+                validationLoadingIndicator.classList.remove("hidden");
+                break;
+            case "hideValidationLoader":
+                toggleLoader(false);
+                validationLoadingIndicator.classList.add("hidden");
+                break;
+            case 'pendingSteps':
+                const pendingStepsArr = JSON.parse(message.value);
+                if (pendingStepsArr?.length > 0) {
+                    onboardingSetup.classList.remove("hidden");
+                    bottomContainer.classList.add("hidden");
+                    pendingStepsArr?.forEach((steps) => {
+                        switch (steps) {
+                            case 0:
+                                isGithubLoginPending = true;
+                                githubCross.classList.remove('hidden');
+                                githubTick.classList.add('hidden');
+                                githubLogin.classList.remove("hidden");
+                                apiKeyContainer.classList.remove("hidden");
+                                break;
+
+                            case 1:
+                                isApiKeyPending = true;
+                                apiKeyCross.classList.remove('hidden');
+                                apiKeyTick.classList.add('hidden');
+                                googleApiKeyTextInput.classList.remove("hidden");
+                                executableContainer.classList.remove("hidden");
+                                break;
+
+                            case 2:
+                                isExecutableDownloadPending = true;
+                                executableCross.classList.remove('hidden');
+                                executableTick.classList.add('hidden');
+                                executableProgress.classList.remove("hidden");
+                                break;
+                        }
+                    });
+                }
+
+                if (!isGithubLoginPending) {
+                    isGithubLoginPending = false;
+                    githubCross.classList.add("hidden");
+                    githubTick.classList.remove("hidden");
+                    githubLogin.classList.add("hidden");
+                }
+                if (!isApiKeyPending) {
+                    isApiKeyPending = false;
+                    apiKeyCross.classList.add("hidden");
+                    apiKeyTick.classList.remove("hidden");
+                    googleApiKeyTextInput.classList.add("hidden");
+
+                }
+                if (!isExecutableDownloadPending) {
+                    isExecutableDownloadPending = false;
+                    executableCross.classList.add("hidden");
+                    executableTick.classList.remove("hidden");
+                    executableProgress.classList.add("hidden");
+                }
+
+                allStepsCompleted();
+                setLoading(false);
+                break;
+            case 'executableDownloadProgress':
+                executableProgress.value = message.value;
+                break;
+            case 'executableDownloaded':
+                isExecutableDownloadPending = false;
+                executableCross.classList.add("hidden");
+                executableTick.classList.remove("hidden");
+                executableProgress.classList.add("hidden");
+                allStepsCompleted();
+                break;
+            case 'apiKeySet':
+                isApiKeyPending = false;
+                apiKeyCross.classList.add("hidden");
+                apiKeyTick.classList.remove("hidden");
+                googleApiKeyTextInput.classList.add("hidden");
+                allStepsCompleted();
+                break;
+            case 'githubLoggedIn':
+                isGithubLoginPending = false;
+                githubCross.classList.add("hidden");
+                githubTick.classList.remove("hidden");
+                githubLogin.classList.add("hidden");
+                allStepsCompleted();
+                break;
         }
     });
 }
 
-function createReferenceChips(references) {
+function setLoader(loaderKind, loaderMessage) {
+    switch (loaderKind) {
+        case "message":
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("block");
+            workspaceLoader.classList.remove("hidden");
+            workspaceLoader.style.display = 'flex';
+            workspaceLoader.classList.remove("animate__slideOutDown");
+            workspaceLoader.classList.add("animate__slideInUp");
+            workspaceLoaderText.classList.remove("hidden");
+            workspaceLoaderText.textContent = loaderMessage;
+            sendButton.classList.add("disabled");
+            break;
+        case "processingFiles":
+            break;
+        case "circular":
+            toggleLoader(true);
+            break;
+        case "none":
+            toggleLoader(false);
+            break;
+    }
+}
+
+function toggleLoader(isShowLoader) {
+    if (isShowLoader) {
+        loadingIndicator.classList.add("block");
+        loadingIndicator.classList.remove("hidden");
+    } else {
+        loadingIndicator.classList.add("hidden");
+        loadingIndicator.classList.remove("block");
+        workspaceLoader.style.display = 'none';
+    }
+}
+
+function allStepsCompleted() {
+    if (!isGithubLoginPending && !isApiKeyPending && !isExecutableDownloadPending) {
+        onboardingSetup.classList.add("hidden");
+        bottomContainer.classList.add("flex");
+        bottomContainer.classList.remove("hidden");
+        onboardingCompleted = true;
+        stepOneCompleted = true;
+        modelCount = 3;
+    }
+}
+function createReferenceChips(references, isCommandAction) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
@@ -766,13 +1275,26 @@ function createReferenceChips(references) {
         return;
     }
 
-    chip.innerHTML = `${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span>`;
+    chip.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}<span class="ml-1">${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]</span></svg>`;
     chip.id = chipId;
     chip.setAttribute("contenteditable", "false");
 
     chipsData = { ...chipsData, [chipId]: references };
-    if (commandEnable) {
-        insertAtReference(chip);
+    if (commandEnable && !isCommandAction) {
+        agentBuilder?.onCodeInput(references, chipId);
+    } else if (isCommandAction) {
+        textInput.textContent = '';
+        agentInputsJson.length = 0;
+        const agentProvider = new AgentProvider(data);
+        agentInputsJson.push(agentProvider.getInputs("/refactor"));
+
+        const agentUIBuilder = new AgentUIBuilder(textInput);
+        agentUIBuilder.buildAgentUI();
+        agentUIBuilder?.onCodeInput(references, chipId);
+
+        setTimeout(() => adjustHeight(), 0);
+        commandEnable = true;
+
     } else {
         insertChipAtCursor(chip, textInput);
     }
@@ -885,14 +1407,18 @@ function debounce(func, wait, immediate = false) {
     };
 }
 
-
 function clearChat() {
     responseContainer.innerHTML = "";
     conversationHistory = [];
+    loadingIndicator.classList.add("hidden");
+    workspaceLoader.style.display = 'none';
+    workspaceLoaderText.classList.add("hidden");
 
     vscode.postMessage({
         type: "clearChat",
     });
+
+    questionnaireContainer.classList.remove("hidden");
 }
 
 function scrollToBottom() {
@@ -910,8 +1436,6 @@ function validateApiKey(apiKey) {
             type: "validate",
             value: apiKey,
         });
-    } else {
-        console.log('not valid api key');
     }
 }
 
@@ -930,18 +1454,18 @@ function countLeadingSpacesOfLine(line) {
 
 function preProcessMarkdown(markdown) {
     const lines = markdown.split("\n");
-  
+
     const processedLines = lines.map(line => {
         const leadingSpaces = countLeadingSpacesOfLine(line);
-  
+
         if (leadingSpaces % 4 !== 0) {
             const leadingSpacesToAdd = (Math.ceil(leadingSpaces / 4)) * 4 - leadingSpaces;
             return " ".repeat(leadingSpacesToAdd) + line;
-        } 
-    
+        }
+
         return line;
     });
-  
+
     return processedLines.join("\n");
 }
 
@@ -950,7 +1474,7 @@ function startAttributeExtension() {
 
     return [
         {
-            type: "lang", 
+            type: "lang",
             filter: function (text) {
                 const olMarkdownRegex = /^\s*(\d+)\. /gm;
 
@@ -966,9 +1490,9 @@ function startAttributeExtension() {
 
                 return text;
             }
-        }, 
+        },
         {
-            type: "output", 
+            type: "output",
             filter: function (text) {
                 if (startNumbers.length > 0) {
                     const lines = text.split("\n");
@@ -1003,38 +1527,27 @@ function displayMessages() {
         if (message.role === "model") {
             modelCount++;
 
-            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">Dash AI</span></div>`;
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">CommandDash</span></div>`;
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            if (modelCount === 1 && !stepOneCompleted) {
-                stepOneCompleted = true;
-                // Update UI or perform actions for Step One completion
-                onboardingText.textContent = "That is insightful, isn't it? Now lets try something related to your workspace using @workspace annotation.";
-                textInput.textContent = "@workspace help me find router code and it's location.";
 
-            } else if (modelCount === 2 && !onboardingCompleted) {
-                onboardingCompleted = true;
-                // Update UI or perform actions for Onboarding completion
-                onboardingText.textContent = "Awesome! You can watch more use cases here.";
-                textInput.textContent = "";
-                textInput.contentEditable = true;
-                onboardingArrowIcon.classList.add("hidden");
-                onboardingText.classList.add("hidden");
-                tryFlutterText.classList.add("hidden");
-            }
         } else if (message.role === "user") {
             roleElement.innerHTML = "<strong>You</strong>";
-            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message");
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "user-message", "inline-flex", "flex-col");
+            const agents = document.createElement("div");
+            agents.classList.add("inline-flex", "flex-row");
+            roleElement.appendChild(agents);
+            agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            if (message.agent && message.agent?.trim() !== "") {
-                agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
-                agent.textContent = message.agent;
-            }
+            // if (message.agent && message.agent?.trim() !== "") {
+            //     agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
+            //     agent.textContent = message.agent;
+            // }
         } else if (message.role === "dash") {
             //UI implementation
-            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#497BEF]", "text-white");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -1053,6 +1566,11 @@ function displayMessages() {
                 button.addEventListener("click", () => handleButtonEvent(message.agent, message.data, messageIndex, type));
                 buttonContainer.appendChild(button);
             });
+        } else if (message.role === "error") {
+            roleElement.innerHTML = "<strong class='text-white'>Error</strong>";
+            roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-red-700");
+            contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-red-700", "text-white");
+            contentElement.innerHTML = markdownToPlain(message.parts);
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(roleElement);
@@ -1167,68 +1685,22 @@ function markdownToPlain(input) {
 }
 
 async function updateValidationList(message) {
-    const existingListItem = document.querySelector(`li[data-type="${message.type}"]`);
-
-    if (existingListItem) {
-        existingListItem.textContent = message.value;
-    } else {
-        const listItem = document.createElement('li');
-        listItem.textContent = message.value;
-        listItem.setAttribute('data-type', message.type);
-        if (message.value.includes("invalid") || message.value.includes("not")) {
-            listItem.classList.add("invalid");
-        } else {
-            listItem.classList.add("valid");
-        }
-        validationList.appendChild(listItem);
+    if (message === "Gemini API Key is invalid") {
+        isApiKeyPending = true;
+        apiKeyCross.classList.remove('hidden');
+        apiKeyTick.classList.add('hidden');
+        googleApiKeyError.textContent = "Error: Gemini API Key is invalid";
+    } else if (message === "Gemini API Key is valid") {
+        isApiKeyPending = false;
+        apiKeyCross.classList.add('hidden');
+        apiKeyTick.classList.remove('hidden');
+        const geminiAPIKey = googleApiKeyTextInput.value;
+        vscode.postMessage({
+            type: "updateApiKey",
+            value: geminiAPIKey,
+        });
+        googleApiKeyError.textContent = "";
     }
-
-    // Check for specific messages to update flags
-    switch (message.type) {
-        case "apiKeyValidation":
-            isApiKeyValid = message.value === "Gemini API Key is valid";
-            if (!isApiKeyValid) {
-                existingListItem.classList.add("invalid");
-                existingListItem.classList.remove("valid");
-            } else {
-                existingListItem?.classList.add("valid");
-                existingListItem?.classList.remove("invalid");
-            }
-            break;
-        case "dependencyValidation":
-            areDependenciesInstalled = message.value === "All dependencies are installed";
-            if (!areDependenciesInstalled) {
-                existingListItem.classList.add("invalid");
-                existingListItem.classList.remove("valid");
-            } else {
-                existingListItem?.classList.add("valid");
-                existingListItem?.classList.remove("invalid");
-            }
-            break;
-    }
-
-    // Check if both conditions are met, add "All permissions look good"
-    if (isApiKeyValid && areDependenciesInstalled) {
-        bodyContainer.classList.add("flex", "flex-col");
-        bottomContainer.classList.remove("hidden");
-        bottomContainer.classList.add("flex");
-        setAPIKeyInSettings();
-
-    } else {
-        // Remove "All permissions look good" item if conditions are not met
-        bodyContainer.classList.remove("flex", "flex-col");
-        bottomContainer.classList.add("hidden");
-        bottomContainer.classList.remove("flex");
-
-    }
-}
-
-function setAPIKeyInSettings() {
-    const geminiAPIKey = googleApiKeyTextInput.value;
-    vscode.postMessage({
-        type: "updateSettings",
-        value: geminiAPIKey
-    });
 }
 
 function adjustHeight() {

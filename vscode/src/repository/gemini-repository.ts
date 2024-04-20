@@ -79,7 +79,9 @@ export class GeminiRepository extends GenerationRepository {
 
         // Count the tokens in the prompt
         const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
-        const { totalTokens } = await model.countTokens(lastMessage?.parts ?? "");
+        let promptText = "";
+        prompt.forEach(p => promptText += p.parts);
+        const { totalTokens } = await model.countTokens(promptText);
         console.log("Total input tokens: " + totalTokens);
 
         // Check if the token count exceeds the limit
@@ -107,7 +109,7 @@ export class GeminiRepository extends GenerationRepository {
         try {
             const _genAI = new GoogleGenerativeAI(apiKey);
             const model = _genAI.getGenerativeModel({ model: 'gemini-pro' });
-            const result = await model.generateContent('Test message');
+            const result = await model.generateContent('Hi');
             return result.response.text;
         } catch (error) {
             // Check if the error is related to an invalid API key

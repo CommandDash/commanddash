@@ -75,13 +75,14 @@ function getCaretCoordinates(element, position) {
 }
 
 class CommandDeck {
-    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn) {
+    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn, agentUIBuilder) {
         this.ref = ref;
         this.menuRef = menuRef;
         this.resolveFn = resolveFn;
         this.replaceFn = replaceFn;
         this.menuItemFn = menuItemFn;
         this.options = [];
+        this.agentUIBuilder = agentUIBuilder;
 
         this.makeOptions = this.makeOptions.bind(this);
         this.closeMenu = this.closeMenu.bind(this);
@@ -97,10 +98,11 @@ class CommandDeck {
     async makeOptions(query) {
         let options = [];
         if (query.startsWith('@')) {
-            options = await this.resolveFn(query.slice(1), 'at');
+            options = await this.resolveFn(query, 'at');
         } else if (query.startsWith('/')) {
-            options = await this.resolveFn(query.slice(1), 'slash');
+            options = await this.resolveFn(query, 'slash');
         }
+
         if (options.length !== 0) {
             this.options = options;
             this.renderMenu();
@@ -122,27 +124,54 @@ class CommandDeck {
     selectItem(active) {
         return () => {
             const option = this.options[active];
-
-            const commands = this.extractCommands(option, "/") ?? option;
-            const isSlashOptionAvailable = commandsExecution.hasOwnProperty(commands);
-
-            if (isSlashOptionAvailable) {
-                commandsExecution[commands].exe(this.ref);
-            } else {
-                const trigger = this.ref.textContent[this.triggerIdx];
-                this.ref.textContent = "";
-                const mentionNode = document.createElement("span");
-                mentionNode.id = "special-commands";
-                mentionNode.classList.add("text-blue-500", "inline-block");
-                mentionNode.contentEditable = false;
-                mentionNode.textContent = `${trigger}${option}\u200B`;
-                this.ref.appendChild(mentionNode);
-                this.ref.appendChild(document.createTextNode("\u00A0"));
-                setCaretToEnd(this.ref);
+            if (!option?.name.startsWith('/')) {
+                this.ref.textContent = '';
             }
+            if (option?.name.startsWith('/')) {
+                const textContent = this.ref.innerHTML;
+                const atIndex = textContent.lastIndexOf('/');
+                this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
+            }
+            if (option?.name.startsWith('@')) {
+                const agentSpan = document.createElement('span');
+                const slugSpan = document.createElement('span');
+                agentSpan.classList.add("inline-block", "text-[#287CEB]");
+                agentSpan.contentEditable = false;
+                agentSpan.textContent = `${option?.name}\u00A0`;
+                slugSpan.classList.add("inline-block");
+                slugSpan.contentEditable = false;
+                slugSpan.textContent = "/";
+                this.ref.appendChild(agentSpan);
+                this.ref.appendChild(slugSpan);
+                activeAgent = true;
+                currentActiveAgent = option.name;
+                // this.closeMenu();
+                this.makeOptions("/");
+                // Move the cursor to the end of the word
+                this.ref.focus();
+                // Move the cursor to the end of the text
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(this.ref);
+                range.collapse(false); // false means collapse to the end
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                this.ref.textContent = '';
+                const agentUIBuilder = new AgentUIBuilder(this.ref);
+                const agentProvider = new AgentProvider(data);
+                // agentInputsJson = agentProvider.getInputs(option);
+                agentInputsJson.push(agentProvider.getInputs(option.name));
+                agentUIBuilder.buildAgentUI();
 
-            this.ref.focus();
-            this.closeMenu();
+                this.ref.focus();
+                this.closeMenu();
+
+                setTimeout(() => {
+                    adjustHeight();
+                    commandEnable = true;
+                }, 0);
+            }
         };
     }
 
@@ -163,18 +192,16 @@ class CommandDeck {
         const textBeforeCaret = this.ref.textContent.slice(0, positionIndex);
         const tokens = textBeforeCaret.split(/\s/);
         const lastToken = tokens[tokens.length - 1];
-        const triggerIdx = textBeforeCaret.endsWith(lastToken)
-            ? textBeforeCaret.length - lastToken.length
-            : -1;
+        const triggerIdx = textBeforeCaret.endsWith(lastToken) ? textBeforeCaret.length - lastToken.length : -1;
         const maybeTrigger = textBeforeCaret[triggerIdx];
         const keystrokeTriggered = maybeTrigger === '@' || maybeTrigger === '/';
 
         this.ref.style.height = "auto";
         this.ref.style.height = this.ref.scrollHeight + "px";
 
-        const isTriggerAtStartOfWord = triggerIdx === 0;
+        // const iscoAtStartOfWord = triggerIdx === 0;
 
-        if (!keystrokeTriggered || !isTriggerAtStartOfWord) {
+        if (!keystrokeTriggered) {
             this.closeMenu();
             return;
         }
@@ -218,24 +245,20 @@ class CommandDeck {
                     this.selectItem(this.active)();
                     keyCaught = true;
                     break;
-                case 'Backspace':
-                    const selection = window.getSelection();
-                    const range = selection.getRangeAt(0);
-                    const mentionNode = document.getElementById("special-commands");
-
-                    if (mentionNode) {
-                        const prevNode = mentionNode.previousSibling;
-                        const nextNode = mentionNode.nextSibling;
-                        this.ref.removeChild(mentionNode);
-
-                        // Restore the cursor position 
-                        range.setStartAfter(prevNode || nextNode);
-                        range.collapse(true);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
-                    break;
             }
+        }
+
+        if (ev.key === "Backspace") {
+            setTimeout(() => {
+                if (this.ref.textContent.trim() === "") {
+                    activeAgent = false;
+                    commandEnable = false;
+                    currentActiveAgent = '';
+                    currentActiveSlug = '';
+                    agentInputsJson.length = 0;
+                    codeInputId = 0;
+                }
+            }, 0);
         }
 
         if (keyCaught) {

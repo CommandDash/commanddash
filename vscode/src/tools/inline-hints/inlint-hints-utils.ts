@@ -15,7 +15,7 @@ export async function activateInlineHints(cacheManager: CacheManager) {
     });
 
     vscode.workspace.onDidChangeTextDocument(async event => {
-        const inlineCount = await cacheManager.getInlineCompletionCount();
+        const inlineCount = cacheManager.getInlineCompletionCount();
 
         if (event.document.languageId === 'dart') {
             const activeEditor = vscode.window.activeTextEditor;

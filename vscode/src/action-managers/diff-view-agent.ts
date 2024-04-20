@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 
 export class DiffViewAgent {
     static async handleResponse(userChoice: string, data: any, messageId: string) {
-        const chip = data.chip;
+        const selection = data.selection;
         const optimizedCode = data.optimizedCode;
-        const originalCodeUri = data.originalCodeUri;
+        const originalCodeUri = data.path;
 
 
         let document = vscode.workspace.textDocuments.find(function (e) {
@@ -12,7 +12,7 @@ export class DiffViewAgent {
             return e.uri.toString() === originalCodeUri;
         });
 
-        const selection = chip.referenceData.selection;
+        // const selection = chip.referenceData.selection;
         if (!document) {
             // if document is not founds, open the document
             let uri = vscode.Uri.parse(originalCodeUri);

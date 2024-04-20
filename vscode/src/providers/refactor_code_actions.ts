@@ -28,22 +28,22 @@ export class FluttergptActionProvider implements vscode.CodeActionProvider {
 			refactorCode.isPreferred = true;
 			refactorCode.command = {
 				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
-				command: "dashai.refactorCode",
+				command: "dash.refactorCode",
 				title: "Refactor code",
 			};
 			functionAction.push(refactorCode);
+			//TODO: Remove entire optimize related code actions code.
+			// // optimize function
+			// const optimizeFunction = new vscode.CodeAction(
+			// 	`✨ Optimize${codeActionIndication}`, vscode.CodeActionKind.RefactorRewrite);
+			// optimizeFunction.isPreferred = true;
+			// optimizeFunction.command = {
+			// 	arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
+			// 	command: "dash.optimizeCode",
+			// 	title: "Optimize Function",
+			// };
 
-			// optimize function
-			const optimizeFunction = new vscode.CodeAction(
-				`✨ Optimize${codeActionIndication}`, vscode.CodeActionKind.RefactorRewrite);
-			optimizeFunction.isPreferred = true;
-			optimizeFunction.command = {
-				arguments: [this.aiRepo, this.extcontext.globalState, selectedRange, this.analyzer, manualSelectionRange !== undefined ? undefined : functionRange !== undefined ? `${functionRange.symbol.element.name}` : `${classRange?.symbol.element.name}`],
-				command: "dashai.optimizeCode",
-				title: "Optimize Function",
-			};
-
-			functionAction.push(optimizeFunction);
+			// functionAction.push(optimizeFunction);
 
 			return functionAction;
 

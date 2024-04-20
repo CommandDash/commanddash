@@ -201,11 +201,19 @@ p[contenteditable="true"] {
     outline: 1px solid #497BEF;
 }
 
-#text-refactor-input {
+.code_input {
     outline: 1px solid var(--vscode-editor-foreground);
 }
 
-#text-refactor-input:focus {
+.code_input:focus {
+    outline: 1px solid #497BEF;
+}
+
+.string_input {
+    outline: 1px solid var(--vscode-editor-foreground);
+}
+
+.string_input:focus {
     outline: 1px solid #497BEF;
 }
 
@@ -222,6 +230,12 @@ p[contenteditable="true"] {
     cursor: pointer;
     z-index: 98;
 }
+
+.questionnaire-card {
+    background-color: var(--vscode-dropdown-background);
+    /* color: var(--vscode-editorWidget-foreground); */
+}
+
 
 .tippy-box[data-theme~='flutter-blue'] {
     background-color: #287CEB;
@@ -242,4 +256,23 @@ p[contenteditable="true"] {
 
 .tippy-box[data-theme~='flutter-blue'][data-placement^='right']>.tippy-arrow::before {
     border-right-color: #287CEB;
+}
+
+progress {
+    height: 7px;
+}
+
+@keyframes progress-animation {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+progress::-webkit-progress-value {
+    background-color: #287CEB;
+    animation: progress-animation 2s linear forwards;
 }
