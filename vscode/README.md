@@ -1,8 +1,3 @@
-<p align="center">
-  <a href="" rel="noopener">
- <img height=180px src="/vscode/media/icon.png"></a>
-</p>
-<h1 align="center">CommandDash (Beta)</h1>
 <div align="center">
 <h3> Your Flutter AI Autopilot with Gemini Code & Vision</h3>
 
@@ -11,7 +6,7 @@
 <img src="/assets/docs/poster.jpg"></a>
 
 -----------------
-CommandDash is a command-based coding assistant. It has built in agents that not only help you write code, but also auto run and debug it - performing various Flutter development tasks for you.
+CommandDash is a command-based coding assistant. It provides built in agents that that can automate various Flutter development tasks for you.
 
 ##### ✨ Powered by Gemini 
 ##### 🤝 Dart Analyzer Inside
@@ -22,12 +17,14 @@ Currently in Beta, CommandDash is being built in open-sourced with the community
 -----------------
 ## Getting Started
 
-##### 1. Create Free Gemini API Key
+##### 1. Create Gemini API Key
 Visit [Makersuite by Google](https://makersuite.google.com/) and create your free API Key.
-##### 2. Add the key in CommandDash Panel
-Paste your API key in the input field in CommandDash Panel.
 
-That's it. You're ready to use Dash AI. ✅
+*Note: Gemini offers both free and paid plans.*
+##### 2. Add the key in CommandDash Panel
+Paste your API key in the input field in Dash Panel.
+
+That's it. You're ready to use CommandDash. ✅
 
 ## Features
 
@@ -36,71 +33,35 @@ That's it. You're ready to use Dash AI. ✅
 <img src="/assets/docs/multi-code-attachment.gif" alt="Multi code chat with VSCode inside Gemini" width="500"/>
 </p>
 
-Attach multiple code snippets from different files in your inline chat. With full-context passed to Gemini, receive accurate responses and amend code across multiple files.
+Select and attach multiple code snippets from different files in your inline chat using **"Attach Snippet to Dash"** from the right-click menu. 
+
+🤝 With full-context passed to Gemini, receive accurate responses and update code across multiple files.
 
 ### 🚀 @Agents and /Commands
 
 Use built in agents and commands to autopilot different kinds of tasks.
 
-Currently, we support:
+Currently, we offer following agents and commands:
 
-#### 1. `@workspace` agent.
-Ask anything related to Flutter or Dart and get instant answers. Query your workspace using `@workspace` command.
+#### 1. `@workspace`
+Directly query across your workspace and find relevant files related to a feature. Leverage this command to build an understand of the codebase you are working with. 
 
-#### 2. `/refactor` command.
+#### 2. `@test`
+Generate unit, widget and integration tests with full-context for your Flutter/Dart project. 
+
+✅ Also, attach previously existing tests as references to help Gemini learn your testing style and choice of libraries. 
+
+#### 3. `@flutter`
+✨ Use `/doc` command answer your Flutter/Dart questions from trusted sources including official docs.
+
+#### 4. `/refactor` and `/document`
+
+Modify your existing code with instructions and apply the changes.
+
 <p align="center">
-<img src="/assets/docs/refactor-command.png" alt="Multi code chat with VSCode inside Gemini" width="500"/>
+<img src="/assets/docs/refactor-command.png" alt="Refactoring code with CommandDash" width="500"/>
 </p>
 
-More, coming very soon.
-
-### ✨ Generate Inline Code
-
-#### 1. **Code Block Completion**
-
-Complete methods, classes or any other code blocks by running `Inline Code Generation` from the menu or via `cmd+shift+R`.
-
-Specify details with comments for better accuracy. For example,
-
-```dart
-class Cart {
-  // Properties
-  List<Item> items = [];
-
-  void addItem(Item item) {
-    items.add(item);
-  }
-
-  void removeItem(Item item) {
-    items.remove(item);
-  }
-  // get total price method
-  **[cmd+shift+R]**
-}
-```
-
-completes the next lines with:
-``` dart
-  double getTotalPrice() {
-    double total = 0;
-    for (Item item in items) {
-      total += item.price;
-    }
-    return total;
-  }
-```
-
-#### 2. **Widget from Image or Description**
-
-Use Gemini's multimodal capabilities to create widget from a image with added description. 
-
-Command: `Dash AI Create: Widget from Image or Description`
-
-#### 3. **Code from Blueprint**
-
-Get complete code from a blueprint of a class or function with the behaviour of functions, state management and architecture of your choice.
-
-Command: `Dash AI Create: Code from Blueprint`
 
 ## FAQs
 
@@ -109,9 +70,9 @@ Command: `Dash AI Create: Code from Blueprint`
 
 2. **Do I need to pay to use CommandDash?**
 
-- Gemini PRO is currently in early access and is completely free to use for upto 60 requests for minute. Please check the [pricing](https://ai.google.dev/pricing) here.
+- Gemini PRO offers both free and paid plans. Please check the [pricing](https://ai.google.dev/pricing) here.
 
-3. **I am an Android Studio user. Can I use Dash AI?**
+3. **I am an Android Studio user. Can I use CommandDash?**
 - We are coming soon for IntelliJ-based IDEs. *🤫 Secret: most of our core logic is written in Dart, allowing us to ship on any platform very very fast!*
 
 ## Contributing
@@ -134,4 +95,4 @@ Connect with like minded people building with Flutter and using AI to do so, eve
 
 ## License
 
-Dash AI is released under the Apache License Version 2.0. See the [LICENSE](LICENSE) file for more information.
+CommandDash is released under the Apache License Version 2.0. See the [LICENSE](LICENSE) file for more information.
