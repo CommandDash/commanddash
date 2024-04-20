@@ -10,6 +10,7 @@ import path = require('path');
 import * as os from 'os';
 import { promisify } from 'util';
 import { ExtensionVersionManager } from '../update-check';
+import { logError, logEvent } from '../telemetry-reporter';
 
 async function setupExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
   const platform = os.platform();
@@ -240,7 +241,8 @@ export class DartCLIClient {
       });
 
       this.eventEmitter.once(`error_${id}`, (response) => {
-        reject(Error(response['message']));
+        logEvent('server_error', response);
+        reject(Error(response['message']));  
       });
 
       console.log(requestPayload);
