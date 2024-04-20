@@ -120,9 +120,10 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
 
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
-   
-    const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
+    
+    //TODO: Renable after moving to CommandDash
+    // const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
+    // context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
     initCommands(context, geminiRepo, analyzer, chatViewProvider);
 
