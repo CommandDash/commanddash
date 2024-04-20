@@ -692,7 +692,7 @@ let data = Object.freeze([
                 "intent": "Refactor your code",
                 "registered_inputs": [
                     {
-                        "display_text": "Additional Instructions",
+                        "display_text": "Instructions",
                         "id": "640160831",
                         "optional": false,
                         "type": "string_input",
