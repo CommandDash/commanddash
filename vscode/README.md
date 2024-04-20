@@ -77,7 +77,7 @@ Modify your existing code with instructions and apply the changes.
 
 ## Contributing
 
-A coding assistant for all is best built when all of us contribute. You can make contributions to the VSCODE or IntelliJ extension or also to [CommandDash CLI](https://github.com/Welltested-AI/commanddash) shared between the extensions.
+A coding assistant for all is best built when all of us contribute. You can make contributions to the VSCODE or IntelliJ extension or also to [agents engine](https://github.com/CommandDash/packages) shared between the extensions.
 
 ### Ways to contribute
 
