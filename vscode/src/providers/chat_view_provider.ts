@@ -262,6 +262,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         try {
             let auth = Auth.getInstance();
             /// Request the client to process the task and handle result or error
+            let agentTrackData = {
+                'agent_name': (agentResponse['agent'] as string).substring(1),
+                'slash_command': agentResponse['slug'],
+                'agent_version': agentResponse['agent_version']
+            };
+            logEvent('agent_start', agentTrackData);
             const response = await task.run({
                 kind: "agent-execute", data: {
                     "auth_details": {
@@ -273,6 +279,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     agent_name: (agentResponse['agent'] as string).substring(1) // remove the '@'
                 }
             });
+            logEvent('agent_success', agentTrackData);
             console.log("Processing completed: ", response);
         } catch (error) {
             console.error("Processing error: ", error);

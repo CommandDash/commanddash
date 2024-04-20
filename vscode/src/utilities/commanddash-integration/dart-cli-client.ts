@@ -11,6 +11,7 @@ import * as os from 'os';
 import { promisify } from 'util';
 import { ExtensionVersionManager } from '../update-check';
 import { logError, logEvent } from '../telemetry-reporter';
+import { error } from 'console';
 
 async function setupExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
   const platform = os.platform();
@@ -241,8 +242,14 @@ export class DartCLIClient {
       });
 
       this.eventEmitter.once(`error_${id}`, (response) => {
-        logEvent('server_error', response);
-        reject(Error(response['message']));  
+        try {
+          const myError = new Error(response['message']);
+          myError.stack = response['data']?.['stack'];
+          logError('server_error', myError);
+        } catch (e) {
+          console.log('Unable to send server error: ' + e);
+        }
+        reject(Error(response['message']));
       });
 
       console.log(requestPayload);
