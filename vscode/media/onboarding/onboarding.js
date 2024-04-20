@@ -692,7 +692,7 @@ let data = Object.freeze([
                 "intent": "Refactor your code",
                 "registered_inputs": [
                     {
-                        "display_text": "Instruction",
+                        "display_text": "Instructions",
                         "id": "640160831",
                         "optional": false,
                         "type": "string_input",
@@ -719,7 +719,7 @@ let data = Object.freeze([
                         "outputs": [
                             "651573210"
                         ],
-                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\n\n            Refactor the given code according to user instruction. User instruction <640160831>\n\n            User selected code:\n            <555878446>\n \n           Proceed step by step: \n           1. Describe the selected piece of code.\n           2. What are the possible optimizations?\n           3. How do you plan to achieve that ? [Don't output code yet]\n           4. Output the modified code to be be programatically replaced in the editor in place of the user selection.Since this is without human review, you need to output the precise code to replace in file.",
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that is need to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\n\nNote:\nState any assumption made and improvements introduced used while modification.",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
