@@ -692,7 +692,7 @@ let data = Object.freeze([
                 "intent": "Refactor your code",
                 "registered_inputs": [
                     {
-                        "display_text": "Instruction",
+                        "display_text": "Additional Instructions",
                         "id": "640160831",
                         "optional": false,
                         "type": "string_input",
@@ -719,7 +719,7 @@ let data = Object.freeze([
                         "outputs": [
                             "651573210"
                         ],
-                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\n\n            Refactor the given code according to user instruction. User instruction <640160831>\n\n            User selected code:\n            <555878446>\n \n           Proceed step by step: \n           1. Describe the selected piece of code.\n           2. What are the possible optimizations?\n           3. How do you plan to achieve that ? [Don't output code yet]\n           4. Output the modified code to be be programatically replaced in the editor in place of the user selection.Since this is without human review, you need to output the precise code to replace in file.",
+                        "prompt": "You are a Flutter/Dart assistant helping user to refactoring the existing code.\n\n            Please find the additional instructions from the user <Additional Instructions> and the code that need to be refactored <Code> below:\n\n            Code:\n            <555878446>\n\n            Additional Instructions: <640160831>\n\n           Best Practises to Follow:\n           1. Make sure to restructure the existing code without changing its external behavior to improve readability, maintainability, and performance.\n           2. Refactor the code to make code easier to understand by breaking down complex logic into simpler, more readable components. \n           3. Make sure that the refactored code addresses the code duplication and code smell issues.\n           4. Refactored code should include inline documentation and code comments to reflect the changes made to the code\n           5. State any assumption made and improvements introduced used while refactoring.",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
