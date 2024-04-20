@@ -69,7 +69,6 @@ export class CacheManager {
         }
         // Get all the flutter projects in the workspace
         const flutterProjects = pubspecs.map((uri) => uri.fsPath);
-        const cache: { [flutterProject: string]: { [filePath: string]: { codehash: string, embedding: ContentEmbedding } } } = {};
 
         // ITERATE OVER ALL THE FILES IN THE CACHE
         // Find the flutter project for the file
@@ -77,7 +76,7 @@ export class CacheManager {
         for (const filePath in cacheData) {
             const parentProjectPath = this.findParentFlutterProject(filePath, flutterProjects);
             if (parentProjectPath) {
-                const key = "gemini-cache-" + computeCodehash(parentProjectPath);
+                const key = "gemini-cache-" + (parentProjectPath);
                 await this.setGlobalValue(key, JSON.stringify(cacheData));
             }
         }
@@ -98,7 +97,7 @@ export class CacheManager {
         // Return cache only for the parent flutter project of the current workspace
         for (const projectPath of flutterProjects) {
             const projectDir = path.dirname(projectPath);
-            const key = "gemini-cache-" + projectDir;
+            const key = "gemini-cache-" + (projectDir);
             // await this.setGlobalValue<String>(key, "value");
             const cacheString = await this.getGlobalValue<string>(key);
             if (!cacheString) {

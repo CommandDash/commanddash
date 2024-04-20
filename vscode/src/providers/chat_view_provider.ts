@@ -230,7 +230,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
             this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
         });
-
         task.onProcessStep('cache', async (message) => {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
@@ -243,7 +242,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
             task.sendStepResponse(message, { path: workspaceFolder.uri.fsPath });
         });
-        
+
         task.onProcessStep('replace_in_file', async (message) => {
             const { originalCode, path, optimizedCode } = message.params.args.file;
             const editor = vscode.window.activeTextEditor;
