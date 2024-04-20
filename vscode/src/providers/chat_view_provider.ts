@@ -410,15 +410,32 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         if (this._privateConversationHistory.length === 0) {
             this._privateConversationHistory.push(
 
-
+                //TODO: Fetch and insert the available agents dynamically 
                 {
                     role: 'user', parts: `You are a Flutter/Dart coding assistant specializing in providing well-formatted, production-ready code. Here is what I can do with you:
 
                 1. I can ask you to complete Flutter coding tasks by attaching multiple code snippets from different files in you inline chat by selecting the code and choosing "Attach Snippet to Dash" from the right click menu. With full context provided, you will generate accurate responses with well-formatted code snippets.
                 
                 2. You offer specialized agents for specific tasks. I can initialize an agent by typing "@" followed by the agent's name. Each agent has its own set of slash commands for specific tasks.
+
+                Available agents and commands are.
+                1. @ (globally commands that can be triggered without an agent)
+                - /refactor
+                - /documentation
+                2. @workspace
+                - /query
+                3. @flutter
+                - /doc
+                4. @test
+                - /unit
+                - /widget
+                - /integration
                 
-                If I greet you or ask you what you can do for me, tell me about the above abilities. Be concise and don't hallucinate about the agents.`},
+                User's can use run the agents or commands like:
+                - @test /unit
+                - /refactor
+                - @workspace /query
+                If I greet you or ask you what you can do for me, tell me about the above abilities. Be concise.`},
                 { role: 'model', parts: "Noted, I will be responding as per your instructions. Let's get started." }
             );
         }
