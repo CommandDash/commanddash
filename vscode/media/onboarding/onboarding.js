@@ -750,7 +750,7 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
         },
-        icon: `<span class="font-bold text-xs">&lt;/&gt;</span>`
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
     },
     {
         id: "workspace-questionaire",
@@ -760,6 +760,34 @@ const questionnaire = [
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "flutter-doc-search",
+        message: "Query official Flutter Docs",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/doc"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "unit-test",
+        message: "Generate unit tests for your methods",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/unit"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;

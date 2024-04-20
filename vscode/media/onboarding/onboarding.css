@@ -232,9 +232,10 @@ p[contenteditable="true"] {
 }
 
 .questionnaire-card {
-    background-color: var(--vscode-editor-foreground);
-    color: var(--vscode-editor-background);
+    background-color: var(--vscode-dropdown-background);
+    /* color: var(--vscode-editorWidget-foreground); */
 }
+
 
 .tippy-box[data-theme~='flutter-blue'] {
     background-color: #287CEB;
