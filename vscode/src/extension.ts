@@ -49,7 +49,7 @@ export async function activate(context: vscode.ExtensionContext) {
     if (geminiRepo){
         initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
     } else {
-        _inlineErrorCommand = vscode.commands.registerCommand('dashai.createInlineCodeCompletion', () => {
+        _inlineErrorCommand = vscode.commands.registerCommand('dash.createInlineCodeCompletion', () => {
             showMissingApiKey();
         });
     }

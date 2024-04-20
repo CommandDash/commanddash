@@ -17,7 +17,7 @@ import { ContextualCodeProvider } from "../utilities/contextual-code";
 import { Auth } from "../utilities/auth/auth";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "dashai.chatView";
+    public static readonly viewType = "dash.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     private setupManager = SetupManager.getInstance();
@@ -408,7 +408,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('dashai.chatView.focus');
+            await vscode.commands.executeCommand('dash.chatView.focus');
         } else {
             this._view?.show?.(true);
         }
