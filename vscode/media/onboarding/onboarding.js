@@ -1014,7 +1014,7 @@ function setCaretToEnd(target) {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Ask Dash AI") {
+    if (textInput.textContent.trim() === "# Ask Dash") {
         textInput.textContent = '';
         textInput.classList.remove('placeholder');
     }
@@ -1023,7 +1023,7 @@ function removePlaceholder() {
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Ask Dash AI';
+        textInput.textContent = '# Ask Dash';
         textInput.classList.add('placeholder');
     }
 }
@@ -1499,7 +1499,7 @@ function displayMessages() {
         if (message.role === "model") {
             modelCount++;
 
-            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">Dash AI</span></div>`;
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">CommandDash</span></div>`;
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -1519,7 +1519,7 @@ function displayMessages() {
             // }
         } else if (message.role === "dash") {
             //UI implementation
-            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#497BEF]", "text-white");
             contentElement.innerHTML = markdownToPlain(message.parts);

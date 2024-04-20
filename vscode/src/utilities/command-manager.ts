@@ -71,6 +71,7 @@ export function registerCommand(
 export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
     const generationRepository: GenerationRepository =  geminiRepo; //TODO: Use up in the tree getUserPrefferedModel();
     // List of commands to register, with their names and options.
+    // TODO: Rename dashai to just dash [Dash AI should not be a keyword anywhere]
     const commands = [
         { name: 'dashai.attachToDash', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'dashai.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },

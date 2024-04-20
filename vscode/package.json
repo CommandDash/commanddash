@@ -63,7 +63,7 @@
       ]
     },
     "configuration": {
-      "title": "Dash AI",
+      "title": "CommandDash",
       "type": "object",
       "properties": {
         "fluttergpt.apiKey": {
@@ -237,7 +237,7 @@
     "submenus": [
       {
         "id": "dashai.createMenu",
-        "label": "Dash AI: Create"
+        "label": "CommandDash: Create"
       }
     ]
   },
