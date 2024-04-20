@@ -12,7 +12,7 @@ CommandDash is a command-based coding assistant. It provides built in agents tha
 ##### 🤝 Dart Analyzer Inside
 ##### 👨🏼‍💻 For and by Flutter Engineers
 
-Currently in Beta, CommandDash is being built in open-sourced with the community.
+Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
 
 -----------------
 ## Getting Started
