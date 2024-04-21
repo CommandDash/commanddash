@@ -169,6 +169,8 @@ export class DartCLIClient {
 
         } if (method === 'log') {
           console.log(params);
+        } if (method==='debug_message'){
+          console.log('debug_message: ' + params);
         }
       }
 
