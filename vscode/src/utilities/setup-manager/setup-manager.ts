@@ -41,22 +41,6 @@ export class SetupManager {
             });
             console.log(error);
         });
-        this.dartClient.onProcessOperation('update_cache', async (message) => {
-            const embd = JSON.parse(message.params.args.embeddings);
-            var cacheMap: { [filePath: string]: { codehash: string, embedding: { values: number[] } } } = {};
-
-            // Iterate over each object in the list
-            for (const cacheItem of embd) {
-                // Extract filePath from the keys of each object in the list
-                const filePath = Object.keys(cacheItem)[0];
-
-                // Add the extracted object to the map
-                cacheMap[filePath] = cacheItem[filePath];
-            }
-
-            await CacheManager.getInstance().setGeminiCache(cacheMap);
-
-        });
         this.dartClient.onProcessOperation('refresh_access_token', async (message) => {
             let refreshToken = this.auth.getGithubRefreshToken();
             if (refreshToken) {

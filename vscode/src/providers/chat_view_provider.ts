@@ -234,6 +234,20 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
         });
+        task.onProcessStep('update_cache', async (message) => {
+            const embd = JSON.parse(message.params.args.embeddings);
+            var cacheMap: { [filePath: string]: { codehash: string, embedding: { values: number[] } } } = {};
+
+            // Iterate over each object in the list
+            for (const cacheItem of embd) {
+                // Extract filePath from the keys of each object in the list
+                const filePath = Object.keys(cacheItem)[0];
+
+                // Add the extracted object to the map
+                cacheMap[filePath] = cacheItem[filePath];
+            }
+            await CacheManager.getInstance().setGeminiCache(cacheMap);
+        });
         task.onProcessStep('workspace_details', async (message) => {
             const workspaceFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
             if (!workspaceFolder) {

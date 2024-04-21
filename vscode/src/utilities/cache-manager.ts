@@ -77,10 +77,16 @@ export class CacheManager {
             const parentProjectPath = this.findParentFlutterProject(filePath, flutterProjects);
             if (parentProjectPath) {
                 const key = "gemini-cache-" + (parentProjectPath);
-                await this.setGlobalValue(key, JSON.stringify(cacheData));
+                var currentCache = this.getGlobalValue<string>(key);
+                if (currentCache) {
+                    var cache = JSON.parse(currentCache);
+                } else {
+                    cache = {};
+                }
+                cache[filePath] = cacheData[filePath];
+                await this.setGlobalValue(key, JSON.stringify(cache));
             }
         }
-
     }
 
     async getGeminiCache(): Promise<string | undefined> {
