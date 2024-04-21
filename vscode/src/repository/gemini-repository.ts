@@ -24,7 +24,7 @@ export class GeminiRepository extends GenerationRepository {
     constructor(apiKey: string) {
         super(apiKey);
         this.genAI = new GoogleGenerativeAI(apiKey);
-        this.migrateCache();
+        // this.migrateCache();
         GeminiRepository._instance = this;
     }
 

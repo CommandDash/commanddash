@@ -118,7 +118,7 @@ export class DartCLIClient {
 
   public connect() {
     this.proc = child_process.spawn(this.executablePath, ['process']);
-   
+
     let buffer = '';
 
     this.proc.stdout.on('data', (data) => {
@@ -169,7 +169,7 @@ export class DartCLIClient {
 
         } if (method === 'log') {
           console.log(params);
-        } if (method==='debug_message'){
+        } if (method === 'debug_message') {
           console.log('debug_message: ' + params);
         }
       }
