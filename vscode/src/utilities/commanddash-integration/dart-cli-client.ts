@@ -117,8 +117,7 @@ export class DartCLIClient {
 
 
   public connect() {
-    // this.proc = child_process.spawn(this.executablePath, ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/keval/Desktop/dev/welltested/cli/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    this.proc = child_process.spawn(this.executablePath, ['process']);
 
     let buffer = '';
 
@@ -170,6 +169,8 @@ export class DartCLIClient {
 
         } if (method === 'log') {
           console.log(params);
+        } if (method === 'debug_message') {
+          console.log('debug_message: ' + params);
         }
       }
 

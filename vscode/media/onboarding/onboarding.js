@@ -269,8 +269,129 @@ const SetupStep = {
 };
 
 let data = Object.freeze([
+  
     {
-        "description": "A sample command-line application.",
+        "description": "Ask queries across trusted Flutter docs.",
+        "min_cli_version": "0.0.1",
+        "name": "@flutter",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Ask across Flutter docs",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "828494489",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "492011444",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "688942371",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/doc",
+                "steps": [
+                    {
+                        "data_sources": [
+                            "1068419102"
+                        ],
+                        "outputs": [
+                            "492011444"
+                        ],
+                        "query": "<828494489>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "688942371"
+                        ],
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<688942371>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
+            }
+        ],
+        "version": "1.1.0"
+    },
+    {
+        "description": "Get answer to your workspace related queries.",
+        "min_cli_version": "0.0.1",
+        "name": "@workspace",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Answer to queries related to your project",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "835164438",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "312430668",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "439982682",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/query",
+                "steps": [
+                    {
+                        "outputs": [
+                            "312430668"
+                        ],
+                        "query": "<835164438>",
+                        "type": "search_in_workspace",
+                        "workspace_object_type": "all",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "439982682"
+                        ],
+                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<439982682>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Please share your query: <835164438>"
+            }
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "description": "Get help with writing tests",
         "min_cli_version": "0.0.1",
         "name": "@test",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
@@ -513,126 +634,6 @@ let data = Object.freeze([
         "version": "1.2.0"
     },
     {
-        "description": "Get Flutter specific help like asking questions across documentation.",
-        "min_cli_version": "0.0.1",
-        "name": "@flutter",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Ask across Flutter docs",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "828494489",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "492011444",
-                        "type": "match_document_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "688942371",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/doc",
-                "steps": [
-                    {
-                        "data_sources": [
-                            "1068419102"
-                        ],
-                        "outputs": [
-                            "492011444"
-                        ],
-                        "query": "<828494489>",
-                        "type": "search_in_sources",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "688942371"
-                        ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<688942371>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
-            }
-        ],
-        "version": "1.1.0"
-    },
-    {
-        "description": "Get answer to your workspace related info/queries.",
-        "min_cli_version": "0.0.1",
-        "name": "@workspace",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Answer to queries related to your project",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "835164438",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "312430668",
-                        "type": "multi_code_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "439982682",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/query",
-                "steps": [
-                    {
-                        "outputs": [
-                            "312430668"
-                        ],
-                        "query": "<835164438>",
-                        "type": "search_in_workspace",
-                        "workspace_object_type": "all",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "439982682"
-                        ],
-                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<439982682>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Please share your query: <835164438>"
-            }
-        ],
-        "version": "1.0.0"
-    },
-    {
         "description": "",
         "min_cli_version": "0.0.1",
         "name": "",
@@ -692,7 +693,7 @@ let data = Object.freeze([
                 "intent": "Refactor your code",
                 "registered_inputs": [
                     {
-                        "display_text": "Instruction",
+                        "display_text": "Instructions",
                         "id": "640160831",
                         "optional": false,
                         "type": "string_input",
@@ -719,7 +720,7 @@ let data = Object.freeze([
                         "outputs": [
                             "651573210"
                         ],
-                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\n\n            Refactor the given code according to user instruction. User instruction <640160831>\n\n            User selected code:\n            <555878446>\n \n           Proceed step by step: \n           1. Describe the selected piece of code.\n           2. What are the possible optimizations?\n           3. How do you plan to achieve that ? [Don't output code yet]\n           4. Output the modified code to be be programatically replaced in the editor in place of the user selection.Since this is without human review, you need to output the precise code to replace in file.",
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that is need to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\n\nNote:\nState any assumption made and improvements introduced used while modification.",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
@@ -750,7 +751,7 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
         },
-        icon: `<span class="font-bold text-xs">&lt;/&gt;</span>`
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
     },
     {
         id: "workspace-questionaire",
@@ -760,6 +761,34 @@ const questionnaire = [
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "flutter-doc-search",
+        message: "Query official Flutter Docs",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/doc"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "unit-test",
+        message: "Generate unit tests for your methods",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/unit"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -1014,7 +1043,7 @@ function setCaretToEnd(target) {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Ask Dash AI") {
+    if (textInput.textContent.trim() === "# Ask Dash") {
         textInput.textContent = '';
         textInput.classList.remove('placeholder');
     }
@@ -1023,7 +1052,7 @@ function removePlaceholder() {
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Ask Dash AI';
+        textInput.textContent = '# Ask Dash';
         textInput.classList.add('placeholder');
     }
 }
@@ -1499,7 +1528,7 @@ function displayMessages() {
         if (message.role === "model") {
             modelCount++;
 
-            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">Dash AI</span></div>`;
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">CommandDash</span></div>`;
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -1519,7 +1548,7 @@ function displayMessages() {
             // }
         } else if (message.role === "dash") {
             //UI implementation
-            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#497BEF]", "text-white");
             contentElement.innerHTML = markdownToPlain(message.parts);
