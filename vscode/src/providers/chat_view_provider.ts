@@ -247,6 +247,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 cacheMap[filePath] = cacheItem[filePath];
             }
             await CacheManager.getInstance().setGeminiCache(cacheMap);
+            task.sendStepResponse(message, {});
         });
         task.onProcessStep('workspace_details', async (message) => {
             const workspaceFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
@@ -267,6 +268,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 this._publicConversationHistory.push({ role: "dash", parts: "Do you want to merge these changes?", buttons: ["accept", "decline"], data: { taskId: task.getTaskId(), message } });
                 this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             }
+            task.sendStepResponse(message, {});
         });
 
         const prompt = this.formatPrompt(agentResponse);
