@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { DartCLIClient, deleteExecutable } from "../commanddash-integration/dart-cli-client";
 import { Auth } from "../auth/auth";
 import { refreshAccessToken } from '../../repository/http-utils';
-import { CacheManager } from '../cache-manager';
 
 export enum SetupStep { github, apiKey, executable }
 
