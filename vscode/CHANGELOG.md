@@ -4,6 +4,11 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+
+## [0.3.3]
+
+- Server path mismatch
+
 ## [0.3.2]
 
 - Switch to CommandDash Engine
