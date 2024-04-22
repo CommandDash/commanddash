@@ -117,8 +117,8 @@ export class DartCLIClient {
 
 
   public connect() {
-    // this.proc = child_process.spawn(this.executablePath, ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/samyak/Documents/commanddash/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    this.proc = child_process.spawn(this.executablePath, ['process']);
+    // this.proc = child_process.spawn('dart', ['run', '/Users/samyak/Documents/commanddash/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
     let buffer = '';
 

@@ -258,6 +258,27 @@ p[contenteditable="true"] {
     border-right-color: #287CEB;
 }
 
+.tippy-box[data-theme~='hot-pink'] {
+    background-color: #FF1D8E;
+    color: white;
+}
+
+.tippy-box[data-theme~='hot-pink'][data-placement^='top']>.tippy-arrow::before {
+    border-top-color: #FF1D8E;
+}
+
+.tippy-box[data-theme~='hot-pink'][data-placement^='bottom']>.tippy-arrow::before {
+    border-bottom-color: #FF1D8E;
+}
+
+.tippy-box[data-theme~='hot-pink'][data-placement^='left']>.tippy-arrow::before {
+    border-left-color: #FF1D8E;
+}
+
+.tippy-box[data-theme~='hot-pink'][data-placement^='right']>.tippy-arrow::before {
+    border-right-color: #FF1D8E;
+}
+
 progress {
     height: 7px;
 }
