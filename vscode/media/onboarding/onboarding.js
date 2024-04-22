@@ -249,7 +249,6 @@ let activeAgent;
 let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
-let agentProvider = null;
 let currentActiveAgent = '';
 let currentActiveSlug = '';
 let isGithubLoginPending = false;
@@ -269,7 +268,7 @@ const SetupStep = {
 };
 
 let data = Object.freeze([
-  
+
     {
         "description": "Ask queries across trusted Flutter docs.",
         "min_cli_version": "0.0.1",
@@ -744,6 +743,7 @@ const questionnaire = [
         message: "Refactor your code",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/refactor"));
@@ -758,6 +758,7 @@ const questionnaire = [
         message: "Search files or query your workspace",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/query"));
@@ -772,6 +773,7 @@ const questionnaire = [
         message: "Query official Flutter Docs",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/doc"));
@@ -786,6 +788,7 @@ const questionnaire = [
         message: "Generate unit tests for your methods",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/unit"));
@@ -799,7 +802,7 @@ const questionnaire = [
 
 (function () {
 
-    // setLoading(true);
+    setLoading(true);
 
     //initialising vscode library
     vscode = acquireVsCodeApi();
@@ -886,8 +889,7 @@ function addToolTipsById() {
 }
 
 function submitResponse() {
-    toggleLoader(true);
-    let prompt = textInput.textContent;
+    let prompt = textInput.textContent.trim();
     if (commandEnable) {
         currentActiveSlug = agentInputsJson[0]?.slug;
         const agentObject = data.find(obj => {
@@ -896,23 +898,53 @@ function submitResponse() {
             });
         });
         currentActiveAgent = agentObject.name;
+        const agentsData = { ...agentInputsJson[0] };
+        if (checkValueExists(agentsData.registered_inputs)) {
+            toggleLoader(true);
+            vscode.postMessage({ type: "agents", value: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
 
-        vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
-        commandEnable = false;
-        activeAgent = false;
-        agentInputsJson.length = 0;
+
+            questionnaireContainer.classList.add("hidden");
+            textInput.textContent = "";
+            commandEnable = false;
+            activeAgent = false;
+            agentInputsJson.length = 0;
+        }
     } else if (prompt.length > 1) {
+        toggleLoader(true);
         for (const chip in chipsData) {
             if (prompt.includes(chip)) {
                 prompt = prompt.replace(chip, chipsData[chip].referenceContent);
             }
         }
         vscode.postMessage({ type: "prompt", value: prompt });
+        questionnaireContainer.classList.add("hidden");
+        textInput.textContent = "";
     }
 
-    textInput.textContent = "";
     adjustHeight();
-    questionnaireContainer.classList.add("hidden");
+}
+
+function checkValueExists(_agentResponseData) {
+    // Check if data is an array
+    if (!Array.isArray(_agentResponseData)) {
+        return false;
+    }
+
+    // Iterate over each object in the array
+    for (const obj of _agentResponseData) {
+        // Check if the object has a "value" key and "optional" is false
+        if (!obj.hasOwnProperty('value') && obj.optional === false) {
+            return false;
+        }
+        // Check if the object doesn't have a "value" key and "optional" is true
+        else if (!obj.hasOwnProperty('value') && obj.optional === true) {
+            continue; // Satisfy the condition
+        }
+    }
+
+    // If all objects meet the criteria, return true
+    return true;
 }
 
 function handleSubmit(event) {
@@ -1282,7 +1314,8 @@ function createReferenceChips(references, isCommandAction) {
 
     chipsData = { ...chipsData, [chipId]: references };
     if (commandEnable && !isCommandAction) {
-        agentBuilder?.onCodeInput(references, chipId);
+        const agentUIBuilder = new AgentUIBuilder(textInput);
+        agentUIBuilder?.onCodeInput(references, chipId);
     } else if (isCommandAction) {
         textInput.textContent = '';
         agentInputsJson.length = 0;
