@@ -744,6 +744,7 @@ const questionnaire = [
         message: "Refactor your code",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/refactor"));
@@ -758,6 +759,7 @@ const questionnaire = [
         message: "Search files or query your workspace",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/query"));
@@ -772,6 +774,7 @@ const questionnaire = [
         message: "Query official Flutter Docs",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/doc"));
@@ -786,6 +789,7 @@ const questionnaire = [
         message: "Generate unit tests for your methods",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
             agentInputsJson.push(agentProvider.getInputs("/unit"));
