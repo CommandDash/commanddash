@@ -249,7 +249,6 @@ let activeAgent;
 let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
-let agentProvider = null;
 let currentActiveAgent = '';
 let currentActiveSlug = '';
 let isGithubLoginPending = false;
@@ -1315,7 +1314,8 @@ function createReferenceChips(references, isCommandAction) {
 
     chipsData = { ...chipsData, [chipId]: references };
     if (commandEnable && !isCommandAction) {
-        agentBuilder?.onCodeInput(references, chipId);
+        const agentUIBuilder = new AgentUIBuilder(textInput);
+        agentUIBuilder?.onCodeInput(references, chipId);
     } else if (isCommandAction) {
         textInput.textContent = '';
         agentInputsJson.length = 0;
