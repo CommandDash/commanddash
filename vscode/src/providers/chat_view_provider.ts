@@ -230,10 +230,24 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
             this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
         });
-
         task.onProcessStep('cache', async (message) => {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
+        });
+        task.onProcessStep('update_cache', async (message) => {
+            const embd = JSON.parse(message.params.args.embeddings);
+            var cacheMap: { [filePath: string]: { codehash: string, embedding: { values: number[] } } } = {};
+
+            // Iterate over each object in the list
+            for (const cacheItem of embd) {
+                // Extract filePath from the keys of each object in the list
+                const filePath = Object.keys(cacheItem)[0];
+
+                // Add the extracted object to the map
+                cacheMap[filePath] = cacheItem[filePath];
+            }
+            await CacheManager.getInstance().setGeminiCache(cacheMap);
+            task.sendStepResponse(message, {});
         });
         task.onProcessStep('workspace_details', async (message) => {
             const workspaceFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
@@ -243,7 +257,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
             task.sendStepResponse(message, { path: workspaceFolder.uri.fsPath });
         });
-        
+
         task.onProcessStep('replace_in_file', async (message) => {
             const { originalCode, path, optimizedCode } = message.params.args.file;
             const editor = vscode.window.activeTextEditor;
@@ -254,6 +268,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 this._publicConversationHistory.push({ role: "dash", parts: "Do you want to merge these changes?", buttons: ["accept", "decline"], data: { taskId: task.getTaskId(), message } });
                 this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             }
+            task.sendStepResponse(message, {});
         });
 
         const prompt = this.formatPrompt(agentResponse);

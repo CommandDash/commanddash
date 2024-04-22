@@ -269,8 +269,129 @@ const SetupStep = {
 };
 
 let data = Object.freeze([
+
     {
-        "description": "A sample command-line application.",
+        "description": "Ask queries across trusted Flutter docs.",
+        "min_cli_version": "0.0.1",
+        "name": "@flutter",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Ask across Flutter docs",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "828494489",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "492011444",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "688942371",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/doc",
+                "steps": [
+                    {
+                        "data_sources": [
+                            "1068419102"
+                        ],
+                        "outputs": [
+                            "492011444"
+                        ],
+                        "query": "<828494489>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "688942371"
+                        ],
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<688942371>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
+            }
+        ],
+        "version": "1.1.0"
+    },
+    {
+        "description": "Get answer to your workspace related queries.",
+        "min_cli_version": "0.0.1",
+        "name": "@workspace",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Answer to queries related to your project",
+                "registered_inputs": [
+                    {
+                        "display_text": "Query",
+                        "id": "835164438",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "312430668",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "439982682",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/query",
+                "steps": [
+                    {
+                        "outputs": [
+                            "312430668"
+                        ],
+                        "query": "<835164438>",
+                        "type": "search_in_workspace",
+                        "workspace_object_type": "all",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "439982682"
+                        ],
+                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<439982682>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Please share your query: <835164438>"
+            }
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "description": "Get help with writing tests",
         "min_cli_version": "0.0.1",
         "name": "@test",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
@@ -511,126 +632,6 @@ let data = Object.freeze([
             }
         ],
         "version": "1.2.0"
-    },
-    {
-        "description": "Get Flutter specific help like asking questions across documentation.",
-        "min_cli_version": "0.0.1",
-        "name": "@flutter",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Ask across Flutter docs",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "828494489",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "492011444",
-                        "type": "match_document_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "688942371",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/doc",
-                "steps": [
-                    {
-                        "data_sources": [
-                            "1068419102"
-                        ],
-                        "outputs": [
-                            "492011444"
-                        ],
-                        "query": "<828494489>",
-                        "type": "search_in_sources",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "688942371"
-                        ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<688942371>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
-            }
-        ],
-        "version": "1.1.0"
-    },
-    {
-        "description": "Get answer to your workspace related info/queries.",
-        "min_cli_version": "0.0.1",
-        "name": "@workspace",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Answer to queries related to your project",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "835164438",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "312430668",
-                        "type": "multi_code_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "439982682",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/query",
-                "steps": [
-                    {
-                        "outputs": [
-                            "312430668"
-                        ],
-                        "query": "<835164438>",
-                        "type": "search_in_workspace",
-                        "workspace_object_type": "all",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "439982682"
-                        ],
-                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<439982682>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Please share your query: <835164438>"
-            }
-        ],
-        "version": "1.0.0"
     },
     {
         "description": "",
@@ -885,8 +886,7 @@ function addToolTipsById() {
 }
 
 function submitResponse() {
-    toggleLoader(true);
-    let prompt = textInput.textContent;
+    let prompt = textInput.textContent.trim();
     if (commandEnable) {
         currentActiveSlug = agentInputsJson[0]?.slug;
         const agentObject = data.find(obj => {
@@ -895,23 +895,53 @@ function submitResponse() {
             });
         });
         currentActiveAgent = agentObject.name;
+        const agentsData = { ...agentInputsJson[0] };
+        if (checkValueExists(agentsData.registered_inputs)) {
+            toggleLoader(true);
+            vscode.postMessage({ type: "agents", value: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
 
-        vscode.postMessage({ type: "agents", value: { ...agentInputsJson[0], agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
-        commandEnable = false;
-        activeAgent = false;
-        agentInputsJson.length = 0;
+
+            questionnaireContainer.classList.add("hidden");
+            textInput.textContent = "";
+            commandEnable = false;
+            activeAgent = false;
+            agentInputsJson.length = 0;
+        }
     } else if (prompt.length > 1) {
+        toggleLoader(true);
         for (const chip in chipsData) {
             if (prompt.includes(chip)) {
                 prompt = prompt.replace(chip, chipsData[chip].referenceContent);
             }
         }
         vscode.postMessage({ type: "prompt", value: prompt });
+        questionnaireContainer.classList.add("hidden");
+        textInput.textContent = "";
     }
 
-    textInput.textContent = "";
     adjustHeight();
-    questionnaireContainer.classList.add("hidden");
+}
+
+function checkValueExists(_agentResponseData) {
+    // Check if data is an array
+    if (!Array.isArray(_agentResponseData)) {
+        return false;
+    }
+
+    // Iterate over each object in the array
+    for (const obj of _agentResponseData) {
+        // Check if the object has a "value" key and "optional" is false
+        if (!obj.hasOwnProperty('value') && obj.optional === false) {
+            return false;
+        }
+        // Check if the object doesn't have a "value" key and "optional" is true
+        else if (!obj.hasOwnProperty('value') && obj.optional === true) {
+            continue; // Satisfy the condition
+        }
+    }
+
+    // If all objects meet the criteria, return true
+    return true;
 }
 
 function handleSubmit(event) {
