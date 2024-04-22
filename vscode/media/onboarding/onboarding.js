@@ -799,7 +799,7 @@ const questionnaire = [
 
 (function () {
 
-    // setLoading(true);
+    setLoading(true);
 
     //initialising vscode library
     vscode = acquireVsCodeApi();
