@@ -4,6 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.3.5]
+
+- Minor Bug Fixes
+
 ## [0.3.4]
 
 - Retain embedding cache for better performance
