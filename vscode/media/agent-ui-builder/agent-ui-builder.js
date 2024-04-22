@@ -91,7 +91,7 @@ class AgentUIBuilder {
     registerCodeInputTippy() {
         tippy(".code_input", {
             content: `Use 'Attach Snippet to Dash' or ${shortCutHints} after selecting the code in editor`,
-            theme: "hot-pink"
+            theme: "flutter-blue"
         });
     }
 
