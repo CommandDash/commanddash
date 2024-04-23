@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
 import { join } from 'path';
-import { chmod, existsSync, renameSync, unlink } from 'fs';
+import { chmod, chmodSync, existsSync, renameSync, unlink } from 'fs';
 import { downloadFile, makeHttpRequest } from '../../repository/http-utils';
 import { AxiosRequestConfig } from 'axios';
 import * as vscode from 'vscode';
@@ -26,16 +26,7 @@ async function setupExecutable(clientVersion: string, executablePath: string, ex
     return;
   }
   await downloadFile(response['url'], executablePath, onProgress);
-  if (platform === 'darwin' || platform === 'linux') {
-    // Downloaded file is required to be coverted to an executable.
-    return new Promise<void>((resolve, reject) => {
-      chmod(executablePath, '755', (err) => {
-        if (err) { reject(err); }
-        console.log('The permissions for the executable have been set');
-        resolve();
-      });
-    });
-  }
+
 }
 
 export async function deleteExecutable(executablePath: string): Promise<void> {
@@ -115,14 +106,23 @@ export class DartCLIClient {
     await deleteExecutable(this.executablePath);
   }
 
+  private renameTempToExecutable(tempFilePath: string) {
+    renameSync(tempFilePath, this.executablePath);
+    const platform = os.platform();
+    if (platform === 'darwin' || platform === 'linux') {
+      // Downloaded file is required to be coverted to an executable.
+      chmodSync(this.executablePath, '755');
+    }
+  }
 
   public connect() {
     // Verify the presence of the temporary file, indicating a downloaded update during the last IDE session. 
     // Proceed with updating the executable if applicable.
     const tempFilePath = `${this.executablePath}.tmp`;
-    if(existsSync(tempFilePath)){
-      renameSync(tempFilePath, this.executablePath);
+    if (existsSync(tempFilePath)) {
+      this.renameTempToExecutable(tempFilePath);
     }
+
 
     this.proc = child_process.spawn(this.executablePath, ['process']);
 
