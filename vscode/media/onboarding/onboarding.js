@@ -639,7 +639,7 @@ let data = Object.freeze([
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
-                "intent": "Generates inline documentation[code comments] for your code",
+                "intent": "Generate inline documentation",
                 "registered_inputs": [
                     {
                         "display_text": "Code",
@@ -729,7 +729,7 @@ let data = Object.freeze([
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, Please share the following info for refactoring: <640160831> <555878446>"
+                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
             }
         ],
         "version": "1.0.0"
