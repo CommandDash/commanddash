@@ -719,7 +719,7 @@ let data = Object.freeze([
                         "outputs": [
                             "651573210"
                         ],
-                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that is need to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\n\nNote:\nState any assumption made and improvements introduced used while modification.",
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
