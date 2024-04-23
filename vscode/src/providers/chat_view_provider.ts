@@ -312,7 +312,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
             if (type === "code_input" && value) {
                 const parsedValue = JSON.parse(value);
-                prompt += `\n ${parsedValue?.referenceContent}`;
+                prompt += "\n" + parsedValue?.referenceContent;
             }
         });
 
