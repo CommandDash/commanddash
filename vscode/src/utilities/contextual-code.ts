@@ -56,6 +56,7 @@ export class ContextualCodeProvider {
                 content += symbolCode + "\n";
             }
             code.set("content", content);
+            codes.push(code);
         }
         return codes;
     }
