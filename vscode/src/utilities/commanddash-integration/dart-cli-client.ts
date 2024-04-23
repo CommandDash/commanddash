@@ -26,7 +26,6 @@ async function setupExecutable(clientVersion: string, executablePath: string, ex
     return;
   }
   await downloadFile(response['url'], executablePath, onProgress);
-
 }
 
 export async function deleteExecutable(executablePath: string): Promise<void> {
@@ -118,7 +117,7 @@ export class DartCLIClient {
   public connect() {
     // Verify the presence of the temporary file, indicating a downloaded update during the last IDE session. 
     // Proceed with updating the executable if applicable.
-    const tempFilePath = `${this.executablePath}.tmp`;
+    const tempFilePath = `${this.executablePath}.pre-downloaded`;
     if (existsSync(tempFilePath)) {
       this.renameTempToExecutable(tempFilePath);
     }

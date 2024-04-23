@@ -67,6 +67,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
 
 
 export async function downloadFile(url: string, destinationPath: string, onProgress: (progress: number) => void): Promise<void> {
+    /// First download on a temp path. This prevents from converting partial downloaded files (due to interruption) into executables.
     const tempFilePath = `${destinationPath}.tmp`;
 
     const response = await axios({
@@ -97,5 +98,6 @@ export async function downloadFile(url: string, destinationPath: string, onProgr
         writer.on('finish', resolve);
         writer.on('error', reject);
     });
-    // Downloaded executable is saved as a temporory file. This will be renamed in the next session.
+    // Downloaded executable is saved as a pre-downloaded file which will be renamed in the next session.
+    fs.renameSync(tempFilePath, `${destinationPath}.pre-downloaded`);
 }
