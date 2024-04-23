@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
 import { join } from 'path';
-import { chmod, existsSync, unlink } from 'fs';
+import { chmod, existsSync, renameSync, unlink } from 'fs';
 import { downloadFile, makeHttpRequest } from '../../repository/http-utils';
 import { AxiosRequestConfig } from 'axios';
 import * as vscode from 'vscode';
@@ -13,7 +13,7 @@ import { ExtensionVersionManager } from '../update-check';
 import { logError, logEvent } from '../telemetry-reporter';
 import { error } from 'console';
 
-async function setupExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void,proc:child_process.ChildProcessWithoutNullStreams|undefined) {
+async function setupExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
   const platform = os.platform();
   const slug = platform === 'win32' ? 'windows' : platform === 'darwin' ? 'macos' : platform === 'linux' ? 'linux' : 'unsupported';
   const config: AxiosRequestConfig = {
@@ -24,9 +24,6 @@ async function setupExecutable(clientVersion: string, executablePath: string, ex
   if (executableVersion && compareVersions(response['version'], executableVersion) <= 0) {
     console.log('Executable is already up to date.');
     return;
-  }
-  if(proc && proc.connected){
-    proc.kill()
   }
   await downloadFile(response['url'], executablePath, onProgress);
   if (platform === 'darwin' || platform === 'linux') {
@@ -106,12 +103,12 @@ export class DartCLIClient {
   }
 
   public async installExecutable(onProgress: (progress: number) => void) {
-    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, undefined, onProgress,this.proc);
+    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, undefined, onProgress);
   }
 
   // Install the updated executable in the background which will be kicked off on next extension activation.
   public async backgroundUpdateExecutable(): Promise<void> {
-    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, await this.executableVersion(), () => { },this.proc);
+    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, await this.executableVersion(), () => { });
   }
 
   public async deleteExecutable(): Promise<void> {
@@ -120,6 +117,13 @@ export class DartCLIClient {
 
 
   public connect() {
+    // Verify the presence of the temporary file, indicating a downloaded update during the last IDE session. 
+    // Proceed with updating the executable if applicable.
+    const tempFilePath = `${this.executablePath}.tmp`;
+    if(existsSync(tempFilePath)){
+      renameSync(tempFilePath, this.executablePath);
+    }
+
     this.proc = child_process.spawn(this.executablePath, ['process']);
 
     let buffer = '';

@@ -97,6 +97,5 @@ export async function downloadFile(url: string, destinationPath: string, onProgr
         writer.on('finish', resolve);
         writer.on('error', reject);
     });
-
-    fs.renameSync(tempFilePath, destinationPath); // Only write file to destination path once download finishes
+    // Downloaded executable is saved as a temporory file. This will be renamed in the next session.
 }
