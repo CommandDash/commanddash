@@ -373,23 +373,23 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     }
 
     private _getHtmlForMarketPlace(webview: vscode.Webview) {
-        const marketPlaceHtmlUri = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.html');
-        const marketPlaceCssUri = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.css');
-        const marketPlaceJSUri = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.js');
+        const marketPlaceHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.html');
+        const marketPlaceHtml = fs.readFileSync(marketPlaceHtmlPath.fsPath, 'utf8');
+        const marketPlaceCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.css"));
+        const marketPlaceJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.js"));
         const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
-
-        const chatHtml = fs.readFileSync(marketPlaceHtmlUri.fsPath, 'utf8');
 
         // Modify your Content-Security-Policy
         const cspSource = webview.cspSource;
 
-        const updatedChatHtml = chatHtml
+        const updatedOnboardingChatHtml = marketPlaceHtml
             .replace(/{{cspSource}}/g, cspSource)
             .replace(/{{marketPlaceCssUri}}/g, marketPlaceCssUri.toString())
             .replace(/{{outputCssUri}}/g, outputCssUri.toString())
-            .replace(/{{marketPlaceJSUri}}/g, marketPlaceJSUri.toString());
+            .replace(/{{marketPlaceJsUri}}/g, marketPlaceJsUri.toString());
 
-        return updatedChatHtml;
+
+        return updatedOnboardingChatHtml;
     }
 
     private async _validateApiKey(apiKey: string) {
