@@ -81,7 +81,8 @@ export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, 
         { name: 'dash.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dash.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dash.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(), options: { isCommand: true, isMenu: true, isShortcut: true } },
-        { name: 'dash.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: false, isShortcut: false } }
+        { name: 'dash.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: false, isShortcut: false } },
+        { name: 'dash.marketPlace', handler: () => flutterGPTViewProvider.setMarketPlaceWebView(), options: { isCommand: true, isMenu: false, isShortcut: false } }
 
         // Add more commands as needed.
     ];

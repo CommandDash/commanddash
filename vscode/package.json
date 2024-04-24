@@ -141,6 +141,14 @@
           "light": "resources/light/trash.svg",
           "dark": "resources/dark/trash.svg"
         }
+      },
+      {
+        "command": "dash.marketPlace",
+        "title": "Market Place",
+        "icon": {
+          "light": "resources/light/market-place.svg",
+          "dark": "resources/dark/market-place.svg"
+        }
       }
     ],
     "menus": {
@@ -213,6 +221,10 @@
       "view/title": [
         {
           "command": "dash.clearChat",
+          "group": "navigation"
+        },
+        {
+          "command": "dash.marketPlace",
           "group": "navigation"
         }
       ],

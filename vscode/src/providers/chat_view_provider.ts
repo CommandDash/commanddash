@@ -372,6 +372,26 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return updatedOnboardingChatHtml;
     }
 
+    private _getHtmlForMarketPlace(webview: vscode.Webview) {
+        const marketPlaceHtmlUri = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.html');
+        const marketPlaceCssUri = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.css');
+        const marketPlaceJSUri = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.js');
+        const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
+
+        const chatHtml = fs.readFileSync(marketPlaceHtmlUri.fsPath, 'utf8');
+
+        // Modify your Content-Security-Policy
+        const cspSource = webview.cspSource;
+
+        const updatedChatHtml = chatHtml
+            .replace(/{{cspSource}}/g, cspSource)
+            .replace(/{{marketPlaceCssUri}}/g, marketPlaceCssUri.toString())
+            .replace(/{{outputCssUri}}/g, outputCssUri.toString())
+            .replace(/{{marketPlaceJSUri}}/g, marketPlaceJSUri.toString());
+
+        return updatedChatHtml;
+    }
+
     private async _validateApiKey(apiKey: string) {
         try {
             await this.aiRepo?.validateApiKey(apiKey);
@@ -516,6 +536,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    public setMarketPlaceWebView() {
+        if (this._view) {
+            this._view.webview.html = this._getHtmlForMarketPlace(this._view.webview);
+        }
+    }
 
     public clearConversationHistory() {
         this._privateConversationHistory = [];
