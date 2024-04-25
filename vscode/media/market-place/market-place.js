@@ -11,6 +11,7 @@ const downloadIcon =
 let vscode = null;
 
 const marketPlaceListContainer = document.getElementById("market-place-list-container");
+const backButton = document.getElementById("back-button");
 
 // Sample data
 const agents = [
@@ -123,7 +124,13 @@ const agents = [
         // Append li to container
         marketPlaceListContainer.appendChild(li);
     });
+
+    backButton.addEventListener("click", handleBackButtonHandler);
 })();
+
+function handleBackButtonHandler() {
+    console.log('back button');
+}
 
 function handleInstall(agent) {
     console.log('agents', agent);
