@@ -22,7 +22,7 @@ export class StorageManager {
         }
 
         try {
-            await this._context.secrets.store(this.agentsSecretStoreKey, agents);
+            await this._context.secrets.store(this.agentsSecretStoreKey, JSON.stringify(agents));
             return true;
 
         } catch (error) {
@@ -41,7 +41,7 @@ export class StorageManager {
         return installAgents || undefined;
     }
 
-    public async deleteApiKey(): Promise<void> {
+    public async deleteAgents(): Promise<void> {
         if(!this._context){
             throw new Error("Context is undefined");
         }

@@ -1089,169 +1089,174 @@ function addPlaceholder() {
     }
 }
 
-function readTriggeredMessage() {
-    window.addEventListener("message", (event) => {
-        const message = event.data;
-        switch (message.type) {
-            case "apiKeyValidation":
-                updateValidationList(message.value);
-                break;
-            case "displayMessages":
-                conversationHistory = message.value;
-                displayMessages(conversationHistory);
-                header.classList.add("hidden");
-                scrollToBottom();
-                break;
-            case "showLoadingIndicator":
-                sendButton.classList.remove("cursor-pointer");
-                sendButton.classList.add("cursor-not-allowed");
-                loadingIndicator.classList.add("block");
-                loadingIndicator.classList.remove("hidden");
-                sendButton.classList.add("disabled");
-                textInput.removeEventListener("keydown", handleSubmit);
-                textInput.textContent = "";
-                break;
-            case "hideLoadingIndicator":
-                sendButton.classList.add("cursor-pointer");
-                sendButton.classList.remove("cursor-not-allowed");
-                loadingIndicator.classList.add("hidden");
-                loadingIndicator.classList.remove("block");
-                workspaceLoader.style.display = 'none';
-                workspaceLoaderText.classList.add("hidden");
+function handleTriggerMessage(event) {
+    const message = event.data;
+    switch (message.type) {
+        case "apiKeyValidation":
+            updateValidationList(message.value);
+            break;
+        case "displayMessages":
+            conversationHistory = message.value;
+            displayMessages(conversationHistory);
+            header.classList.add("hidden");
+            scrollToBottom();
+            break;
+        case "showLoadingIndicator":
+            sendButton.classList.remove("cursor-pointer");
+            sendButton.classList.add("cursor-not-allowed");
+            loadingIndicator.classList.add("block");
+            loadingIndicator.classList.remove("hidden");
+            sendButton.classList.add("disabled");
+            textInput.removeEventListener("keydown", handleSubmit);
+            textInput.textContent = "";
+            break;
+        case "hideLoadingIndicator":
+            sendButton.classList.add("cursor-pointer");
+            sendButton.classList.remove("cursor-not-allowed");
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("block");
+            workspaceLoader.style.display = 'none';
+            workspaceLoaderText.classList.add("hidden");
 
-                sendButton.classList.remove("disabled");
-                textInput.addEventListener("keydown", handleSubmit);
-                break;
-            case 'clearCommandDeck':
-                clearChat();
-                break;
-            case 'addToReference':
-                removePlaceholder();
-                createReferenceChips(JSON.parse(message.value), false);
-                setTimeout(() =>
-                    adjustHeight(),
-                    0);
-                break;
-            case 'commandActionRefactor':
-                removePlaceholder();
+            sendButton.classList.remove("disabled");
+            textInput.addEventListener("keydown", handleSubmit);
+            break;
+        case 'clearCommandDeck':
+            clearChat();
+            break;
+        case 'addToReference':
+            removePlaceholder();
+            createReferenceChips(JSON.parse(message.value), false);
+            setTimeout(() =>
+                adjustHeight(),
+                0);
+            break;
+        case 'commandActionRefactor':
+            removePlaceholder();
 
-                createReferenceChips(JSON.parse(message.value), true);
+            createReferenceChips(JSON.parse(message.value), true);
 
-                setTimeout(() =>
-                    adjustHeight(),
-                    0);
-                break;
-            case 'setInput':
-                textInput.textContent = message.value;
-                if (message.value.startsWith('/')) {
-                    const action = message.value.split(' ')[0].slice(1);
-                    commandsExecution[action].exe(textInput);
-                }
-                break;
-            case 'shortCutHints':
-                shortCutHints = message.value;
-                //adding tooltips to the elements
-                addToolTipsById();
-                break;
-            case 'keyNotExists':
-                setLoading(false);
-                break;
-            case 'loaderUpdate':
-                const _message = JSON.parse(message.value);
-                const loaderKind = _message['kind'];
-                const loaderMessage = _message['message'];
-                setLoader(loaderKind, loaderMessage);
-                break;
-            case "showValidationLoader":
-                toggleLoader(true);
-                validationLoadingIndicator.classList.remove("hidden");
-                break;
-            case "hideValidationLoader":
-                toggleLoader(false);
-                validationLoadingIndicator.classList.add("hidden");
-                break;
-            case 'pendingSteps':
-                const pendingStepsArr = JSON.parse(message.value);
-                if (pendingStepsArr?.length > 0) {
-                    onboardingSetup.classList.remove("hidden");
-                    bottomContainer.classList.add("hidden");
-                    pendingStepsArr?.forEach((steps) => {
-                        switch (steps) {
-                            case 0:
-                                isGithubLoginPending = true;
-                                githubCross.classList.remove('hidden');
-                                githubTick.classList.add('hidden');
-                                githubLogin.classList.remove("hidden");
-                                apiKeyContainer.classList.remove("hidden");
-                                break;
+            setTimeout(() =>
+                adjustHeight(),
+                0);
+            break;
+        case 'setInput':
+            textInput.textContent = message.value;
+            if (message.value.startsWith('/')) {
+                const action = message.value.split(' ')[0].slice(1);
+                commandsExecution[action].exe(textInput);
+            }
+            break;
+        case 'shortCutHints':
+            shortCutHints = message.value;
+            //adding tooltips to the elements
+            addToolTipsById();
+            break;
+        case 'keyNotExists':
+            setLoading(false);
+            break;
+        case 'loaderUpdate':
+            const _message = JSON.parse(message.value);
+            const loaderKind = _message['kind'];
+            const loaderMessage = _message['message'];
+            setLoader(loaderKind, loaderMessage);
+            break;
+        case "showValidationLoader":
+            toggleLoader(true);
+            validationLoadingIndicator.classList.remove("hidden");
+            break;
+        case "hideValidationLoader":
+            toggleLoader(false);
+            validationLoadingIndicator.classList.add("hidden");
+            break;
+        case 'pendingSteps':
+            const pendingStepsArr = JSON.parse(message.value);
+            if (pendingStepsArr?.length > 0) {
+                onboardingSetup.classList.remove("hidden");
+                bottomContainer.classList.add("hidden");
+                pendingStepsArr?.forEach((steps) => {
+                    switch (steps) {
+                        case 0:
+                            isGithubLoginPending = true;
+                            githubCross.classList.remove('hidden');
+                            githubTick.classList.add('hidden');
+                            githubLogin.classList.remove("hidden");
+                            apiKeyContainer.classList.remove("hidden");
+                            break;
 
-                            case 1:
-                                isApiKeyPending = true;
-                                apiKeyCross.classList.remove('hidden');
-                                apiKeyTick.classList.add('hidden');
-                                googleApiKeyTextInput.classList.remove("hidden");
-                                executableContainer.classList.remove("hidden");
-                                break;
+                        case 1:
+                            isApiKeyPending = true;
+                            apiKeyCross.classList.remove('hidden');
+                            apiKeyTick.classList.add('hidden');
+                            googleApiKeyTextInput.classList.remove("hidden");
+                            executableContainer.classList.remove("hidden");
+                            break;
 
-                            case 2:
-                                isExecutableDownloadPending = true;
-                                executableCross.classList.remove('hidden');
-                                executableTick.classList.add('hidden');
-                                executableProgress.classList.remove("hidden");
-                                break;
-                        }
-                    });
-                }
+                        case 2:
+                            isExecutableDownloadPending = true;
+                            executableCross.classList.remove('hidden');
+                            executableTick.classList.add('hidden');
+                            executableProgress.classList.remove("hidden");
+                            break;
+                    }
+                });
+            }
 
-                if (!isGithubLoginPending) {
-                    isGithubLoginPending = false;
-                    githubCross.classList.add("hidden");
-                    githubTick.classList.remove("hidden");
-                    githubLogin.classList.add("hidden");
-                }
-                if (!isApiKeyPending) {
-                    isApiKeyPending = false;
-                    apiKeyCross.classList.add("hidden");
-                    apiKeyTick.classList.remove("hidden");
-                    googleApiKeyTextInput.classList.add("hidden");
-
-                }
-                if (!isExecutableDownloadPending) {
-                    isExecutableDownloadPending = false;
-                    executableCross.classList.add("hidden");
-                    executableTick.classList.remove("hidden");
-                    executableProgress.classList.add("hidden");
-                }
-
-                allStepsCompleted();
-                setLoading(false);
-                break;
-            case 'executableDownloadProgress':
-                executableProgress.value = message.value;
-                break;
-            case 'executableDownloaded':
-                isExecutableDownloadPending = false;
-                executableCross.classList.add("hidden");
-                executableTick.classList.remove("hidden");
-                executableProgress.classList.add("hidden");
-                allStepsCompleted();
-                break;
-            case 'apiKeySet':
-                isApiKeyPending = false;
-                apiKeyCross.classList.add("hidden");
-                apiKeyTick.classList.remove("hidden");
-                googleApiKeyTextInput.classList.add("hidden");
-                allStepsCompleted();
-                break;
-            case 'githubLoggedIn':
+            if (!isGithubLoginPending) {
                 isGithubLoginPending = false;
                 githubCross.classList.add("hidden");
                 githubTick.classList.remove("hidden");
                 githubLogin.classList.add("hidden");
-                allStepsCompleted();
-                break;
-        }
-    });
+            }
+            if (!isApiKeyPending) {
+                isApiKeyPending = false;
+                apiKeyCross.classList.add("hidden");
+                apiKeyTick.classList.remove("hidden");
+                googleApiKeyTextInput.classList.add("hidden");
+
+            }
+            if (!isExecutableDownloadPending) {
+                isExecutableDownloadPending = false;
+                executableCross.classList.add("hidden");
+                executableTick.classList.remove("hidden");
+                executableProgress.classList.add("hidden");
+            }
+
+            allStepsCompleted();
+            setLoading(false);
+            break;
+        case 'executableDownloadProgress':
+            executableProgress.value = message.value;
+            break;
+        case 'executableDownloaded':
+            isExecutableDownloadPending = false;
+            executableCross.classList.add("hidden");
+            executableTick.classList.remove("hidden");
+            executableProgress.classList.add("hidden");
+            allStepsCompleted();
+            break;
+        case 'apiKeySet':
+            isApiKeyPending = false;
+            apiKeyCross.classList.add("hidden");
+            apiKeyTick.classList.remove("hidden");
+            googleApiKeyTextInput.classList.add("hidden");
+            allStepsCompleted();
+            break;
+        case 'githubLoggedIn':
+            isGithubLoginPending = false;
+            githubCross.classList.add("hidden");
+            githubTick.classList.remove("hidden");
+            githubLogin.classList.add("hidden");
+            allStepsCompleted();
+            break;
+        case 'cleanUpEventListener':
+            window.removeEventListener('message', handleTriggerMessage);
+            break;
+    }
+}
+
+function readTriggeredMessage() {
+    window.addEventListener("message", handleTriggerMessage);
 }
 
 function setLoader(loaderKind, loaderMessage) {
