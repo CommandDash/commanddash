@@ -1265,7 +1265,7 @@ function handleTriggerMessage(event) {
             window.removeEventListener('message', handleTriggerMessage);
             break;
         case 'getStoredAgents':
-            const _agents = parseAgents(message.value);
+            const _agents = parseAgents(message.value.agents);
             appendAgents(_agents.agents);
             break;
     }
@@ -1273,7 +1273,6 @@ function handleTriggerMessage(event) {
 
 function appendAgents(agents) {
     for (let key in agents) {
-        debugger;
         if (agents.hasOwnProperty(key)) {
             data.push(agents[key]);
         };

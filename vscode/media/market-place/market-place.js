@@ -36,16 +36,17 @@ function handleBackButtonHandler() {
 function handleInstall(agent) {
     const isInstalled = isAgentInstalled(agent.name);
     if (isInstalled) {
-        uninstallAgent(agent);
+        if (agent) {
+            vscode.postMessage({type: "uninstallAgents", value: JSON.stringify(agent)});
+        }
     } else {
         vscode.postMessage({type: "installAgents", value: JSON.stringify(agent)});
-        // updateInstallButton(agent, "Uninstall");
     }
 }
 
 function isAgentInstalled(agentName) {
     const storedAgents = getStoredAgents();
-    return storedAgents.agentsList.includes(agentName);
+    return storedAgents.agentsList.includes(`@${agentName}`);
 }
 
 function updateInstallButton(agentOrList, buttonText) {
@@ -55,6 +56,8 @@ function updateInstallButton(agentOrList, buttonText) {
     installButtons.forEach(button => {
         if (agentNames.includes(button.dataset.name)) {
             button.textContent = buttonText;
+        } else {
+            button.textContent = "Install";
         }
     });
 }
@@ -167,9 +170,9 @@ function registerMessage() {
         const message = event.data;
         switch (message.type) {
             case "getStoredAgents":
-                const _agents = parseAgents(message.value);
+                const _agents = parseAgents(message.value.agents);
                 storedAgents = {..._agents};
-                updateInstallButton(_agents?.agentsList, "Uninstall");
+                updateInstallButton(_agents?.agentsList, message.value.buttonMessage);
                 break;
             case "fetchedAgents":
                 const _fetchedAgents = parseAgents(message.value);

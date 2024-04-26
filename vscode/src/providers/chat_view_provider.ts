@@ -165,9 +165,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this._installAgent(data, webviewView.webview);
                         break;
                     }
+                case "uninstallAgents":
+                    {
+                        this._uninstallAgent(data, webviewView.webview);
+                        break;
+                    }
                 case "getInstallAgents":
                     {
-                        this._getInstallAgents(webviewView.webview);
+                        this._getInstallAgents("Uninstall");
                         break;
                     }
                 case "backFromMarketPlace":
@@ -178,6 +183,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "fetchAgents":
                     {
                         this._fetchAgentsAPI();
+                        break;
                     }
             }
         });
@@ -198,6 +204,21 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     }
 
+    private async _uninstallAgent(data: any, webview: vscode.Webview) {
+        try {
+            const { value } = data;
+            const _parsedAgent = JSON.parse(value);
+            const existingAgents = await StorageManager.instance.getInstallAgents();
+            const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+            delete _parsedExsistingAgents.agents[`@${_parsedAgent.name}`];
+            _parsedExsistingAgents.agentsList = _parsedExsistingAgents.agentsList.filter((item: string) => item !== `@${_parsedAgent.name}`);
+            await StorageManager.instance.setInstallAgents(_parsedExsistingAgents);
+            this._getInstallAgents("Install");
+        } catch (error) {
+            console.log('error while uninstalling agents: ', error);
+        }
+    }
+
     private async _fetchAgentsAPI() {
         try {
             const config: AxiosRequestConfig = {
@@ -214,7 +235,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log('error: while fetching the get-agent-list api', error);
         }
     }
-
 
     private async _fetchAgent(name: string, version: string) {
         const config: AxiosRequestConfig = {
@@ -245,7 +265,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 agents: {
                     ..._parsedExsistingAgents?.agents,
                     [`@${name}`]: {
-                        ...agentDetails?.agent, name: `@${name}`, 
+                        ...agentDetails?.agent, name: `@${name}`,
                         supported_commands: agentDetails?.agent.supported_commands.map((command: any) => ({
                             ...command,
                             slug: `/${command.slug}`
@@ -256,18 +276,18 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             };
 
             await StorageManager.instance.setInstallAgents(updatedAgents);
-            this._getInstallAgents(webview);
+            this._getInstallAgents("Uninstall");
         } catch (error) {
             console.error('Error installing agents:', error);
         }
     }
 
-    private async _getInstallAgents(webview: vscode.Webview) {
+    private async _getInstallAgents(buttonMessage: string) {
         StorageManager.instance
             .getInstallAgents()
             .then(agents => {
                 if (agents) {
-                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: agents });
+                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: {agents, buttonMessage} });
                 }
             })
             .catch(error => {
