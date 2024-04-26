@@ -16,6 +16,8 @@ import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manage
 import { ContextualCodeProvider } from "../utilities/contextual-code";
 import { Auth } from "../utilities/auth/auth";
 import { StorageManager } from "../utilities/storage-manager";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { makeAuthorizedHttpRequest } from "../repository/http-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dash.chatView";
@@ -160,7 +162,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "installAgents":
                     {
-                        this._installAgents(data, webviewView.webview);
+                        this._installAgent(data, webviewView.webview);
                         break;
                     }
                 case "getInstallAgents":
@@ -172,6 +174,10 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     {
                         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
                         break;
+                    }
+                case "fetchAgents":
+                    {
+                        this._fetchAgentsAPI();
                     }
             }
         });
@@ -188,23 +194,65 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         });
 
         logEvent('new-chat-start', { from: 'command-deck' });
+        // this._installAgent();
 
     }
 
-    private async _installAgents(data: any, webview: vscode.Webview) {
+    private async _fetchAgentsAPI() {
+        try {
+            const config: AxiosRequestConfig = {
+                method: 'post',
+                url: 'https://api.commanddash.dev/agent/get-agent-list',
+                data: {
+                    "testing": false,
+                    "cli_version": "0.0.1"
+                }
+            };
+            let response = await makeAuthorizedHttpRequest(config, this.context);
+            this._view?.webview.postMessage({ type: 'fetchedAgents', value: JSON.stringify(response) });
+        } catch (error) {
+            console.log('error: while fetching the get-agent-list api', error);
+        }
+    }
+
+
+    private async _fetchAgent(name: string, version: string) {
+        const config: AxiosRequestConfig = {
+            method: 'post',
+            url: 'https://api.commanddash.dev/agent/get-agent',
+            data: {
+                "testing": false,
+                "cli_version": "0.0.1",
+                "name": name,
+                "version": version
+            }
+        };
+        const response = await makeAuthorizedHttpRequest(config, this.context);
+        return response;
+    }
+
+    private async _installAgent(data: any, webview: vscode.Webview) {
         try {
             const { value } = data;
-            const _parsedAgentsValue = JSON.parse(value);
-            const _agentName = _parsedAgentsValue?.name as string;
+            const _parsedAgent = JSON.parse(value);
+            const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version) as any ?? { agent: { name: "", version: "" } };
+            const { name } = agentDetails?.agent;
 
+            // StorageManager.instance.deleteAgents();
             const existingAgents = await StorageManager.instance.getInstallAgents();
             const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
             const updatedAgents = {
                 agents: {
                     ..._parsedExsistingAgents?.agents,
-                    [_agentName]: { ..._parsedAgentsValue }
+                    [`@${name}`]: {
+                        ...agentDetails?.agent, name: `@${name}`, 
+                        supported_commands: agentDetails?.agent.supported_commands.map((command: any) => ({
+                            ...command,
+                            slug: `/${command.slug}`
+                        }))
+                    }
                 },
-                agentsList: [..._parsedExsistingAgents?.agentsList, _agentName]
+                agentsList: [..._parsedExsistingAgents?.agentsList, `@${name}`]
             };
 
             await StorageManager.instance.setInstallAgents(updatedAgents);
@@ -445,114 +493,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 
         return updatedOnboardingChatHtml;
-    }
-
-    private _getHtmlForProfileWebview() {
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-
-            <!--
-                Use a content security policy to only allow loading styles from our extension directory,
-                and only allow scripts that have a specific nonce.
-                (See the 'webview-sample' extension sample for img-src content security policy examples)
-            -->
-            
-
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-        .head-container {
-            display: flex;
-            align-items: center;
-        }
-        #back-button {
-            margin-right: 10px;
-            border: none;
-            background: none;
-            cursor: pointer;
-        }
-        #back-button svg {
-            width: 20px;
-            height: 20px;
-            fill: #FFF; /* Adjust color as needed */
-        }
-        h2 {
-            margin: 0;
-        }
-    </style>
-           
-
-            <title>Profile Page</title>
-        </head>
-        <body>
-        <div class="container">
-        <div class="head-container">
-        <button id="back-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M10.646 2.646a.5.5 0 0 1 0 .708L6.707 8l3.939 3.939a.5.5 0 1 1-.708.708l-4.242-4.243a.5.5 0 0 1 0-.707L10.646 2.646zM4.5 8a.5.5 0 0 1 .5-.5h6.793a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>
-        </svg>
-        </button>
-        <h2>Profile Page</h2>
-       </div>
-        
-            <input type="text" id="api-key" placeholder="Update api-key...">
-            <button class="ml-2" id="update-api-key">
-                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <rect x="0.000488281" width="31.9997" height="32" rx="2" fill="#3079D8" />
-                    <path
-                        d="M23.9531 16.3394L9.24951 9.84766L13.7983 16.3417L9.57198 23.1423L23.9531 16.3394Z"
-                        fill="black" stroke="black" stroke-width="0.784"
-                        stroke-linejoin="round" />
-                    <path d="M12.4482 16.3418L15.6388 16.3418" stroke="#3079D8"
-                        stroke-width="0.784" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </button>
-            
-     
-    </div>
-            
-
-            
-            <script>
-            const vscode = acquireVsCodeApi();
-            
-            registerMessage();
-
-            vscode.postMessage({ type: "updateChatViewKey"}); 
-    
-            const updateApiKeyButton = document.getElementById("update-api-key");
-            const backButton = document.getElementById("back-button");
-const apiKey = document.getElementById("api-key");
-updateApiKeyButton.addEventListener("click", (event) => {
-   
-    updatedApiKey = apiKey.value;
-
- vscode.postMessage({ type: "updateChatViewKey"}); 
-    
-    
-});
-
-backButton.addEventListener("click", (event) => {
-    vscode.postMessage({ type: "backFromProfile", value:  ''}); 
-    
-});
-
-function registerMessage() {
-    debugger;
-    window.addEventListener('message', (event) => {
-        debugger;
-        const message = event.data;
-        console.log('message', message);
-    })
-}
-            
-        </script>
-            
-        </body>
-        </html>`;
-
     }
 
     private async _validateApiKey(apiKey: string) {

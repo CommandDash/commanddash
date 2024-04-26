@@ -267,7 +267,7 @@ const SetupStep = {
     2: "executable"
 };
 
-let data = Object.freeze([
+let data = [
 
     {
         "description": "Ask queries across trusted Flutter docs.",
@@ -734,7 +734,7 @@ let data = Object.freeze([
         ],
         "version": "1.0.0"
     }
-]);
+]
 
 
 const questionnaire = [
@@ -850,6 +850,9 @@ const questionnaire = [
 
     vscode.postMessage({
         type: "initialized",
+    });
+    vscode.postMessage({
+        type: "getInstallAgents"
     });
 
 })();
@@ -1089,6 +1092,15 @@ function addPlaceholder() {
     }
 }
 
+function parseAgents(agents) {
+    if (agents) {
+        const _agents = JSON.parse(agents);
+        return _agents;
+    }
+
+    return {agents: {}, agentsList: []};
+}
+
 function handleTriggerMessage(event) {
     const message = event.data;
     switch (message.type) {
@@ -1252,6 +1264,19 @@ function handleTriggerMessage(event) {
         case 'cleanUpEventListener':
             window.removeEventListener('message', handleTriggerMessage);
             break;
+        case 'getStoredAgents':
+            const _agents = parseAgents(message.value);
+            appendAgents(_agents.agents);
+            break;
+    }
+}
+
+function appendAgents(agents) {
+    for (let key in agents) {
+        debugger;
+        if (agents.hasOwnProperty(key)) {
+            data.push(agents[key]);
+        };
     }
 }
 

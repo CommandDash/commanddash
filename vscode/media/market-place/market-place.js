@@ -13,25 +13,8 @@ let vscode = null;
 const marketPlaceListContainer = document.getElementById("market-place-list-container");
 const backButton = document.getElementById("back-button");
 
-// Sample data
-const agents = [
-    {
-        name: "Agent 1",
-        description: "Agent 1 description",
-        commands: ["/docs - find docs", "/pub - install pub lib"],
-        installs: 10000,
-        author: "Author",
-        version: "v1.0.0"
-    },
-    {
-        name: "Agent 2",
-        description: "Agent 2 description",
-        commands: ["/docs - find docs", "/pub - install pub lib"],
-        installs: 20000,
-        author: "Author",
-        version: "v1.0.0"
-    }
-];
+// Storing agents list
+let agents = [];
 
 let storedAgents = null;
 
@@ -40,101 +23,12 @@ let storedAgents = null;
 
     registerMessage();
 
-    agents.forEach(agent => {
-        // Create li element
-        const li = document.createElement("li");
-        li.className = "py-3 sm:py-4 market-place-list-background mt-2 px-2";
-
-        // Create div element
-        const div = document.createElement("div");
-        div.className = "flex items-center space-x-4 rtl:space-x-reverse";
-
-        // Create inner elements
-        const innerDiv = document.createElement("div");
-        innerDiv.className = "flex-1 min-w-0";
-
-        const p = document.createElement("p");
-        p.className = "text-sm font-medium truncate text-[#497BEF]";
-        p.textContent = agent.name;
-
-        const installSpan = document.createElement("span");
-        installSpan.textContent = agent.installs;
-
-        const installContainer = document.createElement("div");
-        installContainer.className = "inline-flex items-center";
-        installContainer.innerHTML = downloadIcon;
-        installContainer.appendChild(installSpan);
-
-        const topDiv = document.createElement("div");
-        topDiv.className = "inline-flex flex-row justify-between w-full";
-        topDiv.appendChild(p);
-        topDiv.appendChild(installContainer);
-
-        const pDescription = document.createElement("p");
-        pDescription.className = "text-sm truncate text-gray-500";
-        pDescription.textContent = agent.description;
-
-        const ul = document.createElement("ul");
-        ul.className = "max-w-md divide-y divide-gray-200";
-
-        agent.commands.forEach(command => {
-            const liCommand = document.createElement("li");
-            liCommand.className = "text-pink-500";
-            liCommand.textContent = command;
-            ul.appendChild(liCommand);
-        });
-
-        const divRow = document.createElement("div");
-        divRow.className = "inline-flex flex-row items-center w-full justify-between";
-
-        const divRowInner = document.createElement("div");
-        divRowInner.className = "inline-flex flex-row";
-
-        const spanAuthor = document.createElement("span");
-        spanAuthor.className = "text-xs text-gray-500 px-1";
-        spanAuthor.textContent = agent.author;
-
-        const divAuthor = document.createElement("div");
-        divAuthor.className = "inline-flex flex-row items-center w-full justify-between";
-        divAuthor.innerHTML = userIcon;
-        divAuthor.appendChild(spanAuthor);
-
-        const spanVersion = document.createElement("span");
-        spanVersion.className = "text-xs";
-        spanVersion.textContent = agent.version;
-
-        divRowInner.appendChild(divAuthor);
-        divRow.appendChild(divRowInner);
-        divRow.appendChild(spanVersion);
-
-        innerDiv.appendChild(topDiv);
-        innerDiv.appendChild(pDescription);
-        innerDiv.appendChild(ul);
-        innerDiv.appendChild(divRow);
-
-        // Create install button element
-        const installButton = document.createElement("button");
-        installButton.className = "inline-flex items-center text-xs font-semibold text-white bg-[#497BEF] px-2 py-[1.5px] rounded-sm install-button";
-        installButton.textContent = isAgentInstalled(agent.name) ? "Uninstall" : "Install";
-        installButton.dataset.name = agent.name;
-        installButton.addEventListener("click", () => handleInstall(agent));
-
-        // Append elements to div
-        div.appendChild(innerDiv);
-        div.appendChild(installButton);
-
-        // Append div to li
-        li.appendChild(div);
-
-        // Append li to container
-        marketPlaceListContainer.appendChild(li);
-    });
-
     backButton.addEventListener("click", handleBackButtonHandler);
 
-    vscode.postMessage({type: "getInstallAgents"});
+    vscode.postMessage({type: "fetchAgents"});
 })();
 
+//Remove back button handler and replace it with toggle market place
 function handleBackButtonHandler() {
     vscode.postMessage({type: "backFromMarketPlace"});
 }
@@ -145,7 +39,7 @@ function handleInstall(agent) {
         uninstallAgent(agent);
     } else {
         vscode.postMessage({type: "installAgents", value: JSON.stringify(agent)});
-        updateInstallButton(agent, "Uninstall");
+        // updateInstallButton(agent, "Uninstall");
     }
 }
 
@@ -170,7 +64,7 @@ function getStoredAgents() {
     return _storedAgents;
 }
 
-function parseStoredAgents(agents) {
+function parseAgents(agents) {
     if (agents) {
         const _agents = JSON.parse(agents);
         return _agents;
@@ -179,14 +73,108 @@ function parseStoredAgents(agents) {
     return {agents: {}, agentsList: []};
 }
 
+function renderAgentsList(_agents) {
+    _agents.forEach(agent => {
+        // Create li element
+        const li = document.createElement("li");
+        li.className = "py-3 sm:py-4 market-place-list-background mt-2 px-2";
+
+        // Create div element
+        const div = document.createElement("div");
+        div.className = "flex items-center space-x-4 rtl:space-x-reverse";
+
+        // Create inner elements
+        const innerDiv = document.createElement("div");
+        innerDiv.className = "flex-1 min-w-0";
+
+        const p = document.createElement("p");
+        p.className = "text-sm font-semi-bold truncate text-[#497BEF]";
+        p.textContent = `@${agent.name}`;
+
+        const installSpan = document.createElement("span");
+        installSpan.textContent = agent.installs;
+
+        const installContainer = document.createElement("div");
+        installContainer.className = "inline-flex items-center";
+        installContainer.innerHTML = downloadIcon;
+        installContainer.appendChild(installSpan);
+
+        const topDiv = document.createElement("div");
+        topDiv.className = "inline-flex flex-row justify-between w-full";
+        topDiv.appendChild(p);
+        topDiv.appendChild(installContainer);
+
+        const pDescription = document.createElement("p");
+        pDescription.className = "text-sm truncate text-gray-500 my-1";
+        pDescription.textContent = agent.description;
+
+        const ul = document.createElement("ul");
+        ul.className = "max-w-md divide-y divide-gray-200";
+
+        agent.commands.forEach(command => {
+            const liCommand = document.createElement("li");
+            liCommand.className = "text-pink-500";
+            liCommand.textContent = `/${command}`;
+            ul.appendChild(liCommand);
+        });
+
+        const divRow = document.createElement("div");
+        divRow.className = "inline-flex flex-row items-center w-full justify-between";
+
+        const divRowInner = document.createElement("div");
+        divRowInner.className = "inline-flex flex-row";
+
+        const spanAuthor = document.createElement("span");
+        spanAuthor.className = "text-xs text-gray-500 px-1";
+        spanAuthor.textContent = agent.author.name;
+
+        const divAuthor = document.createElement("div");
+        divAuthor.className = "inline-flex flex-row items-center w-full justify-between";
+        divAuthor.innerHTML = userIcon;
+        divAuthor.appendChild(spanAuthor);
+
+        divRowInner.appendChild(divAuthor);
+        divRow.appendChild(divRowInner);
+
+        innerDiv.appendChild(topDiv);
+        innerDiv.appendChild(pDescription);
+        innerDiv.appendChild(ul);
+        innerDiv.appendChild(divRow);
+
+        // Create install button element
+        const installButton = document.createElement("button");
+        installButton.className = "inline-flex items-center text-xs font-semibold text-white bg-[#497BEF] px-2 py-[1.5px] rounded-sm install-button";
+        installButton.textContent = isAgentInstalled(agent.name) ? "Uninstall" : "Install";
+        installButton.dataset.name = `@${agent.name}`;
+        installButton.addEventListener("click", () => handleInstall(agent));
+
+        // Append elements to div
+        div.appendChild(innerDiv);
+        div.appendChild(installButton);
+
+        // Append div to li
+        li.appendChild(div);
+
+        // Append li to container
+        marketPlaceListContainer.appendChild(li);
+    });
+
+    vscode.postMessage({type: "getInstallAgents"});
+}
+
 function registerMessage() {
     window.addEventListener("message", (event) => {
         const message = event.data;
         switch (message.type) {
             case "getStoredAgents":
-                const _agents = parseStoredAgents(message.value);
+                const _agents = parseAgents(message.value);
                 storedAgents = {..._agents};
                 updateInstallButton(_agents?.agentsList, "Uninstall");
+                break;
+            case "fetchedAgents":
+                const _fetchedAgents = parseAgents(message.value);
+                agents = _fetchedAgents;
+                renderAgentsList(agents);
                 break;
         }
     });
