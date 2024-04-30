@@ -55,8 +55,12 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
 
 
 export async function refreshAccessToken(refreshToken: string): Promise<string> {
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const response = await makeHttpRequest<{ access_token: string }>({
         url: baseUrl + '/account/github/refresh', method: 'POST',
+        data: {
+            'timezone': userTimezone
+        },
         headers: {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             Authorization: `Bearer ${refreshToken}`
