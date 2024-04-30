@@ -92,7 +92,7 @@ function renderAgentsList(_agents) {
 
         const p = document.createElement("p");
         p.className = "text-sm font-semi-bold truncate text-[#497BEF]";
-        p.textContent = `@${agent.name}`;
+        p.innerHTML = `@${agent.name} ${agent.testing ? `<span class="text-xs text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
 
         const installSpan = document.createElement("span");
         installSpan.textContent = agent.installs;

@@ -256,7 +256,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             const { value } = data;
             const _parsedAgent = JSON.parse(value);
             const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version) as any ?? { agent: { name: "", version: "" } };
-            const { name } = agentDetails?.agent;
+            const { name } = agentDetails;
 
             // StorageManager.instance.deleteAgents();
             const existingAgents = await StorageManager.instance.getInstallAgents();
@@ -265,8 +265,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 agents: {
                     ..._parsedExsistingAgents?.agents,
                     [`@${name}`]: {
-                        ...agentDetails?.agent, name: `@${name}`,
-                        supported_commands: agentDetails?.agent.supported_commands.map((command: any) => ({
+                        ...agentDetails, name: `@${name}`,
+                        supported_commands: agentDetails?.supported_commands.map((command: any) => ({
                             ...command,
                             slug: `/${command.slug}`
                         }))
