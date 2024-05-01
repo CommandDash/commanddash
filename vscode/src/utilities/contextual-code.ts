@@ -9,7 +9,7 @@ import { Token } from '../shared/types/token';
 export class ContextualCodeProvider {
 
     // This should return code, filepath and range for the contextual code
-    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<Map<String, any>[] | undefined> {
+    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<{ filePath: string, content: string }[] | undefined> {
 
         const checkSymbols = (symbols: Outline[]): Outline | undefined => {
             for (const symbol of symbols) {
@@ -47,17 +47,20 @@ export class ContextualCodeProvider {
         const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
 
         // Iterate over the new Map to construct the desired string
-        let codes: Map<String, any>[] = [];
+        let codes: { filePath: string, content: string }[] = [];
         for (const [filePath, tokenCodes] of tokensByFilePath) {
-            let code = new Map<String, any>();
-            code.set("filePath", filePath);
+            var codeObject: { filePath: string, content: string } = {
+                filePath: filePath,
+                content: ""
+            };
+
             let content = '';
             for (const token of tokenCodes) {
                 const symbolCode = token;
                 content += symbolCode + "\n";
             }
-            code.set("content", content);
-            codes.push(code);
+            codeObject.content = content;
+            codes.push(codeObject);
         }
         return codes;
     }
