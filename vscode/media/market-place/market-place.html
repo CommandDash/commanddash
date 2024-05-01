@@ -9,7 +9,11 @@
 </head>
 
 <body>
-    <div>
+    <div class="h-screen flex-col items-center justify-center hidden" id="loading-container">
+        <dotlottie-player src="{{loadingAnimationUri}}" class="px-5" background="transparent" speed="1"
+            style="width: 150px; height: 150px" direction="1" playMode="normal" loop autoplay></dotlottie-player>
+    </div>
+    <div id="body-container">
         <header class="bg-[#497BEF] px-2 py-1 flex max-w-screen items-center justify-between p-6 lg:px-8">
             <span class="text-white text-lg cursor-pointer" id="back-button">&larr;</span>
         </header>
@@ -19,6 +23,7 @@
         </main>
     </div>
     <script src="{{marketPlaceJsUri}}"></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
 </body>
 
 </html>

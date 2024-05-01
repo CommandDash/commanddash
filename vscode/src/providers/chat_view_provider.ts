@@ -501,6 +501,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const marketPlaceCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.css"));
         const marketPlaceJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.js"));
         const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
+        const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
 
         // Modify your Content-Security-Policy
         const cspSource = webview.cspSource;
@@ -509,6 +510,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{cspSource}}/g, cspSource)
             .replace(/{{marketPlaceCssUri}}/g, marketPlaceCssUri.toString())
             .replace(/{{outputCssUri}}/g, outputCssUri.toString())
+            .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{marketPlaceJsUri}}/g, marketPlaceJsUri.toString());
 
 

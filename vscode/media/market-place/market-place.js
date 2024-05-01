@@ -11,6 +11,8 @@ const downloadIcon =
 let vscode = null;
 
 const marketPlaceListContainer = document.getElementById("market-place-list-container");
+const loadingContainer = document.getElementById("loading-container");
+const bodyContainer = document.getElementById("body-container");
 const backButton = document.getElementById("back-button");
 
 // Storing agents list
@@ -21,12 +23,26 @@ let storedAgents = null;
 (function () {
     vscode = acquireVsCodeApi();
 
+    setLoading(true);
+
     registerMessage();
 
     backButton.addEventListener("click", handleBackButtonHandler);
 
     vscode.postMessage({type: "fetchAgents"});
 })();
+
+function setLoading(isLoading) {
+    if (isLoading) {
+        bodyContainer.classList.add("hidden");
+        loadingContainer.classList.remove("hidden");
+        loadingContainer.classList.add("flex");
+    } else {
+        bodyContainer.classList.remove("hidden");
+        loadingContainer.classList.add("hidden");
+        loadingContainer.classList.remove("flex");
+    }
+}
 
 //Remove back button handler and replace it with toggle market place
 function handleBackButtonHandler() {
@@ -163,6 +179,7 @@ function renderAgentsList(_agents) {
     });
 
     vscode.postMessage({type: "getInstallAgents"});
+    setLoading(false);
 }
 
 function registerMessage() {
