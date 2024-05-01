@@ -263,7 +263,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 agents: {
                     ..._parsedExsistingAgents?.agents,
                     [`@${name}`]: {
-                        ...agentDetails, name: `@${name}`,
+                        ...agentDetails, 
+                        name: `@${name}`,
                         supported_commands: agentDetails?.supported_commands.map((command: any) => ({
                             ...command,
                             slug: `/${command.slug}`
