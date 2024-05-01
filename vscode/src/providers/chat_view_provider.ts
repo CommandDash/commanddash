@@ -27,6 +27,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
+    private toggleView: boolean = false;
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
+    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
@@ -173,11 +176,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "getInstallAgents":
                     {
                         this._getInstallAgents("Uninstall");
-                        break;
-                    }
-                case "backFromMarketPlace":
-                    {
-                        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
                         break;
                     }
                 case "fetchAgents":
@@ -528,38 +526,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     }
 
 
-    private _getChatWebview(webview: vscode.Webview) {
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
-        const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "css", "chatpage.css"));
-        const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
-        const chatHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'chat.html');
-        const chatHtml = fs.readFileSync(chatHtmlPath.fsPath, 'utf8');
-
-        // Modify your Content-Security-Policy
-        const cspSource = webview.cspSource;
-        const contentSecurityPolicy = `
-            default-src 'none';
-            connect-src 'self' https://api.openai.com;
-            img-src ${cspSource} https:;
-            style-src 'unsafe-inline' ${cspSource};
-            script-src 'unsafe-inline' ${cspSource} https: http:;
-        `;
-
-        const updatedChatHtml = chatHtml
-            .replace(/{{cspSource}}/g, cspSource)
-            .replace(/{{scriptUri}}/g, scriptUri.toString())
-            .replace(/{{cssUri}}/g, cssUri.toString())
-            .replace(/{{prismCssUri}}/g, prismCssUri.toString());
-
-        return updatedChatHtml;
-    }
-
     private initGemini(apiKey: string): GeminiRepository {
         return new GeminiRepository(apiKey);
     }
-
-    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
-    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {
         this._publicConversationHistory.push(message);
@@ -663,8 +632,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     public setMarketPlaceWebView() {
         if (this._view) {
-            this._view.webview.postMessage({ type: "cleanUpEventListener" });
-            this._view.webview.html = this._getHtmlForMarketPlace(this._view?.webview);
+            if (!this.toggleView) {
+                this._view.webview.postMessage({ type: "cleanUpEventListener" });
+                this._view.webview.html = this._getHtmlForMarketPlace(this._view?.webview);
+            } else {
+                this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
+            }
+            this.toggleView = !this.toggleView;
         }
     }
 

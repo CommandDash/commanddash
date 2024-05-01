@@ -27,8 +27,6 @@ let storedAgents = null;
 
     registerMessage();
 
-    backButton.addEventListener("click", handleBackButtonHandler);
-
     vscode.postMessage({type: "fetchAgents"});
 })();
 
@@ -42,11 +40,6 @@ function setLoading(isLoading) {
         loadingContainer.classList.add("hidden");
         loadingContainer.classList.remove("flex");
     }
-}
-
-//Remove back button handler and replace it with toggle market place
-function handleBackButtonHandler() {
-    vscode.postMessage({type: "backFromMarketPlace"});
 }
 
 function handleInstall(agent) {
