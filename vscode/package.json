@@ -141,6 +141,14 @@
           "light": "resources/light/trash.svg",
           "dark": "resources/dark/trash.svg"
         }
+      },
+      {
+        "command": "dash.marketPlace",
+        "title": "Market Place",
+        "icon": {
+          "light": "resources/light/market-place.svg",
+          "dark": "resources/dark/market-place.svg"
+        }
       }
     ],
     "menus": {
@@ -213,7 +221,13 @@
       "view/title": [
         {
           "command": "dash.clearChat",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "view == dash.chatView"
+        },
+        {
+          "command": "dash.marketPlace",
+          "group": "navigation",
+          "when": "view == dash.chatView"
         }
       ],
       "dash.createMenu": [

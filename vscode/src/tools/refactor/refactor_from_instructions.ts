@@ -61,7 +61,9 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'commandActionRefactor', value: JSON.stringify({
                     filePath,
-                    relativePath: relativePath.trim(), referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, referenceData: {
+                    relativePath: relativePath.trim(), 
+                    referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, 
+                    referenceData: {
                         'selection': {
                             'start': {
                                 'line': replaceRange.start.line,

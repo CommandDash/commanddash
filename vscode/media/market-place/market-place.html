@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{outputCssUri}}">
+    <link rel="stylesheet" href="{{marketPlaceCssUri}}">
+</head>
+
+<body>
+    <div class="h-screen flex-col items-center justify-center hidden" id="loading-container">
+        <dotlottie-player src="{{loadingAnimationUri}}" class="px-5" background="transparent" speed="1"
+            style="width: 150px; height: 150px" direction="1" playMode="normal" loop autoplay></dotlottie-player>
+    </div>
+    <div id="body-container">
+        <main class="flex flex-col">
+            <ul class="max-w-md divide-y divide-gray-200" id="market-place-list-container">
+            </ul>
+            <span class="text-base text-white font-semibold mx-2">
+            More agents are coming soon! You can also create your own with our 
+                <a target="_blank" href="https://pub.dev/packages/dash_agent" class="text-[#497BEF] border-b border-solid  border-[#497BEF]">dash_agent</a>
+            framework</span>
+        </main>
+    </div>
+    <script src="{{marketPlaceJsUri}}"></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+</body>
+
+</html>

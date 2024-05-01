@@ -15,6 +15,9 @@ import { handleDiffViewAndMerge } from "../utilities/diff-utils";
 import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manager";
 import { ContextualCodeProvider } from "../utilities/contextual-code";
 import { Auth } from "../utilities/auth/auth";
+import { StorageManager } from "../utilities/storage-manager";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { makeAuthorizedHttpRequest } from "../repository/http-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dash.chatView";
@@ -24,6 +27,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
+    private toggleView: boolean = false;
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
+    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
@@ -155,6 +161,27 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     {
                         this._setupManager();
                         webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+                        break;
+                    }
+                case "installAgents":
+                    {
+                        this._installAgent(data, webviewView.webview);
+                        break;
+                    }
+                case "uninstallAgents":
+                    {
+                        this._uninstallAgent(data, webviewView.webview);
+                        break;
+                    }
+                case "getInstallAgents":
+                    {
+                        this._getInstallAgents("Uninstall");
+                        break;
+                    }
+                case "fetchAgents":
+                    {
+                        this._fetchAgentsAPI();
+                        break;
                     }
             }
         });
@@ -171,7 +198,100 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         });
 
         logEvent('new-chat-start', { from: 'command-deck' });
+        // this._installAgent();
 
+    }
+
+    private async _uninstallAgent(data: any, webview: vscode.Webview) {
+        try {
+            const { value } = data;
+            const _parsedAgent = JSON.parse(value);
+            const existingAgents = await StorageManager.instance.getInstallAgents();
+            const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+            delete _parsedExsistingAgents.agents[`@${_parsedAgent.name}`];
+            _parsedExsistingAgents.agentsList = _parsedExsistingAgents.agentsList.filter((item: string) => item !== `@${_parsedAgent.name}`);
+            await StorageManager.instance.setInstallAgents(_parsedExsistingAgents);
+            this._getInstallAgents("Install");
+        } catch (error) {
+            console.log('error while uninstalling agents: ', error);
+        }
+    }
+
+    private async _fetchAgentsAPI() {
+        try {
+            const config: AxiosRequestConfig = {
+                method: 'post',
+                url: 'https://api.commanddash.dev/agent/get-agent-list',
+                data: {
+                    "testing": false,
+                    "cli_version": "0.0.1"
+                }
+            };
+            let response = await makeAuthorizedHttpRequest(config, this.context);
+            this._view?.webview.postMessage({ type: 'fetchedAgents', value: JSON.stringify(response) });
+        } catch (error) {
+            console.log('error: while fetching the get-agent-list api', error);
+        }
+    }
+
+    private async _fetchAgent(name: string, version: string, testing: boolean) {
+        const config: AxiosRequestConfig = {
+            method: 'post',
+            url: 'https://api.commanddash.dev/agent/get-agent',
+            data: {
+                "testing": testing,
+                "cli_version": "0.0.1",
+                "name": name,
+                "version": version
+            }
+        };
+        const response = await makeAuthorizedHttpRequest(config, this.context);
+        return response;
+    }
+
+    private async _installAgent(data: any, webview: vscode.Webview) {
+        try {
+            const { value } = data;
+            const _parsedAgent = JSON.parse(value);
+            const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version, _parsedAgent.testing) as any ?? { agent: { name: "", version: "" } };
+            const { name } = agentDetails;
+
+            // StorageManager.instance.deleteAgents();
+            const existingAgents = await StorageManager.instance.getInstallAgents();
+            const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+            const updatedAgents = {
+                agents: {
+                    ..._parsedExsistingAgents?.agents,
+                    [`@${name}`]: {
+                        ...agentDetails, 
+                        name: `@${name}`,
+                        supported_commands: agentDetails?.supported_commands.map((command: any) => ({
+                            ...command,
+                            slug: `/${command.slug}`
+                        }))
+                    }
+                },
+                agentsList: [..._parsedExsistingAgents?.agentsList, `@${name}`]
+            };
+
+            await StorageManager.instance.setInstallAgents(updatedAgents);
+            this._getInstallAgents("Uninstall");
+        } catch (error) {
+            console.error('Error installing agents:', error);
+        }
+    }
+
+    private async _getInstallAgents(buttonMessage: string) {
+        StorageManager.instance
+            .getInstallAgents()
+            .then(agents => {
+                if (agents) {
+                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: {agents, buttonMessage} });
+                }
+            })
+            .catch(error => {
+                console.log('Error in getting installed agents', error);
+            });
     }
 
     private async _setupManager() {
@@ -185,6 +305,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         });
 
         this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
+
+        // this.setupManager.deleteGithub();
 
         this.setupManager.onDidChangeSetup(event => {
             switch (event) {
@@ -372,6 +494,28 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return updatedOnboardingChatHtml;
     }
 
+    private _getHtmlForMarketPlace(webview: vscode.Webview) {
+        const marketPlaceHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.html');
+        const marketPlaceHtml = fs.readFileSync(marketPlaceHtmlPath.fsPath, 'utf8');
+        const marketPlaceCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.css"));
+        const marketPlaceJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.js"));
+        const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
+        const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
+
+        // Modify your Content-Security-Policy
+        const cspSource = webview.cspSource;
+
+        const updatedOnboardingChatHtml = marketPlaceHtml
+            .replace(/{{cspSource}}/g, cspSource)
+            .replace(/{{marketPlaceCssUri}}/g, marketPlaceCssUri.toString())
+            .replace(/{{outputCssUri}}/g, outputCssUri.toString())
+            .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
+            .replace(/{{marketPlaceJsUri}}/g, marketPlaceJsUri.toString());
+
+
+        return updatedOnboardingChatHtml;
+    }
+
     private async _validateApiKey(apiKey: string) {
         try {
             await this.aiRepo?.validateApiKey(apiKey);
@@ -383,38 +527,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     }
 
 
-    private _getChatWebview(webview: vscode.Webview) {
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
-        const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "css", "chatpage.css"));
-        const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
-        const chatHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'chat.html');
-        const chatHtml = fs.readFileSync(chatHtmlPath.fsPath, 'utf8');
-
-        // Modify your Content-Security-Policy
-        const cspSource = webview.cspSource;
-        const contentSecurityPolicy = `
-            default-src 'none';
-            connect-src 'self' https://api.openai.com;
-            img-src ${cspSource} https:;
-            style-src 'unsafe-inline' ${cspSource};
-            script-src 'unsafe-inline' ${cspSource} https: http:;
-        `;
-
-        const updatedChatHtml = chatHtml
-            .replace(/{{cspSource}}/g, cspSource)
-            .replace(/{{scriptUri}}/g, scriptUri.toString())
-            .replace(/{{cssUri}}/g, cssUri.toString())
-            .replace(/{{prismCssUri}}/g, prismCssUri.toString());
-
-        return updatedChatHtml;
-    }
-
     private initGemini(apiKey: string): GeminiRepository {
         return new GeminiRepository(apiKey);
     }
-
-    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
-    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {
         this._publicConversationHistory.push(message);
@@ -516,6 +631,17 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    public setMarketPlaceWebView() {
+        if (this._view) {
+            if (!this.toggleView) {
+                this._view.webview.postMessage({ type: "cleanUpEventListener" });
+                this._view.webview.html = this._getHtmlForMarketPlace(this._view?.webview);
+            } else {
+                this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
+            }
+            this.toggleView = !this.toggleView;
+        }
+    }
 
     public clearConversationHistory() {
         this._privateConversationHistory = [];
