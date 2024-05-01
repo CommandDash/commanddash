@@ -131,14 +131,14 @@ function renderAgentsList(_agents) {
         });
 
         const divRow = document.createElement("div");
-        divRow.className = "inline-flex flex-row items-center w-full justify-between";
+        divRow.className = "inline-flex flex-row items-center w-full justify-between my-2";
 
         const divRowInner = document.createElement("div");
         divRowInner.className = "inline-flex flex-row";
 
         const spanAuthor = document.createElement("span");
-        spanAuthor.className = "text-xs text-gray-500 px-1";
-        spanAuthor.textContent = agent.author.name;
+        spanAuthor.className = "text-xs text-gray-500 px-1 border-b border-gray-500";
+        spanAuthor.innerHTML = `<a target="_blank" href="https://github.com/${agent.author.github_id}">${agent.author.github_id}</a>`;
 
         const divAuthor = document.createElement("div");
         divAuthor.className = "inline-flex flex-row items-center w-full justify-between";
