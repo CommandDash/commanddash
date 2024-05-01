@@ -10,6 +10,7 @@ export class ContextualCodeProvider {
 
     // This should return code, filepath and range for the contextual code
     public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<Map<String, any>[] | undefined> {
+
         const checkSymbols = (symbols: Outline[]): Outline | undefined => {
             for (const symbol of symbols) {
                 if (isPositionInElementDefinitionRange(symbol, range.start)) {
@@ -52,7 +53,7 @@ export class ContextualCodeProvider {
             code.set("filePath", filePath);
             let content = '';
             for (const token of tokenCodes) {
-                const symbolCode = "```dart\n" + token + "\n```";
+                const symbolCode = token;
                 content += symbolCode + "\n";
             }
             code.set("content", content);
