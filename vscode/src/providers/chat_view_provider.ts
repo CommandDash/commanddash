@@ -234,12 +234,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async _fetchAgent(name: string, version: string) {
+    private async _fetchAgent(name: string, version: string, testing: boolean) {
         const config: AxiosRequestConfig = {
             method: 'post',
             url: 'https://api.commanddash.dev/agent/get-agent',
             data: {
-                "testing": false,
+                "testing": testing,
                 "cli_version": "0.0.1",
                 "name": name,
                 "version": version
@@ -253,7 +253,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         try {
             const { value } = data;
             const _parsedAgent = JSON.parse(value);
-            const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version) as any ?? { agent: { name: "", version: "" } };
+            const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version, _parsedAgent.testing) as any ?? { agent: { name: "", version: "" } };
             const { name } = agentDetails;
 
             // StorageManager.instance.deleteAgents();
