@@ -390,7 +390,7 @@ let data = Object.freeze([
         "version": "1.0.0"
     },
     {
-        "description": "Get help with writing tests",
+        "description": "Get help with writing tests.",
         "min_cli_version": "0.0.1",
         "name": "@test",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
@@ -399,36 +399,22 @@ let data = Object.freeze([
                 "intent": "Generate unit test",
                 "registered_inputs": [
                     {
-                        "display_text": "Additional Details",
-                        "id": "951332168",
+                        "display_text": "Instructions",
+                        "id": "843200121",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Testable code",
-                        "id": "659675789",
+                        "display_text": "Test Code",
+                        "id": "262976490",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing Reference",
-                        "id": "618548494",
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Existing Reference",
-                        "id": "830421465",
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Existing Reference",
-                        "id": "58522844",
+                        "display_text": "Existing Test",
+                        "id": "112025462",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -436,7 +422,22 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "911364231",
+                        "id": "1036506828",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "92500063",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "300369847",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "964719078",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -445,54 +446,82 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "911364231"
+                            "1036506828"
                         ],
-                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<659675789>\n```\n\nImportant instructions shared below:\n<951332168>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<618548494>\n\n// Reference 2\n<830421465>\n\n// Reference 3\n<58522844>\n```\n\nSharing unit test template that you can use to generate unit test:\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n4. Brief about the test cases considered while generating code and how they are helping in generating a full code coverage.\n            ",
+                        "prompt": "basic concise outline template for unit test of <262976490> ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "92500063"
+                        ],
+                        "query": "<1036506828>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
+                    },
+                    {
+                        "data_sources": [
+                            "965004436"
+                        ],
+                        "outputs": [
+                            "300369847"
+                        ],
+                        "query": "unit tests for <262976490> with instructions: <843200121>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "964719078"
+                        ],
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<262976490>\n```\n\nImportant instructions shared below:\n<843200121>\n\nPlease find existing tests from user's codebase to understand their testing style:\n```dart\n<112025462>\n```\n<92500063>\n\nSharing some relevant docs and a unit test template that you can use to generate unit test:\n\n<300369847>\n\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<911364231>",
+                        "value": "<964719078>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you generate unit tests for your codebase. Please share the following info: <659675789> \n <951332168> \nReferences [Optional]: <618548494> <830421465> <58522844>"
+                "text_field_layout": "To generate unit test, please provide: <262976490> \n <843200121> \n\n A matching existing test [Optional]: <112025462>"
             },
             {
                 "intent": "Generate widget test",
                 "registered_inputs": [
                     {
-                        "display_text": "Additional Details",
-                        "id": "378053691",
-                        "optional": true,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Testable code",
-                        "id": "549022744",
+                        "display_text": "Widget Code",
+                        "id": "178924804",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing Reference",
-                        "id": "572441453",
+                        "display_text": "Instructions",
+                        "id": "21815287",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Contextual Code",
+                        "id": "529287994",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing Reference",
-                        "id": "858685241",
+                        "display_text": "Contextual Code",
+                        "id": "575320561",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing Reference",
-                        "id": "534412546",
+                        "display_text": "Existing Widget Test",
+                        "id": "124775656",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -500,7 +529,22 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "376012813",
+                        "id": "378072575",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "1040067744",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "423102951",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "985759187",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -509,96 +553,117 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "376012813"
+                            "378072575"
                         ],
-                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<549022744>\n```\n\nImportant instructions shared below:\n<378053691>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n// Reference 1\n<572441453>\n\n// Reference 2\n<858685241>\n\n// Reference 3\n<534412546>\n```\n\nSharing widget test template that you can use to generate widget test:\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
+                        "prompt": "basic concise example template for widget test for <178924804>",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "1040067744"
+                        ],
+                        "query": "<378072575>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
+                    },
+                    {
+                        "data_sources": [
+                            "965004436"
+                        ],
+                        "outputs": [
+                            "423102951"
+                        ],
+                        "query": "widget tests for <178924804> with instructions: <21815287>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "985759187"
+                        ],
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<178924804>\n```\n\nImportant instructions shared below:\n<21815287>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n<124775656>\n```\n<1040067744>\n\nSharing some docs and a widget test template that you can use to generate widget test:\n\n<423102951>\n\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<376012813>",
+                        "value": "<985759187>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you generate widget tests for your codebase. Please share the following info: <549022744> \n <378053691> \nReferences [Optional]: <572441453> <858685241> <534412546>"
+                "text_field_layout": "To generate widget test, please provide: <178924804> \n <21815287> \n\nSupporting contextual code:<529287994><575320561>\n\nA matching existing widget test [Optional]: <124775656>"
             },
             {
                 "intent": "Generate integration test",
                 "registered_inputs": [
                     {
                         "display_text": "Test Flow",
-                        "id": "886174473",
+                        "id": "601572590",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 1",
-                        "id": "803414260",
+                        "display_text": "Widget",
+                        "id": "77275944",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 2",
-                        "id": "587015762",
+                        "display_text": "Widget",
+                        "id": "460038610",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 3",
-                        "id": "505304773",
+                        "display_text": "Widget",
+                        "id": "777930508",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 4",
-                        "id": "194687236",
+                        "display_text": "Widget",
+                        "id": "781755679",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 5",
-                        "id": "225758428",
+                        "display_text": "Widget",
+                        "id": "766654203",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 6",
-                        "id": "242455516",
+                        "display_text": "Widget",
+                        "id": "183904249",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code 7",
-                        "id": "525150526",
+                        "display_text": "Widget",
+                        "id": "185095733",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Additional Details",
-                        "id": "239981268",
+                        "display_text": "Instructions",
+                        "id": "7900085",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing Reference",
-                        "id": "915469522",
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Existing Reference",
-                        "id": "132295015",
+                        "display_text": "Existing Test",
+                        "id": "1012064162",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -606,7 +671,17 @@ let data = Object.freeze([
                 ],
                 "registered_outputs": [
                     {
-                        "id": "638842459",
+                        "id": "423424552",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "573367249",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "162123373",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -615,22 +690,40 @@ let data = Object.freeze([
                 "steps": [
                     {
                         "outputs": [
-                            "638842459"
+                            "423424552"
                         ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <886174473>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <803414260>\n\n  // contextual code 2\n  <587015762>\n\n  // contextual code 3\n  <505304773>\n\n  // contextual code 4\n  <194687236>\n\n  // contextual code 5\n  <225758428>\n\n  // contextual code 6\n  <242455516>\n\n  // contextual code 7\n  <525150526>\n  ````\n  \n  Additional Instruction from User:\n  <239981268>\n\n  Existing Integration Test from User's project:\n  ```dart\n  // integration test reference 1\n  <915469522>\n\n  // integration test referece 2\n  <132295015>\n  ```\n\n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n\n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand, workds and is reliable.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
+                        "prompt": "basic concise outline template for integration test for <77275944> <460038610> <777930508> <781755679> <766654203> <183904249> <185095733>",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "573367249"
+                        ],
+                        "query": "<423424552>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
+                    },
+                    {
+                        "outputs": [
+                            "162123373"
+                        ],
+                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <601572590>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <77275944>\n  \n  // contextual code 2\n  <460038610>\n  \n  // contextual code 3\n  <777930508>\n  \n  // contextual code 4\n  <781755679>\n  \n  // contextual code 5\n  <766654203>\n  \n  // contextual code 6\n  <183904249>\n  \n  // contextual code 7\n  <185095733>\n  ````\n  \n  Additional Instruction from User:\n  <7900085>\n  \n  Existing integration tests from User's project:\n  ```dart\n  <1012064162>\n  ```\n  <573367249>\n  \n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n  \n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand and works.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<638842459>",
+                        "value": "<162123373>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you generate integration test for your code base. Please share the following info: <886174473>\nWidget Codes: <803414260> <587015762> <505304773> <194687236> <225758428> <242455516> <525150526> \nReferences: <915469522> <132295015> \n <239981268>"
+                "text_field_layout": "To generate integration test, please provide: <601572590>\n\nWidgets included: <77275944> <460038610> <777930508> <781755679> <766654203> <183904249> <185095733> \nA matching existing integration test [Optional]: <1012064162>"
             }
         ],
-        "version": "1.2.0"
+        "testing": false,
+        "version": "1.2.4"
     },
     {
         "description": "",
