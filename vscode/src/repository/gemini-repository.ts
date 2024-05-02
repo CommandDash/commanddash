@@ -24,7 +24,7 @@ export class GeminiRepository extends GenerationRepository {
     constructor(apiKey: string) {
         super(apiKey);
         this.genAI = new GoogleGenerativeAI(apiKey);
-        this.migrateCache();
+        // this.migrateCache();
         GeminiRepository._instance = this;
     }
 
@@ -79,7 +79,9 @@ export class GeminiRepository extends GenerationRepository {
 
         // Count the tokens in the prompt
         const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
-        const { totalTokens } = await model.countTokens(lastMessage?.parts ?? "");
+        let promptText = "";
+        prompt.forEach(p => promptText += p.parts);
+        const { totalTokens } = await model.countTokens(promptText);
         console.log("Total input tokens: " + totalTokens);
 
         // Check if the token count exceeds the limit

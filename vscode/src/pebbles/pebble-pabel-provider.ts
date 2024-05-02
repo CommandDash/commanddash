@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import path = require('path');
 import { extractDartCode } from '../utilities/code-processing';
-import { promptGithubLogin } from '../extension';
+// import { promptGithubLogin } from '../extension';
 import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-utils';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { logEvent } from '../utilities/telemetry-reporter';

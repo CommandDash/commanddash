@@ -20,6 +20,7 @@ import { tempScheme, virtualDocumentProvider } from './utilities/virtual-documen
 import { Auth } from './utilities/auth/auth';
 import { SetupManager, SetupStep } from './utilities/setup-manager/setup-manager';
 import { UpdateManager } from './utilities/update-manager';
+import { StorageManager } from './utilities/storage-manager';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
 
@@ -27,6 +28,7 @@ const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 
 export async function activate(context: vscode.ExtensionContext) {
     // handleAgents();
+    StorageManager.instance.loadContext(context);
     //Check for update on activation of extension
     new UpdateManager(context).checkForUpdate();
 
@@ -49,7 +51,7 @@ export async function activate(context: vscode.ExtensionContext) {
     if (geminiRepo){
         initFlutterExtension(context, geminiRepo, analyzer, chatViewProvider);
     } else {
-        _inlineErrorCommand = vscode.commands.registerCommand('dashai.createInlineCodeCompletion', () => {
+        _inlineErrorCommand = vscode.commands.registerCommand('dash.createInlineCodeCompletion', () => {
             showMissingApiKey();
         });
     }
@@ -120,9 +122,10 @@ function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: Gemi
 
     const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
     context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
-   
-    const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
+    
+    //TODO: Renable after moving to CommandDash
+    // const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);
+    // context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, errorActionProvider));
 
     initCommands(context, geminiRepo, analyzer, chatViewProvider);
 

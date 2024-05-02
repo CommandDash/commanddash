@@ -1,0 +1,12 @@
+body {
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+    align-items: left;
+    justify-content: flex-end;
+    height: 100vh;
+}
+
+.market-place-list-background {
+    background-color: var(--vscode-panel-background);
+}

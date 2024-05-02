@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { Task } from './task';
 import { join } from 'path';
-import { chmod, existsSync, unlink } from 'fs';
+import { chmod, chmodSync, existsSync, renameSync, unlink } from 'fs';
 import { downloadFile, makeHttpRequest } from '../../repository/http-utils';
 import { AxiosRequestConfig } from 'axios';
 import * as vscode from 'vscode';
@@ -10,6 +10,8 @@ import path = require('path');
 import * as os from 'os';
 import { promisify } from 'util';
 import { ExtensionVersionManager } from '../update-check';
+import { logError, logEvent } from '../telemetry-reporter';
+import { error } from 'console';
 
 async function setupExecutable(clientVersion: string, executablePath: string, executableVersion: string | undefined, onProgress: (progress: number) => void) {
   const platform = os.platform();
@@ -24,16 +26,6 @@ async function setupExecutable(clientVersion: string, executablePath: string, ex
     return;
   }
   await downloadFile(response['url'], executablePath, onProgress);
-  if (platform === 'darwin' || platform === 'linux') {
-    // Downloaded file is required to be coverted to an executable.
-    return new Promise<void>((resolve, reject) => {
-      chmod(executablePath, '755', (err) => {
-        if (err) { reject(err); }
-        console.log('The permissions for the executable have been set');
-        resolve();
-      });
-    });
-  }
 }
 
 export async function deleteExecutable(executablePath: string): Promise<void> {
@@ -113,46 +105,83 @@ export class DartCLIClient {
     await deleteExecutable(this.executablePath);
   }
 
+  private renameTempToExecutable(tempFilePath: string) {
+    renameSync(tempFilePath, this.executablePath);
+    const platform = os.platform();
+    if (platform === 'darwin' || platform === 'linux') {
+      // Downloaded file is required to be coverted to an executable.
+      chmodSync(this.executablePath, '755');
+    }
+  }
 
   public connect() {
+    // Verify the presence of the temporary file, indicating a downloaded update during the last IDE session. 
+    // Proceed with updating the executable if applicable.
+    const tempFilePath = `${this.executablePath}.pre-downloaded`;
+
+    if (existsSync(tempFilePath)) {
+      this.renameTempToExecutable(tempFilePath);
+    }
+
+
     // this.proc = child_process.spawn(this.executablePath, ['process']);
     this.proc = child_process.spawn('dart', ['run', '/Users/keval/Desktop/dev/welltested/cli/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
+    let buffer = '';
+
     this.proc.stdout.on('data', (data) => {
-      const message = JSON.parse(data.toString());
-      const { id, method, params } = message;
+      buffer += data.toString();
 
-      if (method === 'result') {
-        this.eventEmitter.emit(`result_${id}`, params);
-      } else if (method === 'error') {
-        this.eventEmitter.emit(`error_${id}`, params);
-      } else if (method === 'step') {
-
-        // Validate if a handler is available to process the fetch step request.
-        if (!this.eventEmitter.eventNames().includes(`step_${params.kind}_${id}`)) {
-          console.log(`No handler found for fetch: step_${params.kind}_${id}`);
-          // Inform CLI that there was no available handler to proess it's request
-          this.sendStepResponse(message.id, message.params['kind'], { 'result': 'error', 'message': `Step kind: ${message.params['kind']} is missing a handler.` }, true);
-        }
-
-        // Handle task specific process requests from Dart CLI (e.g. get additional data)
-        this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
-
-      } else if (method === 'operation') {
-
-        // Validate if a handler is available to process the fetch operation request.
-        if (!this.eventEmitter.eventNames().includes(`operation_${params.kind}`)) {
-          // Inform CLI that there was no available handler to proess it's request
-          console.log(`No handler found for fetch: operation_${params.kind}`);
-          this.sendOperationResponse(message.params['kind'], { 'result': 'error', 'message': `Process Operation kind: ${message.params['kind']} is missing a handler.` });
-        }
-
-        // Handle task independent process requests from Dart CLI (e.g. get additional data)
-        this.eventEmitter.emit(`operation_${params.kind}`, message);
-
-      } if (method === 'log') {
-        console.log(params);
+      let incoming = buffer.split(/\r?\n/);
+      try {
+        // verifies if the last message is a complete JSON
+        JSON.parse(incoming[incoming.length - 1]);
+        buffer = '';
+      } catch {
+        /// [rare case] handles if an incomplete JSON is received in received.
+        buffer = incoming.pop() ?? '';
       }
+
+      incoming = incoming.filter(m => m); // remove any empty strings
+      for (const incomingMessage of incoming) {
+        const message = JSON.parse(incomingMessage);
+        const { id, method, params } = message;
+
+        if (method === 'result') {
+          this.eventEmitter.emit(`result_${id}`, params);
+        } else if (method === 'error') {
+          this.eventEmitter.emit(`error_${id}`, params);
+        } else if (method === 'step') {
+
+          // Validate if a handler is available to process the fetch step request.
+          if (!this.eventEmitter.eventNames().includes(`step_${params.kind}_${id}`)) {
+            console.log(`No handler found for fetch: step_${params.kind}_${id}`);
+            // Inform CLI that there was no available handler to proess it's request
+            this.sendStepResponse(message.id, message.params['kind'], { 'result': 'error', 'message': `Step kind: ${message.params['kind']} is missing a handler.` }, true);
+          }
+
+          // Handle task specific process requests from Dart CLI (e.g. get additional data)
+          this.eventEmitter.emit(`step_${params.kind}_${id}`, message);
+
+        } else if (method === 'operation') {
+
+          // Validate if a handler is available to process the fetch operation request.
+          if (!this.eventEmitter.eventNames().includes(`operation_${params.kind}`)) {
+            // Inform CLI that there was no available handler to proess it's request
+            console.log(`No handler found for fetch: operation_${params.kind}`);
+            this.sendOperationResponse(message.params['kind'], { 'result': 'error', 'message': `Process Operation kind: ${message.params['kind']} is missing a handler.` });
+          }
+
+          // Handle task independent process requests from Dart CLI (e.g. get additional data)
+          this.eventEmitter.emit(`operation_${params.kind}`, message);
+
+        } if (method === 'log') {
+          console.log(params);
+        } if (method === 'debug_message') {
+          console.log('debug_message: ' + params);
+        }
+      }
+
     });
 
     this.proc.stderr.on('data', (data) => {
@@ -222,7 +251,14 @@ export class DartCLIClient {
       });
 
       this.eventEmitter.once(`error_${id}`, (response) => {
-        reject(response);
+        try {
+          const myError = new Error(response['message']);
+          myError.stack = response['data']?.['stack'];
+          logError('server_error', myError);
+        } catch (e) {
+          console.log('Unable to send server error: ' + e);
+        }
+        reject(Error(response['message']));
       });
 
       console.log(requestPayload);
@@ -316,10 +352,8 @@ export async function testTaskWithSteps() {
     /// Request the client to process the task and handle result or error
     const response = await task.run({ kind: "random_task_with_step", data: { current_embeddings: {} } });
     console.log("Processing completed: ", response);
-    // debugger;
   } catch (error) {
     console.error("Processing error: ", error);
-    // debugger;
   }
 }
 /// There can't be multiple tasks messages in parallel

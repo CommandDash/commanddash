@@ -14,15 +14,22 @@ import { CacheManager } from "../utilities/cache-manager";
 import { handleDiffViewAndMerge } from "../utilities/diff-utils";
 import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manager";
 import { ContextualCodeProvider } from "../utilities/contextual-code";
+import { Auth } from "../utilities/auth/auth";
+import { StorageManager } from "../utilities/storage-manager";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { makeAuthorizedHttpRequest } from "../repository/http-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "dashai.chatView";
+    public static readonly viewType = "dash.chatView";
     private _view?: vscode.WebviewView;
     private _currentMessageNumber = 0;
     private setupManager = SetupManager.getInstance();
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
+    private toggleView: boolean = false;
+    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
+    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
@@ -150,6 +157,32 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
+                case "initialized":
+                    {
+                        this._setupManager();
+                        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
+                        break;
+                    }
+                case "installAgents":
+                    {
+                        this._installAgent(data, webviewView.webview);
+                        break;
+                    }
+                case "uninstallAgents":
+                    {
+                        this._uninstallAgent(data, webviewView.webview);
+                        break;
+                    }
+                case "getInstallAgents":
+                    {
+                        this._getInstallAgents("Uninstall");
+                        break;
+                    }
+                case "fetchAgents":
+                    {
+                        this._fetchAgentsAPI();
+                        break;
+                    }
             }
         });
 
@@ -164,15 +197,101 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
 
-        webviewView.webview.postMessage({ type: 'shortCutHints', value: shortcutInlineCodeRefactor() });
-
-        // setting up onboarding setup manager to check the credentails required by user
-        setTimeout(() => {
-            this._setupManager();
-        }, 1000);
-
         logEvent('new-chat-start', { from: 'command-deck' });
+        // this._installAgent();
 
+    }
+
+    private async _uninstallAgent(data: any, webview: vscode.Webview) {
+        try {
+            const { value } = data;
+            const _parsedAgent = JSON.parse(value);
+            const existingAgents = await StorageManager.instance.getInstallAgents();
+            const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+            delete _parsedExsistingAgents.agents[`@${_parsedAgent.name}`];
+            _parsedExsistingAgents.agentsList = _parsedExsistingAgents.agentsList.filter((item: string) => item !== `@${_parsedAgent.name}`);
+            await StorageManager.instance.setInstallAgents(_parsedExsistingAgents);
+            this._getInstallAgents("Install");
+        } catch (error) {
+            console.log('error while uninstalling agents: ', error);
+        }
+    }
+
+    private async _fetchAgentsAPI() {
+        try {
+            const config: AxiosRequestConfig = {
+                method: 'post',
+                url: 'https://api.commanddash.dev/agent/get-agent-list',
+                data: {
+                    "testing": false,
+                    "cli_version": "0.0.1"
+                }
+            };
+            let response = await makeAuthorizedHttpRequest(config, this.context);
+            this._view?.webview.postMessage({ type: 'fetchedAgents', value: JSON.stringify(response) });
+        } catch (error) {
+            console.log('error: while fetching the get-agent-list api', error);
+        }
+    }
+
+    private async _fetchAgent(name: string, version: string, testing: boolean) {
+        const config: AxiosRequestConfig = {
+            method: 'post',
+            url: 'https://api.commanddash.dev/agent/get-agent',
+            data: {
+                "testing": testing,
+                "cli_version": "0.0.1",
+                "name": name,
+                "version": version
+            }
+        };
+        const response = await makeAuthorizedHttpRequest(config, this.context);
+        return response;
+    }
+
+    private async _installAgent(data: any, webview: vscode.Webview) {
+        try {
+            const { value } = data;
+            const _parsedAgent = JSON.parse(value);
+            const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version, _parsedAgent.testing) as any ?? { agent: { name: "", version: "" } };
+            const { name } = agentDetails;
+
+            // StorageManager.instance.deleteAgents();
+            const existingAgents = await StorageManager.instance.getInstallAgents();
+            const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+            const updatedAgents = {
+                agents: {
+                    ..._parsedExsistingAgents?.agents,
+                    [`@${name}`]: {
+                        ...agentDetails, 
+                        name: `@${name}`,
+                        supported_commands: agentDetails?.supported_commands.map((command: any) => ({
+                            ...command,
+                            slug: `/${command.slug}`
+                        }))
+                    }
+                },
+                agentsList: [..._parsedExsistingAgents?.agentsList, `@${name}`]
+            };
+
+            await StorageManager.instance.setInstallAgents(updatedAgents);
+            this._getInstallAgents("Uninstall");
+        } catch (error) {
+            console.error('Error installing agents:', error);
+        }
+    }
+
+    private async _getInstallAgents(buttonMessage: string) {
+        StorageManager.instance
+            .getInstallAgents()
+            .then(agents => {
+                if (agents) {
+                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: {agents, buttonMessage} });
+                }
+            })
+            .catch(error => {
+                console.log('Error in getting installed agents', error);
+            });
     }
 
     private async _setupManager() {
@@ -186,6 +305,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         });
 
         this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
+
+        // this.setupManager.deleteGithub();
 
         this.setupManager.onDidChangeSetup(event => {
             switch (event) {
@@ -253,11 +374,34 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
             this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
         });
-
         task.onProcessStep('cache', async (message) => {
             const cache = await CacheManager.getInstance().getGeminiCache();
             task.sendStepResponse(message, { value: cache });
         });
+        task.onProcessStep('update_cache', async (message) => {
+            const embd = JSON.parse(message.params.args.embeddings);
+            var cacheMap: { [filePath: string]: { codehash: string, embedding: { values: number[] } } } = {};
+
+            // Iterate over each object in the list
+            for (const cacheItem of embd) {
+                // Extract filePath from the keys of each object in the list
+                const filePath = Object.keys(cacheItem)[0];
+
+                // Add the extracted object to the map
+                cacheMap[filePath] = cacheItem[filePath];
+            }
+            await CacheManager.getInstance().setGeminiCache(cacheMap);
+            task.sendStepResponse(message, {});
+        });
+        task.onProcessStep('workspace_details', async (message) => {
+            const workspaceFolder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
+            if (!workspaceFolder) {
+                task.sendStepResponse(message, { path: null });
+                return;
+            }
+            task.sendStepResponse(message, { path: workspaceFolder.uri.fsPath });
+        });
+
         task.onProcessStep('replace_in_file', async (message) => {
             const { originalCode, path, optimizedCode } = message.params.args.file;
             const editor = vscode.window.activeTextEditor;
@@ -268,29 +412,37 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 this._publicConversationHistory.push({ role: "dash", parts: "Do you want to merge these changes?", buttons: ["accept", "decline"], data: { taskId: task.getTaskId(), message } });
                 this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             }
+            task.sendStepResponse(message, {});
         });
 
         const prompt = this.formatPrompt(agentResponse);
         this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         try {
-            const config = vscode.workspace.getConfiguration('fluttergpt');
-            var apiKey = config.get<string>('apiKey');
+            let auth = Auth.getInstance();
             /// Request the client to process the task and handle result or error
+            let agentTrackData = {
+                'agent_name': (agentResponse['agent'] as string).substring(1),
+                'slash_command': agentResponse['slug'],
+                'agent_version': agentResponse['agent_version']
+            };
+            logEvent('agent_start', agentTrackData);
             const response = await task.run({
                 kind: "agent-execute", data: {
-                    "authdetails": {
+                    "auth_details": {
                         "type": "gemini",
-                        "key": apiKey,
-                        "githubToken": ""
+                        "key": auth.getApiKey(),
+                        "github_token": auth.getGithubAccessToken()
                     },
                     ...agentResponse,
+                    agent_name: (agentResponse['agent'] as string).substring(1) // remove the '@'
                 }
             });
+            logEvent('agent_success', agentTrackData);
             console.log("Processing completed: ", response);
         } catch (error) {
             console.error("Processing error: ", error);
-            this._publicConversationHistory.push({ role: 'error', parts: JSON.stringify(error) });
+            this._publicConversationHistory.push({ role: 'error', parts: error instanceof Error ? (error as Error).message : (error as any).toString() });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this?._view?.webview?.postMessage({ type: 'hideLoadingIndicator' });
         }
@@ -304,7 +456,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
             if (type === "code_input" && value) {
                 const parsedValue = JSON.parse(value);
-                prompt += `\n ${parsedValue?.referenceContent}`;
+                prompt += "\n" + parsedValue?.referenceContent;
             }
         });
 
@@ -342,6 +494,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const questionnaireUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "questionnaire", "questionnaire.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
+        const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
 
         // Modify your Content-Security-Policy
         const cspSource = webview.cspSource;
@@ -349,6 +502,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const updatedOnboardingChatHtml = onboardingHtml
             .replace(/{{cspSource}}/g, cspSource)
             .replace(/{{onboardingCssUri}}/g, onboardingCssUri.toString())
+            .replace(/{{outputCssUri}}/g, outputCssUri.toString())
             .replace(/{{onboardingJsUri}}/g, onboardingJsUri.toString())
             .replace(/{{commandDeckJsUri}}/g, commandDeckJsUri.toString())
             .replace(/{{agentUIBuilderUri}}/g, agentUIBuilderUri.toString())
@@ -357,6 +511,28 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
+
+
+        return updatedOnboardingChatHtml;
+    }
+
+    private _getHtmlForMarketPlace(webview: vscode.Webview) {
+        const marketPlaceHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'market-place', 'market-place.html');
+        const marketPlaceHtml = fs.readFileSync(marketPlaceHtmlPath.fsPath, 'utf8');
+        const marketPlaceCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.css"));
+        const marketPlaceJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "market-place", "market-place.js"));
+        const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
+        const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
+
+        // Modify your Content-Security-Policy
+        const cspSource = webview.cspSource;
+
+        const updatedOnboardingChatHtml = marketPlaceHtml
+            .replace(/{{cspSource}}/g, cspSource)
+            .replace(/{{marketPlaceCssUri}}/g, marketPlaceCssUri.toString())
+            .replace(/{{outputCssUri}}/g, outputCssUri.toString())
+            .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
+            .replace(/{{marketPlaceJsUri}}/g, marketPlaceJsUri.toString());
 
 
         return updatedOnboardingChatHtml;
@@ -373,38 +549,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     }
 
 
-    private _getChatWebview(webview: vscode.Webview) {
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "scripts", "main.js"));
-        const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "chat", "css", "chatpage.css"));
-        const prismCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "prismjs", "prism.min.css"));
-        const chatHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat', 'chat.html');
-        const chatHtml = fs.readFileSync(chatHtmlPath.fsPath, 'utf8');
-
-        // Modify your Content-Security-Policy
-        const cspSource = webview.cspSource;
-        const contentSecurityPolicy = `
-            default-src 'none';
-            connect-src 'self' https://api.openai.com;
-            img-src ${cspSource} https:;
-            style-src 'unsafe-inline' ${cspSource};
-            script-src 'unsafe-inline' ${cspSource} https: http:;
-        `;
-
-        const updatedChatHtml = chatHtml
-            .replace(/{{cspSource}}/g, cspSource)
-            .replace(/{{scriptUri}}/g, scriptUri.toString())
-            .replace(/{{cssUri}}/g, cssUri.toString())
-            .replace(/{{prismCssUri}}/g, prismCssUri.toString());
-
-        return updatedChatHtml;
-    }
-
     private initGemini(apiKey: string): GeminiRepository {
         return new GeminiRepository(apiKey);
     }
-
-    private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
-    private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     public addMessageToPublicConversationHistory(message: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, }) {
         this._publicConversationHistory.push(message);
@@ -413,7 +560,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async getResponse(prompt: string) {
         if (!this._view) {
-            await vscode.commands.executeCommand('dashai.chatView.focus');
+            await vscode.commands.executeCommand('dash.chatView.focus');
         } else {
             this._view?.show?.(true);
         }
@@ -421,8 +568,34 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         // Initialize conversation history if it's the first time
         if (this._privateConversationHistory.length === 0) {
             this._privateConversationHistory.push(
-                { role: 'user', parts: "You are a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response from you must be STRICTLY under 8192 characters. DO NOT MENTION EXTRA DETAILS APART FROMT THE QUERY ASKED BY THE USER.\n\n" },
-                { role: 'model', parts: "I am a flutter/dart development expert who specializes in providing production-ready well-formatted code. Each response of mine will be STRICTLY under 8192 characters. How can I help you?\n\n" }
+
+                //TODO: Fetch and insert the available agents dynamically 
+                {
+                    role: 'user', parts: `You are a Flutter/Dart coding assistant specializing in providing well-formatted, production-ready code. Here is what I can do with you:
+
+                1. I can ask you to complete Flutter coding tasks by attaching multiple code snippets from different files in you inline chat by selecting the code and choosing "Attach Snippet to Dash" from the right click menu. With full context provided, you will generate accurate responses with well-formatted code snippets.
+                
+                2. You offer specialized agents for specific tasks. I can initialize an agent by typing "@" followed by the agent's name. Each agent has its own set of slash commands for specific tasks.
+
+                Available agents and commands are.
+                1. @ (globally commands that can be triggered without an agent)
+                - /refactor
+                - /documentation
+                2. @workspace
+                - /query
+                3. @flutter
+                - /doc
+                4. @test
+                - /unit
+                - /widget
+                - /integration
+                
+                User's can use run the agents or commands like:
+                - @test /unit
+                - /refactor
+                - @workspace /query
+                If I greet you or ask you what you can do for me, tell me about the above abilities. Be concise.`},
+                { role: 'model', parts: "Noted, I will be responding as per your instructions. Let's get started." }
             );
         }
         let workspacePrompt = "";
@@ -461,6 +634,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 this._privateConversationHistory.push({ role: 'user', parts: prompt });
                 this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
             }
+
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ role: 'model', parts: response });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
@@ -470,16 +644,26 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         } catch (error) {
             console.error(error);
-            const response = error instanceof Error ? error.message : 'An unexpected error occurred.';
             logError('command-deck-conversation-error', error);
-            this._view?.webview.postMessage({ type: 'displaySnackbar', value: response });
-            this._view?.webview.postMessage({ type: 'addResponse', value: '' });
+            this._publicConversationHistory.push({ role: 'error', parts: error instanceof Error ? (error as Error).message : (error as any).toString() });
+            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         } finally {
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
             this._view?.webview.postMessage({ type: 'workspaceLoader', value: false });
         }
     }
 
+    public setMarketPlaceWebView() {
+        if (this._view) {
+            if (!this.toggleView) {
+                this._view.webview.postMessage({ type: "cleanUpEventListener" });
+                this._view.webview.html = this._getHtmlForMarketPlace(this._view?.webview);
+            } else {
+                this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
+            }
+            this.toggleView = !this.toggleView;
+        }
+    }
 
     public clearConversationHistory() {
         this._privateConversationHistory = [];

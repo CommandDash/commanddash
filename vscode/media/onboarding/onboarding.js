@@ -236,6 +236,7 @@ const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const questionnaireContainer = document.getElementById("questionaire-container");
 const executableContainer = document.getElementById("executable-container");
 const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
+const googleApiKeyError = document.getElementById("google-api-key-error");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -248,19 +249,17 @@ let activeAgent;
 let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
-let agentProvider = null;
-let agentInputsJson = [];
 let currentActiveAgent = '';
 let currentActiveSlug = '';
 let isGithubLoginPending = false;
 let isApiKeyPending = false;
 let isExecutableDownloadPending = false;
+let codeInputId = 0;
+
+const agentInputsJson = [];
 
 //initialising visual studio code library
 let vscode = null;
-
-let agents = [];
-let commands = [];
 
 const SetupStep = {
     0: "github",
@@ -268,20 +267,20 @@ const SetupStep = {
     2: "executable"
 };
 
-const data = [
+let data = [
+
     {
-        "name": "@flutter",
-        "description": "A sample command-line application.",
+        "description": "Ask queries across trusted Flutter docs.",
         "min_cli_version": "0.0.1",
-        "pk": "9191c011f84343fea4a32dfc0b53a766",
-        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
+        "name": "@flutter",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
-                "intent": "Your Flutter doc expert",
+                "intent": "Ask across Flutter docs",
                 "registered_inputs": [
                     {
-                        "display_text": "Your query",
-                        "id": "827782934",
+                        "display_text": "Query",
+                        "id": "828494489",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
@@ -289,12 +288,12 @@ const data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "184274299",
+                        "id": "492011444",
                         "type": "match_document_output",
                         "version": "0.0.1"
                     },
                     {
-                        "id": "977235258",
+                        "id": "688942371",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -303,147 +302,119 @@ const data = [
                 "steps": [
                     {
                         "data_sources": [
-                            "1052200504"
+                            "1068419102"
                         ],
                         "outputs": [
-                            "184274299"
+                            "492011444"
                         ],
-                        "query": "<827782934>",
+                        "query": "<828494489>",
                         "type": "search_in_sources",
                         "version": "0.0.1"
                     },
                     {
                         "outputs": [
-                            "977235258"
+                            "688942371"
                         ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <827782934>\n            \n            References: \n            <184274299>.\n            \n            Please respond to the user's query!\n           **Note**: Please be specific and concise to the user's query and minimise prose",
+                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<977235258>",
+                        "value": "<688942371>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, I'm here to help you with core flutter queries. Let me know your question: <827782934>"
+                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
             }
         ],
         "version": "1.1.0"
     },
     {
+        "description": "Get answer to your workspace related queries.",
+        "min_cli_version": "0.0.1",
         "name": "@workspace",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
-                "slug": "/query",
-                "intent": "Ask me anything",
-                "text_field_layout": "Hi, I'm here to help you. <736841542>. <736841543>",
+                "intent": "Answer to queries related to your project",
                 "registered_inputs": [
                     {
-                        "id": "736841542",
-                        "display_text": "Your query",
+                        "display_text": "Query",
+                        "id": "835164438",
+                        "optional": false,
                         "type": "string_input",
+                        "version": "0.0.1"
                     }
                 ],
                 "registered_outputs": [
-                    { "id": "436621806", "type": "default_output" },
-                    { "id": "90611917", "type": "default_output" }
-                ],
-                "steps": [
                     {
-                        "type": "search_in_workspace",
-                        "query": "<422243666>",
-                        "workspace_object_type": "all",
-                        "workspacePath":
-                            "/Users/keval/Desktop/dev/welltested/projects/dart_files",
-                        "outputs": ["436621806"]
+                        "id": "312430668",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
                     },
                     {
+                        "id": "439982682",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/query",
+                "steps": [
+                    {
+                        "outputs": [
+                            "312430668"
+                        ],
+                        "query": "<835164438>",
+                        "type": "search_in_workspace",
+                        "workspace_object_type": "all",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "439982682"
+                        ],
+                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
                         "type": "prompt_query",
-                        "prompt":
-                            "Here are the related references from user's project:\n <436621806>. Answer the user's query. Query: <736841542>.",
-                        "post_process": { "type": "raw" },
-                        "outputs": ["90611917"]
+                        "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<90611917>",
-                        "post_process": { "type": "raw" },
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "name": "",
-        "supported_commands": [
-            {
-                "slug": "/refactor",
-                "intent": "Ask me anything",
-                "text_field_layout":
-                    "\nRefactor your code <736841542> <805088184>",
-                "registered_inputs": [
-                    {
-                        "id": "736841542",
-                        "display_text": "Your query",
-                        "type": "string_input",
-                    },
-                    {
-                        "id": "805088184",
-                        "display_text": "Code Attachment",
-                        "type": "code_input",
-                        "generate_full_string": true,
+                        "value": "<439982682>",
+                        "version": "0.0.1"
                     }
                 ],
-                "registered_outputs": [
-                    { "id": "436621806", "type": "default_output" }
-                ],
-                "steps": [
-                    {
-                        "type": "prompt_query",
-                        "prompt": "You are a Flutter/Dart assistant helping user modify code within their editor window.\nModification instructions from user: <736841542> .\n\nPlease find the editor file code. To represent the selected code, we have it highlighted with <CURSOR_SELECTION> ..... <CURSOR_SELECTION>.\n <805088184> \n\n" +
-                            "Proceed step by step: 1. Describe the selected piece of code.\n2. What are the possible optimizations?\n3. How do you plan to achieve that ? [Dont output code yet]\n4. Output the modified code to be be programatically replaced in the editor in place of the CURSOR_SELECTION.\nSince this is without human review, you need to output the precise CURSOR_SELECTION" +
-                            " IMPORTANT NOTE: Please make sure to output the modified code in a single code block." +
-                            "Do not just give explanation prose but also give the final code at last.",
-                        "post_process": { "type": "code" },
-                        "outputs": ["436621806"]
-                    },
-                    {
-                        "type": "replace_in_file",
-                        "query": "<436621806>",
-                        "replaceInFile": "805088184",
-                        "continue_if_declined": true,
-                    }
-                ]
+                "text_field_layout": "Hi, Please share your query: <835164438>"
             }
-        ]
+        ],
+        "version": "1.0.0"
     },
     {
-        "description": "A sample command-line application.",
+        "description": "Get help with writing tests.",
         "min_cli_version": "0.0.1",
         "name": "@test",
-        "publisher_id": "20d7a7b5-89b7-419c-aaee-e6b61a263687",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
                 "intent": "Generate unit test",
                 "registered_inputs": [
                     {
-                        "display_text": "Additional Details",
-                        "id": "532854029",
+                        "display_text": "Instructions",
+                        "id": "843200121",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Testable code",
-                        "id": "686996455",
+                        "display_text": "Test Code",
+                        "id": "262976490",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing References",
-                        "id": "182018511",
+                        "display_text": "Existing Test",
+                        "id": "112025462",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -451,7 +422,22 @@ const data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "932964762",
+                        "id": "1036506828",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "92500063",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "300369847",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "964719078",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -460,40 +446,82 @@ const data = [
                 "steps": [
                     {
                         "outputs": [
-                            "932964762"
+                            "1036506828"
                         ],
-                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\n            Generate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n            ```dart\n            <686996455>\n            ```\n\n            Important instructions shared below:\n            <532854029>\n\n            Please find additional references that you can use to generate unit tests as well:\n            ```dart\n            <182018511>\n            ```\n            ",
+                        "prompt": "basic concise outline template for unit test of <262976490> ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "92500063"
+                        ],
+                        "query": "<1036506828>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
+                    },
+                    {
+                        "data_sources": [
+                            "965004436"
+                        ],
+                        "outputs": [
+                            "300369847"
+                        ],
+                        "query": "unit tests for <262976490> with instructions: <843200121>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "964719078"
+                        ],
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<262976490>\n```\n\nImportant instructions shared below:\n<843200121>\n\nPlease find existing tests from user's codebase to understand their testing style:\n```dart\n<112025462>\n```\n<92500063>\n\nSharing some relevant docs and a unit test template that you can use to generate unit test:\n\n<300369847>\n\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<932964762>",
+                        "value": "<964719078>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating unit test. \nCode: <686996455> \nAdditional Details[Optional] <532854029> \nReference[Optional]: <182018511>"
+                "text_field_layout": "To generate unit test, please provide: <262976490> \n <843200121> \n\n A matching existing test [Optional]: <112025462>"
             },
             {
                 "intent": "Generate widget test",
                 "registered_inputs": [
                     {
-                        "display_text": "Additional Details",
-                        "id": "113190543",
-                        "optional": true,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Testable code",
-                        "id": "943720337",
+                        "display_text": "Widget Code",
+                        "id": "178924804",
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Existing References",
-                        "id": "653547540",
+                        "display_text": "Instructions",
+                        "id": "21815287",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Contextual Code",
+                        "id": "529287994",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Contextual Code",
+                        "id": "575320561",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Widget Test",
+                        "id": "124775656",
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -501,7 +529,22 @@ const data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "71397614",
+                        "id": "378072575",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "1040067744",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "423102951",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "985759187",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -510,24 +553,282 @@ const data = [
                 "steps": [
                     {
                         "outputs": [
-                            "71397614"
+                            "378072575"
                         ],
-                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\n            Generate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n            ```dart\n            <943720337>\n            ```\n\n            Important instructions shared below:\n            <113190543>\n\n            Please find additional references that you can use to generate unit tests as well:\n            ```dart\n            <653547540>\n            ```\n            ",
+                        "prompt": "basic concise example template for widget test for <178924804>",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "1040067744"
+                        ],
+                        "query": "<378072575>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
+                    },
+                    {
+                        "data_sources": [
+                            "965004436"
+                        ],
+                        "outputs": [
+                            "423102951"
+                        ],
+                        "query": "widget tests for <178924804> with instructions: <21815287>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "985759187"
+                        ],
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<178924804>\n```\n\nImportant instructions shared below:\n<21815287>\n\nPlease find additional references that you can use to generate unit tests as well:\n```dart\n<124775656>\n```\n<1040067744>\n\nSharing some docs and a widget test template that you can use to generate widget test:\n\n<423102951>\n\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<71397614>",
+                        "value": "<985759187>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, please share the code and any other optional instructions to be following while generating widget test. \nCode: <943720337> \nAdditional Details[Optional] <113190543> \nReference[Optional]: <653547540>"
+                "text_field_layout": "To generate widget test, please provide: <178924804> \n <21815287> \n\nSupporting contextual code:<529287994><575320561>\n\nA matching existing widget test [Optional]: <124775656>"
+            },
+            {
+                "intent": "Generate integration test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Test Flow",
+                        "id": "601572590",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "77275944",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "460038610",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "777930508",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "781755679",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "766654203",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "183904249",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "185095733",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Instructions",
+                        "id": "7900085",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Test",
+                        "id": "1012064162",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "423424552",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "573367249",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "162123373",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/integration",
+                "steps": [
+                    {
+                        "outputs": [
+                            "423424552"
+                        ],
+                        "prompt": "basic concise outline template for integration test for <77275944> <460038610> <777930508> <781755679> <766654203> <183904249> <185095733>",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "573367249"
+                        ],
+                        "query": "<423424552>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
+                    },
+                    {
+                        "outputs": [
+                            "162123373"
+                        ],
+                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <601572590>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <77275944>\n  \n  // contextual code 2\n  <460038610>\n  \n  // contextual code 3\n  <777930508>\n  \n  // contextual code 4\n  <781755679>\n  \n  // contextual code 5\n  <766654203>\n  \n  // contextual code 6\n  <183904249>\n  \n  // contextual code 7\n  <185095733>\n  ````\n  \n  Additional Instruction from User:\n  <7900085>\n  \n  Existing integration tests from User's project:\n  ```dart\n  <1012064162>\n  ```\n  <573367249>\n  \n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n  \n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand and works.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<162123373>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "To generate integration test, please provide: <601572590>\n\nWidgets included: <77275944> <460038610> <777930508> <781755679> <766654203> <183904249> <185095733> \nA matching existing integration test [Optional]: <1012064162>"
+            }
+        ],
+        "testing": false,
+        "version": "1.2.4"
+    },
+    {
+        "description": "",
+        "min_cli_version": "0.0.1",
+        "name": "",
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "supported_commands": [
+            {
+                "intent": "Generate inline documentation",
+                "registered_inputs": [
+                    {
+                        "display_text": "Code",
+                        "id": "606180200",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Additional Instrunction",
+                        "id": "474917076",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Reference Code",
+                        "id": "305491004",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "519294379",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/document",
+                "steps": [
+                    {
+                        "outputs": [
+                            "519294379"
+                        ],
+                        "prompt": "You are an Flutter expert and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <606180200>\n    ```\n    \n    References:\n    ```dart\n    <305491004>\n    ```\n    \n    Additional Instructions: <474917076>\n    \n    Note:\n    1. Only share the updated code with proper comments back. Keep it as information as possible for other developers to understand.\n    2. Make sure to refer to [Effective Dart: Documentation](https://dart.dev/effective-dart/documentation) to create effective inline documentation that follow official Dart guidelines",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<519294379>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
+            },
+            {
+                "intent": "Refactor your code",
+                "registered_inputs": [
+                    {
+                        "display_text": "Instructions",
+                        "id": "640160831",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code",
+                        "id": "555878446",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "651573210",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/refactor",
+                "steps": [
+                    {
+                        "outputs": [
+                            "651573210"
+                        ],
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<651573210>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
             }
         ],
         "version": "1.0.0"
-    },
-];
+    }
+]
+
 
 const questionnaire = [
     {
@@ -535,24 +836,56 @@ const questionnaire = [
         message: "Refactor your code",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson = agentProvider.getInputs("/refactor");
-            agentUIBuilder.buildAgentUI(agentInputsJson);
+            agentInputsJson.push(agentProvider.getInputs("/refactor"));
+            agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
         },
-        icon: `<span class="font-bold text-xs">&lt;/&gt;</span>`
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
     },
     {
         id: "workspace-questionaire",
         message: "Search files or query your workspace",
         onclick: (_textInput) => {
             _textInput.textContent = '';
+            agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson = agentProvider.getInputs("/query");
-            agentUIBuilder.buildAgentUI(agentInputsJson);
+            agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "flutter-doc-search",
+        message: "Query official Flutter Docs",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            agentInputsJson.length = 0;
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/doc"));
+            agentUIBuilder.buildAgentUI();
+            setTimeout(() => adjustHeight(), 0);
+            commandEnable = true;
+        },
+        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+    },
+    {
+        id: "unit-test",
+        message: "Generate unit tests for your methods",
+        onclick: (_textInput) => {
+            _textInput.textContent = '';
+            agentInputsJson.length = 0;
+            const agentUIBuilder = new AgentUIBuilder(_textInput);
+            const agentProvider = new AgentProvider(data);
+            agentInputsJson.push(agentProvider.getInputs("/unit"));
+            agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
         },
@@ -562,7 +895,7 @@ const questionnaire = [
 
 (function () {
 
-    // setLoading(true);
+    setLoading(true);
 
     //initialising vscode library
     vscode = acquireVsCodeApi();
@@ -606,30 +939,16 @@ const questionnaire = [
 
     githubLogin.addEventListener("click", githubListener);
 
-    agentProvider = new AgentProvider(data);
-    agents = [...agentProvider.agents];
-    commands = [...agentProvider.commands];
-
     new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+
+    vscode.postMessage({
+        type: "initialized",
+    });
+    vscode.postMessage({
+        type: "getInstallAgents"
+    });
+
 })();
-
-function workspaceQuestionnaireOnClick() {
-    textInput.textContent = '';
-    const agentUIBuilder = new AgentUIBuilder(textInput);
-    const agentProvider = new AgentProvider(data);
-    agentInputsJson = agentProvider.getInputs("/query");
-    agentUIBuilder.buildAgentUI(agentInputsJson);
-    setTimeout(() => adjustHeight(), 0);
-}
-
-function refactorCodeQuestionnaireOnClick() {
-    textInput.textContent = '';
-    const agentUIBuilder = new AgentUIBuilder(textInput);
-    const agentProvider = new AgentProvider(data);
-    agentInputsJson = agentProvider.getInputs("/refactor");
-    agentUIBuilder.buildAgentUI(agentInputsJson);
-    setTimeout(() => adjustHeight(), 0);
-}
 
 function githubListener() {
     vscode.postMessage({
@@ -666,32 +985,62 @@ function addToolTipsById() {
 }
 
 function submitResponse() {
-    toggleLoader(true);
-    let prompt = textInput.textContent;
+    let prompt = textInput.textContent.trim();
     if (commandEnable) {
-        currentActiveSlug = agentInputsJson?.slug;
+        currentActiveSlug = agentInputsJson[0]?.slug;
         const agentObject = data.find(obj => {
             return obj.supported_commands.some(cmd => {
                 return cmd.slug === currentActiveSlug;
             });
         });
         currentActiveAgent = agentObject.name;
+        const agentsData = { ...agentInputsJson[0] };
+        if (checkValueExists(agentsData.registered_inputs)) {
+            toggleLoader(true);
+            vscode.postMessage({ type: "agents", value: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
 
-        vscode.postMessage({ type: "agents", value: { ...agentInputsJson, agent: currentActiveAgent } });
-        commandEnable = false;
-        activeAgent = false;
-    } else {
+
+            questionnaireContainer.classList.add("hidden");
+            textInput.textContent = "";
+            commandEnable = false;
+            activeAgent = false;
+            agentInputsJson.length = 0;
+        }
+    } else if (prompt.length > 1) {
+        toggleLoader(true);
         for (const chip in chipsData) {
             if (prompt.includes(chip)) {
                 prompt = prompt.replace(chip, chipsData[chip].referenceContent);
             }
         }
         vscode.postMessage({ type: "prompt", value: prompt });
+        questionnaireContainer.classList.add("hidden");
+        textInput.textContent = "";
     }
 
-    textInput.textContent = "";
     adjustHeight();
-    questionnaireContainer.classList.add("hidden");
+}
+
+function checkValueExists(_agentResponseData) {
+    // Check if data is an array
+    if (!Array.isArray(_agentResponseData)) {
+        return false;
+    }
+
+    // Iterate over each object in the array
+    for (const obj of _agentResponseData) {
+        // Check if the object has a "value" key and "optional" is false
+        if (!obj.hasOwnProperty('value') && obj.optional === false) {
+            return false;
+        }
+        // Check if the object doesn't have a "value" key and "optional" is true
+        else if (!obj.hasOwnProperty('value') && obj.optional === true) {
+            continue; // Satisfy the condition
+        }
+    }
+
+    // If all objects meet the criteria, return true
+    return true;
 }
 
 function handleSubmit(event) {
@@ -702,9 +1051,9 @@ function handleSubmit(event) {
         // When triggered with @
         if (type === 'at') {
             if (query.length === 0) {
-                matchingItems = agents;
+                matchingItems = getAgents();
             } else {
-                matchingItems = agents.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = getAgents().filter(item => item.name?.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -712,11 +1061,11 @@ function handleSubmit(event) {
         else if (type === 'slash') {
             // If no agent selected yet
             if (!activeAgent) {
-                matchingItems = query.length === 0 ? commands : commands.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                matchingItems = query.length === 0 ? getCommands() : getCommands().filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             } else {
                 const agentSlugs = data.find(item => item.name === currentActiveAgent);
-                const slugs = agentSlugs.supported_commands.map(command => command.slug);
-                matchingItems = slugs.filter(item => item.toLowerCase().startsWith(query.toLowerCase()));
+                const slugs = agentSlugs.supported_commands.map(command => ({ name: command.slug, description: command.intent }));
+                matchingItems = slugs.filter(item => item?.name.toLowerCase().startsWith(query.toLowerCase()));
             }
         }
 
@@ -728,12 +1077,12 @@ function handleSubmit(event) {
     const menuItemFn = (action, setItem, selected, trigger) => {
         const div = document.createElement('div');
         div.setAttribute('role', 'option');
-        div.className = `menu-item ${trigger === '@' ? 'text-blue-500' : 'text-rose-500'}`;
+        div.className = `menu-item ${action?.name?.startsWith('@') ? 'text-blue-500' : 'text-rose-500'}`;
         if (selected) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action}`;
+        div.textContent = `${action.name} - ${action.description}`;
         div.onclick = setItem;
         return div;
     };
@@ -784,6 +1133,29 @@ function handleSubmit(event) {
     }
 }
 
+function getAgents() {
+    const agents = [];
+    data.forEach(agent => {
+        if (agent.name.trim().length > 0) {
+            agents.push({ name: agent.name, description: agent.description });
+        }
+    });
+
+    return agents;
+}
+
+function getCommands() {
+    const commands = [];
+    data.forEach(agent => {
+        if (agent.name.trim().length === 0) {
+            agent.supported_commands.forEach(_commands => {
+                commands.push({ name: _commands.slug, description: _commands.intent });
+            });
+        }
+    });
+    return commands;
+}
+
 function setCaretToEnd(target) {
     const range = document.createRange();
     const sel = window.getSelection();
@@ -799,7 +1171,7 @@ function setCaretToEnd(target) {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Ask Dash AI") {
+    if (textInput.textContent.trim() === "# Ask Dash") {
         textInput.textContent = '';
         textInput.classList.remove('placeholder');
     }
@@ -808,163 +1180,200 @@ function removePlaceholder() {
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Ask Dash AI';
+        textInput.textContent = '# Ask Dash';
         textInput.classList.add('placeholder');
     }
 }
 
-function readTriggeredMessage() {
-    window.addEventListener("message", (event) => {
-        const message = event.data;
-        switch (message.type) {
-            case "apiKeyValidation":
-                updateValidationList(message.value);
-                break;
-            case "displayMessages":
-                conversationHistory = message.value;
-                displayMessages(conversationHistory);
-                header.classList.add("hidden");
-                scrollToBottom();
-                break;
-            case "showLoadingIndicator":
-                sendButton.classList.remove("cursor-pointer");
-                sendButton.classList.add("cursor-not-allowed");
-                loadingIndicator.classList.add("block");
-                loadingIndicator.classList.remove("hidden");
-                sendButton.classList.add("disabled");
-                textInput.removeEventListener("keydown", handleSubmit);
-                textInput.textContent = "";
-                break;
-            case "hideLoadingIndicator":
-                sendButton.classList.add("cursor-pointer");
-                sendButton.classList.remove("cursor-not-allowed");
-                loadingIndicator.classList.add("hidden");
-                loadingIndicator.classList.remove("block");
-                sendButton.classList.remove("disabled");
-                textInput.addEventListener("keydown", handleSubmit);
-                break;
-            case 'clearCommandDeck':
-                clearChat();
-                break;
-            case 'addToReference':
-                removePlaceholder();
-                createReferenceChips(JSON.parse(message.value));
-                setTimeout(() =>
-                    adjustHeight(),
-                    0);
-                break;
-            case 'setInput':
-                textInput.textContent = message.value;
-                if (message.value.startsWith('/')) {
-                    const action = message.value.split(' ')[0].slice(1);
-                    commandsExecution[action].exe(textInput);
-                }
-                break;
-            case 'shortCutHints':
-                shortCutHints = message.value;
-                //adding tooltips to the elements
-                addToolTipsById();
-                break;
-            case 'keyNotExists':
-                setLoading(false);
-                break;
-            case 'loaderUpdate':
-                const _message = JSON.parse(message.value);
-                const loaderKind = _message['kind'];
-                const loaderMessage = _message['message'];
-                setLoader(loaderKind, loaderMessage);
-                break;
-            case "showValidationLoader":
-                toggleLoader(true);
-                validationLoadingIndicator.classList.remove("hidden");
-                break;
-            case "hideValidationLoader":
-                toggleLoader(false);
-                validationLoadingIndicator.classList.add("hidden");
-                break;
-            case 'pendingSteps':
-                const pendingStepsArr = JSON.parse(message.value);
-                if (pendingStepsArr?.length > 0) {
-                    onboardingSetup.classList.remove("hidden");
-                    bottomContainer.classList.add("hidden");
-                    pendingStepsArr?.forEach((steps) => {
-                        switch (steps) {
-                            case 0:
-                                isGithubLoginPending = true;
-                                githubCross.classList.remove('hidden');
-                                githubTick.classList.add('hidden');
-                                githubLogin.classList.remove("hidden");
-                                apiKeyContainer.classList.remove("hidden");
-                                break;
+function parseAgents(agents) {
+    if (agents) {
+        const _agents = JSON.parse(agents);
+        return _agents;
+    }
 
-                            case 1:
-                                isApiKeyPending = true;
-                                apiKeyCross.classList.remove('hidden');
-                                apiKeyTick.classList.add('hidden');
-                                googleApiKeyTextInput.classList.remove("hidden");
-                                executableContainer.classList.remove("hidden");
-                                break;
+    return {agents: {}, agentsList: []};
+}
 
-                            case 2:
-                                isExecutableDownloadPending = true;
-                                executableCross.classList.remove('hidden');
-                                executableTick.classList.add('hidden');
-                                executableProgress.classList.remove("hidden");
-                                break;
-                        }
-                    });
-                }
+function handleTriggerMessage(event) {
+    const message = event.data;
+    switch (message.type) {
+        case "apiKeyValidation":
+            updateValidationList(message.value);
+            break;
+        case "displayMessages":
+            conversationHistory = message.value;
+            displayMessages(conversationHistory);
+            header.classList.add("hidden");
+            scrollToBottom();
+            break;
+        case "showLoadingIndicator":
+            sendButton.classList.remove("cursor-pointer");
+            sendButton.classList.add("cursor-not-allowed");
+            loadingIndicator.classList.add("block");
+            loadingIndicator.classList.remove("hidden");
+            sendButton.classList.add("disabled");
+            textInput.removeEventListener("keydown", handleSubmit);
+            textInput.textContent = "";
+            break;
+        case "hideLoadingIndicator":
+            sendButton.classList.add("cursor-pointer");
+            sendButton.classList.remove("cursor-not-allowed");
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("block");
+            workspaceLoader.style.display = 'none';
+            workspaceLoaderText.classList.add("hidden");
 
-                if (!isGithubLoginPending) {
-                    isGithubLoginPending = false;
-                    githubCross.classList.add("hidden");
-                    githubTick.classList.remove("hidden");
-                    githubLogin.classList.add("hidden");
-                }
-                if (!isApiKeyPending) {
-                    isApiKeyPending = false;
-                    apiKeyCross.classList.add("hidden");
-                    apiKeyTick.classList.remove("hidden");
-                    googleApiKeyTextInput.classList.add("hidden");
+            sendButton.classList.remove("disabled");
+            textInput.addEventListener("keydown", handleSubmit);
+            break;
+        case 'clearCommandDeck':
+            clearChat();
+            break;
+        case 'addToReference':
+            removePlaceholder();
+            createReferenceChips(JSON.parse(message.value), false);
+            setTimeout(() =>
+                adjustHeight(),
+                0);
+            break;
+        case 'commandActionRefactor':
+            removePlaceholder();
 
-                }
-                if (!isExecutableDownloadPending) {
-                    isExecutableDownloadPending = false;
-                    executableCross.classList.add("hidden");
-                    executableTick.classList.remove("hidden");
-                    executableProgress.classList.add("hidden");
-                }
+            createReferenceChips(JSON.parse(message.value), true);
 
-                // Example logic to determine overall status
-                allStepsCompleted();
-                setLoading(false);
-                break;
-            case 'executableDownloadProgress':
-                executableProgress.value = message.value;
-                break;
-            case 'executableDownloaded':
-                isExecutableDownloadPending = false;
-                executableCross.classList.add("hidden");
-                executableTick.classList.remove("hidden");
-                executableProgress.classList.add("hidden");
-                allStepsCompleted();
-                break;
-            case 'apiKeySet':
-                isApiKeyPending = false;
-                apiKeyCross.classList.add("hidden");
-                apiKeyTick.classList.remove("hidden");
-                googleApiKeyTextInput.classList.add("hidden");
-                allStepsCompleted();
-                break;
-            case 'githubLoggedIn':
+            setTimeout(() =>
+                adjustHeight(),
+                0);
+            break;
+        case 'setInput':
+            textInput.textContent = message.value;
+            if (message.value.startsWith('/')) {
+                const action = message.value.split(' ')[0].slice(1);
+                commandsExecution[action].exe(textInput);
+            }
+            break;
+        case 'shortCutHints':
+            shortCutHints = message.value;
+            //adding tooltips to the elements
+            addToolTipsById();
+            break;
+        case 'keyNotExists':
+            setLoading(false);
+            break;
+        case 'loaderUpdate':
+            const _message = JSON.parse(message.value);
+            const loaderKind = _message['kind'];
+            const loaderMessage = _message['message'];
+            setLoader(loaderKind, loaderMessage);
+            break;
+        case "showValidationLoader":
+            toggleLoader(true);
+            validationLoadingIndicator.classList.remove("hidden");
+            break;
+        case "hideValidationLoader":
+            toggleLoader(false);
+            validationLoadingIndicator.classList.add("hidden");
+            break;
+        case 'pendingSteps':
+            const pendingStepsArr = JSON.parse(message.value);
+            if (pendingStepsArr?.length > 0) {
+                onboardingSetup.classList.remove("hidden");
+                bottomContainer.classList.add("hidden");
+                pendingStepsArr?.forEach((steps) => {
+                    switch (steps) {
+                        case 0:
+                            isGithubLoginPending = true;
+                            githubCross.classList.remove('hidden');
+                            githubTick.classList.add('hidden');
+                            githubLogin.classList.remove("hidden");
+                            apiKeyContainer.classList.remove("hidden");
+                            break;
+
+                        case 1:
+                            isApiKeyPending = true;
+                            apiKeyCross.classList.remove('hidden');
+                            apiKeyTick.classList.add('hidden');
+                            googleApiKeyTextInput.classList.remove("hidden");
+                            executableContainer.classList.remove("hidden");
+                            break;
+
+                        case 2:
+                            isExecutableDownloadPending = true;
+                            executableCross.classList.remove('hidden');
+                            executableTick.classList.add('hidden');
+                            executableProgress.classList.remove("hidden");
+                            break;
+                    }
+                });
+            }
+
+            if (!isGithubLoginPending) {
                 isGithubLoginPending = false;
                 githubCross.classList.add("hidden");
                 githubTick.classList.remove("hidden");
                 githubLogin.classList.add("hidden");
-                allStepsCompleted();
-                break;
-        }
-    });
+            }
+            if (!isApiKeyPending) {
+                isApiKeyPending = false;
+                apiKeyCross.classList.add("hidden");
+                apiKeyTick.classList.remove("hidden");
+                googleApiKeyTextInput.classList.add("hidden");
+
+            }
+            if (!isExecutableDownloadPending) {
+                isExecutableDownloadPending = false;
+                executableCross.classList.add("hidden");
+                executableTick.classList.remove("hidden");
+                executableProgress.classList.add("hidden");
+            }
+
+            allStepsCompleted();
+            setLoading(false);
+            break;
+        case 'executableDownloadProgress':
+            executableProgress.value = message.value;
+            break;
+        case 'executableDownloaded':
+            isExecutableDownloadPending = false;
+            executableCross.classList.add("hidden");
+            executableTick.classList.remove("hidden");
+            executableProgress.classList.add("hidden");
+            allStepsCompleted();
+            break;
+        case 'apiKeySet':
+            isApiKeyPending = false;
+            apiKeyCross.classList.add("hidden");
+            apiKeyTick.classList.remove("hidden");
+            googleApiKeyTextInput.classList.add("hidden");
+            allStepsCompleted();
+            break;
+        case 'githubLoggedIn':
+            isGithubLoginPending = false;
+            githubCross.classList.add("hidden");
+            githubTick.classList.remove("hidden");
+            githubLogin.classList.add("hidden");
+            allStepsCompleted();
+            break;
+        case 'cleanUpEventListener':
+            window.removeEventListener('message', handleTriggerMessage);
+            break;
+        case 'getStoredAgents':
+            const _agents = parseAgents(message.value.agents);
+            appendAgents(_agents.agents);
+            break;
+    }
+}
+
+function appendAgents(agents) {
+    for (let key in agents) {
+        if (agents.hasOwnProperty(key)) {
+            data.push(agents[key]);
+        };
+    }
+}
+
+function readTriggeredMessage() {
+    window.addEventListener("message", handleTriggerMessage);
 }
 
 function setLoader(loaderKind, loaderMessage) {
@@ -972,9 +1381,11 @@ function setLoader(loaderKind, loaderMessage) {
         case "message":
             loadingIndicator.classList.add("hidden");
             loadingIndicator.classList.remove("block");
+            workspaceLoader.classList.remove("hidden");
             workspaceLoader.style.display = 'flex';
             workspaceLoader.classList.remove("animate__slideOutDown");
             workspaceLoader.classList.add("animate__slideInUp");
+            workspaceLoaderText.classList.remove("hidden");
             workspaceLoaderText.textContent = loaderMessage;
             sendButton.classList.add("disabled");
             break;
@@ -1010,7 +1421,7 @@ function allStepsCompleted() {
         modelCount = 3;
     }
 }
-function createReferenceChips(references) {
+function createReferenceChips(references, isCommandAction) {
 
     const chip = document.createElement("span");
     const chipId = `${truncateText(references.fileName)}:[${references.startLineNumber} - ${references.endLineNumber}]`;
@@ -1024,9 +1435,22 @@ function createReferenceChips(references) {
     chip.setAttribute("contenteditable", "false");
 
     chipsData = { ...chipsData, [chipId]: references };
-    if (commandEnable) {
-        agentBuilder?.onCodeInput(references, chipId);
-        // insertAtReference(chip);
+    if (commandEnable && !isCommandAction) {
+        const agentUIBuilder = new AgentUIBuilder(textInput);
+        agentUIBuilder?.onCodeInput(references, chipId);
+    } else if (isCommandAction) {
+        textInput.textContent = '';
+        agentInputsJson.length = 0;
+        const agentProvider = new AgentProvider(data);
+        agentInputsJson.push(agentProvider.getInputs("/refactor"));
+
+        const agentUIBuilder = new AgentUIBuilder(textInput);
+        agentUIBuilder.buildAgentUI();
+        agentUIBuilder?.onCodeInput(references, chipId);
+
+        setTimeout(() => adjustHeight(), 0);
+        commandEnable = true;
+
     } else {
         insertChipAtCursor(chip, textInput);
     }
@@ -1259,7 +1683,7 @@ function displayMessages() {
         if (message.role === "model") {
             modelCount++;
 
-            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">Dash AI</span></div>`;
+            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">CommandDash</span></div>`;
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -1279,7 +1703,7 @@ function displayMessages() {
             // }
         } else if (message.role === "dash") {
             //UI implementation
-            roleElement.innerHTML = "<strong class='text-white'>Dash AI</strong>";
+            roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#497BEF]", "text-white");
             contentElement.innerHTML = markdownToPlain(message.parts);
@@ -1302,8 +1726,7 @@ function displayMessages() {
             roleElement.innerHTML = "<strong class='text-white'>Error</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-red-700");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-red-700", "text-white");
-            const error = JSON.parse(message.parts);
-            contentElement.innerHTML = markdownToPlain(error.message);
+            contentElement.innerHTML = markdownToPlain(message.parts);
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(roleElement);
@@ -1418,11 +1841,11 @@ function markdownToPlain(input) {
 }
 
 async function updateValidationList(message) {
-    debugger;
     if (message === "Gemini API Key is invalid") {
         isApiKeyPending = true;
         apiKeyCross.classList.remove('hidden');
         apiKeyTick.classList.add('hidden');
+        googleApiKeyError.textContent = "Error: Gemini API Key is invalid";
     } else if (message === "Gemini API Key is valid") {
         isApiKeyPending = false;
         apiKeyCross.classList.add('hidden');
@@ -1432,6 +1855,7 @@ async function updateValidationList(message) {
             type: "updateApiKey",
             value: geminiAPIKey,
         });
+        googleApiKeyError.textContent = "";
     }
 }
 

@@ -39,7 +39,7 @@ export class Auth {
     }
 
     public async signInWithGithub(context: vscode.ExtensionContext): Promise<void> {
-        const url = '/account/github/url/vscode';
+        const url = '/account/github/url/' + vscode.env.uriScheme;
         const { github_oauth_url } = await makeHttpRequest<{ github_oauth_url: string }>({ url: url });
         vscode.env.openExternal(vscode.Uri.parse(github_oauth_url));
 

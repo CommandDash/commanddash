@@ -75,14 +75,13 @@ function getCaretCoordinates(element, position) {
 }
 
 class CommandDeck {
-    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn, json, agentUIBuilder) {
+    constructor(ref, menuRef, resolveFn, replaceFn, menuItemFn, agentUIBuilder) {
         this.ref = ref;
         this.menuRef = menuRef;
         this.resolveFn = resolveFn;
         this.replaceFn = replaceFn;
         this.menuItemFn = menuItemFn;
         this.options = [];
-        this.json = json;
         this.agentUIBuilder = agentUIBuilder;
 
         this.makeOptions = this.makeOptions.bind(this);
@@ -91,7 +90,6 @@ class CommandDeck {
         this.onInput = this.onInput.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.renderMenu = this.renderMenu.bind(this);
-        this.agentProvider = new AgentProvider(this.json);
 
         this.ref.addEventListener('input', this.onInput);
         this.ref.addEventListener('keydown', this.onKeyDown);
@@ -126,27 +124,27 @@ class CommandDeck {
     selectItem(active) {
         return () => {
             const option = this.options[active];
-            if (!option.startsWith('/')) {
+            if (!option?.name.startsWith('/')) {
                 this.ref.textContent = '';
             }
-            if (option.startsWith('/')) {
+            if (option?.name.startsWith('/')) {
                 const textContent = this.ref.innerHTML;
                 const atIndex = textContent.lastIndexOf('/');
                 this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
             }
-            if (option.startsWith('@')) {
+            if (option?.name.startsWith('@')) {
                 const agentSpan = document.createElement('span');
                 const slugSpan = document.createElement('span');
                 agentSpan.classList.add("inline-block", "text-[#287CEB]");
                 agentSpan.contentEditable = false;
-                agentSpan.textContent = `${option}\u00A0`;
+                agentSpan.textContent = `${option?.name}\u00A0`;
                 slugSpan.classList.add("inline-block");
                 slugSpan.contentEditable = false;
                 slugSpan.textContent = "/";
                 this.ref.appendChild(agentSpan);
                 this.ref.appendChild(slugSpan);
                 activeAgent = true;
-                currentActiveAgent = option;
+                currentActiveAgent = option.name;
                 // this.closeMenu();
                 this.makeOptions("/");
                 // Move the cursor to the end of the word
@@ -161,8 +159,10 @@ class CommandDeck {
             } else {
                 this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
-                agentInputsJson = this.agentProvider.getInputs(option);
-                agentUIBuilder.buildAgentUI(agentInputsJson);
+                const agentProvider = new AgentProvider(data);
+                // agentInputsJson = agentProvider.getInputs(option);
+                agentInputsJson.push(agentProvider.getInputs(option.name));
+                agentUIBuilder.buildAgentUI();
 
                 this.ref.focus();
                 this.closeMenu();
@@ -255,6 +255,8 @@ class CommandDeck {
                     commandEnable = false;
                     currentActiveAgent = '';
                     currentActiveSlug = '';
+                    agentInputsJson.length = 0;
+                    codeInputId = 0;
                 }
             }, 0);
         }

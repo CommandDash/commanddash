@@ -57,16 +57,13 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             const fileName = path.basename(editor.document.fileName);
 
             // focus chatView
-            vscode.commands.executeCommand('dashai.chatView.focus');
+            vscode.commands.executeCommand('dash.chatView.focus');
             flutterGPTViewProvider.postMessageToWebview({
-                type: 'setInput',
-                value: "/refactor"
-            });
-            console.log('selected text', selectedText);
-            flutterGPTViewProvider.postMessageToWebview({
-                type: 'addToReference', value: JSON.stringify({
+                type: 'commandActionRefactor', value: JSON.stringify({
                     filePath,
-                    relativePath: relativePath.trim(), referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, referenceData: {
+                    relativePath: relativePath.trim(), 
+                    referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, 
+                    referenceData: {
                         'selection': {
                             'start': {
                                 'line': replaceRange.start.line,
@@ -83,58 +80,6 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             });
             return;
         }
-        let documentRefactoredText = editor.document.getText(); // Get the entire document text
-        const refactorCodeWithoutProgress = async () => {
-            let contextualCode = await new ContextualCodeProvider().getContextualCode(editor.document, editor.selection, analyzer, elementname);
-            const result = await generationRepository.refactorCode(finalString, contextualCode, instructions!, globalState);
-            console.log(result);
-            if (!result) {
-                vscode.window.showErrorMessage('Failed to refactor code. Please try again.');
-                return;
-            }
-
-            let refactoredCode = extractDartCode(result, false);
-            if (!refactoredCode) {
-                vscode.window.showErrorMessage('Failed to refactor code. Please try again.');
-                return;
-            }
-            refactoredCode = refactoredCode.replace(/<CURSOR_SELECTION>/g, '');
-            refactoredCode = filterSurroundingCode(editor.document.getText(), refactoredCode, replaceRange.start.line, replaceRange.end.line);
-            console.log("Refactored code:", refactoredCode);
-
-            // Modify the documentText string instead of the document directly
-            const startOffset = editor.document.offsetAt(replaceRange.start);
-            const endOffset = editor.document.offsetAt(replaceRange.end);
-            documentRefactoredText = documentRefactoredText.substring(0, startOffset) + refactoredCode + documentRefactoredText.substring(endOffset);
-        };
-        if (showLoadingIndicator) {
-            await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Refactoring Code",
-                cancellable: false
-            }, async (progress) => {
-                let progressPercentage = 0;
-                let prevProgressPercentage = 0;
-                const progressInterval = setInterval(() => {
-                    prevProgressPercentage = progressPercentage;
-                    progressPercentage = (progressPercentage + 10) % 100;
-                    const increment = progressPercentage - prevProgressPercentage;
-                    progress.report({ increment });
-                }, 200);
-                try {
-                    await refactorCodeWithoutProgress();
-                    vscode.window.showInformationMessage('Code refactored successfully!');
-                } finally {
-                    clearInterval(progressInterval);
-                }
-            });
-        }
-        else {
-            await refactorCodeWithoutProgress();
-        }
-        // Pass the current editor, current document uri and optimized code respectively.
-        handleDiffViewAndMerge(editor, editor.document.uri, editor.document.getText(), documentRefactoredText, context, showLoadingIndicator);
-        return documentRefactoredText;
     } catch (error: Error | unknown) {
         logError('refactor-from-instructions-error', error);
         if (error instanceof Error) {

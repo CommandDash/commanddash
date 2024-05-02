@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{outputCssUri}}">
     <link rel="stylesheet" href="{{onboardingCssUri}}">
     <link rel="stylesheet" href="{{prismCssUri}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -16,7 +16,7 @@
         <dotlottie-player src="{{loadingAnimationUri}}" class="px-5" background="transparent" speed="1"
             style="width: 150px; height: 150px" direction="1" playMode="normal" loop autoplay></dotlottie-player>
     </div>
-    <div class="h-screen flex flex-col hidden" id="body-container">
+    <div class="h-screen flex flex-col" id="body-container">
         <a href="https://www.commanddash.io/blog/beginning-of-command-dash-ai-autopilot-for-flutter" target="_blank"
             class="focus:outline-none">
             <div class="py-3 sticky top-0 z-[11] flex w-full px-5 items-center justify-center" id="header">
@@ -93,6 +93,7 @@
 
                     <input type="text" id="google-api-key-text-input"
                         class="bg-white/[.1] border text-sm block w-full p-2.5 mb-2 rounded-[2px]" required>
+                    <span class="text-[#CB4343]" id="google-api-key-error"></span>
                 </div>
                 <div id="executable-container">
                     <div class="inline-flex flex-row items-center">
@@ -117,7 +118,7 @@
             </div>
         </div>
         <div class="flex-1 flex" id="bottom-container">
-            <div class="w-full h-20 absolute inset-0 m-auto" id="questionaire-container">
+            <div class="w-full h-20 absolute inset-0 m-auto" id="questionaire-container", style="bottom: 180px;">
                 <div class="grid grid-cols-2 gap-1" id="questionnaire-grid">
                 </div>
 
@@ -141,7 +142,7 @@
                         id="text-input-container">
                         <div class="relative">
                             <!-- Add "# Ask FlutterGPT" after completing chips -->
-                            <p contenteditable="true" id="text-input"># Ask Dash AI</p>
+                            <p contenteditable="true" id="text-input"># Ask Dash</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div class="inline-flex">
                                     <p class="text-center inline-flex justify-center items-center text-white/[.4] cursor-pointer"
