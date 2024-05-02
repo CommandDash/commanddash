@@ -5,6 +5,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ## [0.3.6]
+- Added Dash Agents Marketplace
+- Fix Github signin issue in Cursor Editor
+
+## [0.3.6]
 - Tip for Code Input usage
 - Engine update failing on windows issue
 - Bug Fixes
