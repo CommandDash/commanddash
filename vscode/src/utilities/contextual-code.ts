@@ -6,6 +6,8 @@ import { ILspAnalyzer } from '../shared/types/LspAnalyzer';
 import { Outline } from '../shared/types/custom_protocols';
 import { getCodeForRange, isPositionInElementDefinitionRange } from '../shared/utils';
 import { Token } from '../shared/types/token';
+import * as fs from 'fs';
+
 export class ContextualCodeProvider {
 
     // This should return code, filepath and range for the contextual code
@@ -49,16 +51,15 @@ export class ContextualCodeProvider {
         // Iterate over the new Map to construct the desired string
         let codes: { filePath: string, content: string }[] = [];
         for (const [filePath, tokenCodes] of tokensByFilePath) {
+            const absoluteFilePath = path.join(vscode.workspace.rootPath || '', filePath);
             var codeObject: { filePath: string, content: string } = {
-                filePath: filePath,
+                filePath: absoluteFilePath,
                 content: ""
             };
 
-            let content = '';
-            for (const token of tokenCodes) {
-                const symbolCode = token;
-                content += symbolCode + "\n";
-            }
+            // adds compelte file code for the nested file
+            let content = fs.readFileSync(absoluteFilePath, 'utf8');
+
             codeObject.content = content;
             codes.push(codeObject);
         }
