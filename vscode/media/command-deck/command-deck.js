@@ -145,7 +145,6 @@ class CommandDeck {
                 this.ref.appendChild(slugSpan);
                 activeAgent = true;
                 currentActiveAgent = option.name;
-                // this.closeMenu();
                 this.makeOptions("/");
                 // Move the cursor to the end of the word
                 this.ref.focus();
@@ -160,8 +159,7 @@ class CommandDeck {
                 this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
                 const agentProvider = new AgentProvider(data);
-                // agentInputsJson = agentProvider.getInputs(option);
-                agentInputsJson.push(agentProvider.getInputs(option.name));
+                agentInputsJson.push(agentProvider.getInputs(option.name, currentActiveAgent));
                 agentUIBuilder.buildAgentUI();
 
                 this.ref.focus();

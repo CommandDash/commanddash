@@ -746,7 +746,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/refactor"));
+            agentInputsJson.push(agentProvider.getInputs("/refactor", ""));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -761,7 +761,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentInputsJson.push(agentProvider.getInputs("/query", "@workspace"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -776,7 +776,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/doc"));
+            agentInputsJson.push(agentProvider.getInputs("/doc", "@flutter"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -791,7 +791,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/unit"));
+            agentInputsJson.push(agentProvider.getInputs("/unit", "@test"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
