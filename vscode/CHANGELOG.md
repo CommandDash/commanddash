@@ -4,7 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.3.6]
+## [0.3.8]
+- Added support to send contextual code to engine
+
+## [0.3.7]
 - Added Dash Agents Marketplace
 - Fix Github signin issue in Cursor Editor
 
