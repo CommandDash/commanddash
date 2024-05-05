@@ -125,7 +125,7 @@ export class DartCLIClient {
 
 
     // this.proc = child_process.spawn(this.executablePath, ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/keval/Desktop/dev/welltested/cli/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    this.proc = child_process.spawn('dart', ['run', '/Users/samyak/Documents/commanddash/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
     let buffer = '';
 
@@ -178,7 +178,7 @@ export class DartCLIClient {
         } if (method === 'log') {
           console.log(params);
         } if (method === 'debug_message') {
-          console.log('debug_message: ' + params);
+         console.log('debug_message: ' + JSON.stringify(params));
         }
       }
 

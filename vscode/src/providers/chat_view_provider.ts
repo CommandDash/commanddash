@@ -349,12 +349,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
             let range = new vscode.Range(
                 new vscode.Position(args.range.start.line, args.range.start.character),
-                new vscode.Position(args.range.end.line, args.range.end.character),
+                new vscode.Position(args.range.end.line-1, args.range.end.character),
             );
             try {
                 let contextualCode = await new ContextualCodeProvider().getContextualCodeInput(
                     document, range, this.analyzer!, undefined
                 );
+                
                 task.sendStepResponse(message, {
                     "context": contextualCode,
                 });
