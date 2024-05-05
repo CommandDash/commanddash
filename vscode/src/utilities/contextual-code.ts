@@ -11,7 +11,7 @@ import * as fs from 'fs';
 export class ContextualCodeProvider {
 
     // This should return code, filepath and range for the contextual code
-    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<{ filePath: string, content: string }[] | undefined> {
+    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<{ filePath: string}[] | undefined> {
 
         const checkSymbols = (symbols: Outline[]): Outline | undefined => {
             for (const symbol of symbols) {
@@ -49,18 +49,12 @@ export class ContextualCodeProvider {
         const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
 
         // Iterate over the new Map to construct the desired string
-        let codes: { filePath: string, content: string }[] = [];
+        let codes: { filePath: string}[] = [];
         for (const [filePath, tokenCodes] of tokensByFilePath) {
             const absoluteFilePath = path.join(vscode.workspace.rootPath || '', filePath);
-            var codeObject: { filePath: string, content: string } = {
-                filePath: absoluteFilePath,
-                content: ""
+            var codeObject: { filePath: string } = {
+                filePath: absoluteFilePath,   
             };
-
-            // adds compelte file code for the nested file
-            let content = fs.readFileSync(absoluteFilePath, 'utf8');
-
-            codeObject.content = content;
             codes.push(codeObject);
         }
         return codes;
