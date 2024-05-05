@@ -27,7 +27,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     aiRepo?: GeminiRepository;
     analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
-    private toggleView: boolean = false;
     private _publicConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string }> = [];
     private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
@@ -199,7 +198,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         logEvent('new-chat-start', { from: 'command-deck' });
         // this._installAgent();
+        this.setMarketPlaceContext(false);
+    }
 
+    private setMarketPlaceContext(isMarketPlace: boolean) {
+        vscode.commands.executeCommand('setContext', 'dash:isMarketPlace', isMarketPlace);
     }
 
     private async _uninstallAgent(data: any, webview: vscode.Webview) {
@@ -263,7 +266,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 agents: {
                     ..._parsedExsistingAgents?.agents,
                     [`@${name}`]: {
-                        ...agentDetails, 
+                        ...agentDetails,
                         name: `@${name}`,
                         supported_commands: agentDetails?.supported_commands.map((command: any) => ({
                             ...command,
@@ -286,7 +289,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .getInstallAgents()
             .then(agents => {
                 if (agents) {
-                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: {agents, buttonMessage} });
+                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: { agents, buttonMessage } });
                 }
             })
             .catch(error => {
@@ -656,13 +659,16 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     public setMarketPlaceWebView() {
         if (this._view) {
-            if (!this.toggleView) {
-                this._view.webview.postMessage({ type: "cleanUpEventListener" });
-                this._view.webview.html = this._getHtmlForMarketPlace(this._view?.webview);
-            } else {
-                this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
-            }
-            this.toggleView = !this.toggleView;
+            this._view.webview.postMessage({ type: "cleanUpEventListener" });
+            this._view.webview.html = this._getHtmlForMarketPlace(this._view?.webview);
+            this.setMarketPlaceContext(true);
+        }
+    }
+
+    public setChatWebView() {
+        if (this._view) {
+            this._view.webview.html = this._getHtmlForWebview(this._view?.webview);
+            this.setMarketPlaceContext(false);
         }
     }
 

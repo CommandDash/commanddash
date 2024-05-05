@@ -827,7 +827,7 @@ let data = [
         ],
         "version": "1.0.0"
     }
-]
+];
 
 
 const questionnaire = [
@@ -839,7 +839,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/refactor"));
+            agentInputsJson.push(agentProvider.getInputs("/refactor", ""));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -854,7 +854,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/query"));
+            agentInputsJson.push(agentProvider.getInputs("/query", "@workspace"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -869,7 +869,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/doc"));
+            agentInputsJson.push(agentProvider.getInputs("/doc", "@flutter"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -884,7 +884,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/unit"));
+            agentInputsJson.push(agentProvider.getInputs("/unit", "@test"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -947,7 +947,6 @@ const questionnaire = [
     vscode.postMessage({
         type: "getInstallAgents"
     });
-
 })();
 
 function githubListener() {
@@ -1390,6 +1389,25 @@ function setLoader(loaderKind, loaderMessage) {
             sendButton.classList.add("disabled");
             break;
         case "processingFiles":
+            workspaceLoader.style.display = 'flex';
+            //replace message array with actual file names
+            const message = ['index.dart', 'main.dart', 'demo.dart'];
+            message.forEach((_filePath) => {
+                const divBlock = document.createElement("div");
+                divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
+                divBlock.id = "divBlock";
+                const fileNames = document.createElement("span");
+                const _dartIcon = document.createElement("span");
+                _dartIcon.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`;
+                _dartIcon.classList.add("h-3", "w-3", "mx-1");
+                _dartIcon.id = "dartIcon";
+                fileNames.textContent = _filePath;
+                fileNames.classList.add("file-path");
+                fileNames.id = "fileNames";
+                divBlock.appendChild(_dartIcon);
+                divBlock.appendChild(fileNames);
+                fileNameContainer.appendChild(divBlock);
+            });
             break;
         case "circular":
             toggleLoader(true);
