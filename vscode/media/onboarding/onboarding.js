@@ -1390,8 +1390,8 @@ function setLoader(loaderKind, loaderMessage) {
             break;
         case "processingFiles":
             workspaceLoader.style.display = 'flex';
+            message = [];
             //replace message array with actual file names
-            const message = ['index.dart', 'main.dart', 'demo.dart'];
             message.forEach((_filePath) => {
                 const divBlock = document.createElement("div");
                 divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
