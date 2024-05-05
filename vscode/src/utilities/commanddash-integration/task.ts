@@ -17,6 +17,7 @@ export class Task {
       try {
         await handler(message);
       } catch (e) {
+        // console.error(e);
         // Inform CLI that client was unable to provide requested data
         this.sendStepResponse(message, { 'message': `Step kind: ${message.params['kind']} failed with error ${e}` });
       }

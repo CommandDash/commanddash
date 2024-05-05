@@ -118,12 +118,14 @@ export class DartCLIClient {
     // Verify the presence of the temporary file, indicating a downloaded update during the last IDE session. 
     // Proceed with updating the executable if applicable.
     const tempFilePath = `${this.executablePath}.pre-downloaded`;
+
     if (existsSync(tempFilePath)) {
       this.renameTempToExecutable(tempFilePath);
     }
 
 
     this.proc = child_process.spawn(this.executablePath, ['process']);
+    // this.proc = child_process.spawn('dart', ['run', '', 'process']);
 
     let buffer = '';
 
@@ -176,7 +178,7 @@ export class DartCLIClient {
         } if (method === 'log') {
           console.log(params);
         } if (method === 'debug_message') {
-          console.log('debug_message: ' + params);
+         console.log('debug_message: ' + JSON.stringify(params));
         }
       }
 

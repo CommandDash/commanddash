@@ -149,6 +149,14 @@
           "light": "resources/light/market-place.svg",
           "dark": "resources/dark/market-place.svg"
         }
+      },
+      {
+        "command": "dash.backButton",
+        "title": "Back",
+        "icon": {
+          "light": "resources/light/back.svg",
+          "dark": "resources/dark/back.svg"
+        }
       }
     ],
     "menus": {
@@ -222,12 +230,17 @@
         {
           "command": "dash.clearChat",
           "group": "navigation",
-          "when": "view == dash.chatView"
+          "when": "view == dash.chatView && !dash:isMarketPlace"
         },
         {
           "command": "dash.marketPlace",
           "group": "navigation",
-          "when": "view == dash.chatView"
+          "when": "view == dash.chatView && !dash:isMarketPlace"
+        },
+        {
+          "command": "dash.backButton",
+          "group": "navigation",
+          "when": "view == dash.chatView && dash:isMarketPlace"
         }
       ],
       "dash.createMenu": [
