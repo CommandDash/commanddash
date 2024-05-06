@@ -1334,8 +1334,14 @@ function setLoader(loaderKind, loaderMessage) {
             sendButton.classList.add("disabled");
             break;
         case "processingFiles":
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("block");
             workspaceLoader.style.display = 'flex';
-            message = [];
+            workspaceLoaderText.classList.remove("hidden");
+            workspaceLoaderText.textContent = loaderMessage.message;
+            message = [...loaderMessage.files];
+
+            fileNameContainer.innerHTML = '';
             //replace message array with actual file names
             message.forEach((_filePath) => {
                 const divBlock = document.createElement("div");
