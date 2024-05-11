@@ -174,7 +174,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "getInstallAgents":
                     {
-                        this._getInstallAgents("Uninstall");
+                        this._getInstallAgents();
                         break;
                     }
                 case "fetchAgents":
@@ -213,8 +213,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
             delete _parsedExsistingAgents.agents[`@${_parsedAgent.name}`];
             _parsedExsistingAgents.agentsList = _parsedExsistingAgents.agentsList.filter((item: string) => item !== `@${_parsedAgent.name}`);
-            await StorageManager.instance.setInstallAgents(_parsedExsistingAgents);
-            this._getInstallAgents("Install");
+            StorageManager.instance.setInstallAgents(_parsedExsistingAgents).then(() => {
+                this._getInstallAgents();
+            });
         } catch (error) {
             console.log('error while uninstalling agents: ', error);
         }
@@ -277,19 +278,21 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 agentsList: [..._parsedExsistingAgents?.agentsList, `@${name}`]
             };
 
-            await StorageManager.instance.setInstallAgents(updatedAgents);
-            this._getInstallAgents("Uninstall");
+            StorageManager.instance.setInstallAgents(updatedAgents).then(() => {
+                this._getInstallAgents();
+            });
+            
         } catch (error) {
             console.error('Error installing agents:', error);
         }
     }
 
-    private async _getInstallAgents(buttonMessage: string) {
+    private async _getInstallAgents() {
         StorageManager.instance
             .getInstallAgents()
             .then(agents => {
                 if (agents) {
-                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: { agents, buttonMessage } });
+                    this._view?.webview.postMessage({ type: 'getStoredAgents', value: { agents } });
                 }
             })
             .catch(error => {
@@ -497,6 +500,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const agentProviderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-provider", "agent-provider.js"));
         const questionnaireUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "questionnaire", "questionnaire.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
+        // const addPhotoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "add-photo.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
         const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
 
@@ -513,6 +517,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{agentProviderUri}}/g, agentProviderUri.toString())
             .replace(/{{questionnaireUri}}/g, questionnaireUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
+            // .replace(/{{addPhotoUri}}/g, addPhotoUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
