@@ -64,9 +64,9 @@ function updateInstallButton(agentOrList) {
     
     installButtons.forEach(button => {
         if (agentNames.includes(button.dataset.name)) {
-            button.textContent = "Install";
-        } else {
             button.textContent = "Uninstall";
+        } else {
+            button.textContent = "Install";
         }
     });
 }
