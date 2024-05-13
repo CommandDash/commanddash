@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{prismCssUri}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
 
 <body>
@@ -205,8 +206,11 @@
                                     <label
                                         class="text-center inline-flex text-2xl justify-center items-center text-white cursor-pointer"
                                         title="Attach" id="attach-file" for="file-upload">
+                                        <i class="material-symbols-outlined">
+                                            &#xe43e;
+                                        </i>
                                     </label>
-                                    <input id="file-upload" type="file" accept="image/*" class="hidden" />
+                                    <input id="file-upload" type="file" accept="image/*" class="hidden" multiple="false" />
                                     <button class="ml-2" id="send-chat" title="tool tip on the send button">
                                         <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">

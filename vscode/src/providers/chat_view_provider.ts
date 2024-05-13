@@ -500,7 +500,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         const agentProviderUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "agent-provider", "agent-provider.js"));
         const questionnaireUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "questionnaire", "questionnaire.js"));
         const headerImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "header.png"));
-        // const addPhotoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "add-photo.png"));
+        const addPhotoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "add-photo.png"));
         const loadingAnimationUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "loading-animation.json"));
         const outputCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "output.css"));
 
@@ -517,7 +517,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             .replace(/{{agentProviderUri}}/g, agentProviderUri.toString())
             .replace(/{{questionnaireUri}}/g, questionnaireUri.toString())
             .replace(/{{headerImageUri}}/g, headerImageUri.toString())
-            // .replace(/{{addPhotoUri}}/g, addPhotoUri.toString())
+            .replace(/{{addPhotoUri}}/g, addPhotoUri.toString())
             .replace(/{{loadingAnimationUri}}/g, loadingAnimationUri.toString())
             .replace(/{{prismCssUri}}/g, prismCssUri.toString());
 
