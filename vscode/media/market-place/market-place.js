@@ -58,13 +58,13 @@ function isAgentInstalled(agentName) {
     return storedAgents.agentsList.includes(`@${agentName}`);
 }
 
-function updateInstallButton(agentOrList, buttonText) {
+function updateInstallButton(agentOrList) {
     const installButtons = document.querySelectorAll(".install-button");
     const agentNames = Array.isArray(agentOrList) ? agentOrList.map(agent => agent) : [agentOrList.name];
     
     installButtons.forEach(button => {
         if (agentNames.includes(button.dataset.name)) {
-            button.textContent = buttonText;
+            button.textContent = "Uninstall";
         } else {
             button.textContent = "Install";
         }
@@ -182,7 +182,7 @@ function registerMessage() {
             case "getStoredAgents":
                 const _agents = parseAgents(message.value.agents);
                 storedAgents = {..._agents};
-                updateInstallButton(_agents?.agentsList, message.value.buttonMessage);
+                updateInstallButton(_agents?.agentsList);
                 break;
             case "fetchedAgents":
                 const _fetchedAgents = parseAgents(message.value);

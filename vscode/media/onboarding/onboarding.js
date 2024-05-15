@@ -237,12 +237,14 @@ const questionnaireContainer = document.getElementById("questionaire-container")
 const executableContainer = document.getElementById("executable-container");
 const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
 const googleApiKeyError = document.getElementById("google-api-key-error");
+const fileUpload = document.getElementById("file-upload");
 
 //initialising variables
 let isApiKeyValid = false;
 let areDependenciesInstalled = false;
 let conversationHistory = [];
 let chipsData = {};
+let filesData = {};
 let stepOneCompleted = false;
 let onboardingCompleted = false;
 let activeAgent;
@@ -250,7 +252,6 @@ let commandEnable = false;
 let shortCutHints = '';
 let agentBuilder = null;
 let currentActiveAgent = '';
-let currentActiveSlug = '';
 let isGithubLoginPending = false;
 let isApiKeyPending = false;
 let isExecutableDownloadPending = false;
@@ -880,6 +881,7 @@ const questionnaire = [
     textInput.addEventListener("blur", addPlaceholder);
     textInput.addEventListener("dragover", dragOver);
     textInput.addEventListener("drop", drop);
+    fileUpload.addEventListener("change", fileAttach);
 
     githubLogin.addEventListener("click", githubListener);
 
@@ -892,6 +894,23 @@ const questionnaire = [
         type: "getInstallAgents"
     });
 })();
+
+function fileAttach(event) {
+    removePlaceholder();
+    const file = event.target.files[0];
+    const imageChip = document.createElement("span");
+    const imageChipId = `${truncateText(file.name)}`;
+    if (document.getElementById(imageChipId)) {
+        return;
+    }
+
+    imageChip.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}<span class="ml-1">${truncateText(file.name)}</span></svg>`;
+    imageChip.id = imageChipId;
+    imageChip.setAttribute("contenteditable", "false");
+
+    filesData = { ...filesData, [imageChipId]: file };
+    insertChipAtCursor(imageChip, textInput);
+}
 
 function githubListener() {
     vscode.postMessage({
@@ -927,16 +946,9 @@ function addToolTipsById() {
     });
 }
 
-function submitResponse() {
+async function submitResponse() {
     let prompt = textInput.textContent.trim();
     if (commandEnable) {
-        currentActiveSlug = agentInputsJson[0]?.slug;
-        const agentObject = data.find(obj => {
-            return obj.supported_commands.some(cmd => {
-                return cmd.slug === currentActiveSlug;
-            });
-        });
-        currentActiveAgent = agentObject.name;
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
             toggleLoader(true);
@@ -956,12 +968,27 @@ function submitResponse() {
                 prompt = prompt.replace(chip, chipsData[chip].referenceContent);
             }
         }
+        for (const file in filesData) {
+            if (prompt.includes(file)) {
+                const dataURL = await loadFileAsDataURL(filesData[file]);
+                prompt = prompt.replace(file, `![${file}](${dataURL})`);
+            }
+        }
         vscode.postMessage({ type: "prompt", value: prompt });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
     }
 
     adjustHeight();
+}
+
+function loadFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(file);
+    });
 }
 
 function checkValueExists(_agentResponseData) {

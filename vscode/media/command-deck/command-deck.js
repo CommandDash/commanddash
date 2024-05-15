@@ -252,7 +252,6 @@ class CommandDeck {
                     activeAgent = false;
                     commandEnable = false;
                     currentActiveAgent = '';
-                    currentActiveSlug = '';
                     agentInputsJson.length = 0;
                     codeInputId = 0;
                 }
