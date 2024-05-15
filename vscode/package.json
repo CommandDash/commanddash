@@ -68,7 +68,7 @@
       "properties": {
         "fluttergpt.apiKey": {
           "type": "string",
-          "markdownDescription": "Gemini API KEY(https://makersuite.google.com/)"
+          "markdownDescription": "CommandDash Gemini API KEY(https://makersuite.google.com/)"
         }
       }
     },
@@ -293,7 +293,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.1.1",
+    "@google/generative-ai": "0.11.1",
     "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
