@@ -4,6 +4,11 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+
+## [0.3.91]
+- Upgarde to Gemini 1.5 Flash
+- Fix agent slug and marketplace glitches
+
 ## [0.3.9]
 - Support processing files loader
 - Attach Contextual Code within the agent requests
