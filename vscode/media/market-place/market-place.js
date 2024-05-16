@@ -14,6 +14,7 @@ const marketPlaceListContainer = document.getElementById("market-place-list-cont
 const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const backButton = document.getElementById("back-button");
+const searchInput = document.getElementById("search-input");
 
 // Storing agents list
 let agents = [];
@@ -101,7 +102,7 @@ function renderAgentsList(_agents) {
 
         const p = document.createElement("p");
         p.className = "text-sm font-semi-bold truncate text-[#497BEF]";
-        p.innerHTML = `@${agent.name} ${agent.testing ? `<span class="text-xs text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
+        p.innerHTML = `<span class="agents">@${agent.name}</span> ${agent.testing ? `<span class="text-xs text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
 
         const installSpan = document.createElement("span");
         installSpan.textContent = agent.installs;
@@ -117,7 +118,7 @@ function renderAgentsList(_agents) {
         topDiv.appendChild(installContainer);
 
         const pDescription = document.createElement("p");
-        pDescription.className = "text-sm truncate text-gray-500 my-1";
+        pDescription.className = "text-sm truncate text-gray-500 my-1 description";
         pDescription.textContent = agent.description;
 
         const ul = document.createElement("ul");
@@ -171,8 +172,24 @@ function renderAgentsList(_agents) {
         marketPlaceListContainer.appendChild(li);
     });
 
+    searchInput.addEventListener("keyup", handleSearchInput);
     vscode.postMessage({type: "getInstallAgents"});
     setLoading(false);
+}
+
+function handleSearchInput(event) {
+    const searchText = event.target.value;
+    const agentList = document.querySelectorAll('.market-place-list-background');
+
+    agentList.forEach(agent => {
+        const agentName = agent.querySelector(".agents").textContent.toLowerCase();
+        const agentDescription = agent.querySelector(".description").textContent.toLowerCase();
+        if (agentName.includes(searchText) || agentDescription.includes(searchText)) {
+            agent.style.display = 'block';
+        } else {
+            agent.style.display = 'none';
+        }
+    });
 }
 
 function registerMessage() {
