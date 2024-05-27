@@ -19,7 +19,8 @@ class AgentUIBuilder {
             textHtml = textHtml.replace(`<${input.id}>`, inputElement.outerHTML);
         });
 
-        this.container.innerHTML = `<span class="inline-block text-pink-500" contenteditable="false">${slug}&nbsp;</span>${textHtml}`;
+        activeCommandsAttach.textContent = `${slug}`;
+        this.container.innerHTML = `${textHtml}`;
         this.ref.appendChild(this.container);
         this.registerCodeInputListener();
         this.registerCodeInputTippy();

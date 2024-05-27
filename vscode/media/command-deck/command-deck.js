@@ -133,19 +133,10 @@ class CommandDeck {
                 this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
             }
             if (option?.name.startsWith('@')) {
-                const agentSpan = document.createElement('span');
-                const slugSpan = document.createElement('span');
-                agentSpan.classList.add("inline-block", "text-[#287CEB]");
-                agentSpan.contentEditable = false;
-                agentSpan.textContent = `${option?.name}\u00A0`;
-                slugSpan.classList.add("inline-block");
-                slugSpan.contentEditable = false;
-                slugSpan.textContent = "/";
-                this.ref.appendChild(agentSpan);
-                this.ref.appendChild(slugSpan);
+                activeAgentAttach.textContent = `${option?.name}`;
                 activeAgent = true;
                 currentActiveAgent = option.name;
-                this.makeOptions("/");
+                this.closeMenu();
                 // Move the cursor to the end of the word
                 this.ref.focus();
                 // Move the cursor to the end of the text
@@ -249,11 +240,10 @@ class CommandDeck {
         if (ev.key === "Backspace") {
             setTimeout(() => {
                 if (this.ref.textContent.trim() === "") {
-                    activeAgent = false;
                     commandEnable = false;
-                    currentActiveAgent = '';
                     agentInputsJson.length = 0;
                     codeInputId = 0;
+                    activeCommandsAttach.textContent = "/";
                 }
             }, 0);
         }

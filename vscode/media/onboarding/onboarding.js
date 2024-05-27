@@ -238,6 +238,8 @@ const executableContainer = document.getElementById("executable-container");
 const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
 const googleApiKeyError = document.getElementById("google-api-key-error");
 const fileUpload = document.getElementById("file-upload");
+const activeAgentAttach = document.getElementById("agents");
+const activeCommandsAttach = document.getElementById("slash-commands");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -674,7 +676,7 @@ let data = [
     {
         "description": "",
         "min_cli_version": "0.0.1",
-        "name": "",
+        "name": "default",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
@@ -769,13 +771,17 @@ let data = [
                     }
                 ],
                 "text_field_layout": "Refactor the code <555878446> on: <640160831> "
-            }
+            },
         ],
         "version": "1.0.0"
     }
 ];
 
-
+const commandLessData = {
+    registered_inputs: [],
+    text_field_layout: "",
+    slug: "",
+};
 const questionnaire = [
     {
         id: "refactor-code-questionaire",
@@ -910,7 +916,7 @@ function fileAttach(event) {
     imageChip.setAttribute("contenteditable", "false");
 
     filesData = { ...filesData, [imageChipId]: file };
-    insertChipAtCursor(imageChip, textInput);
+    // insertChipAtCursor(imageChip, textInput);
 }
 
 function githubListener() {
@@ -948,8 +954,8 @@ function addToolTipsById() {
 }
 
 async function submitResponse() {
-    let prompt = textInput.textContent.trim();
-    if (commandEnable) {
+    let prompt = textInput.textContent.replace(/\s+/g, ' ').trim();
+    if (activeAgent && commandEnable) {
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
             toggleLoader(true);
@@ -962,23 +968,33 @@ async function submitResponse() {
             activeAgent = false;
             agentInputsJson.length = 0;
         }
-    } else if (prompt.length > 1) {
-        toggleLoader(true);
+    } else if (activeAgent && !commandEnable) {
         for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
+            prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
-        for (const file in filesData) {
-            if (prompt.includes(file)) {
-                const dataURL = await loadFileAsDataURL(filesData[file]);
-                prompt = prompt.replace(file, `![${file}](${dataURL})`);
-            }
-        }
-        vscode.postMessage({ type: "prompt", value: prompt });
-        questionnaireContainer.classList.add("hidden");
-        textInput.textContent = "";
+        commandLessData.text_field_layout = prompt;
+        
+        const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
+        const commandLess = {...activeAgentData, supported_commands: [{...commandLessData}]};
+        vscode.postMessage({type: "agents", value: {...commandLess}});
     }
+    // else if (prompt.length > 1) {
+    //     toggleLoader(true);
+    //     for (const chip in chipsData) {
+    //         if (prompt.includes(chip)) {
+    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+    //         }
+    //     }
+    //     for (const file in filesData) {
+    //         if (prompt.includes(file)) {
+    //             const dataURL = await loadFileAsDataURL(filesData[file]);
+    //             prompt = prompt.replace(file, `![${file}](${dataURL})`);
+    //         }
+    //     }
+    //     vscode.postMessage({ type: "prompt", value: prompt });
+    //     questionnaireContainer.classList.add("hidden");
+    //     textInput.textContent = "";
+    // }
 
     adjustHeight();
 }
@@ -1430,7 +1446,9 @@ function createReferenceChips(references, isCommandAction) {
     chip.id = chipId;
     chip.setAttribute("contenteditable", "false");
 
-    chipsData = { ...chipsData, [chipId]: references };
+    const epochId = Math.floor(Date.now() / 1000);
+
+    chipsData = { ...chipsData, [chipId]: {references, epochId} };
     if (commandEnable && !isCommandAction) {
         const agentUIBuilder = new AgentUIBuilder(textInput);
         agentUIBuilder?.onCodeInput(references, chipId);
@@ -1448,7 +1466,7 @@ function createReferenceChips(references, isCommandAction) {
         commandEnable = true;
 
     } else {
-        insertChipAtCursor(chip, textInput);
+        insertChipAtCursor(chip, textInput, references, epochId);
     }
 };
 
@@ -1483,7 +1501,7 @@ function drop(event) {
     }
 }
 
-function insertChipAtCursor(chip, textInput) {
+function insertChipAtCursor(chip, textInput, reference, epochId) {
     //chip property setting
     chip.setAttribute("draggable", "true");
     chip.addEventListener("dragstart", dragStart);
@@ -1517,7 +1535,48 @@ function insertChipAtCursor(chip, textInput) {
         textInput.appendChild(chip);
         textInput.appendChild(nonBreakingSpace);
     }
+    commandLessData.registered_inputs.push({"id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference)});
 }
+
+// function insertChipAtCursor(chip, textInput, reference, epochId) {
+
+//     chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips");
+//     chip.setAttribute("draggable", "true");
+//     chip.addEventListener("dragstart", dragStart);
+
+//     const nonBreakingSpace = document.createElement("span");
+//     nonBreakingSpace.innerHTML = "&nbsp;";
+
+//     commandLessData.dummyRegisteredInputs.push({"id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference)});
+
+//     function dragStart(event) {
+//         event.dataTransfer.setData('text/plain', this.innerText);
+//     }
+
+//     // Get the current selection
+//     const selection = window.getSelection();
+
+//     if (selection.rangeCount > 0 && textInput === document.activeElement) {
+//         // Get the range of the current selection
+//         const range = selection.getRangeAt(0);
+
+//         // Check if the cursor is at the end of the textInput
+//         if (range.startContainer === textInput && range.startOffset === textInput.childNodes.length) {
+//             // Append the chip at the end
+//             textInput.appendChild(chip);
+//             textInput.appendChild(nonBreakingSpace);
+//         } else {
+//             // Insert the chip at the current cursor position
+//             range.insertNode(chip);
+//             textInput.appendChild(nonBreakingSpace);
+//         }
+
+//     } else {
+//         // If there is no selection, append the chip at the end
+//         textInput.appendChild(chip);
+//         textInput.appendChild(nonBreakingSpace);
+//     }
+// }
 
 function insertAtReference(chip) {
 
