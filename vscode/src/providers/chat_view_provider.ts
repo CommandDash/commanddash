@@ -140,7 +140,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
                 case "agents":
                     {
-                        this.handleAgents(data.value);
+                        this.handleAgents(data.value.data, data.value.isCommandLess);
                         break;
                     }
                 case "githubLogin":
@@ -342,8 +342,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async handleAgents(response: any) {
-        const agentResponse = response;
+    private async handleAgents(response: any,  isCommandLess: boolean) {
+        let agentResponse = response;
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
@@ -434,6 +434,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 'agent_version': agentResponse['agent_version']
             };
             logEvent('agent_start', agentTrackData);
+            if (isCommandLess) {
+                agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, {type: "chat_query_input", value: JSON.stringify(this._publicConversationHistory)}] };
+            }
             const response = await task.run({
                 kind: "agent-execute", data: {
                     "auth_details": {

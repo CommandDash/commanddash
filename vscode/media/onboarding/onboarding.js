@@ -959,7 +959,7 @@ async function submitResponse() {
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
+            vscode.postMessage({ type: "agents", value: { data: {...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version}, isCommandLess: false } });
 
 
             questionnaireContainer.classList.add("hidden");
@@ -972,11 +972,11 @@ async function submitResponse() {
         for (const chip in chipsData) {
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
-        commandLessData.text_field_layout = prompt;
+        commandLessData.last_message = prompt;
         
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
         const commandLess = {...activeAgentData, supported_commands: [{...commandLessData}]};
-        vscode.postMessage({type: "agents", value: {...commandLess}});
+        vscode.postMessage({type: "agents", value: { data: {...commandLess}, isCommandLess: true }});
     }
     // else if (prompt.length > 1) {
     //     toggleLoader(true);
