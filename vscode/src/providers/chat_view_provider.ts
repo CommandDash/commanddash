@@ -281,7 +281,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             StorageManager.instance.setInstallAgents(updatedAgents).then(() => {
                 this._getInstallAgents();
             });
-            
+
         } catch (error) {
             console.error('Error installing agents:', error);
         }
@@ -342,7 +342,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async handleAgents(response: any,  isCommandLess: boolean) {
+    private async handleAgents(response: any, isCommandLess: boolean) {
         let agentResponse = response;
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
@@ -355,13 +355,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
             let range = new vscode.Range(
                 new vscode.Position(args.range.start.line, args.range.start.character),
-                new vscode.Position(args.range.end.line-1, args.range.end.character),
+                new vscode.Position(args.range.end.line - 1, args.range.end.character),
             );
             try {
                 let contextualCode = await new ContextualCodeProvider().getContextualCodeInput(
                     document, range, this.analyzer!, undefined
                 );
-                
+
                 task.sendStepResponse(message, {
                     "context": contextualCode,
                 });
@@ -375,6 +375,19 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
 
+            task.sendStepResponse(message, {});
+        });
+        task.onProcessStep('prompt_update', async (message) => {
+            if (this._publicConversationHistory.length === 0) {
+                task.sendStepResponse(message, {});
+                return;
+            }
+            // In private conversation history, to the last user message, append the prompt
+            if (!this._publicConversationHistory[this._publicConversationHistory.length - 1].data) {
+                this._publicConversationHistory[this._publicConversationHistory.length - 1].data = { prompt: message.params.args.prompt };
+            } else {
+                this._publicConversationHistory[this._publicConversationHistory.length - 1].data.prompt = message.params.args.prompt;
+            }
             task.sendStepResponse(message, {});
         });
         task.onProcessStep('loader_update', async (message) => {
@@ -424,7 +437,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
 
         if (isCommandLess) {
-            agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, {type: "chat_query_input", value: JSON.stringify(this._publicConversationHistory), id: Math.floor(Date.now() / 1000)}] };
+            agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, { type: "chat_query_input", value: JSON.stringify(this._publicConversationHistory), id: Math.floor(Date.now() / 1000).toString() }] };
         }
         const prompt = this.formatPrompt(agentResponse);
         this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });

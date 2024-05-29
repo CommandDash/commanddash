@@ -959,7 +959,7 @@ async function submitResponse() {
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { data: {...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version}, isCommandLess: false } });
+            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version }, isCommandLess: false } });
 
 
             questionnaireContainer.classList.add("hidden");
@@ -973,10 +973,10 @@ async function submitResponse() {
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
         commandLessData.last_message = prompt;
-        
+
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = {agent_version: activeAgentData.version, agent: activeAgentData.name, ...commandLessData};
-        vscode.postMessage({type: "agents", value: { data: {...commandLess}, isCommandLess: true }});
+        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, ...commandLessData };
+        vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
     }
     // else if (prompt.length > 1) {
     //     toggleLoader(true);
@@ -1178,7 +1178,7 @@ function parseAgents(agents) {
         return _agents;
     }
 
-    return {agents: {}, agentsList: []};
+    return { agents: {}, agentsList: [] };
 }
 
 function handleTriggerMessage(event) {
@@ -1446,9 +1446,9 @@ function createReferenceChips(references, isCommandAction) {
     chip.id = chipId;
     chip.setAttribute("contenteditable", "false");
 
-    const epochId = Math.floor(Date.now() / 1000);
+    const epochId = Math.floor(Date.now() / 1000).toString();
 
-    chipsData = { ...chipsData, [chipId]: {references, epochId} };
+    chipsData = { ...chipsData, [chipId]: { references, epochId } };
     if (commandEnable && !isCommandAction) {
         const agentUIBuilder = new AgentUIBuilder(textInput);
         agentUIBuilder?.onCodeInput(references, chipId);
@@ -1535,7 +1535,7 @@ function insertChipAtCursor(chip, textInput, reference, epochId) {
         textInput.appendChild(chip);
         textInput.appendChild(nonBreakingSpace);
     }
-    commandLessData.registered_inputs.push({"id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference)});
+    commandLessData.registered_inputs.push({ "id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference) });
 }
 
 // function insertChipAtCursor(chip, textInput, reference, epochId) {
