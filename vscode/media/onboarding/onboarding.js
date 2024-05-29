@@ -975,7 +975,7 @@ async function submitResponse() {
         commandLessData.last_message = prompt;
         
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = {...activeAgentData, supported_commands: [{...commandLessData}]};
+        const commandLess = {agent_version: activeAgentData.version, agent: activeAgentData.name, ...commandLessData};
         vscode.postMessage({type: "agents", value: { data: {...commandLess}, isCommandLess: true }});
     }
     // else if (prompt.length > 1) {

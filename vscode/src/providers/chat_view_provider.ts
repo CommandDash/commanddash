@@ -422,6 +422,10 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
         });
 
+
+        if (isCommandLess) {
+            agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, {type: "chat_query_input", value: JSON.stringify(this._publicConversationHistory), id: Math.floor(Date.now() / 1000)}] };
+        }
         const prompt = this.formatPrompt(agentResponse);
         this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
@@ -434,9 +438,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 'agent_version': agentResponse['agent_version']
             };
             logEvent('agent_start', agentTrackData);
-            if (isCommandLess) {
-                agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, {type: "chat_query_input", value: JSON.stringify(this._publicConversationHistory)}] };
-            }
             const response = await task.run({
                 kind: "agent-execute", data: {
                     "auth_details": {
