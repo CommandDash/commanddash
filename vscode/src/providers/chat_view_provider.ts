@@ -435,11 +435,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
         });
 
-
+        let prompt = '';
         if (isCommandLess) {
             agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, { type: "chat_query_input", value: JSON.stringify(this._publicConversationHistory), id: Math.floor(Date.now() / 1000).toString() }] };
+            prompt = agentResponse.prompt;
+        } else {
+            prompt = this.formatPrompt(agentResponse);
         }
-        const prompt = this.formatPrompt(agentResponse);
+
         this._publicConversationHistory.push({ role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         try {
@@ -472,7 +475,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private formatPrompt(response: any) {
+    private formatPrompt(response: any): string {
         let prompt: string = '';
         response?.registered_inputs?.forEach(({ type, value }: { type: string, value: string }) => {
             if (type === "string_input" && value) {

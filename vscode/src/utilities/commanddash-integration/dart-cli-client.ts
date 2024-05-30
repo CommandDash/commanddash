@@ -124,8 +124,8 @@ export class DartCLIClient {
     }
 
 
-    this.proc = child_process.spawn(this.executablePath, ['process']);
-    // this.proc = child_process.spawn('dart', ['run', '', 'process']);
+    // this.proc = child_process.spawn(this.executablePath, ['process']);
+    this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/dash_cli/bin/dash_cli.dart', 'process']);
 
     let buffer = '';
 

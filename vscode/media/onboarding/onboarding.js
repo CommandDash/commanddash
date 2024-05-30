@@ -969,14 +969,20 @@ async function submitResponse() {
             agentInputsJson.length = 0;
         }
     } else if (activeAgent && !commandEnable) {
+        let value = prompt;
         for (const chip in chipsData) {
+            debugger;
+            value = prompt.replace(chip, chipsData[chip].references.referenceContent);
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
         commandLessData.last_message = prompt;
+        commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
         const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, ...commandLessData };
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
+        questionnaireContainer.classList.add("hidden");
+        textInput.textContent = "";
     }
     // else if (prompt.length > 1) {
     //     toggleLoader(true);
