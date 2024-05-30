@@ -979,7 +979,7 @@ async function submitResponse() {
         commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, ...commandLessData };
+        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData };
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
