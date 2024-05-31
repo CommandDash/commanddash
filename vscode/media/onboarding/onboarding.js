@@ -965,13 +965,11 @@ async function submitResponse() {
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
             commandEnable = false;
-            activeAgent = false;
             agentInputsJson.length = 0;
         }
     } else if (activeAgent && !commandEnable) {
         let value = prompt;
         for (const chip in chipsData) {
-            debugger;
             value = prompt.replace(chip, chipsData[chip].references.referenceContent);
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
@@ -1114,6 +1112,7 @@ function handleSubmit(event) {
             if (textInput.textContent.trim().length === 0) {
                 // Perform some action
                 commandEnable = false;
+                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
             }
         }, 2500);
 
@@ -1735,7 +1734,9 @@ function displayMessages() {
 
     let modelCount = 0;
 
-    conversationHistory.forEach((message) => {
+    const _conversationHistory = conversationHistory.filter(data => Object.keys(data)[0] === currentActiveAgent);
+    _conversationHistory.forEach((_message) => {
+        const message = _message[currentActiveAgent];
         const messageElement = document.createElement("div");
         const roleElement = document.createElement("p");
         const contentElement = document.createElement("p");

@@ -133,6 +133,7 @@ class CommandDeck {
                 this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
             }
             if (option?.name.startsWith('@')) {
+                activeAgentAttach.style = "color: #497BEF; !important";
                 activeAgentAttach.textContent = `${option?.name}`;
                 activeAgent = true;
                 currentActiveAgent = option.name;
@@ -159,6 +160,7 @@ class CommandDeck {
                 setTimeout(() => {
                     adjustHeight();
                     commandEnable = true;
+                    activeCommandsAttach.style = "color: rgb(236 72 153); !important";
                 }, 0);
             }
         };
@@ -241,6 +243,7 @@ class CommandDeck {
             setTimeout(() => {
                 if (this.ref.textContent.trim() === "") {
                     commandEnable = false;
+                    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
                     agentInputsJson.length = 0;
                     codeInputId = 0;
                     activeCommandsAttach.textContent = "/";
