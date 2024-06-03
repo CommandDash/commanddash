@@ -437,10 +437,11 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             task.sendStepResponse(message, {});
         });
 
+        //change agents on the select of agents
         let prompt = '';
+        const conversationHistory = this._publicConversationHistory.filter(obj => Object.keys(obj)[0] === this._activeAgent).map(obj => obj[this._activeAgent]);
+        agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, { type: "chat_query_input", value: JSON.stringify(conversationHistory), id: Math.floor(Date.now() / 1000).toString() }] };
         if (isCommandLess) {
-            const conversationHistory = this._publicConversationHistory.filter(obj => Object.keys(obj)[0] === this._activeAgent).map(obj => obj[this._activeAgent]);
-            agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, { type: "chat_query_input", value: JSON.stringify(conversationHistory), id: Math.floor(Date.now() / 1000).toString() }] };
             prompt = agentResponse.prompt;
         } else {
             prompt = this.formatPrompt(agentResponse);

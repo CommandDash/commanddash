@@ -961,7 +961,6 @@ async function submitResponse() {
             toggleLoader(true);
             vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version }, isCommandLess: false } });
 
-
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
             commandEnable = false;
@@ -1759,10 +1758,6 @@ function displayMessages() {
             agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            // if (message.agent && message.agent?.trim() !== "") {
-            //     agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
-            //     agent.textContent = message.agent;
-            // }
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";

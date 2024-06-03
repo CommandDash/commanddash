@@ -136,6 +136,9 @@ class CommandDeck {
                 activeAgentAttach.style = "color: #497BEF; !important";
                 activeAgentAttach.textContent = `${option?.name}`;
                 activeAgent = true;
+                commandEnable = false;
+                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+                activeCommandsAttach.textContent = "/";
                 currentActiveAgent = option.name;
                 this.closeMenu();
                 // Move the cursor to the end of the word
@@ -147,6 +150,7 @@ class CommandDeck {
                 range.collapse(false); // false means collapse to the end
                 selection.removeAllRanges();
                 selection.addRange(range);
+                displayMessages();
             } else {
                 this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
