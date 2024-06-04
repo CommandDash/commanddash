@@ -676,7 +676,7 @@ let data = [
     {
         "description": "",
         "min_cli_version": "0.0.1",
-        "name": "default",
+        "name": "@default",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
@@ -964,6 +964,8 @@ async function submitResponse() {
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
             commandEnable = false;
+            activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+            activeCommandsAttach.textContent = "/";
             agentInputsJson.length = 0;
         }
     } else if (activeAgent && !commandEnable) {
@@ -1072,7 +1074,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action.name} - ${action.description}`;
+        div.textContent = `${action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
         div.onclick = setItem;
         return div;
     };
@@ -1368,6 +1370,7 @@ function readTriggeredMessage() {
 }
 
 function setLoader(loaderKind, loaderMessage) {
+    fileNameContainer.innerHTML = '';
     switch (loaderKind) {
         case "message":
             loadingIndicator.classList.add("hidden");
@@ -1385,10 +1388,8 @@ function setLoader(loaderKind, loaderMessage) {
             loadingIndicator.classList.remove("block");
             workspaceLoader.style.display = 'flex';
             workspaceLoaderText.classList.remove("hidden");
-            workspaceLoaderText.textContent = loaderMessage.message;
-            message = [...loaderMessage.files];
-
-            fileNameContainer.innerHTML = '';
+            workspaceLoaderText.textContent = loaderMessage.value;
+            message = loaderMessage.files;
             //replace message array with actual file names
             message.forEach((_filePath) => {
                 const divBlock = document.createElement("div");
