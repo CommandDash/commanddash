@@ -1,16 +1,18 @@
 <div align="center">
-<h3> Your Flutter AI Autopilot with Gemini Code & Vision</h3>
+<h3> Programming Agents Marketplace in your IDE</h3>
 
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![VScode version](https://img.shields.io/visual-studio-marketplace/v/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 <img src="/assets/docs/poster.jpg"></a>
 
 -----------------
-CommandDash is a command-based coding assistant. It provides built in agents that that can automate various Flutter development tasks for you.
+CommandDash is a marketplace of programming agents that are expert at integrating APIs and SDKs.
 
-##### ✨ Powered by Gemini 
-##### 🤝 Dart Analyzer Inside
-##### 👨🏼‍💻 For and by Flutter Engineers
+Dash Agents are trained on the latest documentation and examples enabling you to hit the ground instantly by generating integration code contextualized to your codebase.
+
+##### ✨ Skip the documentation
+##### 🤝 Works with all languages
+##### 👨🏼‍💻 Framework to build your own
 
 Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
 
@@ -18,50 +20,35 @@ Currently in Beta, CommandDash is being built in [open-sourced](https://github.c
 ## Getting Started
 
 ##### 1. Create Gemini API Key
-Visit [Makersuite by Google](https://makersuite.google.com/) and create your free API Key.
+Visit [AI Studio by Google](https://aistudio.google.com/app/apikey) and create your free API Key.
 
 *Note: Gemini offers both free and paid plans.*
 ##### 2. Add the key in CommandDash Panel
-Paste your API key in the input field in Dash Panel.
+Paste your API key in the input field in chat.
 
-That's it. You're ready to use CommandDash. ✅
+You're ready to use CommandDash. ✅
 
-## Features
+### 🚀 @Agents and /Commands
 
-### 👨🏼‍💻 Multi-Code Chat Attachments
+Explore 100s of agents available in the marketplace - from LLMs, payment gateways to messaging.
+
+**You can activate an agent and chat with it:**
+
 <p align="center">
 <img src="/assets/docs/multi-code-attachment.gif" alt="Multi code chat with VSCode inside Gemini" width="500"/>
 </p>
 
-Select and attach multiple code snippets from different files in your inline chat using **"Attach Snippet to Dash"** from the right-click menu. 
+Also, you can select and attach multiple code snippets from different files in your inline chat using **"Attach Snippet to Dash"** from the right-click menu. 
 
-🤝 With full-context passed to Gemini, receive accurate responses and update code across multiple files.
+🤝 With full-context code context passed and expertise of Dash Agents, receive accurate integration code across multiple files.
 
-### 🚀 @Agents and /Commands
-
-Use built in agents and commands to autopilot different kinds of tasks.
-
-Currently, we offer following agents and commands:
-
-#### 1. `@workspace`
-Directly query across your workspace and find relevant files related to a feature. Leverage this command to build an understand of the codebase you are working with. 
-
-#### 2. `@test`
-Generate unit, widget and integration tests with full-context for your Flutter/Dart project. 
-
-✅ Also, attach previously existing tests as references to help Gemini learn your testing style and choice of libraries. 
-
-#### 3. `@flutter`
-✨ Use `/doc` command answer your Flutter/Dart questions from trusted sources including official docs.
-
-#### 4. `/refactor` and `/document`
-
-Modify your existing code with instructions and apply the changes.
+**Run commands meant to perform specific tasks:**
 
 <p align="center">
 <img src="/assets/docs/refactor-command.png" alt="Refactoring code with CommandDash" width="500"/>
 </p>
 
+Note: Commands are optionally offered by agents depending on the usecase.
 
 ## FAQs
 
@@ -70,7 +57,9 @@ Modify your existing code with instructions and apply the changes.
 
 2. **Do I need to pay to use CommandDash?**
 
-- Gemini PRO offers both free and paid plans. Please check the [pricing](https://ai.google.dev/pricing) here.
+- Gemini Flash 1.5 offers both free and paid plans. Please check the [pricing](https://ai.google.dev/pricing) here.
+
+The free plan suffices for using CommandDash 🥳
 
 3. **I am an Android Studio user. Can I use CommandDash?**
 - We are coming soon for IntelliJ-based IDEs. *🤫 Secret: most of our core logic is written in Dart, allowing us to ship on any platform very very fast!*
@@ -81,17 +70,15 @@ A coding assistant for all is best built when all of us contribute. You can make
 
 ### Ways to contribute
 
--  **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+-  **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/CommandDash/commanddash//issues).
 
--  **Pick up open issues**: Pick up and fix existing issues open to the community in [issues board](https://github.com/Welltested-AI/fluttergpt/issues).
+-  **Pick up open issues**: Pick up and fix existing issues open to the community in [issues board](https://github.com/CommandDash/commanddash/issues).
 
 -  **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) in our community slack.
 
-To get a sense of direction of where we're heading, please check out our [Roadmap](https://github.com/Welltested-AI/dash-ai?tab=readme-ov-file#roadmap).
-
 ## Community
 
-Connect with like minded people building with Flutter and using AI to do so, every step of the way :D [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA)
+Connect with others using or building agents on CommandDash [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
 
 ## License
 
