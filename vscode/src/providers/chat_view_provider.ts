@@ -29,6 +29,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
     private _publicConversationHistory: Array<{ [agent: string]: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string } }> = [];
+    /// reference documents for particular activated agent for througout chat history
+    private chatDocuments: { [key: string]: string } = {};
     private _privateConversationHistory: Array<{ role: string, parts: string, messageId?: string, data?: any }> = [];
 
     // In the constructor, we store the URI of the extension
@@ -379,6 +381,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
             task.sendStepResponse(message, {});
         });
+
+        task.onProcessStep('chat_document_update', async (message)=>{
+            this.chatDocuments[this._activeAgent] = message.params.args.content;
+            task.sendStepResponse(message, {});
+        });
+
         task.onProcessStep('prompt_update', async (message) => {
             if (this._publicConversationHistory.length === 0) {
                 task.sendStepResponse(message, {});
@@ -392,6 +400,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
             task.sendStepResponse(message, {});
         });
+
         task.onProcessStep('loader_update', async (message) => {
             task.sendStepResponse(message, {});
             this._view?.webview.postMessage({ type: 'loaderUpdate', value: JSON.stringify(message?.params?.args) });
@@ -440,7 +449,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         //change agents on the select of agents
         let prompt = '';
         const conversationHistory = this._publicConversationHistory.filter(obj => Object.keys(obj)[0] === this._activeAgent).map(obj => obj[this._activeAgent]);
-        agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, { type: "chat_query_input", value: JSON.stringify(conversationHistory), id: Math.floor(Date.now() / 1000).toString() }] };
+        agentResponse = { ...agentResponse, registered_inputs: [...agentResponse.registered_inputs, { type: "chat_query_input", value: JSON.stringify(conversationHistory), id: Math.floor(Date.now() / 1000).toString() }], 'chat_documents': this.chatDocuments[this._activeAgent] };
         if (isCommandLess) {
             prompt = agentResponse.prompt;
         } else {
@@ -697,6 +706,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     }
 
     public clearConversationHistory() {
+        delete this.chatDocuments[this._activeAgent];
         this._privateConversationHistory = [];
         this._publicConversationHistory = [];
     }

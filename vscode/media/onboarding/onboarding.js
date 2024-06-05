@@ -974,7 +974,7 @@ async function submitResponse() {
             value = prompt.replace(chip, chipsData[chip].references.referenceContent);
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
-        commandLessData.last_message = prompt;
+        commandLessData.user_message = prompt;
         commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
