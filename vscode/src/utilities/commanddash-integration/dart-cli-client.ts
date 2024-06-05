@@ -81,13 +81,13 @@ export class DartCLIClient {
     return DartCLIClient.instance;
   }
 
-  public async executableVersion(): Promise<string | undefined> {
+  public async executableVersion(): Promise<string> {
     if (!this.executableExists()) {
-      return;
+       throw Error('Request engine version, but engine is not available');
     }
     const { stdout, stderr } = await exec(`${this.executablePath.replace(/ /g, '\\ ')} version`);
     if (stderr) {
-      return;
+      throw Error('Failed to fetch the engine version');
     }
     return stdout?.toString().replace(/\n$/, '');
   }
@@ -98,7 +98,13 @@ export class DartCLIClient {
 
   // Install the updated executable in the background which will be kicked off on next extension activation.
   public async backgroundUpdateExecutable(): Promise<void> {
-    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, await this.executableVersion(), () => { });
+    let currentVersion = await this.executableVersion();
+    await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, currentVersion, () => { });
+    if (compareVersions(currentVersion, '0.1.0')<0) {
+      // Reconnect the engine if the current executable is less than the minimum required one.
+      // TODO: [show the onboarding screen itself if the engine needs to be force updated]
+      this.connect();
+    }
   }
 
   public async deleteExecutable(): Promise<void> {
@@ -123,9 +129,8 @@ export class DartCLIClient {
       this.renameTempToExecutable(tempFilePath);
     }
 
-
-    // this.proc = child_process.spawn(this.executablePath, ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    this.proc = child_process.spawn(this.executablePath, ['process']);
+    // this.proc = child_process.spawn('dart', ['run', '/Users/samyak/Documents/commanddash/commanddash/commanddash/bin/commanddash.dart', 'process']);
 
     let buffer = '';
 
@@ -178,7 +183,7 @@ export class DartCLIClient {
         } if (method === 'log') {
           console.log(params);
         } if (method === 'debug_message') {
-         console.log('debug_message: ' + JSON.stringify(params));
+          console.log('debug_message: ' + JSON.stringify(params));
         }
       }
 
