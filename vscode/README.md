@@ -28,9 +28,9 @@ Paste your API key in the input field in chat.
 
 You're ready to use CommandDash. ✅
 
-### 🚀 @Agents and /Commands
+## 🚀 @Agents and /Commands
 
-Explore 100s of agents available in the marketplace - from LLMs, payment gateways to messaging.
+Explore 100s of agents available in the marketplace - from LLMs, Payment Gateways APIs to Messaging SDKs.
 
 **You can activate an agent and chat with it:**
 
