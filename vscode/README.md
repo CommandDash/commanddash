@@ -12,7 +12,7 @@ Dash Agents are trained on the latest documentation and examples enabling you to
 
 ##### ✨ Skip the documentation
 ##### 🤝 Works with all languages
-##### 👨🏼‍💻 Framework to build your agents
+##### 👨🏼‍💻 Framework to build your own
 
 Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
 
