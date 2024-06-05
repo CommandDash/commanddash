@@ -1359,9 +1359,18 @@ function handleTriggerMessage(event) {
 
 function appendAgents(agents) {
     for (let key in agents) {
-        if (agents.hasOwnProperty(key)) {
-            data.push(agents[key]);
-        };
+    if (agents.hasOwnProperty(key)) {
+        // Find the index of the existing agent with the same key
+        const existingIndex = data.findIndex(agent => agent.name === key);
+
+        // If agent exists, replace it
+        if (existingIndex !== -1) {
+        data[existingIndex] = agents[key];
+        } else {
+        // If agent doesn't exist, add it
+        data.push(agents[key]);
+        }
+    }
     }
 }
 
