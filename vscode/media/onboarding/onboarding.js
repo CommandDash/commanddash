@@ -1735,6 +1735,11 @@ function displayMessages() {
     let modelCount = 0;
 
     const _conversationHistory = conversationHistory.filter(data => Object.keys(data)[0] === currentActiveAgent);
+    if (_conversationHistory.length === 0) {
+        questionnaireContainer.classList.remove("hidden");
+    } else {
+        questionnaireContainer.classList.add("hidden");
+    }
     _conversationHistory.forEach((_message) => {
         const message = _message[currentActiveAgent];
         const messageElement = document.createElement("div");

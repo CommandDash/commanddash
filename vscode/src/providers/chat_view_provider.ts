@@ -187,6 +187,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     }
             }
         });
+        this._fetchAgentsAPI();
 
         webviewView.onDidChangeVisibility(() => {
             console.log('webview', webviewView.visible);
@@ -224,6 +225,19 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    private async _updateInstalledAgents(response: any) {
+        const getInstallAgents = await StorageManager.instance.getInstallAgents();
+        const _getInstallAgents = JSON.parse(getInstallAgents);
+        const agentsList = _getInstallAgents.agentsList.map((agent: string) => agent.replace('@', ''));
+
+        response.forEach(async (agent: any) => {
+            if (agentsList.includes(agent.name)) {
+                const agentDetails = await this._fetchAgent(agent.name, agent.versions[0].version, agent.testing);
+                this._storingAgentsLocally(agentDetails);
+            }
+        });
+    }
+
     private async _fetchAgentsAPI() {
         try {
             const config: AxiosRequestConfig = {
@@ -236,6 +250,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             };
             let response = await makeAuthorizedHttpRequest(config, this.context);
             this._view?.webview.postMessage({ type: 'fetchedAgents', value: JSON.stringify(response) });
+            this._updateInstalledAgents(response);
         } catch (error) {
             console.log('error: while fetching the get-agent-list api', error);
         }
@@ -261,6 +276,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             const { value } = data;
             const _parsedAgent = JSON.parse(value);
             const agentDetails = await this._fetchAgent(_parsedAgent.name, _parsedAgent.versions[0].version, _parsedAgent.testing) as any ?? { agent: { name: "", version: "" } };
+            this._storingAgentsLocally(agentDetails);
+        } catch (error) {
+            console.error('Error installing agents:', error);
+        }
+    }
+
+    private async _storingAgentsLocally(agentDetails: any) {
+        try {
             const { name } = agentDetails;
 
             // StorageManager.instance.deleteAgents();
@@ -278,13 +301,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         }))
                     }
                 },
-                agentsList: [..._parsedExsistingAgents?.agentsList, `@${name}`]
+                agentsList: [...new Set([..._parsedExsistingAgents?.agentsList, `@${name}`])]
             };
 
             StorageManager.instance.setInstallAgents(updatedAgents).then(() => {
                 this._getInstallAgents();
             });
-
         } catch (error) {
             console.error('Error installing agents:', error);
         }
