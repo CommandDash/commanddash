@@ -101,38 +101,39 @@ function renderAgentsList(_agents) {
         innerDiv.className = "flex-1 min-w-0";
 
         const p = document.createElement("p");
-        p.className = "text-sm font-semi-bold truncate text-[#497BEF]";
-        p.innerHTML = `<span class="agents">@${agent.name}</span> ${agent.testing ? `<span class="text-xs text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
+        p.className = "text-base truncate";
+        p.innerHTML = `<span class="agents font-bold">${agent.metadata.display_name}</span> ${agent.testing ? `<span class="text-[1px] font-normal text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
 
         const installSpan = document.createElement("span");
         installSpan.textContent = agent.installs;
 
-        const installContainer = document.createElement("div");
-        installContainer.className = "inline-flex items-center";
-        installContainer.innerHTML = downloadIcon;
-        installContainer.appendChild(installSpan);
+        // const installContainer = document.createElement("div");
+        // installContainer.className = "inline-flex items-center";
+        // installContainer.innerHTML = downloadIcon;
+        // installContainer.appendChild(installSpan);
 
         const topDiv = document.createElement("div");
         topDiv.className = "inline-flex flex-row justify-between w-full";
         topDiv.appendChild(p);
-        topDiv.appendChild(installContainer);
+        // topDiv.appendChild(installContainer);
 
         const pDescription = document.createElement("p");
-        pDescription.className = "text-sm truncate text-gray-500 my-1 description";
+        pDescription.className = "text-xs truncate text-gray-500 my-1 description";
+        pDescription.style = "color: rgb(148 163 184); overflow: hidden; text-overflow: ellipsis; display: inline-block; margin-top: 10px;";
         pDescription.textContent = agent.description;
 
         const ul = document.createElement("ul");
         ul.className = "max-w-md divide-y divide-gray-200";
 
-        agent.commands.forEach(command => {
-            const liCommand = document.createElement("li");
-            liCommand.className = "text-pink-500";
-            liCommand.textContent = `/${command}`;
-            ul.appendChild(liCommand);
-        });
+        // agent.commands.forEach(command => {
+        //     const liCommand = document.createElement("li");
+        //     liCommand.className = "text-pink-500";
+        //     liCommand.textContent = `/${command}`;
+        //     ul.appendChild(liCommand);
+        // });
 
         const divRow = document.createElement("div");
-        divRow.className = "inline-flex flex-row items-center w-full justify-between my-2";
+        divRow.className = "inline-flex flex-row items-center w-full justify-between my-1";
 
         const divRowInner = document.createElement("div");
         divRowInner.className = "inline-flex flex-row";

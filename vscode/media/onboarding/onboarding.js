@@ -791,7 +791,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/refactor", ""));
+            agentInputsJson.push(agentProvider.getInputs("/refactor", "@default"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -900,7 +900,19 @@ const questionnaire = [
     vscode.postMessage({
         type: "getInstallAgents"
     });
+
+    enableDefaultAgent();
 })();
+
+function enableDefaultAgent() {
+    activeAgentAttach.style = "color: #497BEF; !important";
+    activeAgentAttach.textContent = '@default';
+    activeAgent = true;
+    commandEnable = false;
+    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+    activeCommandsAttach.textContent = "/";
+    currentActiveAgent = '@default';
+}
 
 function fileAttach(event) {
     removePlaceholder();
@@ -1359,18 +1371,18 @@ function handleTriggerMessage(event) {
 
 function appendAgents(agents) {
     for (let key in agents) {
-    if (agents.hasOwnProperty(key)) {
-        // Find the index of the existing agent with the same key
-        const existingIndex = data.findIndex(agent => agent.name === key);
+        if (agents.hasOwnProperty(key)) {
+            // Find the index of the existing agent with the same key
+            const existingIndex = data.findIndex(agent => agent.name === key);
 
-        // If agent exists, replace it
-        if (existingIndex !== -1) {
-        data[existingIndex] = agents[key];
-        } else {
-        // If agent doesn't exist, add it
-        data.push(agents[key]);
+            // If agent exists, replace it
+            if (existingIndex !== -1) {
+                data[existingIndex] = agents[key];
+            } else {
+                // If agent doesn't exist, add it
+                data.push(agents[key]);
+            }
         }
-    }
     }
 }
 
@@ -1551,46 +1563,6 @@ function insertChipAtCursor(chip, textInput, reference, epochId) {
     }
     commandLessData.registered_inputs.push({ "id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference) });
 }
-
-// function insertChipAtCursor(chip, textInput, reference, epochId) {
-
-//     chip.classList.add("mb-1", "px-[7px]", "border", "cursor-pointer", "rounded-[4px]", "inline-flex", "items-center", "chips");
-//     chip.setAttribute("draggable", "true");
-//     chip.addEventListener("dragstart", dragStart);
-
-//     const nonBreakingSpace = document.createElement("span");
-//     nonBreakingSpace.innerHTML = "&nbsp;";
-
-//     commandLessData.dummyRegisteredInputs.push({"id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference)});
-
-//     function dragStart(event) {
-//         event.dataTransfer.setData('text/plain', this.innerText);
-//     }
-
-//     // Get the current selection
-//     const selection = window.getSelection();
-
-//     if (selection.rangeCount > 0 && textInput === document.activeElement) {
-//         // Get the range of the current selection
-//         const range = selection.getRangeAt(0);
-
-//         // Check if the cursor is at the end of the textInput
-//         if (range.startContainer === textInput && range.startOffset === textInput.childNodes.length) {
-//             // Append the chip at the end
-//             textInput.appendChild(chip);
-//             textInput.appendChild(nonBreakingSpace);
-//         } else {
-//             // Insert the chip at the current cursor position
-//             range.insertNode(chip);
-//             textInput.appendChild(nonBreakingSpace);
-//         }
-
-//     } else {
-//         // If there is no selection, append the chip at the end
-//         textInput.appendChild(chip);
-//         textInput.appendChild(nonBreakingSpace);
-//     }
-// }
 
 function insertAtReference(chip) {
 
