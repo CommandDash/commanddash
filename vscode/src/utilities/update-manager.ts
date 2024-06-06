@@ -20,7 +20,8 @@ export class UpdateManager {
         }
 
         const currentVersion = this.context.extension.packageJSON.version as string;
-
+        
+        // [Warning]this logic is broken. lexical versions can't be compared like this
         if (this.convertVersionStringToInt(lastestVersion) > this.convertVersionStringToInt(currentVersion)) {
             const selection = await vscode.window.showInformationMessage(
                 `A new version (${lastestVersion}) of FlutterGPT is available. Update now for the latest features and improvements.`,
