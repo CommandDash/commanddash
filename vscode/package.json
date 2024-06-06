@@ -1,7 +1,7 @@
 {
   "name": "fluttergpt",
-  "displayName": "CommandDash: Your Flutter AI Autopilot with Gemini",
-  "description": "Agents that assist you build entire features on autopilot.",
+  "displayName": "CommandDash: AI Agents Marketplace",
+  "description": "Integrate APIs & SDKs like Gemini, Langchain, Firebase with specialized Dash Agents",
   "version": "0.4.0",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
@@ -9,29 +9,30 @@
     "vscode": "^1.82.0"
   },
   "repository": {
-    "url": "https://github.com/Welltested-AI/dash-ai"
+    "url": "https://github.com/CommandDash/commanddash"
   },
   "bugs": {
-    "url": "https://github.com/Welltested-AI/dash-ai/issues",
+    "url": "https://github.com/CommandDash/commanddash/issues",
     "email": "team@commanddash.io"
   },
   "homepage": "https://commanddash.io",
   "categories": [
     "Programming Languages",
     "Machine Learning",
-    "Testing"
+    "Snippets",
+    "Education"
   ],
   "keywords": [
-    "flutter",
-    "dart",
-    "copilot",
-    "gpt",
-    "dash",
-    "ai",
     "chat",
+    "copilot",
+    "autopilot",
+    "command",
     "coding",
-    "commandash",
-    "command"
+    "gpt",
+    "API",
+    "SDK",
+    "chatbot",
+    "docs"
   ],
   "activationEvents": [
     "onLanguage:dart"
