@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "CommandDash: Your Flutter AI Autopilot with Gemini",
   "description": "Agents that assist you build entire features on autopilot.",
-  "version": "0.3.91",
+  "version": "0.4.0",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -68,7 +68,7 @@
       "properties": {
         "fluttergpt.apiKey": {
           "type": "string",
-          "markdownDescription": "CommandDash Gemini API KEY(https://makersuite.google.com/)"
+          "markdownDescription": "Gemini API KEY(https://makersuite.google.com/)"
         }
       }
     },
@@ -163,7 +163,7 @@
       "commandPalette": [
         {
           "command": "dash.attachToDash",
-          "when": "editorHasSelection && resourceLangId == 'dart'"
+          "when": "editorHasSelection"
         },
         {
           "command": "dash.attachToDash.menu",
@@ -222,7 +222,7 @@
         },
         {
           "command": "dash.attachToDash.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
+          "when": "editorHasSelection",
           "group": "dash-menu-group@3"
         }
       ],
@@ -293,7 +293,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@google/generative-ai": "0.11.1",
+    "@google/generative-ai": "^0.1.1",
     "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",

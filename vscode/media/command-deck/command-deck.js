@@ -133,19 +133,14 @@ class CommandDeck {
                 this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
             }
             if (option?.name.startsWith('@')) {
-                const agentSpan = document.createElement('span');
-                const slugSpan = document.createElement('span');
-                agentSpan.classList.add("inline-block", "text-[#287CEB]");
-                agentSpan.contentEditable = false;
-                agentSpan.textContent = `${option?.name}\u00A0`;
-                slugSpan.classList.add("inline-block");
-                slugSpan.contentEditable = false;
-                slugSpan.textContent = "/";
-                this.ref.appendChild(agentSpan);
-                this.ref.appendChild(slugSpan);
+                activeAgentAttach.style = "color: #497BEF; !important";
+                activeAgentAttach.textContent = `${option?.name}`;
                 activeAgent = true;
+                commandEnable = false;
+                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+                activeCommandsAttach.textContent = "/";
                 currentActiveAgent = option.name;
-                this.makeOptions("/");
+                this.closeMenu();
                 // Move the cursor to the end of the word
                 this.ref.focus();
                 // Move the cursor to the end of the text
@@ -155,6 +150,7 @@ class CommandDeck {
                 range.collapse(false); // false means collapse to the end
                 selection.removeAllRanges();
                 selection.addRange(range);
+                displayMessages();
             } else {
                 this.ref.textContent = '';
                 const agentUIBuilder = new AgentUIBuilder(this.ref);
@@ -168,6 +164,7 @@ class CommandDeck {
                 setTimeout(() => {
                     adjustHeight();
                     commandEnable = true;
+                    activeCommandsAttach.style = "color: rgb(236 72 153); !important";
                 }, 0);
             }
         };
@@ -249,11 +246,11 @@ class CommandDeck {
         if (ev.key === "Backspace") {
             setTimeout(() => {
                 if (this.ref.textContent.trim() === "") {
-                    activeAgent = false;
                     commandEnable = false;
-                    currentActiveAgent = '';
+                    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
                     agentInputsJson.length = 0;
                     codeInputId = 0;
+                    activeCommandsAttach.textContent = "/";
                 }
             }, 0);
         }

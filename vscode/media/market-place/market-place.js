@@ -14,6 +14,7 @@ const marketPlaceListContainer = document.getElementById("market-place-list-cont
 const loadingContainer = document.getElementById("loading-container");
 const bodyContainer = document.getElementById("body-container");
 const backButton = document.getElementById("back-button");
+const searchInput = document.getElementById("search-input");
 
 // Storing agents list
 let agents = [];
@@ -27,7 +28,7 @@ let storedAgents = null;
 
     registerMessage();
 
-    vscode.postMessage({type: "fetchAgents"});
+    vscode.postMessage({ type: "fetchAgents" });
 })();
 
 function setLoading(isLoading) {
@@ -46,10 +47,10 @@ function handleInstall(agent) {
     const isInstalled = isAgentInstalled(agent.name);
     if (isInstalled) {
         if (agent) {
-            vscode.postMessage({type: "uninstallAgents", value: JSON.stringify(agent)});
+            vscode.postMessage({ type: "uninstallAgents", value: JSON.stringify(agent) });
         }
     } else {
-        vscode.postMessage({type: "installAgents", value: JSON.stringify(agent)});
+        vscode.postMessage({ type: "installAgents", value: JSON.stringify(agent) });
     }
 }
 
@@ -61,7 +62,7 @@ function isAgentInstalled(agentName) {
 function updateInstallButton(agentOrList) {
     const installButtons = document.querySelectorAll(".install-button");
     const agentNames = Array.isArray(agentOrList) ? agentOrList.map(agent => agent) : [agentOrList.name];
-    
+
     installButtons.forEach(button => {
         if (agentNames.includes(button.dataset.name)) {
             button.textContent = "Uninstall";
@@ -72,7 +73,7 @@ function updateInstallButton(agentOrList) {
 }
 
 function getStoredAgents() {
-    const _storedAgents = storedAgents ? storedAgents : {agents: {}, agentsList: []};
+    const _storedAgents = storedAgents ? storedAgents : { agents: {}, agentsList: [] };
     return _storedAgents;
 }
 
@@ -82,56 +83,75 @@ function parseAgents(agents) {
         return _agents;
     }
 
-    return {agents: {}, agentsList: []};
+    return { agents: {}, agentsList: [] };
 }
 
 function renderAgentsList(_agents) {
     _agents.forEach(agent => {
         // Create li element
         const li = document.createElement("li");
-        li.className = "py-3 sm:py-4 market-place-list-background mt-2 px-2";
+        li.className = "py-1 sm:py-4 market-place-list-background mt-2 px-2";
 
         // Create div element
         const div = document.createElement("div");
         div.className = "flex items-center space-x-4 rtl:space-x-reverse";
+
+        //Create image container
+        const imageContainer = document.createElement("div");
+        imageContainer.className = "w-3 inline-flex items-center text-xs mr-1";
+
+        const agentImage = document.createElement("img");
+        agentImage.style.height = "42px";
+        agentImage.style.width = "42px";
+        agentImage.src = agent.metadata?.avatar_id;
+        agentImage.onerror = function () {
+            agentImage.style.height = "35px";
+            agentImage.src = "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png";
+        };
+        imageContainer.appendChild(agentImage);
 
         // Create inner elements
         const innerDiv = document.createElement("div");
         innerDiv.className = "flex-1 min-w-0";
 
         const p = document.createElement("p");
-        p.className = "text-sm font-semi-bold truncate text-[#497BEF]";
-        p.innerHTML = `@${agent.name} ${agent.testing ? `<span class="text-xs text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
+        p.className = "text-base truncate";
+        p.innerHTML = `<span class="agents font-bold">${agent.metadata.display_name}</span> ${agent.testing ? `<span class="text-[1px] font-normal text-white mx-2 border border-white px-2 py-[1px] rounded-md">test</span>` : ""}`;
 
         const installSpan = document.createElement("span");
         installSpan.textContent = agent.installs;
 
-        const installContainer = document.createElement("div");
-        installContainer.className = "inline-flex items-center";
-        installContainer.innerHTML = downloadIcon;
-        installContainer.appendChild(installSpan);
+        // const installContainer = document.createElement("div");
+        // installContainer.className = "inline-flex items-center";
+        // installContainer.innerHTML = downloadIcon;
+        // installContainer.appendChild(installSpan);
 
         const topDiv = document.createElement("div");
         topDiv.className = "inline-flex flex-row justify-between w-full";
         topDiv.appendChild(p);
-        topDiv.appendChild(installContainer);
+        // topDiv.appendChild(installContainer);
 
         const pDescription = document.createElement("p");
-        pDescription.className = "text-sm truncate text-gray-500 my-1";
+        pDescription.className = "text-xs truncate text-gray-500 my-1 description";
+        pDescription.style.color = "rgb(148 163 184)";
+        pDescription.style.marginTop = "0.5rem";
+        pDescription.style.marginBottom = "0.5rem";
+
+
         pDescription.textContent = agent.description;
 
         const ul = document.createElement("ul");
         ul.className = "max-w-md divide-y divide-gray-200";
 
-        agent.commands.forEach(command => {
-            const liCommand = document.createElement("li");
-            liCommand.className = "text-pink-500";
-            liCommand.textContent = `/${command}`;
-            ul.appendChild(liCommand);
-        });
+        // agent.commands.forEach(command => {
+        //     const liCommand = document.createElement("li");
+        //     liCommand.className = "text-pink-500";
+        //     liCommand.textContent = `/${command}`;
+        //     ul.appendChild(liCommand);
+        // });
 
         const divRow = document.createElement("div");
-        divRow.className = "inline-flex flex-row items-center w-full justify-between my-2";
+        divRow.className = "inline-flex flex-row items-center w-full justify-between my-1";
 
         const divRowInner = document.createElement("div");
         divRowInner.className = "inline-flex flex-row";
@@ -161,6 +181,7 @@ function renderAgentsList(_agents) {
         installButton.addEventListener("click", () => handleInstall(agent));
 
         // Append elements to div
+        div.appendChild(imageContainer);
         div.appendChild(innerDiv);
         div.appendChild(installButton);
 
@@ -171,8 +192,32 @@ function renderAgentsList(_agents) {
         marketPlaceListContainer.appendChild(li);
     });
 
-    vscode.postMessage({type: "getInstallAgents"});
+    searchInput.addEventListener("keyup", handleSearchInput);
+    vscode.postMessage({ type: "getInstallAgents" });
     setLoading(false);
+}
+
+function loadOnErrorImage(agentImage) {
+    agentImage.remove();
+
+    const svgContainer = document.createElement("div");
+    svgContainer.innerHTML = userIcon;
+    agentImage.parentElement.appendChild(svgContainer);
+}
+
+function handleSearchInput(event) {
+    const searchText = event.target.value;
+    const agentList = document.querySelectorAll('.market-place-list-background');
+
+    agentList.forEach(agent => {
+        const agentName = agent.querySelector(".agents").textContent.toLowerCase();
+        const agentDescription = agent.querySelector(".description").textContent.toLowerCase();
+        if (agentName.includes(searchText) || agentDescription.includes(searchText)) {
+            agent.style.display = 'block';
+        } else {
+            agent.style.display = 'none';
+        }
+    });
 }
 
 function registerMessage() {
@@ -181,7 +226,7 @@ function registerMessage() {
         switch (message.type) {
             case "getStoredAgents":
                 const _agents = parseAgents(message.value.agents);
-                storedAgents = {..._agents};
+                storedAgents = { ..._agents };
                 updateInstallButton(_agents?.agentsList);
                 break;
             case "fetchedAgents":

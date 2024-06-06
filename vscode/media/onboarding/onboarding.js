@@ -238,6 +238,8 @@ const executableContainer = document.getElementById("executable-container");
 const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
 const googleApiKeyError = document.getElementById("google-api-key-error");
 const fileUpload = document.getElementById("file-upload");
+const activeAgentAttach = document.getElementById("agents");
+const activeCommandsAttach = document.getElementById("slash-commands");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -269,76 +271,35 @@ const SetupStep = {
 };
 
 let data = [
+    {
+        "description": "Get answers to your questions.",
+        "min_cli_version": "0.0.1",
+        "name": "@dash",
+        "metadata": {
+            "display_name": "Default"
+        },
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "chat_mode": {
+            "data_sources": [],
+            "system_prompt": `CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.
+            
+            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /workspace, /refactor, and  /document commands.
 
-    {
-        "description": "Ask queries across trusted Flutter docs.",
-        "min_cli_version": "0.0.1",
-        "name": "@flutter",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+            They can also attach multiple code snippets by using the option "Attach Snippet to Dash" from the menu bar.
+
+            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.
+
+            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages.
+
+            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.
+            
+            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction
+            
+            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.`,
+          },
         "supported_commands": [
             {
-                "intent": "Ask across Flutter docs",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "828494489",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "492011444",
-                        "type": "match_document_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "688942371",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/doc",
-                "steps": [
-                    {
-                        "data_sources": [
-                            "1068419102"
-                        ],
-                        "outputs": [
-                            "492011444"
-                        ],
-                        "query": "<828494489>",
-                        "type": "search_in_sources",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "688942371"
-                        ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<688942371>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
-            }
-        ],
-        "version": "1.1.0"
-    },
-    {
-        "description": "Get answer to your workspace related queries.",
-        "min_cli_version": "0.0.1",
-        "name": "@workspace",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Answer to queries related to your project",
+                "intent": "Ask questions on your codebase",
                 "registered_inputs": [
                     {
                         "display_text": "Query",
@@ -360,7 +321,7 @@ let data = [
                         "version": "0.0.1"
                     }
                 ],
-                "slug": "/query",
+                "slug": "/workspace",
                 "steps": [
                     {
                         "outputs": [
@@ -386,296 +347,50 @@ let data = [
                     }
                 ],
                 "text_field_layout": "Hi, Please share your query: <835164438>"
-            }
-        ],
-        "version": "1.0.0"
-    },
-    {
-        "description": "Get help with writing tests.",
-        "min_cli_version": "0.0.1",
-        "name": "@test",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Generate unit test",
-                "registered_inputs": [
-                    {
-                        "display_text": "Instructions",
-                        "id": "1043593742",
-                        "optional": true,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Test Code",
-                        "id": "303473333",
-                        "include_contextual_code": true,
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Existing Test",
-                        "id": "749353099",
-                        "include_contextual_code": false,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "642694037",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/unit",
-                "steps": [
-                    {
-                        "outputs": [
-                            "642694037"
-                        ],
-                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<303473333>\n```\n\nImportant instructions shared below:\n<1043593742>\n\nPlease find existing test from user's codebase to understand their testing style:\n```dart\n<749353099>\n```\n\nSharing a unit test template that you can use to generate unit test:\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n            ",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<642694037>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "To generate unit test, please provide: <303473333> \n <1043593742> \n\n A matching existing test [Optional]: <749353099>"
             },
             {
-                "intent": "Generate widget test",
+                "intent": "Refactor your code",
                 "registered_inputs": [
                     {
-                        "display_text": "Widget Code",
-                        "id": "10952200",
-                        "include_contextual_code": true,
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
                         "display_text": "Instructions",
-                        "id": "388753148",
-                        "optional": true,
+                        "id": "640160831",
+                        "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Contextual Code",
-                        "id": "67121667",
-                        "include_contextual_code": false,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Contextual Code",
-                        "id": "332548224",
-                        "include_contextual_code": false,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Existing Widget Test",
-                        "id": "267034757",
-                        "include_contextual_code": true,
-                        "optional": true,
+                        "display_text": "Code",
+                        "id": "555878446",
+                        "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     }
                 ],
                 "registered_outputs": [
                     {
-                        "id": "132466476",
-                        "type": "match_document_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "87690714",
+                        "id": "651573210",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
                 ],
-                "slug": "/widget",
+                "slug": "/refactor",
                 "steps": [
                     {
-                        "data_sources": [
-                            "316798011"
-                        ],
                         "outputs": [
-                            "132466476"
+                            "651573210"
                         ],
-                        "query": "widget tests for <10952200> with instructions: <388753148>",
-                        "type": "search_in_sources",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "87690714"
-                        ],
-                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<10952200>\n```\n\n\nImportant instructions shared below:\n<388753148>\n\nOther widgets attached by the user that may be needed to write the test:\n<67121667>\n<332548224>\n\nPlease find a reference widget test from user's codebase to understand their style\n```dart\n<267034757>\n```\n\nSharing some docs and a widget test template that you can use to generate widget test:\n<132466476>\n\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<87690714>",
+                        "value": "<651573210>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "To generate widget test, please provide: <10952200> \n <388753148> \n\nSupporting contextual code:<67121667><332548224>\n\nA matching existing widget test [Optional]: <267034757>"
+                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
             },
-            {
-                "intent": "Generate integration test",
-                "registered_inputs": [
-                    {
-                        "display_text": "Test Flow",
-                        "id": "618007909",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "878183971",
-                        "include_contextual_code": true,
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "692522247",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "206885194",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "1046042624",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "689900354",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "930130593",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Widget",
-                        "id": "830188033",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Instructions",
-                        "id": "825398103",
-                        "optional": true,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Existing Test",
-                        "id": "470799373",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "973142745",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "474731234",
-                        "type": "multi_code_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "681563375",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/integration",
-                "steps": [
-                    {
-                        "outputs": [
-                            "973142745"
-                        ],
-                        "prompt": "basic concise outline template for integration test for <878183971> <692522247> <206885194> <1046042624> <689900354> <930130593> <830188033>",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "474731234"
-                        ],
-                        "query": "<973142745>",
-                        "type": "search_in_workspace",
-                        "version": "0.0.1",
-                        "workspace_object_type": "all"
-                    },
-                    {
-                        "outputs": [
-                            "681563375"
-                        ],
-                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <618007909>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <878183971>\n  \n  // contextual code 2\n  <692522247>\n  \n  // contextual code 3\n  <206885194>\n  \n  // contextual code 4\n  <1046042624>\n  \n  // contextual code 5\n  <689900354>\n  \n  // contextual code 6\n  <930130593>\n  \n  // contextual code 7\n  <830188033>\n  ````\n  \n  Additional Instruction from User:\n  <825398103>\n  \n  Existing integration tests from User's project:\n  ```dart\n  <470799373>\n  ```\n  <474731234>\n  \n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n  \n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand and works.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<681563375>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "To generate integration test, please provide: <618007909>\n\nWidgets included: <878183971> <692522247> <206885194> <1046042624> <689900354> <930130593> <830188033> \nA matching existing integration test [Optional]: <470799373>"
-            }
-        ],
-        "testing": false,
-        "version": "1.2.8"
-    },
-    {
-        "description": "",
-        "min_cli_version": "0.0.1",
-        "name": "",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
             {
                 "intent": "Generate inline documentation",
                 "registered_inputs": [
@@ -726,55 +441,307 @@ let data = [
                 ],
                 "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
             },
+            
+        ],
+        "version": "1.0.0"
+    },
+    {
+        "description": "Get help with writing tests.",
+        "min_cli_version": "0.0.1",
+        "name": "@test",
+        "metadata": {
+            "display_name": "Test"
+        },
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "chat_mode": {
+            "data_sources": [],
+            "system_prompt": `You are a testing agent inside user's IDE. You can help them generate any kind of tests for their code in any programming language. They can attach multiple code pieces using Attach Snippet to Dash in the menu bar after selecting the code and provide you instruction on how they would like the tests to be generated.
+            
+            Users can either chat with you or also activate specific commands /unit, /widget and /integration by typing / in the text field and then choosing one of them from the dropdown. Commands accepts predefined inputs and generates the test when submitted.`,
+          },
+        "supported_commands": [
             {
-                "intent": "Refactor your code",
+                "intent": "Generate unit test",
                 "registered_inputs": [
                     {
                         "display_text": "Instructions",
-                        "id": "640160831",
-                        "optional": false,
+                        "id": "88544118",
+                        "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
-                        "display_text": "Code",
-                        "id": "555878446",
+                        "display_text": "Test Code",
+                        "id": "991178328",
                         "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Test",
+                        "id": "773779088",
+                        "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
                     }
                 ],
                 "registered_outputs": [
                     {
-                        "id": "651573210",
+                        "id": "664145368",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "669781305",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
                 ],
-                "slug": "/refactor",
+                "slug": "/unit",
                 "steps": [
                     {
-                        "outputs": [
-                            "651573210"
+                        "data_sources": [
+                            "888952842"
                         ],
-                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
+                        "outputs": [
+                            "664145368"
+                        ],
+                        "query": "unit tests for <991178328> with instructions: <88544118>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "669781305"
+                        ],
+                        "prompt": "You are a Flutter/Dart unit test writing assistant.\n\nGenerate Flutter unit tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<991178328>\n```\n\nImportant instructions shared below:\n<88544118>\n\nPlease find existing test from user's codebase to understand their testing style:\n```dart\n<773779088>\n```\n\nSharing some relevant docs and a unit test template that you can use to generate unit test:\n\n<664145368>\n\n```dart\n// Import necessary packages and files\n...\n\n// Generate mocks for dependencies\n@GenerateMocks([UniversityEndpoint])\nvoid main() {\n  // Declare variables\n  late UniversityEndpoint endpoint;\n  late UniversityRemoteDataSource dataSource;\n\n  // Group tests related to function calls\n  group(\"Test function calls\", () {\n    // Set up dependencies before each test\n    setUp(() {\n      endpoint = MockUniversityEndpoint();\n      dataSource = UniversityRemoteDataSource(universityEndpoint: endpoint);\n    });\n\n    // Test if dataSource calls getUniversitiesByCountry from endpoint\n    test('Test dataSource calls getUniversitiesByCountry from endpoint', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Call the method under test\n      dataSource.getUniversitiesByCountry(\"test\");\n\n      // Verify if the method in endpoint is called with correct parameters\n      verify(endpoint.getUniversitiesByCountry(\"test\"));\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream\n    test('Test dataSource maps getUniversitiesByCountry response to Stream', () {\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.value(<ApiUniversityModel>[]));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          const AppResult<List<University>>.data([])\n        ]),\n      );\n    });\n\n    // Test if dataSource maps getUniversitiesByCountry response to Stream with error\n    test('Test dataSource maps getUniversitiesByCountry response to Stream with error', () {\n      // Create a mock API error\n      ApiError mockApiError = ApiError(\n        statusCode: 400,\n        message: \"error\",\n        errors: null,\n      );\n\n      // Mock the endpoint response\n      when(endpoint.getUniversitiesByCountry(\"test\"))\n          .thenAnswer((realInvocation) => Future.error(mockApiError));\n\n      // Expect the method under test to emit certain values in order\n      expect(\n        dataSource.getUniversitiesByCountry(\"test\"),\n        emitsInOrder([\n          const AppResult<List<University>>.loading(),\n          AppResult<List<University>>.apiError(mockApiError)\n        ]),\n      );\n    });\n  });\n}\n}\n```\n\nAdditional things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating unit tests.\n3. Generate smart test cases that not only covers all possible execution paths covers the intended behaviours based real world use cases.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<651573210>",
+                        "value": "<669781305>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
+                "text_field_layout": "To generate unit test, please provide: <991178328> \n <88544118> \n\n A matching existing test [Optional]: <773779088>"
+            },
+            {
+                "intent": "Generate widget test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Widget Code",
+                        "id": "1041271608",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Instructions",
+                        "id": "931556907",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Contextual Code",
+                        "id": "329632660",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Contextual Code",
+                        "id": "220230879",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Widget Test",
+                        "id": "999875681",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "807963722",
+                        "type": "match_document_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "908258161",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/widget",
+                "steps": [
+                    {
+                        "data_sources": [
+                            "888952842"
+                        ],
+                        "outputs": [
+                            "807963722"
+                        ],
+                        "query": "widget tests for <1041271608> with instructions: <931556907>",
+                        "type": "search_in_sources",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "908258161"
+                        ],
+                        "prompt": "You are a Flutter/Dart widget test writing assistant.\n\nGenerate Flutter widget tests covering common as well as edge case scenarios for the code shared below keeping the important instructions in mind:\n\n```dart\n<1041271608>\n```\n\nImportant instructions shared below:\n<931556907>\n\nPlease find a reference widget test from user's codebase to understand their style\n```dart\n<999875681>\n```\n\nSharing some docs and a widget test template that you can use to generate widget test:\n\n<807963722>\n\n```dart\n// necessary imports\nimport 'package:sample_app/lib/main.dart';\n\nvoid main() {\n  testWidgets('Verify add user button present on ActiveUsers page',\n      (WidgetTester tester) async {\n    \n    //Arrange - Pump MyApp() widget to tester\n    await tester.pumpWidget(MyApp());\n\n    //Act - Find button by type \n    var fab = find.byType(FloatingActionButton);\n\n    //Assert - Check that button widget is present\n    expect(fab, findsOneWidget);\n \n  });\n}\n```\n\nAdditioanl things to keep in mind:\n1. Include inline comments for improving code readability.\n2. State any assumption made or libraries used while creating widget tests.\n            ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<908258161>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "To generate widget test, please provide: <1041271608> \n <931556907> \n\nSupporting contextual code:<329632660><220230879>\n\nA matching existing widget test [Optional]: <999875681>"
+            },
+            {
+                "intent": "Generate integration test",
+                "registered_inputs": [
+                    {
+                        "display_text": "Test Flow",
+                        "id": "74504400",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "615910934",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "659876479",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "823389336",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "180545408",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "378571282",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "587755142",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Widget",
+                        "id": "475689144",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Instructions",
+                        "id": "948431573",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Existing Test",
+                        "id": "881968560",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "608049158",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "585262592",
+                        "type": "multi_code_output",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "id": "355240070",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/integration",
+                "steps": [
+                    {
+                        "outputs": [
+                            "608049158"
+                        ],
+                        "prompt": "basic concise outline template for integration test for <615910934> <659876479> <823389336> <180545408> <378571282> <587755142> <475689144>",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "585262592"
+                        ],
+                        "query": "<608049158>",
+                        "type": "search_in_workspace",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "outputs": [
+                            "355240070"
+                        ],
+                        "prompt": "You are a Flutter Integrations Test writing assistant. Your task to generate integration test based on the details shared by the user below.\n  \n  Test Flow: <74504400>\n  \n  Contextual Code from User's Project:\n  ```dart\n  // contextual code 1\n  <615910934>\n  \n  // contextual code 2\n  <659876479>\n  \n  // contextual code 3\n  <823389336>\n  \n  // contextual code 4\n  <180545408>\n  \n  // contextual code 5\n  <378571282>\n  \n  // contextual code 6\n  <587755142>\n  \n  // contextual code 7\n  <475689144>\n  ````\n  \n  Additional Instruction from User:\n  <948431573>\n  \n  Existing integration tests from User's project:\n  ```dart\n  <881968560>\n  ```\n  <585262592>\n  \n  You may reuse or refer the above tests to:\n  1. Fill in code for parts for which contextual code might be missing (like app launch, reaching a certain page, etc).\n  2. Output test that match user's test writing pattern.\n  \n  Note:\n  1. Only generate test code based on the contextual code that is shared. Don't generate any key or text by assumption (that is if they are not present in contextual for use).\n  2. In case if the key is not provided to find a widget look for other ways. For example, one approach can be use with widget type.\n  3. Generate test that is easy to understand and works.\n  4. Finally, make sure to share feedback on how the integration test can be further enhanced by the user.\n  ",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<355240070>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "To generate integration test, please provide: <74504400>\n\nWidgets included: <615910934> <659876479> <823389336> <180545408> <378571282> <587755142> <475689144> \nA matching existing integration test [Optional]: <881968560>"
             }
         ],
-        "version": "1.0.0"
+        "testing": false,
+        "version": "1.2.5"
     }
 ];
 
-
+const commandLessData = {
+    registered_inputs: [],
+    text_field_layout: "",
+    slug: "",
+};
 const questionnaire = [
     {
         id: "refactor-code-questionaire",
@@ -784,7 +751,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/refactor", ""));
+            agentInputsJson.push(agentProvider.getInputs("/refactor", "@dash"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -799,7 +766,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/query", "@workspace"));
+            agentInputsJson.push(agentProvider.getInputs("/workspace", "@dash"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -808,13 +775,13 @@ const questionnaire = [
     },
     {
         id: "flutter-doc-search",
-        message: "Query official Flutter Docs",
+        message: "Generate documentation for your code",
         onclick: (_textInput) => {
             _textInput.textContent = '';
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/doc", "@flutter"));
+            agentInputsJson.push(agentProvider.getInputs("/document", "@dash"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -893,7 +860,19 @@ const questionnaire = [
     vscode.postMessage({
         type: "getInstallAgents"
     });
+
+    enableDefaultAgent();
 })();
+
+function enableDefaultAgent() {
+    activeAgentAttach.style = "color: #497BEF; !important";
+    activeAgentAttach.textContent = '@dash';
+    activeAgent = true;
+    commandEnable = false;
+    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+    activeCommandsAttach.textContent = "/";
+    currentActiveAgent = '@dash';
+}
 
 function fileAttach(event) {
     removePlaceholder();
@@ -909,7 +888,7 @@ function fileAttach(event) {
     imageChip.setAttribute("contenteditable", "false");
 
     filesData = { ...filesData, [imageChipId]: file };
-    insertChipAtCursor(imageChip, textInput);
+    // insertChipAtCursor(imageChip, textInput);
 }
 
 function githubListener() {
@@ -947,37 +926,52 @@ function addToolTipsById() {
 }
 
 async function submitResponse() {
-    let prompt = textInput.textContent.trim();
-    if (commandEnable) {
+    let prompt = textInput.textContent.replace(/\s+/g, ' ').trim();
+    if (activeAgent && commandEnable) {
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version } });
-
+            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version }, isCommandLess: false } });
 
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
             commandEnable = false;
-            activeAgent = false;
+            activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+            activeCommandsAttach.textContent = "/";
             agentInputsJson.length = 0;
         }
-    } else if (prompt.length > 1) {
-        toggleLoader(true);
+    } else if (activeAgent && !commandEnable) {
+        let value = prompt;
         for (const chip in chipsData) {
-            if (prompt.includes(chip)) {
-                prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-            }
+            value = prompt.replace(chip, chipsData[chip].references.referenceContent);
+            prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
-        for (const file in filesData) {
-            if (prompt.includes(file)) {
-                const dataURL = await loadFileAsDataURL(filesData[file]);
-                prompt = prompt.replace(file, `![${file}](${dataURL})`);
-            }
-        }
-        vscode.postMessage({ type: "prompt", value: prompt });
+        commandLessData.user_message = prompt;
+        commandLessData.prompt = value;
+
+        const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
+        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData };
+        vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
     }
+    // else if (prompt.length > 1) {
+    //     toggleLoader(true);
+    //     for (const chip in chipsData) {
+    //         if (prompt.includes(chip)) {
+    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
+    //         }
+    //     }
+    //     for (const file in filesData) {
+    //         if (prompt.includes(file)) {
+    //             const dataURL = await loadFileAsDataURL(filesData[file]);
+    //             prompt = prompt.replace(file, `![${file}](${dataURL})`);
+    //         }
+    //     }
+    //     vscode.postMessage({ type: "prompt", value: prompt });
+    //     questionnaireContainer.classList.add("hidden");
+    //     textInput.textContent = "";
+    // }
 
     adjustHeight();
 }
@@ -1052,7 +1046,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action.name} - ${action.description}`;
+        div.textContent = `${action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
         div.onclick = setItem;
         return div;
     };
@@ -1091,6 +1085,7 @@ function handleSubmit(event) {
             if (textInput.textContent.trim().length === 0) {
                 // Perform some action
                 commandEnable = false;
+                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
             }
         }, 2500);
 
@@ -1161,7 +1156,7 @@ function parseAgents(agents) {
         return _agents;
     }
 
-    return {agents: {}, agentsList: []};
+    return { agents: {}, agentsList: [] };
 }
 
 function handleTriggerMessage(event) {
@@ -1337,8 +1332,17 @@ function handleTriggerMessage(event) {
 function appendAgents(agents) {
     for (let key in agents) {
         if (agents.hasOwnProperty(key)) {
-            data.push(agents[key]);
-        };
+            // Find the index of the existing agent with the same key
+            const existingIndex = data.findIndex(agent => agent.name === key);
+
+            // If agent exists, replace it
+            if (existingIndex !== -1) {
+                data[existingIndex] = agents[key];
+            } else {
+                // If agent doesn't exist, add it
+                data.push(agents[key]);
+            }
+        }
     }
 }
 
@@ -1347,7 +1351,7 @@ function readTriggeredMessage() {
 }
 
 function setLoader(loaderKind, loaderMessage) {
-    fileNameContainer.innerHTML = ''; //clears the file information from the previous loader if any
+    fileNameContainer.innerHTML = '';
     switch (loaderKind) {
         case "message":
             loadingIndicator.classList.add("hidden");
@@ -1366,9 +1370,7 @@ function setLoader(loaderKind, loaderMessage) {
             workspaceLoader.style.display = 'flex';
             workspaceLoaderText.classList.remove("hidden");
             workspaceLoaderText.textContent = loaderMessage.value;
-            message = [...loaderMessage.files];
-
-            fileNameContainer.innerHTML = '';
+            message = loaderMessage.files;
             //replace message array with actual file names
             message.forEach((_filePath) => {
                 const divBlock = document.createElement("div");
@@ -1430,7 +1432,9 @@ function createReferenceChips(references, isCommandAction) {
     chip.id = chipId;
     chip.setAttribute("contenteditable", "false");
 
-    chipsData = { ...chipsData, [chipId]: references };
+    const epochId = Math.floor(Date.now() / 1000).toString();
+
+    chipsData = { ...chipsData, [chipId]: { references, epochId } };
     if (commandEnable && !isCommandAction) {
         const agentUIBuilder = new AgentUIBuilder(textInput);
         agentUIBuilder?.onCodeInput(references, chipId);
@@ -1448,7 +1452,7 @@ function createReferenceChips(references, isCommandAction) {
         commandEnable = true;
 
     } else {
-        insertChipAtCursor(chip, textInput);
+        insertChipAtCursor(chip, textInput, references, epochId);
     }
 };
 
@@ -1483,7 +1487,7 @@ function drop(event) {
     }
 }
 
-function insertChipAtCursor(chip, textInput) {
+function insertChipAtCursor(chip, textInput, reference, epochId) {
     //chip property setting
     chip.setAttribute("draggable", "true");
     chip.addEventListener("dragstart", dragStart);
@@ -1517,6 +1521,7 @@ function insertChipAtCursor(chip, textInput) {
         textInput.appendChild(chip);
         textInput.appendChild(nonBreakingSpace);
     }
+    commandLessData.registered_inputs.push({ "id": epochId, "type": "code_input", "optional": false, "version": "0.0.1", "value": JSON.stringify(reference) });
 }
 
 function insertAtReference(chip) {
@@ -1670,7 +1675,14 @@ function displayMessages() {
 
     let modelCount = 0;
 
-    conversationHistory.forEach((message) => {
+    const _conversationHistory = conversationHistory.filter(data => Object.keys(data)[0] === currentActiveAgent);
+    if (_conversationHistory.length === 0) {
+        questionnaireContainer.classList.remove("hidden");
+    } else {
+        questionnaireContainer.classList.add("hidden");
+    }
+    _conversationHistory.forEach((_message) => {
+        const message = _message[currentActiveAgent];
         const messageElement = document.createElement("div");
         const roleElement = document.createElement("p");
         const contentElement = document.createElement("p");
@@ -1693,10 +1705,6 @@ function displayMessages() {
             agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
-            // if (message.agent && message.agent?.trim() !== "") {
-            //     agent.classList.add("text-pink-500", "block", "w-full", "px-2.5", "user-message");
-            //     agent.textContent = message.agent;
-            // }
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";

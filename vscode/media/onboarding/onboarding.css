@@ -177,11 +177,13 @@ p[contenteditable="true"] {
 }
 
 #agents {
-    color: var(--vscode-input-placeholderForeground);
+    color: var(--vscode-input-placeholderForeground);;
 }
 
 #slash-commands {
     color: var(--vscode-input-placeholderForeground);
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 #bottom-text-input-container {

@@ -10,3 +10,69 @@ body {
 .market-place-list-background {
     background-color: var(--vscode-panel-background);
 }
+
+.input-container {
+    padding-top: 4px;
+    position: relative;
+    color: var(--vscode-editor-foreground);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-right: 4px;
+    padding-left: 4px;
+}
+
+.search-input {
+    border-width: .5px;
+    border-color: rgb(209 213 219);
+    height: 1.75rem;
+    /* 28px */
+    width: 100%;
+    /* dynamic in size */
+    padding-left: 0.75rem;
+    /* 12px */
+    padding-right: 1.25rem;
+    /* 20px */
+    font-size: 0.875rem;
+    /* 14px */
+    line-height: 1.25rem;
+    /* 20px */
+    background-color: var(--vscode-panel-background);
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin-top: 0.625rem;
+    /* 12px */
+    margin-right: 1rem;
+    /* 16px */
+    fill: var(--vscode-editor-foreground);
+}
+
+.skeleton-loader {
+    width: 100%;
+    height: 15px;
+    display: block;
+    background: linear-gradient(to right,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.5) 50%,
+            rgba(255, 255, 255, 0) 80%),
+        lightgray;
+    background-repeat: repeat-y;
+    background-size: 50px 500px;
+    background-position: 0 0;
+    animation: shine 1s infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position: 100% 0;
+    }
+}

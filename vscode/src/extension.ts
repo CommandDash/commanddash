@@ -29,8 +29,6 @@ const activeFileFilters: vscode.DocumentFilter[] = [DART_MODE];
 export async function activate(context: vscode.ExtensionContext) {
     // handleAgents();
     StorageManager.instance.loadContext(context);
-    //Check for update on activation of extension
-    new UpdateManager(context).checkForUpdate();
 
     activateTelemetry(context);
 
