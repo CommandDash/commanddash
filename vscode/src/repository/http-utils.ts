@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Auth } from '../utilities/auth/auth';
 
 const baseUrl = 'https://api.commanddash.dev';
 
@@ -42,7 +43,7 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response?.status === 401 || error.response?.status === 422) {
-                const newAccessToken = await refreshAccessToken(refreshToken);
+                const newAccessToken = await refreshAccessToken(refreshToken, context);
                 context.globalState.update('access_token', newAccessToken);
                 return makeAuthorizedHttpRequest<T>(config, context);
             }
@@ -54,19 +55,30 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
 }
 
 
-export async function refreshAccessToken(refreshToken: string): Promise<string> {
+export async function refreshAccessToken(refreshToken: string, context: vscode.ExtensionContext): Promise<string> {
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const response = await makeHttpRequest<{ access_token: string }>({
-        url: baseUrl + '/account/github/refresh', method: 'POST',
-        data: {
-            'timezone': userTimezone
-        },
-        headers: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            Authorization: `Bearer ${refreshToken}`
+    try {
+        const response: AxiosResponse<{ access_token: string }> = await axios({
+            url: baseUrl + '/account/github/refresh', method: 'POST',
+            data: {
+                'timezone': userTimezone
+            },
+            headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                Authorization: `Bearer ${refreshToken}`
+            }
+        });
+       
+        return response.data.access_token;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 401) {
+                // Refresh token has expired, sign in the user again
+                return await Auth.getInstance().signInWithGithub(context);
+            }
         }
-    });
-    return response.access_token;
+        throw error;
+    }
 }
 
 

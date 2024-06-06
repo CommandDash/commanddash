@@ -78,21 +78,26 @@ export class GeminiRepository extends GenerationRepository {
         let lastMessage = prompt.pop();
 
         // Count the tokens in the prompt
-        const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = this.genAI.getGenerativeModel({ model: "gemini-pro" }); //TODO: upgrade this to flash model
         let promptText = "";
         prompt.forEach(p => promptText += p.parts);
         const { totalTokens } = await model.countTokens(promptText);
         console.log("Total input tokens: " + totalTokens);
 
         // Check if the token count exceeds the limit
-        if (totalTokens > 30720) {
+        if (totalTokens > 1040384) {
             throw Error('Input prompt exceeds the maximum token limit.');
         }
 
-        const chat = this.genAI.getGenerativeModel({ model: "gemini-pro", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
+        const chat = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest", generationConfig: { temperature: 0.0, topP: 0.2 } }).startChat(
             {
-                history: prompt, generationConfig: {
-                    maxOutputTokens: 2048,
+                history: prompt.map(p => {
+                    return {
+                        role: p.role,
+                        parts: [{ text: p.parts }]
+                    };
+                }), generationConfig: {
+                    maxOutputTokens: 8192,
                 },
             }
         );

@@ -38,7 +38,7 @@ export class Auth {
         return this.cacheManager.getGlobalValue<string>('access_token');
     }
 
-    public async signInWithGithub(context: vscode.ExtensionContext): Promise<void> {
+    public async signInWithGithub(context: vscode.ExtensionContext): Promise<string> {
         const url = '/account/github/url/' + vscode.env.uriScheme;
         const { github_oauth_url } = await makeHttpRequest<{ github_oauth_url: string }>({ url: url });
         vscode.env.openExternal(vscode.Uri.parse(github_oauth_url));
@@ -68,6 +68,7 @@ export class Auth {
         const { accessToken, refreshToken } = await authPromise;
         await context.globalState.update('access_token', accessToken);
         await context.globalState.update('refresh_token', refreshToken);
+        return refreshToken;
     }
 
     public async signOutFromGithub(context: vscode.ExtensionContext): Promise<void> {

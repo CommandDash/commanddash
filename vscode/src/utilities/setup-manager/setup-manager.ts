@@ -43,7 +43,7 @@ export class SetupManager {
         this.dartClient.onProcessOperation('refresh_access_token', async (message) => {
             let refreshToken = this.auth.getGithubRefreshToken();
             if (refreshToken) {
-                let accessToken = await refreshAccessToken(refreshToken);
+                let accessToken = await refreshAccessToken(refreshToken, context);
                 this.dartClient?.sendOperationResponse(message, {
                     'access_token': accessToken
                 });
