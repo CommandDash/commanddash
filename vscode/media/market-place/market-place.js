@@ -28,7 +28,7 @@ let storedAgents = null;
 
     registerMessage();
 
-    vscode.postMessage({type: "fetchAgents"});
+    vscode.postMessage({ type: "fetchAgents" });
 })();
 
 function setLoading(isLoading) {
@@ -47,10 +47,10 @@ function handleInstall(agent) {
     const isInstalled = isAgentInstalled(agent.name);
     if (isInstalled) {
         if (agent) {
-            vscode.postMessage({type: "uninstallAgents", value: JSON.stringify(agent)});
+            vscode.postMessage({ type: "uninstallAgents", value: JSON.stringify(agent) });
         }
     } else {
-        vscode.postMessage({type: "installAgents", value: JSON.stringify(agent)});
+        vscode.postMessage({ type: "installAgents", value: JSON.stringify(agent) });
     }
 }
 
@@ -62,7 +62,7 @@ function isAgentInstalled(agentName) {
 function updateInstallButton(agentOrList) {
     const installButtons = document.querySelectorAll(".install-button");
     const agentNames = Array.isArray(agentOrList) ? agentOrList.map(agent => agent) : [agentOrList.name];
-    
+
     installButtons.forEach(button => {
         if (agentNames.includes(button.dataset.name)) {
             button.textContent = "Uninstall";
@@ -73,7 +73,7 @@ function updateInstallButton(agentOrList) {
 }
 
 function getStoredAgents() {
-    const _storedAgents = storedAgents ? storedAgents : {agents: {}, agentsList: []};
+    const _storedAgents = storedAgents ? storedAgents : { agents: {}, agentsList: [] };
     return _storedAgents;
 }
 
@@ -83,18 +83,32 @@ function parseAgents(agents) {
         return _agents;
     }
 
-    return {agents: {}, agentsList: []};
+    return { agents: {}, agentsList: [] };
 }
 
 function renderAgentsList(_agents) {
     _agents.forEach(agent => {
         // Create li element
         const li = document.createElement("li");
-        li.className = "py-3 sm:py-4 market-place-list-background mt-2 px-2";
+        li.className = "py-1 sm:py-4 market-place-list-background mt-2 px-2";
 
         // Create div element
         const div = document.createElement("div");
         div.className = "flex items-center space-x-4 rtl:space-x-reverse";
+
+        //Create image container
+        const imageContainer = document.createElement("div");
+        imageContainer.className = "w-3 inline-flex items-center text-xs mr-1";
+
+        const agentImage = document.createElement("img");
+        agentImage.style.height = "42px";
+        agentImage.style.width = "42px";
+        agentImage.src = agent.metadata?.avatar_id;
+        agentImage.onerror = function () {
+            agentImage.style.height = "35px";
+            agentImage.src = "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png";
+        };
+        imageContainer.appendChild(agentImage);
 
         // Create inner elements
         const innerDiv = document.createElement("div");
@@ -119,7 +133,11 @@ function renderAgentsList(_agents) {
 
         const pDescription = document.createElement("p");
         pDescription.className = "text-xs truncate text-gray-500 my-1 description";
-        pDescription.style = "color: rgb(148 163 184); overflow: hidden; text-overflow: ellipsis; display: inline-block; margin-top: 10px;";
+        pDescription.style.color = "rgb(148 163 184)";
+        pDescription.style.marginTop = "0.5rem";
+        pDescription.style.marginBottom = "0.5rem";
+
+
         pDescription.textContent = agent.description;
 
         const ul = document.createElement("ul");
@@ -163,6 +181,7 @@ function renderAgentsList(_agents) {
         installButton.addEventListener("click", () => handleInstall(agent));
 
         // Append elements to div
+        div.appendChild(imageContainer);
         div.appendChild(innerDiv);
         div.appendChild(installButton);
 
@@ -174,8 +193,16 @@ function renderAgentsList(_agents) {
     });
 
     searchInput.addEventListener("keyup", handleSearchInput);
-    vscode.postMessage({type: "getInstallAgents"});
+    vscode.postMessage({ type: "getInstallAgents" });
     setLoading(false);
+}
+
+function loadOnErrorImage(agentImage) {
+    agentImage.remove();
+
+    const svgContainer = document.createElement("div");
+    svgContainer.innerHTML = userIcon;
+    agentImage.parentElement.appendChild(svgContainer);
 }
 
 function handleSearchInput(event) {
@@ -199,7 +226,7 @@ function registerMessage() {
         switch (message.type) {
             case "getStoredAgents":
                 const _agents = parseAgents(message.value.agents);
-                storedAgents = {..._agents};
+                storedAgents = { ..._agents };
                 updateInstallButton(_agents?.agentsList);
                 break;
             case "fetchedAgents":

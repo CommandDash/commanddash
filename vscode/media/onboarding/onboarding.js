@@ -277,6 +277,9 @@ let data = [
         "min_cli_version": "0.0.1",
         "name": "@flutter",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "metadata": {
+            "display_name": "Flutter"
+        },
         "supported_commands": [
             {
                 "intent": "Ask across Flutter docs",
@@ -337,6 +340,9 @@ let data = [
         "description": "Get answer to your workspace related queries.",
         "min_cli_version": "0.0.1",
         "name": "@workspace",
+        "metadata": {
+            "display_name": "Workspace"
+        },
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
@@ -396,6 +402,9 @@ let data = [
         "description": "Get help with writing tests.",
         "min_cli_version": "0.0.1",
         "name": "@test",
+        "metadata": {
+            "display_name": "Test"
+        },
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             {
@@ -677,6 +686,9 @@ let data = [
         "description": "",
         "min_cli_version": "0.0.1",
         "name": "@default",
+        "metadata": {
+            "display_name": "Default"
+        },
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "chat_mode": {
             "data_sources": [],
