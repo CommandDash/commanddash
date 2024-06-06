@@ -271,82 +271,35 @@ const SetupStep = {
 };
 
 let data = [
+    {
+        "description": "Get answers to your questions.",
+        "min_cli_version": "0.0.1",
+        "name": "@dash",
+        "metadata": {
+            "display_name": "Default"
+        },
+        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "chat_mode": {
+            "data_sources": [],
+            "system_prompt": `CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.
+            
+            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /workspace, /refactor, and  /document commands.
 
-    {
-        "description": "Ask queries across trusted Flutter docs.",
-        "min_cli_version": "0.0.1",
-        "name": "@flutter",
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "metadata": {
-            "display_name": "Flutter"
-        },
+            They can also attach multiple code snippets by using the option "Attach Snippet to Dash" from the menu bar.
+
+            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.
+
+            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages.
+
+            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.
+            
+            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction
+            
+            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.`,
+          },
         "supported_commands": [
             {
-                "intent": "Ask across Flutter docs",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "828494489",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "492011444",
-                        "type": "match_document_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "688942371",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/doc",
-                "steps": [
-                    {
-                        "data_sources": [
-                            "1068419102"
-                        ],
-                        "outputs": [
-                            "492011444"
-                        ],
-                        "query": "<828494489>",
-                        "type": "search_in_sources",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "outputs": [
-                            "688942371"
-                        ],
-                        "prompt": "You are an Flutter expert who answers user's queries related to the framework.\n            \n            Please find the user query <Query> and relavant references <References> picked from the Flutter docs to assist you: \n            \n            Query: <828494489>\n            \n            References: \n            <492011444>\n            \n            Note: \n            1. If the references don't address the question, state that \"I couldn't fetch your answer from the doc sources, but I'll try to answer from my own knowledge\".\n            2. Be truthful, complete and detailed with your responses and include code snippets wherever required.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<688942371>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi! Ask me anything from Flutter docs: <828494489>"
-            }
-        ],
-        "version": "1.1.0"
-    },
-    {
-        "description": "Get answer to your workspace related queries.",
-        "min_cli_version": "0.0.1",
-        "name": "@workspace",
-        "metadata": {
-            "display_name": "Workspace"
-        },
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            {
-                "intent": "Answer to queries related to your project",
+                "intent": "Ask questions on your codebase",
                 "registered_inputs": [
                     {
                         "display_text": "Query",
@@ -368,7 +321,7 @@ let data = [
                         "version": "0.0.1"
                     }
                 ],
-                "slug": "/query",
+                "slug": "/workspace",
                 "steps": [
                     {
                         "outputs": [
@@ -394,7 +347,101 @@ let data = [
                     }
                 ],
                 "text_field_layout": "Hi, Please share your query: <835164438>"
-            }
+            },
+            {
+                "intent": "Refactor your code",
+                "registered_inputs": [
+                    {
+                        "display_text": "Instructions",
+                        "id": "640160831",
+                        "optional": false,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Code",
+                        "id": "555878446",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "651573210",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/refactor",
+                "steps": [
+                    {
+                        "outputs": [
+                            "651573210"
+                        ],
+                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<651573210>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
+            },
+            {
+                "intent": "Generate inline documentation",
+                "registered_inputs": [
+                    {
+                        "display_text": "Code",
+                        "id": "606180200",
+                        "optional": false,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Additional Instrunction",
+                        "id": "474917076",
+                        "optional": true,
+                        "type": "string_input",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "display_text": "Reference Code",
+                        "id": "305491004",
+                        "optional": true,
+                        "type": "code_input",
+                        "version": "0.0.1"
+                    }
+                ],
+                "registered_outputs": [
+                    {
+                        "id": "519294379",
+                        "type": "prompt_output",
+                        "version": "0.0.1"
+                    }
+                ],
+                "slug": "/document",
+                "steps": [
+                    {
+                        "outputs": [
+                            "519294379"
+                        ],
+                        "prompt": "You are an Flutter expert and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <606180200>\n    ```\n    \n    References:\n    ```dart\n    <305491004>\n    ```\n    \n    Additional Instructions: <474917076>\n    \n    Note:\n    1. Only share the updated code with proper comments back. Keep it as information as possible for other developers to understand.\n    2. Make sure to refer to [Effective Dart: Documentation](https://dart.dev/effective-dart/documentation) to create effective inline documentation that follow official Dart guidelines",
+                        "type": "prompt_query",
+                        "version": "0.0.1"
+                    },
+                    {
+                        "type": "append_to_chat",
+                        "value": "<519294379>",
+                        "version": "0.0.1"
+                    }
+                ],
+                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
+            },
+            
         ],
         "version": "1.0.0"
     },
@@ -406,6 +453,12 @@ let data = [
             "display_name": "Test"
         },
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
+        "chat_mode": {
+            "data_sources": [],
+            "system_prompt": `You are a testing agent inside user's IDE. You can help them generate any kind of tests for their code in any programming language. They can attach multiple code pieces using Attach Snippet to Dash in the menu bar after selecting the code and provide you instruction on how they would like the tests to be generated.
+            
+            Users can either chat with you or also activate specific commands /unit, /widget and /integration by typing / in the text field and then choosing one of them from the dropdown. Commands accepts predefined inputs and generates the test when submitted.`,
+          },
         "supported_commands": [
             {
                 "intent": "Generate unit test",
@@ -681,129 +734,6 @@ let data = [
         ],
         "testing": false,
         "version": "1.2.5"
-    },
-    {
-        "description": "",
-        "min_cli_version": "0.0.1",
-        "name": "@default",
-        "metadata": {
-            "display_name": "Default"
-        },
-        "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "chat_mode": {
-            "data_sources": [],
-            "system_prompt": `CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.
-            
-            You are the @default agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /refactor and /document commands.
-
-            They can also attach multiple code snippets by using the option "Attach Snippet to Dash" from the menu bar.
-
-            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.
-
-            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages.
-
-            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.
-            
-            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction
-            
-            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.`,
-          },
-        "supported_commands": [
-            {
-                "intent": "Generate inline documentation",
-                "registered_inputs": [
-                    {
-                        "display_text": "Code",
-                        "id": "606180200",
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Additional Instrunction",
-                        "id": "474917076",
-                        "optional": true,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Reference Code",
-                        "id": "305491004",
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "519294379",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/document",
-                "steps": [
-                    {
-                        "outputs": [
-                            "519294379"
-                        ],
-                        "prompt": "You are an Flutter expert and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <606180200>\n    ```\n    \n    References:\n    ```dart\n    <305491004>\n    ```\n    \n    Additional Instructions: <474917076>\n    \n    Note:\n    1. Only share the updated code with proper comments back. Keep it as information as possible for other developers to understand.\n    2. Make sure to refer to [Effective Dart: Documentation](https://dart.dev/effective-dart/documentation) to create effective inline documentation that follow official Dart guidelines",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<519294379>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
-            },
-            {
-                "intent": "Refactor your code",
-                "registered_inputs": [
-                    {
-                        "display_text": "Instructions",
-                        "id": "640160831",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Code",
-                        "id": "555878446",
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "651573210",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/refactor",
-                "steps": [
-                    {
-                        "outputs": [
-                            "651573210"
-                        ],
-                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<651573210>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
-            },
-        ],
-        "version": "1.0.0"
     }
 ];
 
@@ -821,7 +751,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/refactor", "@default"));
+            agentInputsJson.push(agentProvider.getInputs("/refactor", "@dash"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -836,7 +766,7 @@ const questionnaire = [
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/query", "@workspace"));
+            agentInputsJson.push(agentProvider.getInputs("/workspace", "@dash"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -845,13 +775,13 @@ const questionnaire = [
     },
     {
         id: "flutter-doc-search",
-        message: "Query official Flutter Docs",
+        message: "Generate documentation for your code",
         onclick: (_textInput) => {
             _textInput.textContent = '';
             agentInputsJson.length = 0;
             const agentUIBuilder = new AgentUIBuilder(_textInput);
             const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/doc", "@flutter"));
+            agentInputsJson.push(agentProvider.getInputs("/document", "@dash"));
             agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
             commandEnable = true;
@@ -936,12 +866,12 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@default';
+    activeAgentAttach.textContent = '@dash';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
     activeCommandsAttach.textContent = "/";
-    currentActiveAgent = '@default';
+    currentActiveAgent = '@dash';
 }
 
 function fileAttach(event) {
