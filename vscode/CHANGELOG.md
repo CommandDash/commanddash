@@ -4,6 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.1]
+- Introduced Chat Mode for agents
+- Enhanced marketplace
+- Disabled other non-primary features like code from blueprint and inline code generation
 
 ## [0.3.91]
 - Upgarde to Gemini 1.5 Flash
