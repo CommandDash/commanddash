@@ -866,7 +866,7 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = 'Default';
+    activeAgentAttach.textContent = '@dash';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
