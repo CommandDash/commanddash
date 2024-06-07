@@ -866,7 +866,7 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@dash';
+    activeAgentAttach.textContent = 'Default';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
@@ -1046,7 +1046,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
+        div.textContent = `${action?.metadata?.display_name ?? action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
         div.onclick = setItem;
         return div;
     };
@@ -1102,7 +1102,7 @@ function getAgents() {
     const agents = [];
     data.forEach(agent => {
         if (agent.name.trim().length > 0) {
-            agents.push({ name: agent.name, description: agent.description });
+            agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata });
         }
     });
 
@@ -1442,7 +1442,7 @@ function createReferenceChips(references, isCommandAction) {
         textInput.textContent = '';
         agentInputsJson.length = 0;
         const agentProvider = new AgentProvider(data);
-        agentInputsJson.push(agentProvider.getInputs("/refactor"));
+        agentInputsJson.push(agentProvider.getInputs("/refactor", "@dash"));
 
         const agentUIBuilder = new AgentUIBuilder(textInput);
         agentUIBuilder.buildAgentUI();

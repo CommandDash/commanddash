@@ -134,7 +134,7 @@ class CommandDeck {
             }
             if (option?.name.startsWith('@')) {
                 activeAgentAttach.style = "color: #497BEF; !important";
-                activeAgentAttach.textContent = `${option?.name}`;
+                activeAgentAttach.textContent = `${option?.metadata.display_name}`;
                 activeAgent = true;
                 commandEnable = false;
                 activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
