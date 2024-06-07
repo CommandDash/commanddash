@@ -272,38 +272,29 @@ const SetupStep = {
 
 let data = [
     {
-        "description": "Get answers to your questions.",
+        "description": "Your primary agent for any usage or coding help.",
+        "metadata": {
+            "avatar_id": "https://cdn.commanddash.dev/assets/85fe1b9f-35a6-5732-9657-e880909c26e9/agents/avatars/07-06-2024/76f575c4-c6f9-40c2-8292-8f9a2cba0b0b.jpeg",
+            "description": "Your primary agent for any usage or coding help.",
+            "display_name": "Dash",
+            "tags": [],
+            "version": "0.0.1"
+        },
         "min_cli_version": "0.0.1",
         "name": "@dash",
-        "metadata": {
-            "display_name": "Default"
-        },
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "chat_mode": {
             "data_sources": [],
-            "system_prompt": `CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.
-            
-            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /workspace, /refactor, and  /document commands.
-
-            They can also attach multiple code snippets by using the option "Attach Snippet to Dash" from the menu bar.
-
-            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.
-
-            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages.
-
-            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.
-            
-            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction
-            
-            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.`,
-          },
+            "system_prompt": "            CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /workspace, /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
+            "version": "0.0.1"
+        },
         "supported_commands": [
             {
                 "intent": "Ask questions on your codebase",
                 "registered_inputs": [
                     {
                         "display_text": "Query",
-                        "id": "835164438",
+                        "id": "903396436",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
@@ -311,12 +302,12 @@ let data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "312430668",
+                        "id": "206381269",
                         "type": "multi_code_output",
                         "version": "0.0.1"
                     },
                     {
-                        "id": "439982682",
+                        "id": "741501672",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -325,42 +316,43 @@ let data = [
                 "steps": [
                     {
                         "outputs": [
-                            "312430668"
+                            "206381269"
                         ],
-                        "query": "<835164438>",
+                        "query": "<903396436>",
                         "type": "search_in_workspace",
-                        "workspace_object_type": "all",
-                        "version": "0.0.1"
+                        "version": "0.0.1",
+                        "workspace_object_type": "all"
                     },
                     {
                         "outputs": [
-                            "439982682"
+                            "741501672"
                         ],
-                        "prompt": "Here are the related references from user's project:\n            ```\n            <312430668>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <835164438>.",
+                        "prompt": "Here are the related references from user's project:\n            ```\n            <206381269>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <903396436>.\n            \n            If you cannot find the answer in the attaches references, say \"Sorry, I couldn't find the answer to your question in the workspace.\"",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<439982682>",
+                        "value": "<741501672>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, Please share your query: <835164438>"
+                "text_field_layout": "Hi, Please share your query: <903396436>"
             },
             {
                 "intent": "Refactor your code",
                 "registered_inputs": [
                     {
-                        "display_text": "Instructions",
-                        "id": "640160831",
+                        "display_text": "Instruction",
+                        "id": "260641975",
                         "optional": false,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Code",
-                        "id": "555878446",
+                        "id": "907016073",
+                        "include_contextual_code": true,
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -368,7 +360,7 @@ let data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "651573210",
+                        "id": "752315169",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -377,40 +369,42 @@ let data = [
                 "steps": [
                     {
                         "outputs": [
-                            "651573210"
+                            "752315169"
                         ],
-                        "prompt": "You are a Flutter/Dart assistant helping user to write code.\n\n            Please find instructions provided by user <Instructions> and the code that needs to be modified <Code> based on the provided instructions:\n\n            Instructions: <640160831>\n\n            Code:\n            <555878446>\nOutput the modified code with any notes that the user needs to know.\n",
+                        "prompt": "You are a coding assistant helping user to write code.\n\n\n            Please find instructions provided my users <Instructions> and the code that is need to be modified <Code> based on the provided instructions:\n\n            Instructions: <260641975>\n\n            Code:\n            ```dart\n            <907016073>\n            ```\n            \n            Note: State any assumption made and improvements introduced used while modification.\n            ",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<651573210>",
+                        "value": "<752315169>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Refactor the code <555878446> on: <640160831> "
+                "text_field_layout": "Hi, Please share the following info for refactoring: <260641975> <907016073>"
             },
             {
-                "intent": "Generate inline documentation",
+                "intent": "Add inline documentation to your code",
                 "registered_inputs": [
                     {
                         "display_text": "Code",
-                        "id": "606180200",
+                        "id": "969449752",
+                        "include_contextual_code": true,
                         "optional": false,
                         "type": "code_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Additional Instrunction",
-                        "id": "474917076",
+                        "id": "904424077",
                         "optional": true,
                         "type": "string_input",
                         "version": "0.0.1"
                     },
                     {
                         "display_text": "Reference Code",
-                        "id": "305491004",
+                        "id": "166904426",
+                        "include_contextual_code": true,
                         "optional": true,
                         "type": "code_input",
                         "version": "0.0.1"
@@ -418,7 +412,7 @@ let data = [
                 ],
                 "registered_outputs": [
                     {
-                        "id": "519294379",
+                        "id": "926029354",
                         "type": "prompt_output",
                         "version": "0.0.1"
                     }
@@ -427,22 +421,22 @@ let data = [
                 "steps": [
                     {
                         "outputs": [
-                            "519294379"
+                            "926029354"
                         ],
-                        "prompt": "You are an Flutter expert and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <606180200>\n    ```\n    \n    References:\n    ```dart\n    <305491004>\n    ```\n    \n    Additional Instructions: <474917076>\n    \n    Note:\n    1. Only share the updated code with proper comments back. Keep it as information as possible for other developers to understand.\n    2. Make sure to refer to [Effective Dart: Documentation](https://dart.dev/effective-dart/documentation) to create effective inline documentation that follow official Dart guidelines",
+                        "prompt": "You are a coding assistant and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <969449752>\n    ```\n    \n    References:\n    ```dart\n    <166904426>\n    ```\n    \n    Additional Instructions: <904424077>\n    \n    Share the updated code with proper comments back. Keep it as informational as possible for other developers to understand.",
                         "type": "prompt_query",
                         "version": "0.0.1"
                     },
                     {
                         "type": "append_to_chat",
-                        "value": "<519294379>",
+                        "value": "<926029354>",
                         "version": "0.0.1"
                     }
                 ],
-                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <606180200> <305491004> <474917076>"
-            },
-            
+                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <969449752> <166904426> <904424077>"
+            }
         ],
+        "testing": true,
         "version": "1.0.0"
     },
     {
@@ -866,7 +860,7 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@dash';
+    activeAgentAttach.textContent = '@Dash';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
@@ -930,8 +924,9 @@ async function submitResponse() {
     if (activeAgent && commandEnable) {
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
+            const currentAgentData = data.find((agent) => agent.name === currentActiveAgent);
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version }, isCommandLess: false } });
+            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: currentAgentData?.version, testing: currentAgentData?.testing }, isCommandLess: false } });
 
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
@@ -950,28 +945,11 @@ async function submitResponse() {
         commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData };
+        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData, testing: activeAgentData?.testing };
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
     }
-    // else if (prompt.length > 1) {
-    //     toggleLoader(true);
-    //     for (const chip in chipsData) {
-    //         if (prompt.includes(chip)) {
-    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-    //         }
-    //     }
-    //     for (const file in filesData) {
-    //         if (prompt.includes(file)) {
-    //             const dataURL = await loadFileAsDataURL(filesData[file]);
-    //             prompt = prompt.replace(file, `![${file}](${dataURL})`);
-    //         }
-    //     }
-    //     vscode.postMessage({ type: "prompt", value: prompt });
-    //     questionnaireContainer.classList.add("hidden");
-    //     textInput.textContent = "";
-    // }
 
     adjustHeight();
 }
@@ -1046,7 +1024,7 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
+        div.textContent = `${action?.metadata?.display_name ?? action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
         div.onclick = setItem;
         return div;
     };
@@ -1102,7 +1080,7 @@ function getAgents() {
     const agents = [];
     data.forEach(agent => {
         if (agent.name.trim().length > 0) {
-            agents.push({ name: agent.name, description: agent.description });
+            agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata });
         }
     });
 
@@ -1442,7 +1420,7 @@ function createReferenceChips(references, isCommandAction) {
         textInput.textContent = '';
         agentInputsJson.length = 0;
         const agentProvider = new AgentProvider(data);
-        agentInputsJson.push(agentProvider.getInputs("/refactor"));
+        agentInputsJson.push(agentProvider.getInputs("/refactor", "@dash"));
 
         const agentUIBuilder = new AgentUIBuilder(textInput);
         agentUIBuilder.buildAgentUI();

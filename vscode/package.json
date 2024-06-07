@@ -78,12 +78,6 @@
         "command": "dash.attachToDash.menu",
         "key": "ctrl+R",
         "mac": "cmd+R"
-      },
-      {
-        "command": "dash.createInlineCodeCompletion.menu",
-        "key": "ctrl+shift+right",
-        "mac": "cmd+shift+right",
-        "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
       }
     ],
     "commands": [
@@ -94,46 +88,6 @@
       {
         "command": "dash.attachToDash.menu",
         "title": "Attach Snippet to Dash"
-      },
-      {
-        "command": "dash.createInlineCodeCompletion",
-        "title": "Dash: Inline Code Generation"
-      },
-      {
-        "command": "dash.createInlineCodeCompletion.menu",
-        "title": "Inline Code Generation"
-      },
-      {
-        "command": "dash.createWidget",
-        "title": "Dash Create: Widget from Image or Description"
-      },
-      {
-        "command": "dash.createWidget.menu",
-        "title": "Widget from Image or Description"
-      },
-      {
-        "command": "dash.createCodeFromBlueprint",
-        "title": "Dash Create: Code from Blueprint"
-      },
-      {
-        "command": "dash.createCodeFromBlueprint.menu",
-        "title": "Code from Blueprint"
-      },
-      {
-        "command": "dash.createCodeFromDescription",
-        "title": "Dash Create: Code From Description"
-      },
-      {
-        "command": "dash.createCodeFromDescription.menu",
-        "title": "Code From Description"
-      },
-      {
-        "command": "dash.fixErrors",
-        "title": "Dash Refactor: Fix Errors"
-      },
-      {
-        "command": "dash.optimizeCode",
-        "title": "Dash Refactor: Optimize"
       },
       {
         "command": "dash.clearChat",
@@ -169,57 +123,12 @@
         {
           "command": "dash.attachToDash.menu",
           "when": "false"
-        },
-        {
-          "command": "dash.createInlineCodeCompletion",
-          "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'"
-        },
-        {
-          "command": "dash.createInlineCodeCompletion.menu",
-          "when": "false"
-        },
-        {
-          "command": "dash.createWidget",
-          "when": "!editorHasSelection && resourceLangId == 'dart'"
-        },
-        {
-          "command": "dash.createWidget.menu",
-          "when": "false"
-        },
-        {
-          "command": "dash.createCodeFromBlueprint",
-          "when": "editorHasSelection && resourceLangId == 'dart'"
-        },
-        {
-          "command": "dash.createCodeFromBlueprint.menu",
-          "when": "false"
-        },
-        {
-          "command": "dash.createCodeFromDescription",
-          "when": "!editorHasSelection && resourceLangId == 'dart'"
-        },
-        {
-          "command": "dash.createCodeFromDescription.menu",
-          "when": "false"
-        },
-        {
-          "command": "dash.fixErrors",
-          "when": "editorHasSelection && resourceLangId == 'dart'"
-        },
-        {
-          "command": "dash.optimizeCode",
-          "when": "editorHasSelection && resourceLangId == 'dart'"
         }
       ],
       "editor/context": [
         {
           "submenu": "dash.createMenu",
           "group": "dash-menu-group@1"
-        },
-        {
-          "command": "dash.createInlineCodeCompletion.menu",
-          "when": "!editorHasSelection && editorTextFocus && resourceLangId == 'dart'",
-          "group": "dash-menu-group@2"
         },
         {
           "command": "dash.attachToDash.menu",
@@ -245,21 +154,6 @@
         }
       ],
       "dash.createMenu": [
-        {
-          "command": "dash.createCodeFromBlueprint.menu",
-          "when": "editorHasSelection && resourceLangId == 'dart'",
-          "group": "dash-menu-group@1"
-        },
-        {
-          "command": "dash.createCodeFromDescription.menu",
-          "when": "!editorHasSelection && resourceLangId == 'dart'",
-          "group": "dash-menu-group@2"
-        },
-        {
-          "command": "dash.createWidget.menu",
-          "when": "!editorHasSelection && resourceLangId == 'dart'",
-          "group": "dash-menu-group@3"
-        }
       ]
     },
     "submenus": [
