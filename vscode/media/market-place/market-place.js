@@ -98,7 +98,7 @@ function renderAgentsList(_agents) {
 
         //Create image container
         const imageContainer = document.createElement("div");
-        imageContainer.className = "w-3 inline-flex items-center text-xs mr-1";
+        imageContainer.className = "w-3 inline-flex items-center text-xs mr-2";
 
         const agentImage = document.createElement("img");
         agentImage.style.height = "42px";

@@ -443,7 +443,8 @@ let data = [
             },
             
         ],
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "testing": false
     },
     {
         "description": "Get help with writing tests.",
@@ -866,7 +867,7 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@dash';
+    activeAgentAttach.textContent = '@Default';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
@@ -930,8 +931,9 @@ async function submitResponse() {
     if (activeAgent && commandEnable) {
         const agentsData = { ...agentInputsJson[0] };
         if (checkValueExists(agentsData.registered_inputs)) {
+            const currentAgentData = data.find((agent) => agent.name === currentActiveAgent);
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: data.find((agent) => agent.name === currentActiveAgent)?.version }, isCommandLess: false } });
+            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: currentAgentData?.version, testing: currentAgentData?.testing }, isCommandLess: false } });
 
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
@@ -950,28 +952,11 @@ async function submitResponse() {
         commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData };
+        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData, testing: activeAgentData?.testing };
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
     }
-    // else if (prompt.length > 1) {
-    //     toggleLoader(true);
-    //     for (const chip in chipsData) {
-    //         if (prompt.includes(chip)) {
-    //             prompt = prompt.replace(chip, chipsData[chip].referenceContent);
-    //         }
-    //     }
-    //     for (const file in filesData) {
-    //         if (prompt.includes(file)) {
-    //             const dataURL = await loadFileAsDataURL(filesData[file]);
-    //             prompt = prompt.replace(file, `![${file}](${dataURL})`);
-    //         }
-    //     }
-    //     vscode.postMessage({ type: "prompt", value: prompt });
-    //     questionnaireContainer.classList.add("hidden");
-    //     textInput.textContent = "";
-    // }
 
     adjustHeight();
 }
