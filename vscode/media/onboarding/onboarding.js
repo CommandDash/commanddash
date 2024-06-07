@@ -276,7 +276,7 @@ let data = [
         "min_cli_version": "0.0.1",
         "name": "@dash",
         "metadata": {
-            "display_name": "Default"
+            "display_name": "Dash"
         },
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "chat_mode": {
@@ -866,7 +866,7 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = 'Default';
+    activeAgentAttach.textContent = 'Dash';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";

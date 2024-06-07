@@ -7,19 +7,15 @@ import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
 // import { ExtensionVersionManager } from './utilities/update-check';
-import { FluttergptActionProvider as RefactorActionProvider } from './providers/refactor_code_actions';
 import { ILspAnalyzer } from './shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from './shared/types/constants';
-import { AIHoverProvider } from './providers/hover_provider';
 import { GeminiRepository } from './repository/gemini-repository';
-import { ErrorCodeActionProvider } from './providers/error_code_actions_provider';
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { initCommands, registerCommand } from './utilities/command-manager';
 import { CacheManager } from './utilities/cache-manager';
 import { tempScheme, virtualDocumentProvider } from './utilities/virtual-document-provider';
 import { Auth } from './utilities/auth/auth';
 import { SetupManager, SetupStep } from './utilities/setup-manager/setup-manager';
-import { UpdateManager } from './utilities/update-manager';
 import { StorageManager } from './utilities/storage-manager';
 
 export const DART_MODE: vscode.DocumentFilter & { language: string } = { language: "dart", scheme: "file" };
@@ -115,11 +111,11 @@ function initWebview(context: vscode.ExtensionContext, geminiRepo?: GeminiReposi
 
 function initFlutterExtension(context: vscode.ExtensionContext, geminiRepo: GeminiRepository, analyzer: ILspAnalyzer, chatViewProvider: FlutterGPTViewProvider) {
 
-    const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
+    // const refactorActionProvider = new RefactorActionProvider(analyzer, geminiRepo, context);
+    // context.subscriptions.push(vscode.languages.registerCodeActionsProvider(activeFileFilters, refactorActionProvider));
 
-    const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
-    context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
+    // const hoverProvider = new AIHoverProvider(geminiRepo, analyzer);
+    // context.subscriptions.push(vscode.languages.registerHoverProvider(activeFileFilters, hoverProvider));
     
     //TODO: Renable after moving to CommandDash
     // const errorActionProvider = new ErrorCodeActionProvider(analyzer, geminiRepo, context);

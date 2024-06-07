@@ -69,18 +69,9 @@ export function registerCommand(
 }
 
 export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
-    const generationRepository: GenerationRepository =  geminiRepo; //TODO: Use up in the tree getUserPrefferedModel();
-    // List of commands to register, with their names and options.
-    // TODO: Rename dash to just dash [Dash AI should not be a keyword anywhere]
     const commands = [
         { name: 'dash.attachToDash', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'dash.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'dash.createCodeFromBlueprint', handler: () => createCodeFromBlueprint(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'dash.createCodeFromDescription', handler: () => createCodeFromDescription(generationRepository, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'dash.refactorCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => refactorCode(generationRepository, context.globalState, range, analyzer, elementName, context, flutterGPTViewProvider, undefined, undefined,), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'dash.fixErrors', handler: (aiRepo: GenerationRepository, errors: vscode.Diagnostic[], globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => fixErrors(generationRepository, errors, context.globalState, range, analyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'dash.optimizeCode', handler: (aiRepo: GenerationRepository, globalState: vscode.Memento, range: vscode.Range, anlyzer: ILspAnalyzer, elementName: string | undefined) => optimizeCode(generationRepository, context.globalState, range, anlyzer, elementName, context), options: { isCommand: true, isMenu: false, isShortcut: false } },
-        { name: 'dash.createInlineCodeCompletion', handler: () => createInlineCodeCompletion(), options: { isCommand: true, isMenu: true, isShortcut: true } },
         { name: 'dash.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dash.marketPlace', handler: () => flutterGPTViewProvider.setMarketPlaceWebView(), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dash.backButton', handler: () => flutterGPTViewProvider.setChatWebView(), options: { isCommand: true, isMenu: false, isShortcut: false } },

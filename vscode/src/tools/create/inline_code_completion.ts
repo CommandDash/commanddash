@@ -73,8 +73,8 @@ export async function createInlineCodeCompletion() {
     logEvent('create-inline-code-completion', { 'type': "create" });
     vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        cancellable: false,
-        title: 'Dash: Generating code, please wait.'
+        cancellable: true,
+        title: 'Inline code generation is not supported anymore'
     }, async (progress, token: vscode.CancellationToken) => {
         const cacheManager = CacheManager.getInstance();
         cacheManager.incrementInlineCompletionCount();
