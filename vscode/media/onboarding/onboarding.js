@@ -272,7 +272,7 @@ const SetupStep = {
 
 let data = [
     {
-        "description": "Get answers to your questions.",
+        "description": "Your primary agent for any usage or coding help.",
         "min_cli_version": "0.0.1",
         "name": "@dash",
         "metadata": {
@@ -867,7 +867,7 @@ const questionnaire = [
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@Default';
+    activeAgentAttach.textContent = '@Dash';
     activeAgent = true;
     commandEnable = false;
     activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
