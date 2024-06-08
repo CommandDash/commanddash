@@ -4,6 +4,12 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.3]
+- Show agent display name in sent message tile
+
+## [0.4.2]
+- Minor bug fix
+
 ## [0.4.1]
 - Introduced Chat Mode for agents
 - Enhanced marketplace

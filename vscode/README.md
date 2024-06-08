@@ -44,7 +44,7 @@ Also, you can select and attach multiple code snippets from different files in y
 
 **Run commands meant to perform specific tasks:**
 
-For example, `@Test` agent has a command to help you genereate unit tests:
+For example, `@GoRouter` agent offers a `/generate` command:
 <p align="center">
 <img src="/assets/docs/command.png" alt="Refactoring code with CommandDash" width="500" style="padding-left: 20px; padding-right: 20px;"/>
 </p>
