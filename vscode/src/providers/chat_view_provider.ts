@@ -486,7 +486,7 @@ private async _updateInstalledAgents(response: any) {
             prompt = this.formatPrompt(agentResponse);
         }
 
-        this._publicConversationHistory.push({ [this._activeAgent]: { role: 'user', parts: prompt, agent: agentResponse.agent, slug: agentResponse.slug } });
+        this._publicConversationHistory.push({ [this._activeAgent]: { role: 'user', parts: prompt, agent: agentResponse.metadata.display_name, slug: agentResponse.slug } });
         this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
         try {
             let auth = Auth.getInstance();
