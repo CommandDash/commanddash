@@ -35,7 +35,7 @@ Explore 100s of agents available in the marketplace - from LLMs, Payment Gateway
 **You can activate an agent and chat with it:**
 
 <p align="center">
-<img src="/assets/docs/multi-code-attachment.gif" alt="Multi code chat with VSCode inside Gemini" width="500"/>
+<img src="/assets/docs/agent-usage.gif" alt="Multi code chat with VSCode inside Gemini" width="500"/>
 </p>
 
 Also, you can select and attach multiple code snippets from different files in your inline chat using **"Attach Snippet to Dash"** from the right-click menu. 
@@ -44,8 +44,9 @@ Also, you can select and attach multiple code snippets from different files in y
 
 **Run commands meant to perform specific tasks:**
 
+For example, `@Test` agent has a command to help you genereate unit tests:
 <p align="center">
-<img src="/assets/docs/refactor-command.png" alt="Refactoring code with CommandDash" width="500"/>
+<img src="/assets/docs/command.png" alt="Refactoring code with CommandDash" width="500" style="padding-left: 20px; padding-right: 20px;"/>
 </p>
 
 Note: Commands are optionally offered by agents depending on the usecase.
