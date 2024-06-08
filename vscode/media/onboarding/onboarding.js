@@ -926,7 +926,7 @@ async function submitResponse() {
         if (checkValueExists(agentsData.registered_inputs)) {
             const currentAgentData = data.find((agent) => agent.name === currentActiveAgent);
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: currentAgentData?.version, testing: currentAgentData?.testing }, isCommandLess: false } });
+            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: currentAgentData?.version, testing: currentAgentData?.testing, metadata: currentAgentData?.metadata }, isCommandLess: false } });
 
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
@@ -945,7 +945,7 @@ async function submitResponse() {
         commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData, testing: activeAgentData?.testing };
+        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData, testing: activeAgentData?.testing, metadata: activeAgentData?.metadata };
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
@@ -1680,7 +1680,7 @@ function displayMessages() {
             const agents = document.createElement("div");
             agents.classList.add("inline-flex", "flex-row");
             roleElement.appendChild(agents);
-            agents.innerHTML = `<span class="text-[#497BEF]">${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
+            agents.innerHTML = `<span class="text-[#497BEF]">@${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
             contentElement.innerHTML = markdownToPlain(message.parts);
         } else if (message.role === "dash") {
