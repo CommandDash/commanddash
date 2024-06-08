@@ -44,7 +44,7 @@ D -->|Passes| F(Move to next step)
 F -->|All completed| G(Voila! Task Accomplished)
 ```
 
-We have been able to build internal MVPs of such capablilties in a copilot. And are now sharing a roadmap with the community to make it available in production for everyone.
+We have been able to build internal MVPs of such capabilities in a copilot. And are now sharing a roadmap with the community to make it available in production for everyone.
 
 ## Roadmap
 
