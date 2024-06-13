@@ -224,23 +224,26 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log('error while uninstalling agents: ', error);
         }
     }
-private async _updateInstalledAgents(response: any) {
-    const getInstallAgents = await StorageManager.instance.getInstallAgents();
-    const _getInstallAgents = JSON.parse(getInstallAgents);
+    
+    private async _updateInstalledAgents(response: any) {
+        const getInstallAgents = await StorageManager.instance.getInstallAgents();
+        if (getInstallAgents) {
+            const _getInstallAgents = JSON.parse(getInstallAgents);
 
-    for (const agentName in _getInstallAgents.agents) {
-        const matchedAgent = response.find((agent: any) => {
-            let bool1 = agent.name === agentName.replace('@', '');
-            let bool2 = agent.testing === _getInstallAgents.agents[agentName].testing;
-            return bool1 && bool2;
-        });
+            for (const agentName in _getInstallAgents.agents) {
+                const matchedAgent = response.find((agent: any) => {
+                    let bool1 = agent.name === agentName.replace('@', '');
+                    let bool2 = agent.testing === _getInstallAgents.agents[agentName].testing;
+                    return bool1 && bool2;
+                });
 
-        if (matchedAgent) {
-            const agentDetails = await this._fetchAgent(matchedAgent.name, matchedAgent.versions[0].version, matchedAgent.testing);
-            this._storingAgentsLocally(agentDetails);
+                if (matchedAgent) {
+                    const agentDetails = await this._fetchAgent(matchedAgent.name, matchedAgent.versions[0].version, matchedAgent.testing);
+                    this._storingAgentsLocally(agentDetails);
+                }
+            }
         }
     }
-}
     private async _fetchAgentsAPI(backgroundUpdate: boolean = false) {
         try {
             const config: AxiosRequestConfig = {
@@ -252,13 +255,13 @@ private async _updateInstalledAgents(response: any) {
                 }
             };
             let response = await makeAuthorizedHttpRequest(config, this.context);
-            
-            if (backgroundUpdate){
+
+            if (backgroundUpdate) {
                 this._updateInstalledAgents(response);
             } else {
                 this._view?.webview.postMessage({ type: 'fetchedAgents', value: JSON.stringify(response) });
             }
-            
+
         } catch (error) {
             console.log('error: while fetching the get-agent-list api', error);
         }
@@ -412,7 +415,7 @@ private async _updateInstalledAgents(response: any) {
             task.sendStepResponse(message, {});
         });
 
-        task.onProcessStep('chat_document_update', async (message)=>{
+        task.onProcessStep('chat_document_update', async (message) => {
             this.chatDocuments[this._activeAgent] = message.params.args.content;
             task.sendStepResponse(message, {});
         });

@@ -56,7 +56,11 @@ export class SetupManager {
             this.pendingSetupSteps.push(SetupStep.executable);
         } else {
             this.dartClient.connect();
-            this.dartClient.backgroundUpdateExecutable();
+            try {
+                this.dartClient.backgroundUpdateExecutable();
+            } catch (error) {
+                console.log(`Error: ${error}`);
+            }
         }
     }
 

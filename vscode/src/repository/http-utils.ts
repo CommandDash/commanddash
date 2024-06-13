@@ -13,7 +13,8 @@ export async function makeHttpRequest<T>(config: AxiosRequestConfig): Promise<T>
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw new Error(`Error: ${error.response?.data?.error?.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data?.error?.message}`);
+            //TODO: handle undefined request
+            throw new Error(`Error: ${error?.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data?.message}`);
         } else {
             throw new Error(`Failed to make HTTP request: ${error}`);
         };
@@ -47,7 +48,7 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
                 context.globalState.update('access_token', newAccessToken);
                 return makeAuthorizedHttpRequest<T>(config, context);
             }
-            throw new Error(`Error: ${error.response?.data.error.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data.error.message}`);
+            throw new Error(`Error: ${error?.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data?.message}`);
         } else {
             throw new Error(`Failed to make HTTP request: ${error}`);
         };
