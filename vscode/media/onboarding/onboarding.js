@@ -940,7 +940,7 @@ async function submitResponse() {
     } else if (activeAgent && !commandEnable) {
         let value = prompt;
         for (const chip in chipsData) {
-            value = prompt.replace(chip, chipsData[chip].references.referenceContent);
+            value = value.replace(chip, chipsData[chip].references.referenceContent);
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
         commandLessData.user_message = prompt;
@@ -951,6 +951,7 @@ async function submitResponse() {
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
+        chipsData = {};
     }
 
     adjustHeight();
