@@ -47,7 +47,7 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
                 context.globalState.update('access_token', newAccessToken);
                 return makeAuthorizedHttpRequest<T>(config, context);
             }
-            throw new Error(`Error: ${error.response?.data.error.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data.error.message}`);
+            throw new Error(`Error: ${error.code} received with status code ${error.response?.status}.\nMessage: ${error.response?.data.error.message}`);
         } else {
             throw new Error(`Failed to make HTTP request: ${error}`);
         };
@@ -68,7 +68,7 @@ export async function refreshAccessToken(refreshToken: string, context: vscode.E
                 Authorization: `Bearer ${refreshToken}`
             }
         });
-       
+
         return response.data.access_token;
     } catch (error) {
         if (axios.isAxiosError(error)) {

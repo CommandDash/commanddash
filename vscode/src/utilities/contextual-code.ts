@@ -2,7 +2,6 @@
 import path = require('path');
 import * as vscode from 'vscode';
 import { SemanticTokensRegistrationType, SemanticTokensProviderShape, SymbolKind } from 'vscode-languageclient';
-import { ILspAnalyzer } from '../shared/types/LspAnalyzer';
 import { Outline } from '../shared/types/custom_protocols';
 import { getCodeForRange, isPositionInElementDefinitionRange } from '../shared/utils';
 import { Token } from '../shared/types/token';
@@ -11,49 +10,20 @@ import * as fs from 'fs';
 export class ContextualCodeProvider {
 
     // This should return code, filepath and range for the contextual code
-    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<{ filePath: string}[] | undefined> {
+    public async getContextualCodeInput(document: vscode.TextDocument, range: vscode.Range, elementname: string | undefined): Promise<{ filePath: string }[] | undefined> {
 
-        const checkSymbols = (symbols: Outline[]): Outline | undefined => {
-            for (const symbol of symbols) {
-                if (isPositionInElementDefinitionRange(symbol, range.start)) {
-                    return symbol;
-                }
-                if (symbol.children) {
-                    const result = checkSymbols(symbol.children);
-                    if (result !== undefined) {
-                        return result;
-                    }
-                }
-            }
-            return undefined;
-        };
 
-        // get the target symbol if the elementname is not provided. This is the case when the user selects a range of code.
-        // The elementName is used to avoid adding target symbol in the contextual code.
-        if (elementname === undefined) {
-            const outline = await analyzer.fileTracker.waitForOutline(document);
-
-            if (outline === undefined) {
-                return undefined;
-            }
-            const outlineSymbols = outline?.children || [];
-            // parse the outline to get all top level symbols
-            const symbol = checkSymbols(outlineSymbols);
-            if (symbol !== undefined) {
-                elementname = symbol.element.name;
-            }
-        }
-        const docTokens = await this.getDocumentTokens(document, analyzer, range);
+        const docTokens = await this.getDocumentTokens(document, range);
 
 
         const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
 
         // Iterate over the new Map to construct the desired string
-        let codes: { filePath: string}[] = [];
+        let codes: { filePath: string }[] = [];
         for (const [filePath, tokenCodes] of tokensByFilePath) {
             const absoluteFilePath = path.join(vscode.workspace.rootPath || '', filePath);
             var codeObject: { filePath: string } = {
-                filePath: absoluteFilePath,   
+                filePath: absoluteFilePath,
             };
             codes.push(codeObject);
         }
@@ -62,38 +32,9 @@ export class ContextualCodeProvider {
 
     // gets the contextual code for the given range.
     // Contextual code is the code for all the symbols referenced in the range.
-    public async getContextualCode(document: vscode.TextDocument, range: vscode.Range, analyzer: ILspAnalyzer, elementname: string | undefined): Promise<string | undefined> {
-        const checkSymbols = (symbols: Outline[]): Outline | undefined => {
-            for (const symbol of symbols) {
-                if (isPositionInElementDefinitionRange(symbol, range.start)) {
-                    return symbol;
-                }
-                if (symbol.children) {
-                    const result = checkSymbols(symbol.children);
-                    if (result !== undefined) {
-                        return result;
-                    }
-                }
-            }
-            return undefined;
-        };
+    public async getContextualCode(document: vscode.TextDocument, range: vscode.Range, elementname: string | undefined): Promise<string | undefined> {
 
-        // get the target symbol if the elementname is not provided. This is the case when the user selects a range of code.
-        // The elementName is used to avoid adding target symbol in the contextual code.
-        if (elementname === undefined) {
-            const outline = await analyzer.fileTracker.waitForOutline(document);
-
-            if (outline === undefined) {
-                return undefined;
-            }
-            const outlineSymbols = outline?.children || [];
-            // parse the outline to get all top level symbols
-            const symbol = checkSymbols(outlineSymbols);
-            if (symbol !== undefined) {
-                elementname = symbol.element.name;
-            }
-        }
-        const docTokens = await this.getDocumentTokens(document, analyzer, range);
+        const docTokens = await this.getDocumentTokens(document, range);
 
 
         const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
@@ -112,9 +53,9 @@ export class ContextualCodeProvider {
 
     // gets the contextual code for the whole file.
     // Used for inline completions to handle cases where there is no method or class in context.
-    public async getContextualCodeForCompletion(document: vscode.TextDocument, analyzer: ILspAnalyzer,): Promise<string | undefined> {
+    public async getContextualCodeForCompletion(document: vscode.TextDocument,): Promise<string | undefined> {
         // provide code for tokens in the whole file. Avoid duplicate code for the same file.
-        const docTokens = await this.getDocumentTokens(document, analyzer, new vscode.Range(0, 0, document.lineCount - 1, 0));
+        const docTokens = await this.getDocumentTokens(document, new vscode.Range(0, 0, document.lineCount - 1, 0));
 
         const tokensByFilePath = this.getTokensFilePathMap(docTokens, document);
 
@@ -132,15 +73,17 @@ export class ContextualCodeProvider {
 
 
 
-    private async getDocumentTokens(document: vscode.TextDocument, analyzer: ILspAnalyzer, range: vscode.Range): Promise<Token[]> {
+    private async getDocumentTokens(document: vscode.TextDocument, range: vscode.Range): Promise<Token[]> {
 
-        let tokenSource = new vscode.CancellationTokenSource();
-        const shape = analyzer.client.getFeature(SemanticTokensRegistrationType.method).getProvider(document) as SemanticTokensProviderShape | undefined;
-        const semanticTokens = await shape?.range?.provideDocumentRangeSemanticTokens(document, range, tokenSource.token);
-        if (semanticTokens === undefined || semanticTokens?.data === undefined) {
-            return [];
-        }
-        let tokens = await this.parseTokens(semanticTokens?.data!, document, analyzer);
+        // const semanticTokens = await shape?.range?.provideDocumentRangeSemanticTokens(document, range, tokenSource.token);
+        // if (semanticTokens === undefined || semanticTokens?.data === undefined) {
+        //     return [];
+        // }
+        const semanticTokens = await vscode.commands.executeCommand<vscode.SemanticTokens>(
+            'vscode.provideDocumentSemanticTokens',
+            document.uri
+        );
+        let tokens = await this.parseTokens(semanticTokens?.data!, document,);
 
 
         return tokens;
@@ -169,7 +112,7 @@ export class ContextualCodeProvider {
     }
 
 
-    private async parseTokens(tokensArray: Uint32Array, document: vscode.TextDocument, analyzer: ILspAnalyzer): Promise<Token[]> {
+    private async parseTokens(tokensArray: Uint32Array, document: vscode.TextDocument,): Promise<Token[]> {
         const tokens: Token[] = [];
         let currentLine = 0;
         let currentStart = 0;
@@ -194,13 +137,23 @@ export class ContextualCodeProvider {
 
 
             const cancellationToken = new vscode.CancellationTokenSource();
-            const definitionProvider = analyzer.client.getFeature('textDocument/definition').getProvider(document);
-            if (definitionProvider === undefined) {
-                continue;
-            }
-            let definition = await definitionProvider?.provideDefinition(document, range.start, cancellationToken.token) as vscode.LocationLink[];
+            console.log("range", range);
+            let definition: {
+                targetUri?: vscode.Uri;
+                targetRange?: vscode.Range;
+                uri: vscode.Uri;
+                range: vscode.Range;
+            }[] = await vscode.commands.executeCommand('vscode.executeDefinitionProvider', document.uri, range.start, cancellationToken.token);
+            console.log(typeof (definition[0]));
 
-            let uri = definition[0]?.targetUri;
+            // const definitionProvider =
+            //     // await vscode.commands.executeCommand<vscode.DefinitionProvider>('vscode.executeDefinitionProvider', document.uri, range.start, cancellationToken.token);
+            //     analyzer.client.getFeature('textDocument/definition').getProvider(document);
+            // if (definitionProvider === undefined) {
+            //     continue;
+            // }
+            // let definition_analyzer = await definitionProvider?.provideDefinition(document, range.start, cancellationToken.token) as vscode.LocationLink[];
+            let uri = definition[0]?.targetUri ?? definition[0].uri;
             if (uri) {
                 // check if same file as document. 
                 // We don't want to show the code for the same file as we already pass the for for full file in the prompt.
@@ -208,13 +161,19 @@ export class ContextualCodeProvider {
                     // We add the code only for files in the current workspace. This is to avoid code from the sdk and other packages.
                     // TODO: Add support for code from other packages as well. This will be better for users who modulize their code into packages.
                     let workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-                    if (workspaceFolder && this.toAddInContextualCode(this.getSymbolKind(tokenType))) {
-                        const code = await getCodeForRange(uri, definition[0].targetRange);
+                    const legend = await vscode.commands.executeCommand<vscode.SemanticTokensLegend>(
+                        'vscode.provideDocumentSemanticTokensLegend',
+                        document.uri
+                    );
+                    console.log(legend);
+                    var symbolkind = this.getSymbolKind(tokenType, legend);
+                    if (workspaceFolder && this.toAddInContextualCode(this.getSymbolKind(tokenType, legend))) {
+                        const code = await getCodeForRange(uri, definition[0].targetRange ?? definition[0].range);
                         if (code) {
                             tokens.push({
                                 name: name,
                                 tokenTypeNumber: tokenType,
-                                tokenType: this.getSymbolKind(tokenType),
+                                tokenType: this.getSymbolKind(tokenType, legend),
                                 line: currentLine,
                                 start: currentStart,
                                 length: length,
@@ -246,7 +205,12 @@ export class ContextualCodeProvider {
         }
     }
 
-    private getSymbolKind(kindNumber: number): string | undefined {
+    private getSymbolKind(kindNumber: number, legend: vscode.SemanticTokensLegend): string | undefined {
+        var kind = legend.tokenTypes[kindNumber];
+        if (kind === "function") {
+            return 'Method';
+        }
+        return kind;
         switch (kindNumber) {
             case 2:
                 return "Class";

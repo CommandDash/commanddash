@@ -5,7 +5,6 @@ import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
 import { refactorCode } from "../tools/refactor/refactor_from_instructions";
-import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
 import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
 import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
@@ -26,7 +25,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     private setupManager = SetupManager.getInstance();
     private _activeAgent: string = '';
     aiRepo?: GeminiRepository;
-    analyzer?: ILspAnalyzer;
     private tasksMap: any = {};
     private _publicConversationHistory: Array<{ [agent: string]: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string } }> = [];
     /// reference documents for particular activated agent for througout chat history
@@ -37,10 +35,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     constructor(private readonly _extensionUri: vscode.Uri,
         private context: vscode.ExtensionContext,
         aiRepo?: GeminiRepository,
-        analyzer?: ILspAnalyzer,
     ) {
         this.aiRepo = aiRepo;
-        this.analyzer = analyzer;
     }
 
     // Public method to post a message to the webview
@@ -67,7 +63,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         // set the HTML for the webview
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
+        // this.setupManager.deleteGithub();
         // add an event listener for messages received by the webview
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.type) {
@@ -224,23 +220,23 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             console.log('error while uninstalling agents: ', error);
         }
     }
-private async _updateInstalledAgents(response: any) {
-    const getInstallAgents = await StorageManager.instance.getInstallAgents();
-    const _getInstallAgents = JSON.parse(getInstallAgents);
+    private async _updateInstalledAgents(response: any) {
+        const getInstallAgents = await StorageManager.instance.getInstallAgents();
+        const _getInstallAgents = JSON.parse(getInstallAgents);
 
-    for (const agentName in _getInstallAgents.agents) {
-        const matchedAgent = response.find((agent: any) => {
-            let bool1 = agent.name === agentName.replace('@', '');
-            let bool2 = agent.testing === _getInstallAgents.agents[agentName].testing;
-            return bool1 && bool2;
-        });
+        for (const agentName in _getInstallAgents.agents) {
+            const matchedAgent = response.find((agent: any) => {
+                let bool1 = agent.name === agentName.replace('@', '');
+                let bool2 = agent.testing === _getInstallAgents.agents[agentName].testing;
+                return bool1 && bool2;
+            });
 
-        if (matchedAgent) {
-            const agentDetails = await this._fetchAgent(matchedAgent.name, matchedAgent.versions[0].version, matchedAgent.testing);
-            this._storingAgentsLocally(agentDetails);
+            if (matchedAgent) {
+                const agentDetails = await this._fetchAgent(matchedAgent.name, matchedAgent.versions[0].version, matchedAgent.testing);
+                this._storingAgentsLocally(agentDetails);
+            }
         }
     }
-}
     private async _fetchAgentsAPI(backgroundUpdate: boolean = false) {
         try {
             const config: AxiosRequestConfig = {
@@ -252,13 +248,13 @@ private async _updateInstalledAgents(response: any) {
                 }
             };
             let response = await makeAuthorizedHttpRequest(config, this.context);
-            
-            if (backgroundUpdate){
+
+            if (backgroundUpdate) {
                 this._updateInstalledAgents(response);
             } else {
                 this._view?.webview.postMessage({ type: 'fetchedAgents', value: JSON.stringify(response) });
             }
-            
+
         } catch (error) {
             console.log('error: while fetching the get-agent-list api', error);
         }
@@ -381,28 +377,28 @@ private async _updateInstalledAgents(response: any) {
         const client = DartCLIClient.getInstance();
         const task = client.newTask();
 
-        task.onProcessStep('context', async (message) => {
-            const args = message.params.args;
-            let uri: vscode.Uri = vscode.Uri.parse(args.filePath);
-            let document = await vscode.workspace.openTextDocument(uri);
+        // task.onProcessStep('context', async (message) => {
+        //     const args = message.params.args;
+        //     let uri: vscode.Uri = vscode.Uri.parse(args.filePath);
+        //     let document = await vscode.workspace.openTextDocument(uri);
 
 
-            let range = new vscode.Range(
-                new vscode.Position(args.range.start.line, args.range.start.character),
-                new vscode.Position(args.range.end.line - 1, args.range.end.character),
-            );
-            try {
-                let contextualCode = await new ContextualCodeProvider().getContextualCodeInput(
-                    document, range, this.analyzer!, undefined
-                );
+        //     let range = new vscode.Range(
+        //         new vscode.Position(args.range.start.line, args.range.start.character),
+        //         new vscode.Position(args.range.end.line - 1, args.range.end.character),
+        //     );
+        //     try {
+        //         let contextualCode = await new ContextualCodeProvider().getContextualCodeInput(
+        //             document, range, this.analyzer!, undefined
+        //         );
 
-                task.sendStepResponse(message, {
-                    "context": contextualCode,
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        });
+        //         task.sendStepResponse(message, {
+        //             "context": contextualCode,
+        //         });
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+        // });
 
         task.onProcessStep('append_to_chat', async (message) => {
             this._publicConversationHistory.push({ [this._activeAgent]: { role: 'model', parts: message.params.args.message } });
@@ -412,7 +408,7 @@ private async _updateInstalledAgents(response: any) {
             task.sendStepResponse(message, {});
         });
 
-        task.onProcessStep('chat_document_update', async (message)=>{
+        task.onProcessStep('chat_document_update', async (message) => {
             this.chatDocuments[this._activeAgent] = message.params.args.content;
             task.sendStepResponse(message, {});
         });
@@ -544,7 +540,7 @@ private async _updateInstalledAgents(response: any) {
             this._publicConversationHistory.push({ [this._activeAgent]: { role: 'user', parts: data.message, agent: '/refactor' } });
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
             this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
-            const result = await RefactorActionManager.handleRequest(chipsData, chipIds, data, this.aiRepo!, this.context, this.analyzer!, this);
+            const result = await RefactorActionManager.handleRequest(chipsData, chipIds, data, this.aiRepo!, this.context, this);
             this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
             // this._publicConversationHistory.push(result);
             this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });

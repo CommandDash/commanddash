@@ -1,14 +1,13 @@
 import * as vscode from 'vscode';
 import { extractDartCode, filterSurroundingCode } from '../../utilities/code-processing';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
-import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
 import { handleDiffViewAndMerge } from '../../utilities/diff-utils';
 import { GenerationRepository } from '../../repository/generation-repository';
 import { FlutterGPTViewProvider } from '../../providers/chat_view_provider';
 import * as path from 'path';
 
-export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, analyzer: ILspAnalyzer, elementname: string | undefined, context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider, usedEditor: vscode.TextEditor | undefined, instructions: string | undefined, showLoadingIndicator: boolean = true): Promise<string | undefined> {
+export async function refactorCode(generationRepository: GenerationRepository, globalState: vscode.Memento, range: vscode.Range | undefined, elementname: string | undefined, context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider, usedEditor: vscode.TextEditor | undefined, instructions: string | undefined, showLoadingIndicator: boolean = true): Promise<string | undefined> {
     logEvent('refactor-code', { 'type': 'refractor' });
     try {
         const editor = usedEditor === undefined ? vscode.window.activeTextEditor : usedEditor;
@@ -61,8 +60,8 @@ export async function refactorCode(generationRepository: GenerationRepository, g
             flutterGPTViewProvider.postMessageToWebview({
                 type: 'commandActionRefactor', value: JSON.stringify({
                     filePath,
-                    relativePath: relativePath.trim(), 
-                    referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`, 
+                    relativePath: relativePath.trim(),
+                    referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`,
                     referenceData: {
                         'selection': {
                             'start': {
