@@ -4,7 +4,6 @@ import { logError, logEvent } from '../../utilities/telemetry-reporter';
 import path = require('path');
 import { extractDartCode, filterSurroundingCode } from '../../utilities/code-processing';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
-import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { dartCodeExtensionIdentifier } from '../../shared/types/constants';
 import { CacheManager } from '../../utilities/cache-manager';
 
@@ -78,7 +77,7 @@ export async function createInlineCodeCompletion() {
     }, async (progress, token: vscode.CancellationToken) => {
         const cacheManager = CacheManager.getInstance();
         cacheManager.incrementInlineCompletionCount();
-        const out = await generateSuggestions();      
+        const out = await generateSuggestions();
         const editor = vscode.window.activeTextEditor;
         if (editor) {
             replaceLineOfCode(editor?.selection.active.line, out[0]);
@@ -103,7 +102,7 @@ async function generateSuggestions(): Promise<string[]> {
         ///TODO: Replace with Generation Repository
         var relevantFiles = await GeminiRepository.getInstance().findClosestDartFiles("Current file content:" + editor.document.getText() + "\n\n" + "Line of code:" + currentLineContent, undefined, true, filepath);
         // Add code for all the elements used in the file.
-        const contextualCode = await new ContextualCodeProvider().getContextualCodeForCompletion(editor.document, getDartAnalyser());
+        const contextualCode = await new ContextualCodeProvider().getContextualCodeForCompletion(editor.document,);
         if (contextualCode && contextualCode.length > 0) { // contextual code might not be available in all cases. Improvements are planned for contextual code gen.
             // TODO: avoid duplications from the relevant files.
             relevantFiles = relevantFiles + "\n" + contextualCode;
@@ -139,27 +138,11 @@ async function generateSuggestions(): Promise<string[]> {
     }
     catch (error: Error | unknown) {
         logError('inline-code-completion-error', error);
-        if (error instanceof Error) {  
+        if (error instanceof Error) {
             vscode.window.showErrorMessage(`${error.message}`);
         } else {
             vscode.window.showErrorMessage(`Failed to generate code: ${error}`);
         }
         return [];
     }
-}
-
-function getDartAnalyser() { // This could be in a wider scope.
-    const dartExt = vscode.extensions.getExtension(dartCodeExtensionIdentifier);
-    if (!dartExt) {
-        // This should not happen since the FlutterGPT extension has a dependency on the Dart one
-        // but just in case, we'd like to give a useful error message.
-        vscode.window.showWarningMessage("Kindly install 'Dart' extension to activate FlutterGPT");
-    }
-    // Assumption is the dart extension is already activated 
-    if (!dartExt?.exports) {
-        console.error("The Dart extension did not provide an exported API. Maybe it failed to activate or is not the latest version?");
-    }
-
-    const analyzer: ILspAnalyzer = dartExt?.exports._privateApi.analyzer;
-    return analyzer;
 }
