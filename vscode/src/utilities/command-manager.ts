@@ -26,7 +26,6 @@ import { createWidgetFromDescription } from '../tools/create/widget_from_descrip
 import { createCodeFromBlueprint } from '../tools/create/code_from_blueprint';
 import { createCodeFromDescription } from '../tools/create/code_from_description';
 import { refactorCode } from '../tools/refactor/refactor_from_instructions';
-import { ILspAnalyzer } from '../shared/types/LspAnalyzer';
 import { GeminiRepository } from '../repository/gemini-repository';
 import { fixErrors } from '../tools/refactor/fix_errors';
 import { optimizeCode } from '../tools/refactor/optimize_code';
@@ -68,7 +67,7 @@ export function registerCommand(
     }
 }
 
-export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, analyzer: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
+export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
     const commands = [
         { name: 'dash.attachToDash', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'dash.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
