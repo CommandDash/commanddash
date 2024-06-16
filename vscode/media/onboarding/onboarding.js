@@ -1673,14 +1673,14 @@ function displayMessages() {
             modelCount++;
 
             const agentImage = document.createElement("img");
-            agentImage.style.height = "32px";
-            agentImage.style.width = "32px";
+            agentImage.style.height = "27px";
+            agentImage.style.width = "27px";
             agentImage.style.borderRadius = "7px";
             agentImage.src = _agentData.metadata.avatar_id;
             agentImage.style.objectFit = "container";
             agentImage.onerror = function () {
-                agentImage.style.height = "29px";
-                agentImage.style.width = "34px";
+                agentImage.style.height = "27px";
+                agentImage.style.width = "32px";
                 agentImage.src = "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png";
             };
 
@@ -1690,7 +1690,7 @@ function displayMessages() {
 
             const displayNameSpan = document.createElement("span");
             displayNameSpan.classList.add("font-bold", "text-md", "ml-1");
-            displayNameSpan.textContent = `@${_agentData.metadata.display_name}`;
+            displayNameSpan.textContent = _agentData.metadata.display_name;
             roleElementContainer.appendChild(displayNameSpan);
 
             roleElement.innerHTML = ''; // Clear any existing content
