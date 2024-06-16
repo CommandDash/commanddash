@@ -281,7 +281,6 @@ let data = [
         },
         "description": "Your primary agent for any usage or coding help.",
         "metadata": {
-            "avatar_id": "https://cdn.commanddash.dev/assets/85fe1b9f-35a6-5732-9657-e880909c26e9/agents/avatars/08-06-2024/39a1406d-525f-44f9-b712-9d2a37cdc87b.jpeg",
             "description": "Your primary agent for any usage or coding help.",
             "display_name": "Dash",
             "tags": [],
@@ -1674,16 +1673,17 @@ function displayMessages() {
             modelCount++;
 
             const agentImage = document.createElement("img");
-            agentImage.style.height = "29px";
-            agentImage.style.width = "34px";
+            agentImage.style.height = "32px";
+            agentImage.style.width = "32px";
             agentImage.style.borderRadius = "7px";
             agentImage.src = _agentData.metadata.avatar_id;
+            agentImage.style.objectFit = "container";
             agentImage.onerror = function () {
                 agentImage.style.height = "29px";
                 agentImage.style.width = "34px";
                 agentImage.src = "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png";
             };
-            
+
             const roleElementContainer = document.createElement("div");
             roleElementContainer.classList.add("inline-flex", "flex-row", "items-center");
             roleElementContainer.appendChild(agentImage);
