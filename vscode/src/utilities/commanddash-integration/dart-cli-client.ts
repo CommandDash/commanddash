@@ -100,7 +100,7 @@ export class DartCLIClient {
   public async backgroundUpdateExecutable(): Promise<void> {
     let currentVersion = await this.executableVersion();
     await setupExecutable(ExtensionVersionManager.getExtensionVersion(), this.executablePath, currentVersion, () => { });
-    if (compareVersions(currentVersion, '0.1.0')<0) {
+    if (compareVersions(currentVersion, '0.1.3')<0) {
       // Reconnect the engine if the current executable is less than the minimum required one.
       // TODO: [show the onboarding screen itself if the engine needs to be force updated]
       this.connect();
