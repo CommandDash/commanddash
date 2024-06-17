@@ -15,8 +15,8 @@ import { SetupManager, SetupStep } from "../utilities/setup-manager/setup-manage
 import { ContextualCodeProvider } from "../utilities/contextual-code";
 import { Auth } from "../utilities/auth/auth";
 import { StorageManager } from "../utilities/storage-manager";
-import { AxiosRequestConfig, AxiosResponse } from "axios";
-import { makeAuthorizedHttpRequest } from "../repository/http-utils";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { makeAuthorizedHttpRequest, validateApiKey } from "../repository/http-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dash.chatView";
@@ -150,7 +150,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "validate":
                     {
                         webviewView.webview.postMessage({ type: "showValidationLoader" });
-                        this.aiRepo = this.initGemini(data.value);
                         await this._validateApiKey(data.value);
                         webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
@@ -608,17 +607,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async _validateApiKey(apiKey: string) {
         try {
-            await this.aiRepo?.validateApiKey(apiKey);
+            await validateApiKey(apiKey);
             this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is valid' });
         } catch (error) {
             console.log('gemini api error', error);
             this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is invalid' });
         }
-    }
-
-
-    private initGemini(apiKey: string): GeminiRepository {
-        return new GeminiRepository(apiKey);
     }
 
     private async getResponse(prompt: string) {
