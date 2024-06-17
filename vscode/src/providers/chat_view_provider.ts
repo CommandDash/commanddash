@@ -16,7 +16,7 @@ import { ContextualCodeProvider } from "../utilities/contextual-code";
 import { Auth } from "../utilities/auth/auth";
 import { StorageManager } from "../utilities/storage-manager";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { makeAuthorizedHttpRequest } from "../repository/http-utils";
+import { makeAuthorizedHttpRequest, validateApiKey } from "../repository/http-utils";
 
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = "dash.chatView";
@@ -605,49 +605,9 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return updatedOnboardingChatHtml;
     }
 
-    private async _apiKeyValidation(apiKey: string) {
-        try {
-            const config: AxiosRequestConfig = {
-                method: "POST",
-                url: `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                data: {
-                    "contents": [
-                        {
-                            "role": "user",
-                            "parts": [{ "text": "Test" }]
-                        }
-                    ]
-                }
-            };
-
-            const response: AxiosResponse = await axios(config);
-            return response.data;
-        } catch (error) {
-            // Check if the error is related to an invalid API key
-            if (this.isApiKeyInvalidError(error)) {
-                throw new Error('API key is not valid. Please pass a valid API key.');
-            } else {
-                // Handle other errors internally (optional: log them for debugging)
-                console.error('gemini api error', error);
-            }
-        }
-    }
-
-    // Function to check if the error is related to an invalid API key
-    public isApiKeyInvalidError(error: any): boolean {
-        return (
-            error &&
-            error.response?.data?.error?.message &&
-            error.response?.data?.error?.message?.includes('API key not valid')
-        );
-    }
-
     private async _validateApiKey(apiKey: string) {
         try {
-            await this._apiKeyValidation(apiKey);
+            await validateApiKey(apiKey);
             this._view?.webview.postMessage({ type: 'apiKeyValidation', value: 'Gemini API Key is valid' });
         } catch (error) {
             console.log('gemini api error', error);
