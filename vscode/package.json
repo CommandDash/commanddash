@@ -1,8 +1,8 @@
 {
   "name": "fluttergpt",
-  "displayName": "CommandDash: AI Agents Marketplace",
-  "description": "Integrate APIs & SDKs like Gemini, Langchain, Firebase with specialized Dash Agents",
-  "version": "0.4.3",
+  "displayName": "CommandDash: Turn docs into AI agents",
+  "description": "Integrate APIs & SDKs using their AI Dash Agents. Skip reading documentation.",
+  "version": "0.4.4",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -18,7 +18,6 @@
   "homepage": "https://commanddash.io",
   "categories": [
     "Programming Languages",
-    "Machine Learning",
     "Snippets",
     "Education"
   ],

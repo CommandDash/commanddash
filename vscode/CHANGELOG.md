@@ -4,6 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.4]
+- Removed dependency on Dart extension
+- Show agent name and avatar in received message
+
 ## [0.4.3]
 - Show agent display name in sent message tile
 
