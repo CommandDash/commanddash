@@ -37,9 +37,7 @@
   "activationEvents": [
     "onLanguage:dart"
   ],
-  "extensionDependencies": [
-    "Dart-Code.dart-code"
-  ],
+  "extensionDependencies": [],
   "main": "./out/extension.js",
   "contributes": {
     "extensionKind": [
@@ -69,7 +67,7 @@
       "properties": {
         "fluttergpt.apiKey": {
           "type": "string",
-          "markdownDescription": "Gemini API KEY(https://makersuite.google.com/)"
+          "markdownDescription": "Gemini API KEY (https://aistudio.google.com/)"
         }
       }
     },
@@ -127,10 +125,6 @@
       ],
       "editor/context": [
         {
-          "submenu": "dash.createMenu",
-          "group": "dash-menu-group@1"
-        },
-        {
           "command": "dash.attachToDash.menu",
           "when": "editorHasSelection",
           "group": "dash-menu-group@3"
@@ -156,12 +150,7 @@
       "dash.createMenu": [
       ]
     },
-    "submenus": [
-      {
-        "id": "dash.createMenu",
-        "label": "CommandDash: Create"
-      }
-    ]
+    "submenus": []
   },
   "scripts": {
     "vscode:prepublish": "npm run -S esbuild-base",
