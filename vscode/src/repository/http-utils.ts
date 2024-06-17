@@ -82,6 +82,43 @@ export async function refreshAccessToken(refreshToken: string, context: vscode.E
     }
 }
 
+export async function validateApiKey(apiKey: string) {
+    try {
+        let data = JSON.stringify({
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": "Test"
+                        }
+                    ]
+                }
+            ]
+        });
+
+        let config: AxiosRequestConfig = {
+            method: 'post',
+            url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+
+        const response: AxiosResponse = await axios.request(config);
+        return response.data;
+    } catch (error: any) {
+        // Check if the error is related to an invalid API key
+        if (error &&
+            error.response?.data?.error?.message &&
+            error.response?.data?.error?.message?.includes('API key not valid')) {
+            throw new Error('API key is not valid. Please pass a valid API key.');
+        } else {
+            // Handle other errors internally (optional: log them for debugging)
+            console.error('gemini api error', error);
+        }
+    }
+}
 
 export async function downloadFile(url: string, destinationPath: string, onProgress: (progress: number) => void): Promise<void> {
     /// First download on a temp path. This prevents from converting partial downloaded files (due to interruption) into executables.
