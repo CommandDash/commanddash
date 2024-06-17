@@ -281,7 +281,6 @@ let data = [
         },
         "description": "Your primary agent for any usage or coding help.",
         "metadata": {
-            "avatar_id": "https://cdn.commanddash.dev/assets/85fe1b9f-35a6-5732-9657-e880909c26e9/agents/avatars/08-06-2024/39a1406d-525f-44f9-b712-9d2a37cdc87b.jpeg",
             "description": "Your primary agent for any usage or coding help.",
             "display_name": "Dash",
             "tags": [],
@@ -454,7 +453,7 @@ let data = [
             "system_prompt": `You are a testing agent inside user's IDE. You can help them generate any kind of tests for their code in any programming language. They can attach multiple code pieces using Attach Snippet to Dash in the menu bar after selecting the code and provide you instruction on how they would like the tests to be generated.
             
             Users can either chat with you or also activate specific commands /unit, /widget and /integration by typing / in the text field and then choosing one of them from the dropdown. Commands accepts predefined inputs and generates the test when submitted.`,
-          },
+        },
         "supported_commands": [
             {
                 "intent": "Generate unit test",
@@ -940,7 +939,7 @@ async function submitResponse() {
     } else if (activeAgent && !commandEnable) {
         let value = prompt;
         for (const chip in chipsData) {
-            value = prompt.replace(chip, chipsData[chip].references.referenceContent);
+            value = value.replace(chip, chipsData[chip].references.referenceContent);
             prompt = prompt.replace(chip, `<${chipsData[chip].epochId}>`);
         }
         commandLessData.user_message = prompt;
@@ -951,6 +950,7 @@ async function submitResponse() {
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";
+        chipsData = {};
     }
 
     adjustHeight();
@@ -1661,6 +1661,7 @@ function displayMessages() {
     } else {
         questionnaireContainer.classList.add("hidden");
     }
+    const _agentData = data.find((_data) => _data.name === currentActiveAgent);
     _conversationHistory.forEach((_message) => {
         const message = _message[currentActiveAgent];
         const messageElement = document.createElement("div");
@@ -1668,11 +1669,35 @@ function displayMessages() {
         const contentElement = document.createElement("p");
         const buttonContainer = document.createElement("p");
         const agent = document.createElement("span");
+
         if (message.role === "model") {
             modelCount++;
 
-            roleElement.innerHTML = `<div class="inline-flex flex-row items-center">${dashAI}<span class="font-bold text-md ml-1">CommandDash</span></div>`;
+            const agentImage = document.createElement("img");
+            agentImage.style.height = "27px";
+            agentImage.style.width = "27px";
+            agentImage.style.borderRadius = "7px";
+            agentImage.src = _agentData.metadata.avatar_id;
+            agentImage.style.objectFit = "container";
+            agentImage.onerror = function () {
+                agentImage.style.height = "27px";
+                agentImage.style.width = "32px";
+                agentImage.src = "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png";
+            };
+
+            const roleElementContainer = document.createElement("div");
+            roleElementContainer.classList.add("inline-flex", "flex-row", "items-center");
+            roleElementContainer.appendChild(agentImage);
+
+            const displayNameSpan = document.createElement("span");
+            displayNameSpan.classList.add("font-bold", "text-md", "ml-1");
+            displayNameSpan.textContent = _agentData.metadata.display_name;
+            roleElementContainer.appendChild(displayNameSpan);
+
+            roleElement.innerHTML = ''; // Clear any existing content
+            roleElement.appendChild(roleElementContainer);
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
+
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
             contentElement.innerHTML = markdownToPlain(message.parts);
 
