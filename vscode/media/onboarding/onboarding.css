@@ -57,8 +57,10 @@ ul {
 
 .menu-item {
     cursor: pointer;
-    padding: .5rem 1rem;
+    padding: .5rem .3rem;
     border-radius: 7px;
+    display: inline-flex;
+    flex-direction: row;
 }
 
 .menu-item.selected {

@@ -1026,7 +1026,29 @@ function handleSubmit(event) {
             div.classList.add('selected');
             div.setAttribute('aria-selected', '');
         }
-        div.textContent = `${action?.metadata?.display_name ?? action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`;
+        const image = document.createElement('img');
+        image.style.height = "22px";
+        image.style.width = "22px";
+        image.style.marginRight = "10px"; // Optional: add some margin for spacing
+        image.onerror = function () {
+            image.style.height = "22px";
+            image.style.width = "27px";
+            image.src = "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png";
+        };
+        image.src = action?.metadata?.avatar_id ?? "https://raw.githubusercontent.com/CommandDash/commanddash/develop/assets/commanddash-logo.png"; // Fallback URL
+
+        const textContainer = document.createElement('div');
+        textContainer.classList.add('inline-flex', 'flex-row', 'items-start');
+
+        const displayName = document.createElement('span');
+        displayName.classList.add('text-xs');
+        displayName.textContent = `${action?.metadata?.display_name ?? action.name} ${action.description.length > 0 ? `- ${action.description}` : ''}`
+
+        textContainer.appendChild(displayName);
+
+        div.appendChild(image);
+        div.appendChild(textContainer);
+
         div.onclick = setItem;
         return div;
     };
