@@ -180,6 +180,17 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this._fetchAgentsAPI();
                         break;
                     }
+                case "executeDownload": 
+                {
+                    this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
+                        if (steps === SetupStep.executable) {
+                            this.setupManager.setupExecutable((progress: number) => {
+                                this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+                            });
+                        }
+                    });
+                    break;
+                }
             }
         });
         this._fetchAgentsAPI(true);
@@ -330,17 +341,10 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async _setupManager() {
 
-        this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
-            if (steps === SetupStep.executable) {
-                this.setupManager.setupExecutable((progress: number) => {
-                    this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
-                });
-            }
-        });
+        this.setupManager.deleteGithub();
+        this.setupManager.deleteExecutable();
 
         this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
-
-        // this.setupManager.deleteGithub();
 
         this.setupManager.onDidChangeSetup(event => {
             switch (event) {
@@ -351,6 +355,13 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case SetupStep.apiKey:
                     console.log('apikey');
                     this._view?.webview.postMessage({ type: 'apiKeySet' });
+                    this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
+                        if (steps === SetupStep.executable) {
+                            this.setupManager.setupExecutable((progress: number) => {
+                                this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+                            });
+                        }
+                    });
                     break;
                 case SetupStep.executable:
                     console.log('executable');

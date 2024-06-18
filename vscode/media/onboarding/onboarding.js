@@ -1231,7 +1231,8 @@ function handleTriggerMessage(event) {
                             githubCross.classList.remove('hidden');
                             githubTick.classList.add('hidden');
                             githubLogin.classList.remove("hidden");
-                            apiKeyContainer.classList.remove("hidden");
+                            apiKeyContainer.classList.add("hidden");
+                            executableContainer.classList.add("hidden");
                             break;
 
                         case 1:
@@ -1239,7 +1240,7 @@ function handleTriggerMessage(event) {
                             apiKeyCross.classList.remove('hidden');
                             apiKeyTick.classList.add('hidden');
                             googleApiKeyTextInput.classList.remove("hidden");
-                            executableContainer.classList.remove("hidden");
+                            executableContainer.classList.add("hidden");
                             break;
 
                         case 2:
@@ -1257,13 +1258,18 @@ function handleTriggerMessage(event) {
                 githubCross.classList.add("hidden");
                 githubTick.classList.remove("hidden");
                 githubLogin.classList.add("hidden");
+                apiKeyContainer.classList.remove("hidden");
             }
             if (!isApiKeyPending) {
                 isApiKeyPending = false;
+                apiKeyContainer.classList.remove("hidden");
                 apiKeyCross.classList.add("hidden");
                 apiKeyTick.classList.remove("hidden");
                 googleApiKeyTextInput.classList.add("hidden");
-
+                vscode.postMessage({
+                    type: "executeDownload",
+                });
+                executableContainer.classList.remove("hidden");
             }
             if (!isExecutableDownloadPending) {
                 isExecutableDownloadPending = false;
@@ -1290,6 +1296,7 @@ function handleTriggerMessage(event) {
             apiKeyCross.classList.add("hidden");
             apiKeyTick.classList.remove("hidden");
             googleApiKeyTextInput.classList.add("hidden");
+            executableContainer.classList.remove("hidden");
             allStepsCompleted();
             break;
         case 'githubLoggedIn':
@@ -1297,6 +1304,8 @@ function handleTriggerMessage(event) {
             githubCross.classList.add("hidden");
             githubTick.classList.remove("hidden");
             githubLogin.classList.add("hidden");
+            apiKeyContainer.classList.remove("hidden");
+            executableContainer.classList.add("hidden");
             allStepsCompleted();
             break;
         case 'cleanUpEventListener':
