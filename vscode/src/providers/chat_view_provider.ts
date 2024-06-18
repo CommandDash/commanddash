@@ -341,9 +341,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     private async _setupManager() {
 
-        this.setupManager.deleteGithub();
-        this.setupManager.deleteExecutable();
-
         this._view?.webview.postMessage({ type: 'pendingSteps', value: JSON.stringify(this.setupManager.pendingSetupSteps) });
 
         this.setupManager.onDidChangeSetup(event => {
