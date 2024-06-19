@@ -235,7 +235,10 @@ p[contenteditable="true"] {
 
 .questionnaire-card {
     background-color: var(--vscode-dropdown-background);
-    /* color: var(--vscode-editorWidget-foreground); */
+}
+
+.questionnaire-card-gradient {
+    background-color: #497BEF; 
 }
 
 

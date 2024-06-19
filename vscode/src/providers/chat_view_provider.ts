@@ -180,17 +180,22 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this._fetchAgentsAPI();
                         break;
                     }
-                case "executeDownload": 
-                {
-                    this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
-                        if (steps === SetupStep.executable) {
-                            this.setupManager.setupExecutable((progress: number) => {
-                                this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
-                            });
-                        }
-                    });
-                    break;
-                }
+                case "executeDownload":
+                    {
+                        this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
+                            if (steps === SetupStep.executable) {
+                                this.setupManager.setupExecutable((progress: number) => {
+                                    this.postMessageToWebview({ type: 'executableDownloadProgress', value: progress });
+                                });
+                            }
+                        });
+                        break;
+                    }
+                case "setMarketPlace":
+                    {
+                        this.setMarketPlaceWebView();
+                        break;
+                    }
             }
         });
         this._fetchAgentsAPI(true);
