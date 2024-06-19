@@ -34,7 +34,24 @@ const dartIcon = `
 </defs>
 `;
 
-const dashAI = `<svg width="34" height="29" viewBox="0 0 791 669" fill="none" xmlns="http://www.w3.org/2000/svg">
+const marketPlaceIcon = `
+<svg width="20px" height="20px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" version="1.1" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+<path d="m10.25 8c0 3.25 4 3.25 4 0 0-3.45178-2.7982-6.25-6.25-6.25-3.45178 0-6.25 2.79822-6.25 6.25s2.79822 6.25 6.25 6.25c2.25 0 3.25-1 3.25-1"/>
+<circle cx="8" cy="8" r="2.25"/>
+</svg>`;
+
+const questionIcon = `
+<svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 14C12 14 12 13.3223 12 12.5C12 11.6777 15.5 11.5 15.5 9C15.5 7.5 14 6.5 12 6.5C10.5 6.5 9 7.5 9 9" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M13.2271 16.9535C13.2271 17.6313 12.6777 18.1807 11.9999 18.1807C11.3221 18.1807 10.7726 17.6313 10.7726 16.9535C10.7726 16.2757 11.3221 15.7262 11.9999 15.7262C12.6777 15.7262 13.2271 16.2757 13.2271 16.9535Z" fill="#000000"/>
+</svg>`;
+
+const codeSnippetIcon = `
+<svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 17L22 12L17 7M7 7L2 12L7 17M14 3L10 21" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const dashAI = `<svg width="20" height="20" viewBox="0 0 791 669" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_i_82_3)">
 <path d="M196.02 364.695C215.26 364.971 227.712 386.012 234.073 438.496C240.434 490.981 250.23 529.811 219.077 547.822C202.637 556.435 195.913 546.915 195.913 546.915C195.913 546.915 197.467 564.153 173.221 570.126C156.032 574.241 139.8 548.025 139.8 548.025C139.8 548.025 125.561 566.352 103.567 566.352C76.0739 566.352 71.3644 523.276 88.9403 471.136C106.516 418.997 148.146 364.005 196.02 364.695Z" fill="#4AC6FA"/>
 </g>
@@ -739,64 +756,59 @@ const commandLessData = {
 };
 const questionnaire = [
     {
-        id: "refactor-code-questionaire",
-        message: "Refactor your code",
+        id: "explore-marketplace",
+        message: "Explore marketplace",
+        isGradient: true,
         onclick: (_textInput) => {
-            _textInput.textContent = '';
-            agentInputsJson.length = 0;
-            const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/refactor", "@dash"));
-            agentUIBuilder.buildAgentUI();
-            setTimeout(() => adjustHeight(), 0);
-            commandEnable = true;
+            vscode.postMessage({type: "setMarketPlace"});
         },
-        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+        icon: marketPlaceIcon,
     },
     {
-        id: "workspace-questionaire",
-        message: "Search files or query your workspace",
+        id: "commanddash-questionaire",
+        message: "What can CommandDash do?",
+        isGradient: false,
         onclick: (_textInput) => {
-            _textInput.textContent = '';
+            _textInput.textContent = 'What can CommandDash do?';
             agentInputsJson.length = 0;
-            const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/workspace", "@dash"));
-            agentUIBuilder.buildAgentUI();
             setTimeout(() => adjustHeight(), 0);
-            commandEnable = true;
+            activeAgent = true;
+            currentActiveAgent = "@dash";
+            activeAgentAttach.textContent = '@Dash';
+            commandEnable = false;
         },
-        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+        icon: questionIcon,
     },
     {
-        id: "flutter-doc-search",
-        message: "Generate documentation for your code",
+        id: "attach-code",
+        message: "Attach code snippet",
+        isGradient: false,
         onclick: (_textInput) => {
-            _textInput.textContent = '';
-            agentInputsJson.length = 0;
-            const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/document", "@dash"));
-            agentUIBuilder.buildAgentUI();
-            setTimeout(() => adjustHeight(), 0);
-            commandEnable = true;
+            //TODO: Add youtube link to show code snippet
+            const url = "";
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         },
-        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+        icon: codeSnippetIcon,
     },
     {
-        id: "unit-test",
-        message: "Generate unit tests for your methods",
+        id: "create-agents",
+        message: "Create your own agents",
+        isGradient: false,
         onclick: (_textInput) => {
-            _textInput.textContent = '';
-            agentInputsJson.length = 0;
-            const agentUIBuilder = new AgentUIBuilder(_textInput);
-            const agentProvider = new AgentProvider(data);
-            agentInputsJson.push(agentProvider.getInputs("/unit", "@test"));
-            agentUIBuilder.buildAgentUI();
-            setTimeout(() => adjustHeight(), 0);
-            commandEnable = true;
+            const url = "https://www.commanddash.io/docs/quickstart";
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         },
-        icon: `<svg width="20" height="20" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">${dartIcon}</svg>`,
+        icon: dashAI,
     }
 ];
 
