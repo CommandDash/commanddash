@@ -784,14 +784,13 @@ const questionnaire = [
         message: "Attach code snippet",
         isGradient: false,
         onclick: (_textInput) => {
-            //TODO: Add youtube link to show code snippet
-            const url = "";
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            _textInput.textContent = 'Select the code, right click on selected code and select option "Attach snippet to dash"';
+            agentInputsJson.length = 0;
+            setTimeout(() => adjustHeight(), 0);
+            activeAgent = true;
+            currentActiveAgent = "@dash";
+            activeAgentAttach.textContent = '@Dash';
+            commandEnable = false;
         },
         icon: codeSnippetIcon,
     },

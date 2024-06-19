@@ -20,7 +20,9 @@ class Questionnaire {
             cardContainer.addEventListener("click", () => onclick(this.ref));
 
             const _message = document.createElement("span");
-            _message.classList.add("font-bold", "text-white");
+            _message.style.fontSize = "1rem";
+            _message.style.lineHeight = ".75rem";
+            _message.classList.add("text-white");
             _message.textContent = message;
 
             const iconContainer = document.createElement("div");

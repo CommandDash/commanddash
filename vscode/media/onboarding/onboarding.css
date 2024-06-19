@@ -238,7 +238,7 @@ p[contenteditable="true"] {
 }
 
 .questionnaire-card-gradient {
-    background: linear-gradient(135deg, #DC72BE, #497BEF);
+    background-color: #497BEF; 
 }
 
 
