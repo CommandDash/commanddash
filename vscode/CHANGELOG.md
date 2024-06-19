@@ -4,6 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.6]
+- Onboarding in first session bug fix 
+- Updated tutorial cards
+
 ## [0.4.5]
 - Show onboarding in steps
 
