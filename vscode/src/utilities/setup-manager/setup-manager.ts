@@ -64,6 +64,22 @@ export class SetupManager {
         }
     }
 
+    public async updatePendingSteps() {
+
+        if (!this.auth.getGithubAccessToken()) {
+            this.pendingSetupSteps.push(SetupStep.github);
+        }
+        if (!this.auth.getApiKey()) {
+            this.pendingSetupSteps.push(SetupStep.apiKey);
+        }
+        if (this.dartClient && !this.dartClient.executableExists()) {
+            this.pendingSetupSteps.push(SetupStep.executable);
+        }
+        if (this.auth.getGithubAccessToken() && this.auth.getApiKey() && (this.dartClient && this.dartClient.executableExists())) {
+            this.pendingSetupSteps.length = 0;
+        }
+    }
+
     public async setupGithub() {
         await this.auth.signInWithGithub(this.context!);
         this._onDidChangeSetup.fire(SetupStep.github);

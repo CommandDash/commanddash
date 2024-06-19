@@ -1406,6 +1406,7 @@ function allStepsCompleted() {
         onboardingCompleted = true;
         stepOneCompleted = true;
         modelCount = 3;
+        pendingStepsArr = [];
     }
 }
 function createReferenceChips(references, isCommandAction) {
