@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "CommandDash: Turn docs into AI agents",
   "description": "Integrate APIs & SDKs using their AI Dash Agents. Skip reading documentation.",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
