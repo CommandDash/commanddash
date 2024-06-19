@@ -781,10 +781,10 @@ const questionnaire = [
     },
     {
         id: "attach-code",
-        message: "Attach code snippet",
+        message: "How to attach code snippets",
         isGradient: false,
         onclick: (_textInput) => {
-            _textInput.textContent = 'Select the code, right click on selected code and select option "Attach snippet to dash"';
+            _textInput.textContent = 'How do I attach a code snippet to chat?';
             agentInputsJson.length = 0;
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
@@ -796,16 +796,16 @@ const questionnaire = [
     },
     {
         id: "create-agents",
-        message: "Create your own agents",
+        message: "Can I create my own agents?",
         isGradient: false,
         onclick: (_textInput) => {
-            const url = "https://www.commanddash.io/docs/quickstart";
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            _textInput.textContent = 'How do I create and publish my own Dash agent?';
+            agentInputsJson.length = 0;
+            setTimeout(() => adjustHeight(), 0);
+            activeAgent = true;
+            currentActiveAgent = "@dash";
+            activeAgentAttach.textContent = '@Dash';
+            commandEnable = false;
         },
         icon: dashAI,
     }
