@@ -1781,15 +1781,14 @@ function setResponse() {
     preCodeBlocks.forEach((_preCodeBlock) => {
         _preCodeBlock.classList.add(
             "p-1",
-            "my-2",
-            "language-dart"
+            "my-2"
         );
     });
 
     const preBlocks = document.querySelectorAll("pre");
     preBlocks.forEach((_preBlock) => {
-        _preBlock.classList.add("language-dart", "relative", "my-5");
-        Prism.highlightElement(_preBlock);
+        _preBlock.classList.add("relative", "my-5");
+        Prism.highlightAllUnder(_preBlock);
 
         const iconContainer = document.createElement("div");
         iconContainer.id = "icon-container";
@@ -1840,7 +1839,7 @@ function setResponse() {
 
     const codeBlocks = document.querySelectorAll("code");
     codeBlocks.forEach((_codeBlock) => {
-        _codeBlock.classList.add("rounded-sm", "language-dart");
+        _codeBlock.classList.add("rounded-sm");
         _codeBlock.addEventListener("click", function (e) {
             e.preventDefault();
             vscode.postMessage({
