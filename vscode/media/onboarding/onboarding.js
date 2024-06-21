@@ -1783,6 +1783,7 @@ function setResponse() {
             "p-1",
             "my-2"
         );
+        Prism.highlightElement(_preCodeBlock);
     });
 
     const preBlocks = document.querySelectorAll("pre");
@@ -1839,6 +1840,7 @@ function setResponse() {
 
     const codeBlocks = document.querySelectorAll("code");
     codeBlocks.forEach((_codeBlock) => {
+        Prism.highlightElement(_codeBlock);
         _codeBlock.classList.add("rounded-sm");
         _codeBlock.addEventListener("click", function (e) {
             e.preventDefault();
