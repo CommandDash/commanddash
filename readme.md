@@ -9,17 +9,21 @@
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 
-<h3 align="center">Turn documentation into IDE Agents</h3>
+<h3 align="center">Skip documentation, use IDE Integration Agents</h3>
 <img src="/assets/docs/poster.jpg"></a>
 
 -----------------
-Modern software is built using 3rd party APIs and SDKs. But integrating them is time-taking, requiring to read docs and paste snippets.
+Modern software is built on top of 3rd party APIs and SDKs. But integrating them is time consuming, requiring to manually read docs and copy-paste snippets.
 
-CommandDash enables you to **skip reading documentation, and integrate any API or SDK with an IDE agent trained on the docs, examples and issues.**
+[CommandDash](https://commanddash.io) enables you to **skip reading documentation, and integrate any API or SDK with an IDE agent upto date with latest documentation, examples and issues.**
 
 <p align="center">
 <img src="assets/docs/agent-usage.gif" alt="Chat with Gemini inside VSCODE" width="500"/>
 </p>
+
+##### 🙌🏼 Open Marketplace of IDE Agents
+##### 🎯 Supports every programming language
+##### 💙 Free to every developer.
 
 Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
 
