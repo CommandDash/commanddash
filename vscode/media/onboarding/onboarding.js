@@ -1370,9 +1370,9 @@ function setLoader(loaderKind, loaderMessage) {
             workspaceLoader.style.display = 'flex';
             workspaceLoaderText.classList.remove("hidden");
             workspaceLoaderText.textContent = loaderMessage.value;
-            message = loaderMessage.files;
+            let _message = loaderMessage.files;
             //replace message array with actual file names
-            message.forEach((_filePath) => {
+            _message.forEach((_filePath) => {
                 const divBlock = document.createElement("div");
                 divBlock.classList.add("inline-flex", "flex-row", "items-center", "mt-2");
                 divBlock.id = "divBlock";
@@ -1627,6 +1627,8 @@ function preProcessMarkdown(markdown) {
     return processedLines.join("\n");
 }
 
+
+
 function startAttributeExtension() {
     let startNumbers = [];
 
@@ -1637,12 +1639,19 @@ function startAttributeExtension() {
                 const olMarkdownRegex = /^\s*(\d+)\. /gm;
 
                 const lines = text.split("\n");
+                let isCodeBlock = false;
+                const codeBlockRegex = /^```/;
 
                 lines.forEach(line => {
-                    const match = olMarkdownRegex.exec(line);
+                    if (isInsideCodeBlock(line, codeBlockRegex)) {
+                        isCodeBlock = !isCodeBlock;
+                    }
 
-                    if (match) {
-                        startNumbers.push(match[1]);
+                    if (!isCodeBlock) {
+                        const match = olMarkdownRegex.exec(line);
+                        if (match) {
+                            startNumbers.push(match[1]);
+                        }
                     }
                 });
 
@@ -1654,9 +1663,15 @@ function startAttributeExtension() {
             filter: function (text) {
                 if (startNumbers.length > 0) {
                     const lines = text.split("\n");
+                    let isCodeBlock = false;
+                    const codeBlockRegex = /^```/;
 
                     lines.forEach((line, index) => {
-                        if (line.includes("<ol>")) {
+                        if (isInsideCodeBlock(line, codeBlockRegex)) {
+                            isCodeBlock = !isCodeBlock;
+                        }
+
+                        if (!isCodeBlock && line.includes("<ol>")) {
                             const startNumber = startNumbers.shift();
                             lines[index] = line.replace("<ol>", `<ol start="${startNumber}">`);
                         }
@@ -1669,6 +1684,10 @@ function startAttributeExtension() {
             }
         }
     ];
+}
+
+function isInsideCodeBlock(line, codeBlockRegex) {
+    return codeBlockRegex.test(line);
 }
 
 function displayMessages() {
@@ -1783,7 +1802,7 @@ function setResponse() {
             "p-1",
             "my-2"
         );
-        Prism.highlightElement(_preCodeBlock);
+        Prism.highlightAllUnder(_preCodeBlock);
     });
 
     const preBlocks = document.querySelectorAll("pre");
@@ -1866,8 +1885,7 @@ function markdownToPlain(input) {
         tasklists: true, // Enable task list syntax for checkboxes (optional)
         extensions: [startAttributeExtension]
     });
-    processedInput = preProcessMarkdown(input);
-    html = converter.makeHtml(processedInput);
+    html = converter.makeHtml(input);
     return html;
 }
 
