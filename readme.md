@@ -9,7 +9,7 @@
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 
-<h3 align="center">Skip documentation, use IDE Integration Agents</h3>
+<h3 align="center">Skip documentation, upgrade to IDE agents</h3>
 <img src="/assets/docs/poster.jpg"></a>
 
 -----------------
@@ -25,8 +25,7 @@ Modern software is built on top of 3rd party APIs and SDKs. But integrating them
 ##### 🎯 Supports every programming language
 ##### 💙 Free to every developer.
 
-Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
-
+Our vision is to enable developers to seamlessly integrate APIs and SDKs without leaving their IDEs. 
 
 ## FAQs
 
@@ -35,28 +34,25 @@ Currently in Beta, CommandDash is being built in [open-sourced](https://github.c
 
 2. **Do I need to pay to use CommandDash?**
 
-- Gemini Flash 1.5 offers both free and paid plans. Please check the [pricing](https://ai.google.dev/pricing) here.
-
-The free plan suffices for using CommandDash 🥳
+- Gemini Flash 1.5 offers both free and paid plans. Please check the [pricing](https://ai.google.dev/pricing) here. 
+    The free plan suffices for using CommandDash 🥳
 
 3. **I am an Android Studio user. Can I use CommandDash?**
-- We are coming soon for IntelliJ-based IDEs. *🤫 Secret: most of our core logic is written in Dart, allowing us to ship on any platform very very fast!*
+- We are coming soon for IntelliJ-based IDEs. *🤫 Secret: most of our core logic is written in Dart, shipped as an executable, allowing us to ship on any platform very fast!*
 
 ## Contributing
 
-You can make contributions to the VSCODE or IntelliJ extension or also to [agents engine](https://github.com/CommandDash/packages) shared between the extensions.
-
-### Ways to contribute
+You can make contributions to the VSCODE or IntelliJ extension or also to the shared [engine](https://github.com/CommandDash/packages).
 
 -  **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/CommandDash/commanddash//issues).
 
 -  **Pick up open issues**: Pick up and fix existing issues open to the community in [issues board](https://github.com/CommandDash/commanddash/issues).
 
--  **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) in our community slack.
+-  **Add agents to the marketplace**: You can add agents for your most used APIs or SDKs and share it with others to help them easily integrate. [Quickstart](https://www.commanddash.io/docs/quickstart).
 
 ## Community
 
-Connect with others using or building agents on CommandDash [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
+Connect with others using or publishing agents on CommandDash [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
 
 ## License
 
