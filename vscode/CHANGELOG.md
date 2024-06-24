@@ -4,6 +4,9 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.7]
+- Code Block Indentation issues resolved
+
 ## [0.4.6]
 - Onboarding in first session bug fix 
 - Updated tutorial cards
