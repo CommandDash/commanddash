@@ -61,7 +61,7 @@ export async function refactorCode(generationRepository: GenerationRepository, g
                 type: 'commandActionRefactor', value: JSON.stringify({
                     filePath,
                     relativePath: relativePath.trim(),
-                    referenceContent: `\`${relativePath.trim()}\`\n\`\`\`\n${selectedText.toString()}\n\`\`\`\n`,
+                    referenceContent: `\`${relativePath.trim()}\`\n\`\`\`${extractFileExtension(fileName)}\n${selectedText.toString()}\n\`\`\`\n`,
                     referenceData: {
                         'selection': {
                             'start': {
@@ -89,3 +89,23 @@ export async function refactorCode(generationRepository: GenerationRepository, g
         return '';
     }
 }
+
+
+/**
+ * Extracts the extension from a given filename.
+ * 
+ * @param filename - The name of the file from which to extract the extension.
+ * @returns The file extension without the dot, or an empty string if no extension is found.
+ */
+function extractFileExtension(filename: string): string {
+    // Split the filename by dots
+    const parts = filename.split('.');
+  
+    // If there are no dots or the last part is empty, return an empty string
+    if (parts.length <= 1 || parts[parts.length - 1] === '') {
+        return '';
+    }
+  
+    // Return the last part as the extension
+    return parts[parts.length - 1];
+  }
