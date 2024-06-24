@@ -760,7 +760,7 @@ const questionnaire = [
         message: "Explore marketplace",
         isGradient: true,
         onclick: (_textInput) => {
-            vscode.postMessage({type: "setMarketPlace"});
+            vscode.postMessage({ type: "setMarketPlace" });
         },
         icon: marketPlaceIcon,
     },
@@ -1706,7 +1706,7 @@ function displayMessages() {
         const message = _message[currentActiveAgent];
         const messageElement = document.createElement("div");
         const roleElement = document.createElement("p");
-        const contentElement = document.createElement("p");
+        const contentElement = document.createElement("div");
         const buttonContainer = document.createElement("p");
         const agent = document.createElement("span");
 
