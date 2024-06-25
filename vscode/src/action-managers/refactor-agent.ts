@@ -1,13 +1,10 @@
 import * as vscode from 'vscode';
-import { GeminiRepository } from '../repository/gemini-repository';
-import { refactorCode } from '../tools/refactor/refactor_from_instructions';
-import { dartCodeExtensionIdentifier } from '../shared/types/constants';
 import { FlutterGPTViewProvider } from '../providers/chat_view_provider';
 export class RefactorActionManager {
 
   constructor() { }
 
-  static async handleRequest(chips: any, chipIds: string[], data: any, aiRepo: GeminiRepository, context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider) {
+  static async handleRequest(chips: any, chipIds: string[], data: any, context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider) {
     var instructions = data.instructions as string;
     var chip;
     for (const chipId of chipIds) {
@@ -28,13 +25,5 @@ export class RefactorActionManager {
     }
     const selection = chip.referenceData.selection;
     const range: vscode.Range = new vscode.Range(new vscode.Position(selection.start.line, selection.start.character), new vscode.Position(selection.end.line, selection.end.character));
-    const optimizedCode = await refactorCode(aiRepo!, context.globalState, range, undefined, context, flutterGPTViewProvider, editor, instructions.trim(), false);
-    return {
-      role: "dash", parts: 'Do you want to merge these changes?', messageId: "", data: {
-        'chip': chip,
-        'optimizedCode': optimizedCode,
-        'originalCodeUri': editorUri,
-      }, buttons: ["accept", "decline"], agent: "diffView",
-    };
   }
 }

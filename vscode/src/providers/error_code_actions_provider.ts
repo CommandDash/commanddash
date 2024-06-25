@@ -4,11 +4,10 @@ import { CodeAction } from "vscode";
 import { Outline } from "../shared/types/custom_protocols";
 import { cursorIsAt } from "../shared/utils";
 import { ILspAnalyzer } from "../shared/types/LspAnalyzer";
-import { GeminiRepository } from "../repository/gemini-repository";
 
 
 export class ErrorCodeActionProvider implements vscode.CodeActionProvider {
-	constructor(private readonly analyzer: ILspAnalyzer, private readonly aiRepo: GeminiRepository, private readonly extcontext: vscode.ExtensionContext) { }
+	constructor(private readonly analyzer: ILspAnalyzer, private readonly extcontext: vscode.ExtensionContext) { }
 
 
 	async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<CodeAction[] | undefined> {

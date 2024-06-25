@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { logError } from './telemetry-reporter';
-import { ContentEmbedding } from '@google/generative-ai';
+// import { ContentEmbedding } from '@google/generative-ai';
 import * as path from 'path';
 import { computeCodehash } from '../shared/utils';
 export class CacheManager {
@@ -61,7 +61,7 @@ export class CacheManager {
         }
     }
 
-    async setGeminiCache(cacheData: { [filePath: string]: { codehash: string, embedding: ContentEmbedding } }): Promise<void> {
+    async setGeminiCache(cacheData: { [filePath: string]: { codehash: string } }): Promise<void> {
         const excludePatterns = "**/{android,ios,web,linux,macos,windows,.dart_tool}/**";
         const pubspecs = await vscode.workspace.findFiles("**/pubspec.yaml", excludePatterns);
         if (pubspecs.length === 0) {
@@ -99,7 +99,7 @@ export class CacheManager {
         // Get all the flutter projects in the workspace
         const flutterProjects = pubspecs.map((uri) => uri.fsPath);
 
-        const activeCache: { [filePath: string]: { codehash: string, embedding: ContentEmbedding } } = {};
+        const activeCache: { [filePath: string]: { codehash: string } } = {};
         // Return cache only for the parent flutter project of the current workspace
         for (const projectPath of flutterProjects) {
             const projectDir = path.dirname(projectPath);

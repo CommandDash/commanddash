@@ -6,7 +6,7 @@
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
-    "vscode": "^1.82.0"
+    "vscode": "^1.77.0"
   },
   "repository": {
     "url": "https://github.com/CommandDash/commanddash"
@@ -146,8 +146,7 @@
           "when": "view == dash.chatView && dash:isMarketPlace"
         }
       ],
-      "dash.createMenu": [
-      ]
+      "dash.createMenu": []
     },
     "submenus": []
   },
@@ -176,7 +175,6 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.1.1",
     "@vscode/extension-telemetry": "^0.8.1",
     "axios": "^1.4.0",
     "dotenv": "^16.3.1",
