@@ -3,7 +3,7 @@ import { DartCLIClient, deleteExecutable } from "../commanddash-integration/dart
 import { Auth } from "../auth/auth";
 import { refreshAccessToken } from '../../repository/http-utils';
 
-export enum SetupStep { github, apiKey, executable }
+export enum SetupStep { github, executable }
 
 export class SetupManager {
     public pendingSetupSteps: SetupStep[] = [];
@@ -28,9 +28,6 @@ export class SetupManager {
         this.context = context;
         if (!this.auth.getGithubAccessToken()) {
             this.pendingSetupSteps.push(SetupStep.github);
-        }
-        if (!this.auth.getApiKey()) {
-            this.pendingSetupSteps.push(SetupStep.apiKey);
         }
         this.dartClient = DartCLIClient.init(this.context);
         this.dartClient.onGlobalError((error) => {
@@ -69,13 +66,10 @@ export class SetupManager {
         if (!this.auth.getGithubAccessToken()) {
             this.pendingSetupSteps.push(SetupStep.github);
         }
-        if (!this.auth.getApiKey()) {
-            this.pendingSetupSteps.push(SetupStep.apiKey);
-        }
         if (this.dartClient && !this.dartClient.executableExists()) {
             this.pendingSetupSteps.push(SetupStep.executable);
         }
-        if (this.auth.getGithubAccessToken() && this.auth.getApiKey() && (this.dartClient && this.dartClient.executableExists())) {
+        if (this.auth.getGithubAccessToken() && (this.dartClient && this.dartClient.executableExists())) {
             this.pendingSetupSteps.length = 0;
         }
     }
@@ -83,11 +77,6 @@ export class SetupManager {
     public async setupGithub() {
         await this.auth.signInWithGithub(this.context!);
         this._onDidChangeSetup.fire(SetupStep.github);
-    }
-
-    public async setupApiKey(apiKey: string) {
-        await this.auth.setApiKey(apiKey);
-        this._onDidChangeSetup.fire(SetupStep.apiKey);
     }
 
     public async setupExecutable(onProgress: (progress: number) => void) {

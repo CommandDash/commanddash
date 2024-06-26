@@ -96,11 +96,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                         this.clearConversationHistory();
                         break;
                     }
-                case "updateApiKey":
-                    {
-                        this.setupManager.setupApiKey(data.value);
-                        break;
-                    }
                 case "checkKeyIfExists":
                     {
                         this._checkIfKeyExists();
@@ -133,13 +128,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "githubLogin":
                     {
                         this.setupManager.setupGithub();
-                        break;
-                    }
-                case "validate":
-                    {
-                        webviewView.webview.postMessage({ type: "showValidationLoader" });
-                        await this._validateApiKey(data.value);
-                        webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
                 case "initialized":
@@ -198,6 +186,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         vscode.window.onDidChangeActiveColorTheme(() => {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
+
+        //TODO: move to first chat
+        //TODO: market place event
+        //TODO: on questionaire event
+        //TODO: search agents on marketplace
+        //TODO: following up message proper placement
+        //TODO: Remove dart icon and show icons based on file type
+        
 
         logEvent('new-chat-start', { from: 'command-deck' });
         // this._installAgent();
@@ -341,12 +337,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         this.setupManager.onDidChangeSetup(event => {
             switch (event) {
                 case SetupStep.github:
-                    console.log('github');
                     this._view?.webview.postMessage({ type: 'githubLoggedIn' });
-                    break;
-                case SetupStep.apiKey:
-                    console.log('apikey');
-                    this._view?.webview.postMessage({ type: 'apiKeySet' });
                     this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
                         if (steps === SetupStep.executable) {
                             this.setupManager.setupExecutable((progress: number) => {
@@ -356,7 +347,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     });
                     break;
                 case SetupStep.executable:
-                    console.log('executable');
                     this._view?.webview.postMessage({ type: 'executableDownloaded' });
                     break;
             }

@@ -221,7 +221,6 @@ const activityBarBackground = getComputedStyle(document.documentElement).getProp
 const activityBarForeground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
 
 //initialising elements
-const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
 const loadingContainer = document.getElementById("loading-container");
@@ -232,7 +231,6 @@ const textInput = document.getElementById("text-input");
 const responseContainer = document.getElementById("response");
 const textinputMenu = document.getElementById("menu");
 const loadingIndicator = document.getElementById('loader');
-const validationLoadingIndicator = document.getElementById('validation-loader');
 const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
@@ -242,18 +240,13 @@ const executableProgress = document.getElementById("executable-progress");
 const githubLogin = document.getElementById("github-sign-in");
 const githubTick = document.getElementById("github-tick");
 const githubCross = document.getElementById("github-cross");
-const apiKeyTick = document.getElementById("apiKey-tick");
-const apiKeyCross = document.getElementById("apiKey-cross");
 const executableTick = document.getElementById("executable-tick");
 const executableCross = document.getElementById("executable-cross");
 const onboardingSetup = document.getElementById("onboarding-setup");
-const apiKeyContainer = document.getElementById("apikey-container");
 const workspaceLoader = document.getElementById('workspace-loader');
 const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const questionnaireContainer = document.getElementById("questionaire-container");
 const executableContainer = document.getElementById("executable-container");
-const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
-const googleApiKeyError = document.getElementById("google-api-key-error");
 const fileUpload = document.getElementById("file-upload");
 const activeAgentAttach = document.getElementById("agents");
 const activeCommandsAttach = document.getElementById("slash-commands");
@@ -272,7 +265,6 @@ let shortCutHints = '';
 let agentBuilder = null;
 let currentActiveAgent = '';
 let isGithubLoginPending = false;
-let isApiKeyPending = false;
 let isExecutableDownloadPending = false;
 let codeInputId = 0;
 
@@ -280,12 +272,6 @@ const agentInputsJson = [];
 
 //initialising visual studio code library
 let vscode = null;
-
-const SetupStep = {
-    0: "github",
-    1: "apiKey",
-    2: "executable"
-};
 
 let data = [
     {
@@ -821,12 +807,6 @@ const questionnaire = [
     //reading vscode triggered messages to webview
     readTriggeredMessage();
 
-    googleApiKeyTextInput.addEventListener("input", (event) => {
-        const apiKey = event.target.value.trim();
-        const debouncedFunction = debounce(validateApiKey, 700);
-        debouncedFunction(apiKey);
-    });
-
     sendButton.addEventListener("click", (event) => {
         submitResponse();
     });
@@ -1153,9 +1133,6 @@ function parseAgents(agents) {
 function handleTriggerMessage(event) {
     const message = event.data;
     switch (message.type) {
-        case "apiKeyValidation":
-            updateValidationList(message.value);
-            break;
         case "displayMessages":
             conversationHistory = message.value;
             displayMessages(conversationHistory);
@@ -1222,16 +1199,9 @@ function handleTriggerMessage(event) {
             const loaderMessage = _message['message'];
             setLoader(loaderKind, loaderMessage);
             break;
-        case "showValidationLoader":
-            toggleLoader(true);
-            validationLoadingIndicator.classList.remove("hidden");
-            break;
-        case "hideValidationLoader":
-            toggleLoader(false);
-            validationLoadingIndicator.classList.add("hidden");
-            break;
         case 'pendingSteps':
             const pendingStepsArr = JSON.parse(message.value);
+            debugger;
             if (pendingStepsArr?.length > 0) {
                 onboardingSetup.classList.remove("hidden");
                 bottomContainer.classList.add("hidden");
@@ -1242,19 +1212,10 @@ function handleTriggerMessage(event) {
                             githubCross.classList.remove('hidden');
                             githubTick.classList.add('hidden');
                             githubLogin.classList.remove("hidden");
-                            apiKeyContainer.classList.add("hidden");
                             executableContainer.classList.add("hidden");
                             break;
 
                         case 1:
-                            isApiKeyPending = true;
-                            apiKeyCross.classList.remove('hidden');
-                            apiKeyTick.classList.add('hidden');
-                            googleApiKeyTextInput.classList.remove("hidden");
-                            executableContainer.classList.add("hidden");
-                            break;
-
-                        case 2:
                             isExecutableDownloadPending = true;
                             executableCross.classList.remove('hidden');
                             executableTick.classList.add('hidden');
@@ -1269,18 +1230,10 @@ function handleTriggerMessage(event) {
                 githubCross.classList.add("hidden");
                 githubTick.classList.remove("hidden");
                 githubLogin.classList.add("hidden");
-                apiKeyContainer.classList.remove("hidden");
-            }
-            if (!isApiKeyPending) {
-                isApiKeyPending = false;
-                apiKeyContainer.classList.remove("hidden");
-                apiKeyCross.classList.add("hidden");
-                apiKeyTick.classList.remove("hidden");
-                googleApiKeyTextInput.classList.add("hidden");
-                vscode.postMessage({
-                    type: "executeDownload",
-                });
                 executableContainer.classList.remove("hidden");
+                // vscode.postMessage({
+                //     type: "executeDownload",
+                // });
             }
             if (!isExecutableDownloadPending) {
                 isExecutableDownloadPending = false;
@@ -1302,21 +1255,12 @@ function handleTriggerMessage(event) {
             executableProgress.classList.add("hidden");
             allStepsCompleted();
             break;
-        case 'apiKeySet':
-            isApiKeyPending = false;
-            apiKeyCross.classList.add("hidden");
-            apiKeyTick.classList.remove("hidden");
-            googleApiKeyTextInput.classList.add("hidden");
-            executableContainer.classList.remove("hidden");
-            allStepsCompleted();
-            break;
         case 'githubLoggedIn':
             isGithubLoginPending = false;
             githubCross.classList.add("hidden");
             githubTick.classList.remove("hidden");
             githubLogin.classList.add("hidden");
-            apiKeyContainer.classList.remove("hidden");
-            executableContainer.classList.add("hidden");
+            executableContainer.classList.remove("hidden");
             allStepsCompleted();
             break;
         case 'cleanUpEventListener':
@@ -1410,7 +1354,7 @@ function toggleLoader(isShowLoader) {
 }
 
 function allStepsCompleted() {
-    if (!isGithubLoginPending && !isApiKeyPending && !isExecutableDownloadPending) {
+    if (!isGithubLoginPending && !isExecutableDownloadPending) {
         onboardingSetup.classList.add("hidden");
         bottomContainer.classList.add("flex");
         bottomContainer.classList.remove("hidden");
@@ -1586,15 +1530,6 @@ function scrollToBottom() {
             responseContainer.scrollTo(0, 999999);
         }
     }, 100);
-}
-
-function validateApiKey(apiKey) {
-    if (isValidGeminiApiKey(apiKey)) {
-        vscode.postMessage({
-            type: "validate",
-            value: apiKey,
-        });
-    }
 }
 
 function isValidGeminiApiKey(apiKey) {
@@ -1889,24 +1824,6 @@ function markdownToPlain(input) {
     return html;
 }
 
-async function updateValidationList(message) {
-    if (message === "Gemini API Key is invalid") {
-        isApiKeyPending = true;
-        apiKeyCross.classList.remove('hidden');
-        apiKeyTick.classList.add('hidden');
-        googleApiKeyError.textContent = "Error: Gemini API Key is invalid";
-    } else if (message === "Gemini API Key is valid") {
-        isApiKeyPending = false;
-        apiKeyCross.classList.add('hidden');
-        apiKeyTick.classList.remove('hidden');
-        const geminiAPIKey = googleApiKeyTextInput.value;
-        vscode.postMessage({
-            type: "updateApiKey",
-            value: geminiAPIKey,
-        });
-        googleApiKeyError.textContent = "";
-    }
-}
 
 function adjustHeight() {
     textInput.style.height = 'auto';

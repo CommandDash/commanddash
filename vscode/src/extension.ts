@@ -49,14 +49,6 @@ export async function activate(context: vscode.ExtensionContext) {
             case SetupStep.github:
                 // Handle any login related side-effects.
                 break;
-            case SetupStep.apiKey:
-                // re-register Flutter Extension Commands
-                if (_inlineErrorCommand) {
-                    // Dispose the error command if it exists
-                    _inlineErrorCommand!.dispose();
-                }
-                initFlutterExtension(context, chatViewProvider);
-                break;
             case SetupStep.executable:
                 // Handle any executable related side-effects
                 break;
