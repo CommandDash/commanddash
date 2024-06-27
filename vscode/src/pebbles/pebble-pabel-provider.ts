@@ -9,7 +9,6 @@ import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-u
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { logEvent } from '../utilities/telemetry-reporter';
 import { get } from 'http';
-import { GeminiRepository } from '../repository/gemini-repository';
 
 export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
 
@@ -18,7 +17,6 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
     constructor(
         private readonly extensionPath: vscode.Uri,
         private context: vscode.ExtensionContext,
-        private geminiRepo: GeminiRepository
     ) { }
 
     public async refresh() {
@@ -76,7 +74,7 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
             async message => {
                 switch (message.command) {
                     case 'customize':
-                        this.customizeCode(message.code, this.geminiRepo, this.context);
+                        this.customizeCode(message.code, this.context);
                         return;
                     case 'add':
                         const data = message.code;
@@ -207,7 +205,7 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
 
 
 
-    public async customizeCode(data: { code: string; pebble_id: string; search_query_pk: string; customization_prompt: string; project_name: string; }, openAIRepo: GeminiRepository, context: vscode.ExtensionContext) {
+    public async customizeCode(data: { code: string; pebble_id: string; search_query_pk: string; customization_prompt: string; project_name: string; }, context: vscode.ExtensionContext) {
 
         let prompt = "Change the following code according to given instructions. Give out just the modified code. Avoid any text other than the code. Give out the code in a single codeblock.";
         prompt += "\n\n Code:\n```dart\n" + data.code + "\n```\n\nInstructions:\n" + data.customization_prompt + "\n\nModified Code:";
@@ -225,15 +223,8 @@ export class PebblePanelViewProvider implements vscode.WebviewViewProvider {
                 progress.report({ increment });
             }, 200);
             try {
-                const result = await this.geminiRepo.getCompletion([{
-                    'role': 'user',
-                    'parts': prompt
-                }]);
                 clearInterval(progressInterval);
                 progress.report({ increment: 100 });
-
-                const dartCode = extractDartCode(result);
-                this.copyCode(dartCode, data.pebble_id, data.search_query_pk, data.customization_prompt, data.project_name, context);
 
             } catch (error) {
                 logEvent('pebble-customization-failed', {

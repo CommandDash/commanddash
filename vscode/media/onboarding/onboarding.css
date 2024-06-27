@@ -302,3 +302,7 @@ progress::-webkit-progress-value {
     background-color: #287CEB;
     animation: progress-animation 2s linear forwards;
 }
+
+#executable-progress {
+    width: 200px;
+}

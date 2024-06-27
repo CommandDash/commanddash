@@ -7,8 +7,6 @@ import path = require('path');
 import { promptGithubLogin } from '../extension';
 import { makeAuthorizedHttpRequest, makeHttpRequest } from '../repository/http-utils';
 import { logEvent } from '../utilities/telemetry-reporter';
-import { GeminiRepository } from '../repository/gemini-repository';
-
 
 
 async function getConfigs(context: vscode.ExtensionContext): Promise<Record<string, unknown>> {
@@ -48,7 +46,7 @@ async function getProjectName() {
 }
 
 
-export async function savePebblePanel(geminiRepo: GeminiRepository, context: vscode.ExtensionContext): Promise<void> {
+export async function savePebblePanel(context: vscode.ExtensionContext): Promise<void> {
     const document = vscode.window.activeTextEditor?.document;
     if (!document) {
         vscode.window.showErrorMessage('Please open a file first.');
@@ -72,12 +70,7 @@ export async function savePebblePanel(geminiRepo: GeminiRepository, context: vsc
             progress.report({ increment: 20 });
 
             try {
-                description = await geminiRepo.getCompletion([
-                    {
-                        role: "user",
-                        parts: "Generate a 3 line short description for the following code in this format: A code to...:\n```dart\n" + selectedText + "\n```\n\nDescription:"
-                    }
-                ]);
+                
                 progress.report({ increment: 100 });
             } catch (error) {
                 vscode.window.showErrorMessage("failed to generate description for code" + error);

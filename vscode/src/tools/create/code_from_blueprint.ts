@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
-import { GeminiRepository } from '../../repository/gemini-repository';
 import { GenerationRepository } from '../../repository/generation-repository';
 
 export async function createCodeFromBlueprint(generationRepository: GenerationRepository, globalState: vscode.Memento) {

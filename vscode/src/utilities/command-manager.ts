@@ -22,18 +22,8 @@
 */
 import * as vscode from 'vscode';
 import { addToReference } from '../tools/reference/add_reference';
-import { createWidgetFromDescription } from '../tools/create/widget_from_description';
-import { createCodeFromBlueprint } from '../tools/create/code_from_blueprint';
-import { createCodeFromDescription } from '../tools/create/code_from_description';
-import { refactorCode } from '../tools/refactor/refactor_from_instructions';
-import { GeminiRepository } from '../repository/gemini-repository';
-import { fixErrors } from '../tools/refactor/fix_errors';
-import { optimizeCode } from '../tools/refactor/optimize_code';
 import { logEvent } from './telemetry-reporter';
 import { FlutterGPTViewProvider } from '../providers/chat_view_provider'; // Adjust the import path accordingly
-import { createInlineCodeCompletion } from '../tools/create/inline_code_completion';
-import { getUserPrefferedModel } from './model-repository-provider';
-import { GenerationRepository } from '../repository/generation-repository';
 import { Auth } from './auth/auth';
 
 
@@ -46,31 +36,25 @@ export function registerCommand(
     const { isCommand, isMenu, isShortcut } = options;
 
     let baseCommand = vscode.commands.registerCommand(name, async (...args: any[]) => {
-        const apiKeyValid = Auth.getInstance().getApiKey();
-        if (apiKeyValid) {
-            logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
-            handler(...args);
-        }
+        logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
+        handler(...args);
+        
     });
 
     context.subscriptions.push(baseCommand);
 
     if (isMenu) {
         let menuCommand = vscode.commands.registerCommand(`${name}.menu`, async (...args: any[]) => {
-            const apiKeyValid = Auth.getInstance().getApiKey();
-            if (apiKeyValid) {
-                logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
-                handler(...args);
-            }
+            logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
+            handler(...args);
         });
         context.subscriptions.push(menuCommand);
     }
 }
 
-export function initCommands(context: vscode.ExtensionContext, geminiRepo: any, flutterGPTViewProvider: FlutterGPTViewProvider) {
+export function initCommands(context: vscode.ExtensionContext, flutterGPTViewProvider: FlutterGPTViewProvider) {
     const commands = [
         { name: 'dash.attachToDash', handler: () => addToReference(context.globalState, flutterGPTViewProvider), options: { isCommand: true, isMenu: true, isShortcut: false } },
-        { name: 'dash.createWidget', handler: async () => createWidgetFromDescription(geminiRepo, context.globalState), options: { isCommand: true, isMenu: true, isShortcut: false } },
         { name: 'dash.clearChat', handler: () => flutterGPTViewProvider?.postMessageToWebview({ type: 'clearCommandDeck' }), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dash.marketPlace', handler: () => flutterGPTViewProvider.setMarketPlaceWebView(), options: { isCommand: true, isMenu: false, isShortcut: false } },
         { name: 'dash.backButton', handler: () => flutterGPTViewProvider.setChatWebView(), options: { isCommand: true, isMenu: false, isShortcut: false } },

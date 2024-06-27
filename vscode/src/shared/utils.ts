@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import { isWin } from './types/constants';
 import path = require('path');
 import * as vscode from 'vscode';
-import { GeminiRepository } from '../repository/gemini-repository';
 import { ILspAnalyzer } from './types/LspAnalyzer';
 import { Outline } from './types/custom_protocols';
 import { SemanticTokensRegistrationType, SemanticTokensProviderShape, SymbolKind } from 'vscode-languageclient';

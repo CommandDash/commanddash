@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { extractDartCode, extractExplanation, extractReferenceTextFromEditor, filterSurroundingCode } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logError, logEvent } from '../../utilities/telemetry-reporter';
-import { GeminiRepository } from '../../repository/gemini-repository';
 import { appendReferences } from '../../utilities/prompt_helpers';
 import { ILspAnalyzer } from '../../shared/types/LspAnalyzer';
 import { ContextualCodeProvider } from '../../utilities/contextual-code';
