@@ -1224,9 +1224,9 @@ function handleTriggerMessage(event) {
                 isGithubLoginPending = false;
                 githubLogin.classList.add("hidden");
                 executableContainer.classList.remove("hidden");
-                // vscode.postMessage({
-                //     type: "executeDownload",
-                // });
+                vscode.postMessage({
+                    type: "executeDownload",
+                });
             }
             if (!isExecutableDownloadPending) {
                 isExecutableDownloadPending = false;
@@ -1725,7 +1725,6 @@ function setResponse() {
     const preCodeBlocks = document.querySelectorAll("code");
     preCodeBlocks.forEach((_preCodeBlock) => {
         _preCodeBlock.classList.add(
-            "p-1",
             "my-2"
         );
         Prism.highlightAllUnder(_preCodeBlock);
