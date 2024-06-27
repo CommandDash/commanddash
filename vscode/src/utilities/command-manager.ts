@@ -36,22 +36,17 @@ export function registerCommand(
     const { isCommand, isMenu, isShortcut } = options;
 
     let baseCommand = vscode.commands.registerCommand(name, async (...args: any[]) => {
-        const apiKeyValid = Auth.getInstance().getApiKey();
-        if (apiKeyValid) {
-            logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
-            handler(...args);
-        }
+        logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
+        handler(...args);
+        
     });
 
     context.subscriptions.push(baseCommand);
 
     if (isMenu) {
         let menuCommand = vscode.commands.registerCommand(`${name}.menu`, async (...args: any[]) => {
-            const apiKeyValid = Auth.getInstance().getApiKey();
-            if (apiKeyValid) {
-                logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
-                handler(...args);
-            }
+            logEvent(name, { 'type': 'commands', 'isCommand': isCommand.toString(), 'isShortcut': isShortcut.toString(), 'isMenu': isMenu.toString() });
+            handler(...args);
         });
         context.subscriptions.push(menuCommand);
     }
