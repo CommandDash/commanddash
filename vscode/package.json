@@ -1,8 +1,8 @@
 {
   "name": "fluttergpt",
-  "displayName": "CommandDash: Turn docs into AI agents",
-  "description": "Integrate APIs & SDKs using their AI Dash Agents. Skip reading documentation.",
-  "version": "0.4.6",
+  "displayName": "CommandDash: AI docs for APIs, SDKs and more",
+  "description": "Free AI assist to integrate 1000+ libraries with custom agents from marketplace",
+  "version": "0.4.7",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
@@ -24,18 +24,16 @@
   "keywords": [
     "chat",
     "copilot",
-    "autopilot",
-    "command",
     "coding",
     "gpt",
-    "API",
-    "SDK",
-    "chatbot",
-    "docs"
+    "command",
+    "autopilot",
+    "dash",
+    "comandash",
+    "comanddash",
+    "commandash"
   ],
-  "activationEvents": [
-    "onLanguage:dart"
-  ],
+  "activationEvents": [],
   "extensionDependencies": [],
   "main": "./out/extension.js",
   "contributes": {
