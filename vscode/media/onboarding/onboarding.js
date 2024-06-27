@@ -238,8 +238,6 @@ const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
 const executableProgress = document.getElementById("executable-progress");
 const githubLogin = document.getElementById("github-sign-in");
-const githubTick = document.getElementById("github-tick");
-const githubCross = document.getElementById("github-cross");
 const executableTick = document.getElementById("executable-tick");
 const executableCross = document.getElementById("executable-cross");
 const onboardingSetup = document.getElementById("onboarding-setup");
@@ -1201,7 +1199,6 @@ function handleTriggerMessage(event) {
             break;
         case 'pendingSteps':
             const pendingStepsArr = JSON.parse(message.value);
-            debugger;
             if (pendingStepsArr?.length > 0) {
                 onboardingSetup.classList.remove("hidden");
                 bottomContainer.classList.add("hidden");
@@ -1209,8 +1206,6 @@ function handleTriggerMessage(event) {
                     switch (steps) {
                         case 0:
                             isGithubLoginPending = true;
-                            githubCross.classList.remove('hidden');
-                            githubTick.classList.add('hidden');
                             githubLogin.classList.remove("hidden");
                             executableContainer.classList.add("hidden");
                             break;
@@ -1227,8 +1222,6 @@ function handleTriggerMessage(event) {
 
             if (!isGithubLoginPending) {
                 isGithubLoginPending = false;
-                githubCross.classList.add("hidden");
-                githubTick.classList.remove("hidden");
                 githubLogin.classList.add("hidden");
                 executableContainer.classList.remove("hidden");
                 // vscode.postMessage({
@@ -1257,8 +1250,6 @@ function handleTriggerMessage(event) {
             break;
         case 'githubLoggedIn':
             isGithubLoginPending = false;
-            githubCross.classList.add("hidden");
-            githubTick.classList.remove("hidden");
             githubLogin.classList.add("hidden");
             executableContainer.classList.remove("hidden");
             allStepsCompleted();
