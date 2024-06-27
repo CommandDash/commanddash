@@ -239,7 +239,6 @@ const codeSnippetButton = document.getElementById("code-snippets");
 const executableProgress = document.getElementById("executable-progress");
 const githubLogin = document.getElementById("github-sign-in");
 const executableTick = document.getElementById("executable-tick");
-const executableCross = document.getElementById("executable-cross");
 const onboardingSetup = document.getElementById("onboarding-setup");
 const workspaceLoader = document.getElementById('workspace-loader');
 const workspaceLoaderText = document.getElementById('workspace-loader-text');
@@ -1212,7 +1211,6 @@ function handleTriggerMessage(event) {
 
                         case 1:
                             isExecutableDownloadPending = true;
-                            executableCross.classList.remove('hidden');
                             executableTick.classList.add('hidden');
                             executableProgress.classList.remove("hidden");
                             break;
@@ -1230,7 +1228,6 @@ function handleTriggerMessage(event) {
             }
             if (!isExecutableDownloadPending) {
                 isExecutableDownloadPending = false;
-                executableCross.classList.add("hidden");
                 executableTick.classList.remove("hidden");
                 executableProgress.classList.add("hidden");
             }
@@ -1243,7 +1240,6 @@ function handleTriggerMessage(event) {
             break;
         case 'executableDownloaded':
             isExecutableDownloadPending = false;
-            executableCross.classList.add("hidden");
             executableTick.classList.remove("hidden");
             executableProgress.classList.add("hidden");
             allStepsCompleted();
