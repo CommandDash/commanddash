@@ -276,7 +276,7 @@ let data = [
             "data_sources": [
                 "501123716"
             ],
-            "system_prompt": "            CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /workspace, /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages. If user is looking for help with any library, suggest them looking out if an agent for that exists in the marketplace.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
+            "system_prompt": "            CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages. If user is looking for help with any library, suggest them looking out if an agent for that exists in the marketplace.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
             "version": "0.0.1"
         },
         "description": "Your primary agent for any usage or coding help.",
@@ -290,56 +290,56 @@ let data = [
         "name": "@dash",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
-            {
-                "intent": "Ask questions on your codebase",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "368689265",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "729757158",
-                        "type": "multi_code_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "791477237",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/workspace",
-                "steps": [
-                    {
-                        "outputs": [
-                            "729757158"
-                        ],
-                        "query": "<368689265>",
-                        "type": "search_in_workspace",
-                        "version": "0.0.1",
-                        "workspace_object_type": "all"
-                    },
-                    {
-                        "outputs": [
-                            "791477237"
-                        ],
-                        "prompt": "Here are the related references from user's project:\n            ```\n            <729757158>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <368689265>.\n            \n            If you cannot find the answer in the attaches references, say \"Sorry, I couldn't find the answer to your question in the workspace.\"",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<791477237>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Please share your query: <368689265>"
-            },
+            // {
+            //     "intent": "Ask questions on your codebase",
+            //     "registered_inputs": [
+            //         {
+            //             "display_text": "Query",
+            //             "id": "368689265",
+            //             "optional": false,
+            //             "type": "string_input",
+            //             "version": "0.0.1"
+            //         }
+            //     ],
+            //     "registered_outputs": [
+            //         {
+            //             "id": "729757158",
+            //             "type": "multi_code_output",
+            //             "version": "0.0.1"
+            //         },
+            //         {
+            //             "id": "791477237",
+            //             "type": "prompt_output",
+            //             "version": "0.0.1"
+            //         }
+            //     ],
+            //     "slug": "/workspace",
+            //     "steps": [
+            //         {
+            //             "outputs": [
+            //                 "729757158"
+            //             ],
+            //             "query": "<368689265>",
+            //             "type": "search_in_workspace",
+            //             "version": "0.0.1",
+            //             "workspace_object_type": "all"
+            //         },
+            //         {
+            //             "outputs": [
+            //                 "791477237"
+            //             ],
+            //             "prompt": "Here are the related references from user's project:\n            ```\n            <729757158>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <368689265>.\n            \n            If you cannot find the answer in the attaches references, say \"Sorry, I couldn't find the answer to your question in the workspace.\"",
+            //             "type": "prompt_query",
+            //             "version": "0.0.1"
+            //         },
+            //         {
+            //             "type": "append_to_chat",
+            //             "value": "<791477237>",
+            //             "version": "0.0.1"
+            //         }
+            //     ],
+            //     "text_field_layout": "Hi, Please share your query: <368689265>"
+            // },
             {
                 "intent": "Refactor your code",
                 "registered_inputs": [

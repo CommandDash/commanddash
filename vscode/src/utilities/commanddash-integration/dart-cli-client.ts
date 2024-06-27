@@ -129,8 +129,7 @@ export class DartCLIClient {
       this.renameTempToExecutable(tempFilePath);
     }
 
-    // this.proc = child_process.spawn(this.executablePath, ['process']);
-    this.proc = child_process.spawn('dart', ['run', '/Users/fisclouds/Documents/commanddash/commanddash/bin/commanddash.dart', 'process']);
+    this.proc = child_process.spawn(this.executablePath, ['process']);
 
     let buffer = '';
 

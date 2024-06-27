@@ -6,7 +6,7 @@
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
-    "vscode": "^1.77.0"
+    "vscode": "^1.82.0"
   },
   "repository": {
     "url": "https://github.com/CommandDash/commanddash"
