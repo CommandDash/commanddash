@@ -47,7 +47,6 @@ Note: Commands are optionally offered by agents depending on the usecase.
 - CommandDash uses processed metadata from your interactions to improve it's generations without using your shared code.
 
 2. **Do I need to pay to use CommandDash?**
-
 - CommandDash is free to use for every developer.
 
 3. **I am an Android Studio user. Can I use CommandDash?**
@@ -67,7 +66,7 @@ You can suggest agents to add to the marketplace, or contribute to the VSCODE or
 
 ## Community
 
-Connect with others using or building agents on CommandDash [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
+Do you love devtools but hate documentation? Join our community and help developers build without leaving their IDE: [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
 
 ## License
 
