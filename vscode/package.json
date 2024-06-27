@@ -2,7 +2,7 @@
   "name": "fluttergpt",
   "displayName": "CommandDash: AI Agents for APIs, SDKs and more",
   "description": "AI assist to integrate 1000+ libraries with expert agents from marketplace",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
