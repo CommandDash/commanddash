@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
 import * as os from 'os';
-import { GeminiRepository } from "../repository/gemini-repository";
 import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
 import { refactorCode } from "../tools/refactor/refactor_from_instructions";
@@ -24,7 +23,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     private _currentMessageNumber = 0;
     private setupManager = SetupManager.getInstance();
     private _activeAgent: string = '';
-    aiRepo?: GeminiRepository;
     private tasksMap: any = {};
     private _publicConversationHistory: Array<{ [agent: string]: { role: string, parts: string, messageId?: string, data?: any, buttons?: string[], agent?: string, slug?: string } }> = [];
     /// reference documents for particular activated agent for througout chat history
@@ -33,11 +31,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
-        private context: vscode.ExtensionContext,
-        aiRepo?: GeminiRepository,
-    ) {
-        this.aiRepo = aiRepo;
-    }
+        private context: vscode.ExtensionContext) {}
 
     // Public method to post a message to the webview
     public postMessageToWebview(message: any): void {
@@ -71,12 +65,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     {
                         break;
                     }
-                case "action":
-                    {
-                        this.handleAction(data.value);
-                        break;
-                    }
-
                 case "prompt":
                     {
                         this.getResponse(data.value);
@@ -106,11 +94,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "clearChat":
                     {
                         this.clearConversationHistory();
-                        break;
-                    }
-                case "updateApiKey":
-                    {
-                        this.setupManager.setupApiKey(data.value);
                         break;
                     }
                 case "checkKeyIfExists":
@@ -145,13 +128,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                 case "githubLogin":
                     {
                         this.setupManager.setupGithub();
-                        break;
-                    }
-                case "validate":
-                    {
-                        webviewView.webview.postMessage({ type: "showValidationLoader" });
-                        await this._validateApiKey(data.value);
-                        webviewView.webview.postMessage({ type: "hideValidationLoader" });
                         break;
                     }
                 case "initialized":
@@ -210,6 +186,14 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         vscode.window.onDidChangeActiveColorTheme(() => {
             webviewView.webview.postMessage({ type: 'updateTheme' });
         });
+
+        //TODO: move to first chat
+        //TODO: market place event
+        //TODO: on questionaire event
+        //TODO: search agents on marketplace
+        //TODO: following up message proper placement
+        //TODO: Remove dart icon and show icons based on file type
+        
 
         logEvent('new-chat-start', { from: 'command-deck' });
         // this._installAgent();
@@ -353,12 +337,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         this.setupManager.onDidChangeSetup(event => {
             switch (event) {
                 case SetupStep.github:
-                    console.log('github');
                     this._view?.webview.postMessage({ type: 'githubLoggedIn' });
-                    break;
-                case SetupStep.apiKey:
-                    console.log('apikey');
-                    this._view?.webview.postMessage({ type: 'apiKeySet' });
                     this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
                         if (steps === SetupStep.executable) {
                             this.setupManager.setupExecutable((progress: number) => {
@@ -368,7 +347,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
                     });
                     break;
                 case SetupStep.executable:
-                    console.log('executable');
                     this._view?.webview.postMessage({ type: 'executableDownloaded' });
                     break;
             }
@@ -543,25 +521,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         return prompt;
     }
 
-    private async handleAction(input: string) {
-        const data = JSON.parse(input);
-        const actionType = data.message.startsWith('/') ? data.message.split('\u00A0')[0].substring(1) : '';
-        const chipsData: object = data.chipsData;
-        data.message = data.message.replace(`/${actionType}`, '').trim();
-        data.instructions = data.instructions.replace(`/${actionType}`, '').trim();
-        const chipIds: string[] = data.chipId;
-        if (actionType === 'refactor') {
-            this._publicConversationHistory.push({ [this._activeAgent]: { role: 'user', parts: data.message, agent: '/refactor' } });
-            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
-            this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
-            const result = await RefactorActionManager.handleRequest(chipsData, chipIds, data, this.aiRepo!, this.context, this);
-            this._view?.webview.postMessage({ type: 'hideLoadingIndicator' });
-            // this._publicConversationHistory.push(result);
-            this._view?.webview.postMessage({ type: 'displayMessages', value: this._publicConversationHistory });
-            this._view?.webview.postMessage({ type: 'setPrompt', value: '' });
-
-        }
-    }
     private _getHtmlForWebview(webview: vscode.Webview) {
         const onboardingHtmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'onboarding', 'onboarding.html');
         const onboardingHtml = fs.readFileSync(onboardingHtmlPath.fsPath, 'utf8');
@@ -680,17 +639,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
         // Check if the prompt includes '@workspace' and handle accordingly
         try {
-            if (prompt.includes('@workspace') && this.aiRepo) {
-                // Add the full prompt to the private history for completion
-                this._view?.webview.postMessage({ type: 'workspaceLoader', value: true });
-                const dartFiles = await this.aiRepo.findClosestDartFiles(prompt, this._view);
-                workspacePrompt = "You've complete access to the codebase. I'll provide you with top 5 closest files code as context and your job is to read following files code end-to-end and answer the prompt initialised by `@workspace` symbol. If you're unable to find answer for the requested prompt, suggest an alternative solution as a dart expert. Be crisp & crystal clear in your answer. Make sure to provide your thinking process in steps including the file paths, name & code. Here's the code: \n\n" + dartFiles + "\n\n" + prompt;
-                this._privateConversationHistory.push({ role: 'user', parts: workspacePrompt });
-            } else {
-                // Append the current user prompt to the conversation history
-                this._privateConversationHistory.push({ role: 'user', parts: prompt });
-                this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
-            }
+            this._privateConversationHistory.push({ role: 'user', parts: prompt });
+            this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
         } catch (error) {
             console.error("Error processing workspace prompt: ", error);
             logError('workspace-prompt-error', error);
@@ -698,14 +648,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         // Use the stored conversation history for the prompt
         try {
             let response = '';
-            if (prompt.includes('@workspace') && this.aiRepo) {
-                response = await this.aiRepo.getCompletion(this._privateConversationHistory, true, this._view);
-                this._privateConversationHistory.push({ role: 'user', parts: workspacePrompt });
-            } else if (this.aiRepo) {
-                response = await this.aiRepo.getCompletion(this._privateConversationHistory);
-                this._privateConversationHistory.push({ role: 'user', parts: prompt });
-                this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
-            }
+            this._privateConversationHistory.push({ role: 'user', parts: prompt });
+            this._view?.webview.postMessage({ type: 'showLoadingIndicator' });
 
             this._privateConversationHistory.push({ role: 'model', parts: response });
             this._publicConversationHistory.push({ [this._activeAgent]: { role: 'model', parts: response } });

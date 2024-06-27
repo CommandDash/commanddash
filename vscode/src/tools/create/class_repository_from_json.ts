@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { extractDartCode, extractReferenceTextFromEditor } from '../../utilities/code-processing';
 import { getReferenceEditor } from '../../utilities/state-objects';
 import { logEvent } from '../../utilities/telemetry-reporter';
-import { GeminiRepository } from '../../repository/gemini-repository';
 import { GenerationRepository } from '../../repository/generation-repository';
 //not active currently. to be thought out and revised again.
 export async function createRepoClassFromPostman(generationRepository: GenerationRepository, globalState: vscode.Memento) {

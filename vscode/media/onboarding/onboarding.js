@@ -221,7 +221,6 @@ const activityBarBackground = getComputedStyle(document.documentElement).getProp
 const activityBarForeground = getComputedStyle(document.documentElement).getPropertyValue("--vscode-activityBar-foreground");
 
 //initialising elements
-const googleApiKeyTextInput = document.getElementById("google-api-key-text-input");
 const googleApiKeyHeader = document.getElementById("google-api-key-header");
 const validationList = document.getElementById("validation-list");
 const loadingContainer = document.getElementById("loading-container");
@@ -232,7 +231,6 @@ const textInput = document.getElementById("text-input");
 const responseContainer = document.getElementById("response");
 const textinputMenu = document.getElementById("menu");
 const loadingIndicator = document.getElementById('loader');
-const validationLoadingIndicator = document.getElementById('validation-loader');
 const fileNameContainer = document.getElementById("file-names");
 const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
@@ -240,20 +238,12 @@ const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
 const executableProgress = document.getElementById("executable-progress");
 const githubLogin = document.getElementById("github-sign-in");
-const githubTick = document.getElementById("github-tick");
-const githubCross = document.getElementById("github-cross");
-const apiKeyTick = document.getElementById("apiKey-tick");
-const apiKeyCross = document.getElementById("apiKey-cross");
 const executableTick = document.getElementById("executable-tick");
-const executableCross = document.getElementById("executable-cross");
 const onboardingSetup = document.getElementById("onboarding-setup");
-const apiKeyContainer = document.getElementById("apikey-container");
 const workspaceLoader = document.getElementById('workspace-loader');
 const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const questionnaireContainer = document.getElementById("questionaire-container");
 const executableContainer = document.getElementById("executable-container");
-const apiKeyValidationMessage = document.getElementById("api-key-validation-message");
-const googleApiKeyError = document.getElementById("google-api-key-error");
 const fileUpload = document.getElementById("file-upload");
 const activeAgentAttach = document.getElementById("agents");
 const activeCommandsAttach = document.getElementById("slash-commands");
@@ -272,7 +262,6 @@ let shortCutHints = '';
 let agentBuilder = null;
 let currentActiveAgent = '';
 let isGithubLoginPending = false;
-let isApiKeyPending = false;
 let isExecutableDownloadPending = false;
 let codeInputId = 0;
 
@@ -281,19 +270,13 @@ const agentInputsJson = [];
 //initialising visual studio code library
 let vscode = null;
 
-const SetupStep = {
-    0: "github",
-    1: "apiKey",
-    2: "executable"
-};
-
 let data = [
     {
         "chat_mode": {
             "data_sources": [
                 "501123716"
             ],
-            "system_prompt": "            CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /workspace, /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages. If user is looking for help with any library, suggest them looking out if an agent for that exists in the marketplace.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
+            "system_prompt": "            CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages. If user is looking for help with any library, suggest them looking out if an agent for that exists in the marketplace.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
             "version": "0.0.1"
         },
         "description": "Your primary agent for any usage or coding help.",
@@ -307,56 +290,56 @@ let data = [
         "name": "@dash",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
-            {
-                "intent": "Ask questions on your codebase",
-                "registered_inputs": [
-                    {
-                        "display_text": "Query",
-                        "id": "368689265",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "729757158",
-                        "type": "multi_code_output",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "id": "791477237",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/workspace",
-                "steps": [
-                    {
-                        "outputs": [
-                            "729757158"
-                        ],
-                        "query": "<368689265>",
-                        "type": "search_in_workspace",
-                        "version": "0.0.1",
-                        "workspace_object_type": "all"
-                    },
-                    {
-                        "outputs": [
-                            "791477237"
-                        ],
-                        "prompt": "Here are the related references from user's project:\n            ```\n            <729757158>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <368689265>.\n            \n            If you cannot find the answer in the attaches references, say \"Sorry, I couldn't find the answer to your question in the workspace.\"",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<791477237>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Please share your query: <368689265>"
-            },
+            // {
+            //     "intent": "Ask questions on your codebase",
+            //     "registered_inputs": [
+            //         {
+            //             "display_text": "Query",
+            //             "id": "368689265",
+            //             "optional": false,
+            //             "type": "string_input",
+            //             "version": "0.0.1"
+            //         }
+            //     ],
+            //     "registered_outputs": [
+            //         {
+            //             "id": "729757158",
+            //             "type": "multi_code_output",
+            //             "version": "0.0.1"
+            //         },
+            //         {
+            //             "id": "791477237",
+            //             "type": "prompt_output",
+            //             "version": "0.0.1"
+            //         }
+            //     ],
+            //     "slug": "/workspace",
+            //     "steps": [
+            //         {
+            //             "outputs": [
+            //                 "729757158"
+            //             ],
+            //             "query": "<368689265>",
+            //             "type": "search_in_workspace",
+            //             "version": "0.0.1",
+            //             "workspace_object_type": "all"
+            //         },
+            //         {
+            //             "outputs": [
+            //                 "791477237"
+            //             ],
+            //             "prompt": "Here are the related references from user's project:\n            ```\n            <729757158>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <368689265>.\n            \n            If you cannot find the answer in the attaches references, say \"Sorry, I couldn't find the answer to your question in the workspace.\"",
+            //             "type": "prompt_query",
+            //             "version": "0.0.1"
+            //         },
+            //         {
+            //             "type": "append_to_chat",
+            //             "value": "<791477237>",
+            //             "version": "0.0.1"
+            //         }
+            //     ],
+            //     "text_field_layout": "Hi, Please share your query: <368689265>"
+            // },
             {
                 "intent": "Refactor your code",
                 "registered_inputs": [
@@ -821,12 +804,6 @@ const questionnaire = [
     //reading vscode triggered messages to webview
     readTriggeredMessage();
 
-    googleApiKeyTextInput.addEventListener("input", (event) => {
-        const apiKey = event.target.value.trim();
-        const debouncedFunction = debounce(validateApiKey, 700);
-        debouncedFunction(apiKey);
-    });
-
     sendButton.addEventListener("click", (event) => {
         submitResponse();
     });
@@ -1153,9 +1130,6 @@ function parseAgents(agents) {
 function handleTriggerMessage(event) {
     const message = event.data;
     switch (message.type) {
-        case "apiKeyValidation":
-            updateValidationList(message.value);
-            break;
         case "displayMessages":
             conversationHistory = message.value;
             displayMessages(conversationHistory);
@@ -1222,14 +1196,6 @@ function handleTriggerMessage(event) {
             const loaderMessage = _message['message'];
             setLoader(loaderKind, loaderMessage);
             break;
-        case "showValidationLoader":
-            toggleLoader(true);
-            validationLoadingIndicator.classList.remove("hidden");
-            break;
-        case "hideValidationLoader":
-            toggleLoader(false);
-            validationLoadingIndicator.classList.add("hidden");
-            break;
         case 'pendingSteps':
             const pendingStepsArr = JSON.parse(message.value);
             if (pendingStepsArr?.length > 0) {
@@ -1239,24 +1205,12 @@ function handleTriggerMessage(event) {
                     switch (steps) {
                         case 0:
                             isGithubLoginPending = true;
-                            githubCross.classList.remove('hidden');
-                            githubTick.classList.add('hidden');
                             githubLogin.classList.remove("hidden");
-                            apiKeyContainer.classList.add("hidden");
                             executableContainer.classList.add("hidden");
                             break;
 
                         case 1:
-                            isApiKeyPending = true;
-                            apiKeyCross.classList.remove('hidden');
-                            apiKeyTick.classList.add('hidden');
-                            googleApiKeyTextInput.classList.remove("hidden");
-                            executableContainer.classList.add("hidden");
-                            break;
-
-                        case 2:
                             isExecutableDownloadPending = true;
-                            executableCross.classList.remove('hidden');
                             executableTick.classList.add('hidden');
                             executableProgress.classList.remove("hidden");
                             break;
@@ -1266,25 +1220,14 @@ function handleTriggerMessage(event) {
 
             if (!isGithubLoginPending) {
                 isGithubLoginPending = false;
-                githubCross.classList.add("hidden");
-                githubTick.classList.remove("hidden");
                 githubLogin.classList.add("hidden");
-                apiKeyContainer.classList.remove("hidden");
-            }
-            if (!isApiKeyPending) {
-                isApiKeyPending = false;
-                apiKeyContainer.classList.remove("hidden");
-                apiKeyCross.classList.add("hidden");
-                apiKeyTick.classList.remove("hidden");
-                googleApiKeyTextInput.classList.add("hidden");
+                executableContainer.classList.remove("hidden");
                 vscode.postMessage({
                     type: "executeDownload",
                 });
-                executableContainer.classList.remove("hidden");
             }
             if (!isExecutableDownloadPending) {
                 isExecutableDownloadPending = false;
-                executableCross.classList.add("hidden");
                 executableTick.classList.remove("hidden");
                 executableProgress.classList.add("hidden");
             }
@@ -1297,26 +1240,14 @@ function handleTriggerMessage(event) {
             break;
         case 'executableDownloaded':
             isExecutableDownloadPending = false;
-            executableCross.classList.add("hidden");
             executableTick.classList.remove("hidden");
             executableProgress.classList.add("hidden");
             allStepsCompleted();
             break;
-        case 'apiKeySet':
-            isApiKeyPending = false;
-            apiKeyCross.classList.add("hidden");
-            apiKeyTick.classList.remove("hidden");
-            googleApiKeyTextInput.classList.add("hidden");
-            executableContainer.classList.remove("hidden");
-            allStepsCompleted();
-            break;
         case 'githubLoggedIn':
             isGithubLoginPending = false;
-            githubCross.classList.add("hidden");
-            githubTick.classList.remove("hidden");
             githubLogin.classList.add("hidden");
-            apiKeyContainer.classList.remove("hidden");
-            executableContainer.classList.add("hidden");
+            executableContainer.classList.remove("hidden");
             allStepsCompleted();
             break;
         case 'cleanUpEventListener':
@@ -1410,7 +1341,7 @@ function toggleLoader(isShowLoader) {
 }
 
 function allStepsCompleted() {
-    if (!isGithubLoginPending && !isApiKeyPending && !isExecutableDownloadPending) {
+    if (!isGithubLoginPending && !isExecutableDownloadPending) {
         onboardingSetup.classList.add("hidden");
         bottomContainer.classList.add("flex");
         bottomContainer.classList.remove("hidden");
@@ -1586,15 +1517,6 @@ function scrollToBottom() {
             responseContainer.scrollTo(0, 999999);
         }
     }, 100);
-}
-
-function validateApiKey(apiKey) {
-    if (isValidGeminiApiKey(apiKey)) {
-        vscode.postMessage({
-            type: "validate",
-            value: apiKey,
-        });
-    }
 }
 
 function isValidGeminiApiKey(apiKey) {
@@ -1799,7 +1721,6 @@ function setResponse() {
     const preCodeBlocks = document.querySelectorAll("code");
     preCodeBlocks.forEach((_preCodeBlock) => {
         _preCodeBlock.classList.add(
-            "p-1",
             "my-2"
         );
         Prism.highlightAllUnder(_preCodeBlock);
@@ -1889,24 +1810,6 @@ function markdownToPlain(input) {
     return html;
 }
 
-async function updateValidationList(message) {
-    if (message === "Gemini API Key is invalid") {
-        isApiKeyPending = true;
-        apiKeyCross.classList.remove('hidden');
-        apiKeyTick.classList.add('hidden');
-        googleApiKeyError.textContent = "Error: Gemini API Key is invalid";
-    } else if (message === "Gemini API Key is valid") {
-        isApiKeyPending = false;
-        apiKeyCross.classList.add('hidden');
-        apiKeyTick.classList.remove('hidden');
-        const geminiAPIKey = googleApiKeyTextInput.value;
-        vscode.postMessage({
-            type: "updateApiKey",
-            value: geminiAPIKey,
-        });
-        googleApiKeyError.textContent = "";
-    }
-}
 
 function adjustHeight() {
     textInput.style.height = 'auto';
