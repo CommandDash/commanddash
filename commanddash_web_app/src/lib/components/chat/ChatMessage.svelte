@@ -1,6 +1,5 @@
 <script lang="ts">
     import showdown from "showdown";
-    import loadedLanguages from "prismjs/components/index";
     import type { Message } from "$lib/types/Message";
 
     export let messages: Message[] = [];
