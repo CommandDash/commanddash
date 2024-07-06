@@ -34,4 +34,11 @@
     });
 </script>
 
-<ChatWindow {loading} agentName={currentAgentDetails?.name} agentPrivate={currentAgentDetails?.testing} agentVersion={currentAgentDetails?.version} />
+<ChatWindow 
+{loading} 
+agentName={currentAgentDetails?.name} 
+agentPrivate={currentAgentDetails?.testing} 
+agentVersion={currentAgentDetails?.version} 
+agentDisplayName={currentAgentDetails?.metadata?.display_name}
+agentDescription={currentAgentDetails?.metadata?.description}
+agentLogo={currentAgentDetails?.metadata?.avatar_id} />
