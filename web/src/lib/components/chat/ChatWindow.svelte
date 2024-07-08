@@ -73,7 +73,7 @@
 <div class="relative min-h-0 min-w-0 h-screen">
     <div class="scrollbar-custom mr-1 h-full overflow-y-auto">
         <div
-            class="mx-auto flex h-full max-w-3xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-4xl xl:pt-10"
+            class="mx-auto flex h-full max-w-5xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-5xl xl:pt-10"
         >
             <div class="flex h-max flex-col gap-6 pb-40 2xl:gap-7">
                 {#if messages.length > 0}
@@ -112,12 +112,12 @@
         </div>
     </div>
     <div
-        class="dark:via-gray-80 pointer-events-none absolute inset-x-0 bottom-0 z-0 mx-auto flex w-full max-w-3xl flex-col items-center justify-center bg-gradient-to-t from-white via-white/80 to-white/0 px-3.5 py-4 max-md:border-t max-md:bg-white sm:px-5 md:py-8 xl:max-w-4xl dark:border-gray-800 dark:from-gray-900 dark:to-gray-900/0 max-md:dark:bg-gray-900 [&>*]:pointer-events-auto"
+        class="dark:via-gray-80 pointer-events-none absolute inset-x-0 bottom-0 z-0 mx-auto flex w-full max-w-5xl flex-col items-center justify-center bg-gradient-to-t from-white via-white/80 to-white/0 px-3.5 py-4 max-md:border-t max-md:bg-white sm:px-5 md:py-8 xl:max-w-5xl dark:border-gray-800 dark:from-gray-900 dark:to-gray-900/0 max-md:dark:bg-gray-900 [&>*]:pointer-events-auto"
     >
         <div class="w-full">
             <form
                 tabindex="-1"
-                class="relative flex w-full max-w-4xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500"
+                class="relative flex w-full max-w-5xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500"
             >
                 <div class="flex w-full flex-1 border-none bg-transparent">
                     <ChatInput

@@ -1,6 +1,5 @@
 <script lang="ts">
     import NavConversationItem from "./NavConversationItem.svelte";
-	import { env as envPublic } from "$env/dynamic/public";
 </script>
 
 <div class="sticky top-0 flex flex-none items-center justify-between px-3 py-3.5 max-sm:pt-0">
@@ -8,7 +7,7 @@
 		class="flex items-center rounded-xl text-lg font-semibold"
 		href="#"
 	>
-		{envPublic.PUBLIC_APP_NAME}
+		CommandDash
 	</a>
 </div>
 

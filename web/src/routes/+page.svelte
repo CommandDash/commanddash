@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-    <title>{envPublic.PUBLIC_APP_NAME}</title>
+    <title>Commanddash</title>
 </svelte:head>
 
 <ChatWindow />

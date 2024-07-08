@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { env as envPublic } from "$env/dynamic/public";
+    import IconVisualStudio from "../icons/IconVisualStudio.svelte";
 
     export let agentDisplayName: string = "";
     export let agentDescription: string = "";
@@ -41,7 +41,7 @@
     ];
 </script>
 
-<div class="my-auto grid gap-8 lg:grid-cols-3">
+<div class="my-auto grid gap-4 lg:grid-cols-2">
     <div class="lg:col-span-1">
         <div class="inline-flex flex-col">
             <div class="inline-flex flex-row">
@@ -58,6 +58,14 @@
                 {agentDescription}
             </p>
         </div>
+    </div>
+    <div class="lg:col-span-2 lg:pl-24 hidden md:block">
+        <div class="overflow-hidden rounded-xl border dark:border-gray-800 cursor-pointer">
+			<a href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt" target="_blank" class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg">
+                <IconVisualStudio />
+                <div class="text-sm text-white">VSCode</div>
+            </a>
+		</div>
     </div>
     <div class="lg:col-span-3 lg:mt-6">
         <p class="mb-3 text-gray-600 dark:text-gray-300">Use case</p>
