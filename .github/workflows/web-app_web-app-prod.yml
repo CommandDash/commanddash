@@ -27,7 +27,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd commanddash_web_app/build
-          zip -r ../../release.zip .
+          zip -r ../release.zip build node_modules package.json package-lock.json
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
