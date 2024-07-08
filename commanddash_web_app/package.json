@@ -11,7 +11,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"start": "node deploy/build/index.js"
+		"start": "node build/index.js"
 	},
 	"devDependencies": {
 		"@iconify-json/carbon": "^1.1.36",
