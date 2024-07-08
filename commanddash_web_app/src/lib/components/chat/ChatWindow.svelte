@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { LottiePlayer } from "@lottiefiles/svelte-lottie-player";
+    import { onMount } from "svelte";
 
     import type { Message } from "$lib/types/Message";
     import ChatInput from "./ChatInput.svelte";
@@ -19,8 +19,13 @@
     export let agentPrivate: boolean = false;
 
     let messageLoading: boolean = false;
-
     let message: string = "";
+    let LottiePlayer: any;
+
+    onMount(async () => {
+        const module = await import("@lottiefiles/svelte-lottie-player");
+        LottiePlayer = module.LottiePlayer;
+    });
 
     const handleSubmit = async () => {
         if (messageLoading || loading) {
@@ -75,6 +80,18 @@
                     {#if !loading}
                         <ChatMessage {messages} />
                         {#if messageLoading}
+                            {#if LottiePlayer}
+                                <LottiePlayer
+                                    src="/lottie/loading-animation.json"
+                                    autoplay={true}
+                                    loop={true}
+                                    height={100}
+                                    width={100}
+                                />
+                            {/if}
+                        {/if}
+                    {:else if loading}
+                        {#if LottiePlayer}
                             <LottiePlayer
                                 src="/lottie/loading-animation.json"
                                 autoplay={true}
@@ -83,17 +100,13 @@
                                 width={100}
                             />
                         {/if}
-                    {:else if loading}
-                        <LottiePlayer
-                            src="/lottie/loading-animation.json"
-                            autoplay={true}
-                            loop={true}
-                            height={100}
-                            width={100}
-                        />
                     {/if}
                 {:else}
-                    <ChatIntroduction {agentDescription} {agentDisplayName} {agentLogo} />
+                    <ChatIntroduction
+                        {agentDescription}
+                        {agentDisplayName}
+                        {agentLogo}
+                    />
                 {/if}
             </div>
         </div>
