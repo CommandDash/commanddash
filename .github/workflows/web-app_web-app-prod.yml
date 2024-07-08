@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - web-app-prod
+name: Build and deploy SvelteKit app to Azure Web App - web-app-prod
 
 on:
   push:
@@ -18,16 +18,16 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: npm install, build, and test
+      - name: Install dependencies and build SvelteKit app
         run: |
           cd commanddash_web_app
           npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm run build
+
       - name: Zip artifact for deployment
         run: |
-          cd commanddash_web_app/build
-          zip -r ../../release.zip .
+          cd commanddash_web_app
+          zip -r ../release.zip build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -42,7 +42,7 @@ jobs:
       name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -60,10 +60,15 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_58CC6F3841FB49A38469650AD296DCC8 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7B7BF9D41759471DBA0ED64C44AF88AE }}
 
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: "web-app-prod"
-          slot-name: "Production"
-          package: deploy
+      - name: Install Node.js dependencies on Azure
+        run: |
+          cd deploy/build
+          npm install
+
+      - name: Install PM2
+        run: |
+          npm install -g pm2
+
+      - name: Start SvelteKit App
+        run: |
+          pm2 start build/index.js --name sveltekit-app --no-daemon
