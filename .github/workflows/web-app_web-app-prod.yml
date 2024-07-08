@@ -24,6 +24,11 @@ jobs:
           npm install
           npm run build
 
+      - name: List build directory contents
+        run: |
+          cd commanddash_web_app
+          ls -la build
+
       - name: Zip artifact for deployment
         run: |
           cd commanddash_web_app
@@ -53,6 +58,10 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip -d deploy
 
+      - name: List deploy directory contents
+        run: |
+          ls -la deploy
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -65,10 +74,14 @@ jobs:
           cd deploy
           npm install
 
+      - name: List deploy/build directory contents
+        run: |
+          ls -la deploy/build
+
       - name: Install PM2
         run: |
           npm install -g pm2
 
       - name: Start SvelteKit App
         run: |
-          pm2 start build/index.js --name sveltekit-app --no-daemon
+          pm2 start deploy/build/index.js --name sveltekit-app --no-daemon
