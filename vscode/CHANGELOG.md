@@ -4,6 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.8]
+- Don't ask for Gemini API Key
+- Removed google generative ai package dependencies
+
 ## [0.4.7]
 - Code Block Indentation issues resolved
 

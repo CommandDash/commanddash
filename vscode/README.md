@@ -1,32 +1,22 @@
 <div align="center">
-<h3> Programming Agents Marketplace in your IDE</h3>
+<h3>Integrate APIs, SDKs or Packages with AI Agents</h3>
 
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![VScode version](https://img.shields.io/visual-studio-marketplace/v/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 <img src="/assets/docs/poster.jpg"></a>
 
 -----------------
-CommandDash is a marketplace of programming agents that are expert at integrating APIs and SDKs.
+CommandDash is a marketplace of AI agents that are expert at integrating APIs and SDKs.
 
-Dash Agents are trained on the latest documentation and examples enabling you to hit the ground instantly by generating integration code contextualized to your codebase.
+Dash Agents are trained on the latest documentation, examples and issues enabling you to integrate any library without reading its docs by generating integration code contextualized to your codebase.
 
 ##### ✨ Skip the documentation
-##### 🤝 Works with all languages
-##### 👨🏼‍💻 Framework to build your own
+##### 🤝 Supports all languages
+##### 👨🏼‍💻 Free for every developer
 
 Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
 
 -----------------
-## Getting Started
-
-##### 1. Create Gemini API Key
-Visit [AI Studio by Google](https://aistudio.google.com/app/apikey) and create your free API Key.
-
-*Note: Gemini offers both free and paid plans.*
-##### 2. Add the key in CommandDash Panel
-Paste your API key in the input field in chat.
-
-You're ready to use CommandDash. ✅
 
 ## 🚀 @Agents and /Commands
 
@@ -53,33 +43,30 @@ Note: Commands are optionally offered by agents depending on the usecase.
 
 ## FAQs
 
-1. **How safe and secure is it to use, and can you explain why?**
-- CommandDash is powered by Google's  Gemini Models and is secure to use for personal usage or work - [Safety and Security Guidelines](https://blog.google/technology/ai/google-gemini-ai/#responsibility-safety)
+1. **What are the data safety aspects?**
+- CommandDash uses processed metadata from your interactions to improve it's generations without using your shared code.
 
 2. **Do I need to pay to use CommandDash?**
-
-- Gemini Flash 1.5 offers both free and paid plans. Please check the [pricing](https://ai.google.dev/pricing) here.
-
-The free plan suffices for using CommandDash 🥳
+- CommandDash is free to use for every developer.
 
 3. **I am an Android Studio user. Can I use CommandDash?**
 - We are coming soon for IntelliJ-based IDEs. *🤫 Secret: most of our core logic is written in Dart, allowing us to ship on any platform very very fast!*
 
 ## Contributing
 
-A coding assistant for all is best built when all of us contribute. You can make contributions to the VSCODE or IntelliJ extension or also to [agents engine](https://github.com/CommandDash/packages) shared between the extensions.
+CommanDash is hub of AI agents on docs of any APIs, SDKs and more.
 
-### Ways to contribute
+You can suggest agents to add to the marketplace, or contribute to the VSCODE or IntelliJ extension or also to the shared [engine](https://github.com/CommandDash/packages).
 
 -  **File feature requests**: Suggest features that'll make your development process easier in the [issues board](https://github.com/CommandDash/commanddash//issues).
 
 -  **Pick up open issues**: Pick up and fix existing issues open to the community in [issues board](https://github.com/CommandDash/commanddash/issues).
 
--  **Participate in discussions**: Help by sharing your ideas in the [active discussions](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) in our community slack.
+-  **Request agents in the marketplace**: You can submit requests to add agents for your most used APIs or SDKs. [Fill Form](https://airtable.com/app22SBaii3xYD5aR/shrLv4mDsEtnFjmtj).
 
 ## Community
 
-Connect with others using or building agents on CommandDash [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
+Do you love devtools but hate documentation? Join our community and help developers build without leaving their IDE: [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
 
 ## License
 
