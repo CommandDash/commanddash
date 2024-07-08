@@ -54,7 +54,7 @@
                     {agentDisplayName}
                 </p>
             </div>
-            <p class="text-base text-gray-600 dark:text-gray-400">
+            <p class="text-base text-gray-600 dark:text-gray-400 mt-1">
                 {agentDescription}
             </p>
         </div>
@@ -68,9 +68,9 @@
 		</div>
     </div>
     <div class="lg:col-span-3 lg:mt-6">
-        <p class="mb-3 text-gray-600 dark:text-gray-300">Use case</p>
+        <!-- <p class="mb-3 text-gray-600 dark:text-gray-300">Use case</p> -->
         <div class="grid gap-3 lg:grid-cols-2 lg:gap-5">
-            {#each questionnaires as questionnaire}
+            <!-- {#each questionnaires as questionnaire}
                 <button
                     class={`relative rounded-xl border ${questionnaire.id === "explore-marketplace" ? "bg-[#497BEF] text-gray-300 border-[#497BEF] hover:bg-[#287CEB] hover:border-[#287CEB]" : "bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100"} p-3 max-xl:text-sm xl:p-3.5`}
                 >
@@ -81,7 +81,7 @@
                         {@html questionnaire.icon.svg}
                     </div>
                 </button>
-            {/each}
+            {/each} -->
         </div>
     </div>
 </div>

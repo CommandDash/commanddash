@@ -13,7 +13,7 @@
     export let loading = false;
     export let agentName: string = "dash";
     export let agentDisplayName: string = "Dash";
-    export let agentDescription: string = "";
+    export let agentDescription: string = "Default Agent Dash";
     export let agentLogo: string = "";
     export let agentVersion: string = "1.0.3";
     export let agentPrivate: boolean = false;
