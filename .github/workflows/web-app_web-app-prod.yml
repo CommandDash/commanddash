@@ -20,14 +20,14 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          cd commanddash_web_app
+          cd web
           npm install
           npm run build --if-present
           npm run test --if-present
 
       - name: Zip artifact for deployment
         run: |
-          cd commanddash_web_app
+          cd web
           zip -r ../release.zip build node_modules package.json package-lock.json -x "*.git*"
 
       - name: Upload artifact for deployment job
