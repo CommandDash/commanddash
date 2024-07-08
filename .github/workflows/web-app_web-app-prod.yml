@@ -27,7 +27,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd commanddash_web_app
-          zip -r ../release.zip build
+          zip -r ../release.zip build package.json package-lock.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -62,7 +62,7 @@ jobs:
 
       - name: Install Node.js dependencies on Azure
         run: |
-          cd deploy/build
+          cd deploy
           npm install
 
       - name: Install PM2
