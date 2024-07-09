@@ -1,6 +1,13 @@
 <script lang="ts">
     import "../styles/main.css";
-    import NavMenu from "$lib/components/NavMenu.svelte";
+    import {onMount} from "svelte";
+    import { browser } from "$app/environment";
+
+    onMount(() => {
+        if (browser) {
+            window.document.documentElement.classList.add('dark')
+        }
+    })
 </script>
 
 <div class="grid h-full w-screen grid-cols-1 grid-rows-[1fr] overflow-hidden text-smd dark:text-gray-300">
