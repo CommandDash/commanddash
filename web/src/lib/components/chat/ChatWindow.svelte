@@ -118,6 +118,7 @@
             <form
                 tabindex="-1"
                 class="relative flex w-full max-w-5xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500"
+                on:submit|preventDefault={handleSubmit}
             >
                 <div class="flex w-full flex-1 border-none bg-transparent">
                     <ChatInput
