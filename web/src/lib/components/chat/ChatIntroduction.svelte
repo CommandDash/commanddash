@@ -60,7 +60,7 @@
         </div>
     </div>
     <div class="lg:col-span-2 lg:pl-24 hidden md:block">
-        <div class="overflow-hidden rounded-xl border dark:border-gray-800 cursor-pointer">
+        <div class="overflow-hidden rounded border dark:border-gray-800 cursor-pointer">
 			<a href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt" target="_blank" class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg">
                 <IconVisualStudio />
                 <div class="text-sm text-white">VSCode</div>

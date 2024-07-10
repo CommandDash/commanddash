@@ -107,7 +107,7 @@
             role="presentation"
         >
             <div
-                class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-[#497BEF] px-5 py-3.5 prose-pre:my-2"
+                class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded border border-gray-100 bg-[#497BEF]/[.2] px-5 py-3.5 prose-pre:my-2"
             >
                 <div
                     class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base"

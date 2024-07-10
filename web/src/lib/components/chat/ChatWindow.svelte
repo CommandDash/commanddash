@@ -81,13 +81,16 @@
                         <ChatMessage {messages} />
                         {#if messageLoading}
                             {#if LottiePlayer}
-                                <LottiePlayer
-                                    src="/lottie/loading-animation.json"
-                                    autoplay={true}
-                                    loop={true}
-                                    height={100}
-                                    width={100}
-                                />
+                                <div
+                                    class="flex-col w-full h-48 px-2 py-3"
+                                >
+                                    <div
+                                        class="inline-flex flex-row items-end px-2"
+                                    >
+                                        <span id="workspace-loader-text">Preparing results</span>
+                                        <div class="typing-loader mx-2"></div>
+                                    </div>
+                                </div>
                             {/if}
                         {/if}
                     {:else if loading}
@@ -117,7 +120,7 @@
         <div class="w-full">
             <form
                 tabindex="-1"
-                class="relative flex w-full max-w-5xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500"
+                class="relative flex w-full max-w-5xl flex-1 items-center rounded border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500"
                 on:submit|preventDefault={handleSubmit}
             >
                 <div class="flex w-full flex-1 border-none bg-transparent">
@@ -128,7 +131,7 @@
                         bind:value={message}
                     />
                     <button
-                        class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+                        class="btn mx-1 my-1 h-[2.4rem] self-end rounded bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
                         type="submit"
                     >
                         <CarbonSendAltFilled />
@@ -142,5 +145,36 @@
 <style>
     li::marker {
         color: white;
+    }
+
+    .typing-loader {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        animation: loading 1s linear infinite alternate;
+        margin-bottom: 4px;
+    }
+
+    @keyframes loading {
+        0% {
+            background-color: #0e70c0;
+            box-shadow:
+                8px 0px 0px 0px #d4d4d4,
+                16px 0px 0px 0px #d4d4d4;
+        }
+
+        25% {
+            background-color: #d4d4d4;
+            box-shadow:
+                8px 0px 0px 0px #0e70c0,
+                16px 0px 0px 0px #d4d4d4;
+        }
+
+        75% {
+            background-color: #d4d4d4;
+            box-shadow:
+                8px 0px 0px 0px #d4d4d4,
+                16px 0px 0px 0px #0e70c0;
+        }
     }
 </style>
