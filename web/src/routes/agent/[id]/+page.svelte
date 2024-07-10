@@ -53,7 +53,7 @@
 
 {#if loading}
     <LoadingPage />
-{:else}
+{:else if !loading && !currentAgentDetails}
     <div
         class="h-screen w-screen inline-flex justify-center items-center flex-col"
     >
