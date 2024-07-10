@@ -18,6 +18,7 @@
     export let agentVersion: string = "1.0.3";
     export let agentPrivate: boolean = false;
 
+    let agentReferences: Array<any> = [];
     let messageLoading: boolean = false;
     let message: string = "";
     let LottiePlayer: any;
@@ -34,19 +35,21 @@
         messageLoading = true;
 
         messages = [...messages, { role: "user", text: message }];
+        debugger;
 
-        message = "";
 
         const agentData = {
             agent_name: agentName,
             agent_version: agentVersion,
             chat_history: messages,
-            current_message: message,
-            included_references: [],
+            included_references: agentReferences,
             private: agentPrivate,
         };
 
+        message = "";
+
         try {
+            debugger;
             const response = await fetch(
                 "https://api.commanddash.dev/v2/ai/agent/answer",
                 {
@@ -57,11 +60,13 @@
                     },
                 },
             );
+            
             const modelResponse = await response.json();
             messages = [
                 ...messages,
                 { role: "model", text: modelResponse.response },
             ];
+            agentReferences = modelResponse.references;
         } catch (error) {
             console.log("error", error);
         }
