@@ -78,12 +78,18 @@ client.on('messageCreate', async message => {
         }
 
         // Determine the channel (thread or main channel)
-        const channel = message.channel.type === ChannelType.PublicThread || message.channel.type === ChannelType.PrivateThread
-            ? message.channel
-            : await message.startThread({
+        let channel;
+        if (message.channel.type === ChannelType.PublicThread || message.channel.type === ChannelType.PrivateThread) {
+            channel = message.channel
+        } else {
+            channel = await message.startThread({
                 name: `Thread for ${message.author.username}`,
                 autoArchiveDuration: 60,
             });
+
+            // await channel.send("Hold tight, I'm preparing your answer!\n\nQuick tip ⚡️, I can help you better from your IDE. Install the [VSCode extension](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt)");
+        }
+
 
         // Start typing indicator
         const typingInterval = keepTyping(channel);
