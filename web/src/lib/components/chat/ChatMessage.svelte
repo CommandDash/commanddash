@@ -1,10 +1,18 @@
 <script lang="ts">
     import showdown from "showdown";
+    import IconVisualStudio from "../icons/IconVisualStudio.svelte";
     import type { Message } from "$lib/types/Message";
 
     export let messages: Message[] = [];
     export let agentLogo: string = "";
     export let agentDisplayName: string = "";
+    export let agentReferences: Array<any> = [];
+
+    let showAllLinks: boolean = false;
+
+    const toggleShowLinks = () => {
+        showAllLinks = !showAllLinks;
+    };
 
     const markdownToPlain = (message: string) => {
         const converter = new showdown.Converter({
@@ -24,7 +32,7 @@
 
     const isInsideCodeBlock = (line: string, codeBlockRegex: RegExp) => {
         return codeBlockRegex.test(line);
-    }
+    };
 
     const startAttributeExtension = () => {
         let startNumbers: any[] = [];
@@ -109,24 +117,64 @@
             role="presentation"
         >
             <div
-                class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded border border-gray-100 bg-[#497BEF]/[.2] px-5 py-3.5 prose-pre:my-2"
+                class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded border-[.1px] border-white bg-[#497BEF]/[.2] px-5 py-3.5 prose-pre:my-2"
             >
-            <div class="inline-flex flex-row justify-center">
-                <img
-                    class="mr-2 aspect-square size-8 rounded"
-                    src={agentLogo}
-                    alt=""
-                />
-                <p class="flex items-center font-semibold">
-                    {agentDisplayName}
-                </p>
-            </div>
+                <div class="inline-flex flex-row justify-center">
+                    <img
+                        class="mr-2 aspect-square size-8 rounded"
+                        src={agentLogo}
+                        alt=""
+                    />
+                    <p class="flex items-center font-semibold">
+                        {agentDisplayName}
+                    </p>
+                </div>
                 <div
                     class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base"
                 >
                     <p class="text-white">
                         {@html markdownToPlain(message.text?.trim())}
                     </p>
+                </div>
+                <div class="mx-auto grid gap-4 md:grid-cols-2">
+                    <div class="md:col-span-1 inline-flex flex-col">
+                        <span> Source </span>
+                        {#each agentReferences.slice(0, showAllLinks ? agentReferences.length : 2) as link}
+                            {#if link.url}
+                                <a
+                                    href={link.url}
+                                    target="_blank"
+                                    class="cursor-pointer hover:text-violet-500 underline"
+                                    >{link.url}</a
+                                >
+                            {/if}
+                        {/each}
+                        {#if agentReferences.length > 2}
+                            <span
+                                on:click={toggleShowLinks}
+                                class="mt-2 text-blue-500 hover:text-blue-700 underline cursor-pointer"
+                            >
+                                {showAllLinks ? "Read Less" : "Read More"}
+                            </span>
+                        {/if}
+                    </div>
+                    <div class="md:col-span-2">
+                        <div
+                            class="overflow-hidden rounded border dark:border-gray-800 cursor-pointer"
+                        >
+                            <a
+                                href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
+                                target="_blank"
+                                class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
+                            >
+                                <IconVisualStudio />
+                                <div class="text-sm text-white">VSCode</div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="md:col-span-3 md:mt-6">
+                        <div class="grid gap-3 md:grid-cols-2 md:gap-5"></div>
+                    </div>
                 </div>
             </div>
         </div>
