@@ -29,16 +29,38 @@ client.on('messageCreate', async message => {
         function splitMessage(message, maxLength = 2000) {
             if (message.length <= maxLength) return [message];
             const parts = [];
-            while (message.length > maxLength) {
-                let part = message.slice(0, maxLength);
-                const lastNewline = part.lastIndexOf('\n');
-                if (lastNewline > -1) {
-                    part = part.slice(0, lastNewline + 1);
+            let currentPart = '';
+            let inCodeBlock = false;
+
+            const lines = message.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('```')) {
+                    inCodeBlock = !inCodeBlock;
                 }
-                parts.push(part);
-                message = message.slice(part.length);
+
+                if (currentPart.length + line.length + 1 > maxLength) {
+                    if (inCodeBlock) {
+                        currentPart += '\n```';
+                        parts.push(currentPart);
+                        currentPart = '```';
+                    } else {
+                        parts.push(currentPart);
+                        currentPart = '';
+                    }
+                }
+
+                currentPart += (currentPart.length > 0 ? '\n' : '') + line;
+
+                if (!inCodeBlock && currentPart.length >= maxLength) {
+                    parts.push(currentPart);
+                    currentPart = '';
+                }
             }
-            parts.push(message);
+
+            if (currentPart.length > 0) {
+                parts.push(currentPart);
+            }
+
             return parts;
         }
 
@@ -94,6 +116,7 @@ client.on('messageCreate', async message => {
         try {
             // Fetch all messages in the thread if it's a thread
             let history = [];
+            history.push({ "role": "user", "text": "This conversation is happening on Discord, so please keep response concise and quote snippets only when necessary (unless of course explicity requested) " });
             if (channel.type === ChannelType.PublicThread || channel.type === ChannelType.PrivateThread) {
                 const messages = await channel.messages.fetch({ limit: 100 });
                 history = messages.map(msg => ({
