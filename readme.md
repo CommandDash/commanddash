@@ -6,7 +6,7 @@
 <h1 align="center">CommandDash</h1>
 <div align = "center">
 
-[![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE) <a href="https://app.commanddash.io/agent/dash"><img src="https://cdn.commanddash.dev/assets/badge.svg"></a>
+[![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE) <a href="https://app.commanddash.io/agent/dash" target="_blank"><img src="https://cdn.commanddash.dev/assets/badge.svg"></a>
 
 </div>
 
