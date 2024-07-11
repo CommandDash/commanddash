@@ -8,7 +8,7 @@
     import LoadingPage from "$lib/components/LoadingPage.svelte";
 
     let currentAgentDetails: Agent;
-    $: loading = false;
+    $: loading = true;
 
     onMount(async () => {
         loading = true;

@@ -3,6 +3,8 @@
     import type { Message } from "$lib/types/Message";
 
     export let messages: Message[] = [];
+    export let agentLogo: string = "";
+    export let agentDisplayName: string = "";
 
     const markdownToPlain = (message: string) => {
         const converter = new showdown.Converter({
@@ -109,6 +111,16 @@
             <div
                 class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded border border-gray-100 bg-[#497BEF]/[.2] px-5 py-3.5 prose-pre:my-2"
             >
+            <div class="inline-flex flex-row justify-center">
+                <img
+                    class="mr-2 aspect-square size-8 rounded"
+                    src={agentLogo}
+                    alt=""
+                />
+                <p class="flex items-center font-semibold">
+                    {agentDisplayName}
+                </p>
+            </div>
                 <div
                     class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base"
                 >

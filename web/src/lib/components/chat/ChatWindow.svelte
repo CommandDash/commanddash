@@ -83,7 +83,7 @@
             <div class="flex h-max flex-col gap-6 pb-40 2xl:gap-7">
                 {#if messages.length > 0}
                     {#if !loading}
-                        <ChatMessage {messages} />
+                        <ChatMessage {messages} {agentLogo} {agentDisplayName} />
                         {#if messageLoading}
                             {#if LottiePlayer}
                                 <div
