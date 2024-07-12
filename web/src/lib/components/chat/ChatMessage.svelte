@@ -10,6 +10,8 @@
 
     let showAllLinks: boolean = false;
 
+    $: validReferences = agentReferences.filter((link) => link.url);
+
     const toggleShowLinks = () => {
         showAllLinks = !showAllLinks;
     };
@@ -138,24 +140,26 @@
                 </div>
                 <div class="mx-auto grid gap-4 md:grid-cols-2">
                     <div class="md:col-span-1 inline-flex flex-col">
-                        <span> Source </span>
-                        {#each agentReferences.slice(0, showAllLinks ? agentReferences.length : 2) as link}
-                            {#if link.url}
-                                <a
-                                    href={link.url}
-                                    target="_blank"
-                                    class="cursor-pointer hover:text-violet-500 underline"
-                                    >{link.url}</a
+                        {#if validReferences.length > 0}
+                            <span> Source </span>
+                            {#each validReferences.slice(0, showAllLinks ? validReferences.length : 2) as link}
+                                {#if link.url}
+                                    <a
+                                        href={link.url}
+                                        target="_blank"
+                                        class="cursor-pointer hover:text-violet-500 underline"
+                                        >{link.url}</a
+                                    >
+                                {/if}
+                            {/each}
+                            {#if validReferences.length > 2}
+                                <span
+                                    on:click={toggleShowLinks}
+                                    class="mt-2 text-blue-500 hover:text-blue-700 underline cursor-pointer"
                                 >
+                                    {showAllLinks ? "Read Less" : "Read More"}
+                                </span>
                             {/if}
-                        {/each}
-                        {#if agentReferences.length > 2}
-                            <span
-                                on:click={toggleShowLinks}
-                                class="mt-2 text-blue-500 hover:text-blue-700 underline cursor-pointer"
-                            >
-                                {showAllLinks ? "Read Less" : "Read More"}
-                            </span>
                         {/if}
                     </div>
                     <div class="md:col-span-2">
