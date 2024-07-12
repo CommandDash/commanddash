@@ -1,6 +1,5 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
-// const fetch = require('node-fetch'); // Ensure you have node-fetch installed
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -10,6 +9,9 @@ const client = new Client({
         GatewayIntentBits.GuildMembers
     ]
 });
+
+// Parse the GUILD_AGENT_MAP from the environment variable
+const guildAgentMap = JSON.parse(process.env.GUILD_AGENT_MAP);
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -90,12 +92,18 @@ client.on('messageCreate', async message => {
             // await channel.send("Hold tight, I'm preparing your answer!\n\nQuick tip ⚡️, I can help you better from your IDE. Install the [VSCode extension](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt)");
         }
 
-
         // Start typing indicator
         const typingInterval = keepTyping(channel);
 
         // Fetch agent details
-        const agentName = "flame_engine";
+        const guildId = message.guild.id;
+        const agentName = guildAgentMap[guildId];
+        if (!agentName) {
+            channel.send('Sorry, I could not find the agent for this guild.');
+            stopTyping(typingInterval); // Stop typing indicator
+            return;
+        }
+
         let agentDetails;
         try {
             const response = await fetch("https://api.commanddash.dev/agent/get-latest-agent", {
