@@ -1,5 +1,9 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -181,3 +185,12 @@ client.on('error', error => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+// API endpoint to return the Discord token
+app.get('/api/token', (req, res) => {
+    res.json({ token: process.env.DISCORD_TOKEN });
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
