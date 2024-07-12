@@ -31,7 +31,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd discord
-          zip -r ../release.zip ./* node_modules package.json package-lock.json web.config
+          zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
