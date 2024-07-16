@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { error } from "@sveltejs/kit";
+    import { error as pageError } from "@sveltejs/kit";
     import { page } from "$app/stores";
 
     import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
@@ -12,8 +12,8 @@
 
     onMount(async () => {
         loading = true;
-        const id: string = $page.params?.id;
         const ref: string = $page.url.searchParams.get('github') || "";
+        console.log('ref', ref);
         try {
             const response = await fetch(
                 "https://api.commanddash.dev/agent/get-latest-agent",
@@ -22,13 +22,13 @@
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ name: id, referrer: ref }),
+                    body: JSON.stringify({ referrer: ref }),
                 },
             );
 
             if (!response.ok) {
                 loading = false;
-                throw error(404, "Agent not found");
+                throw pageError(404, "Agent not found");
             }
 
             currentAgentDetails = (await response.json()) as Agent;
@@ -57,7 +57,7 @@
 {:else if !loading && !currentAgentDetails}
     <div
         class="h-screen w-screen inline-flex justify-center items-center flex-col">
-        <h1 class="text-2xl">404</h1>
-        <h1 class="text-xl">No agent found</h1>
+        <h1 class="text-2xl">Error:</h1>
+        <h1 class="text-xl">Something went wrong</h1>
     </div>
 {/if}
