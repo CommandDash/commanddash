@@ -4,6 +4,7 @@ export type Agent = {
         system_prompt: string,
         version: string
     },
+    data_sources_indexed: boolean,
     description: string,
     metadata: {
         avatar_id: string,
