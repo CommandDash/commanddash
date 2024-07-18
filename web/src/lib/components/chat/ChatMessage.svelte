@@ -1,7 +1,7 @@
 <script lang="ts">
     import showdown from "showdown";
-    import { writable } from 'svelte/store';
-    import Icon from '@iconify/svelte';
+    import { writable } from "svelte/store";
+    import Icon from "@iconify/svelte";
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
     import type { Message } from "$lib/types/Message";
 
@@ -16,7 +16,7 @@
 
     // Toggle the expanded state for a specific message
     const toggleShowLinks = (id: string) => {
-        expandedMessages.update(expanded => {
+        expandedMessages.update((expanded) => {
             if (expanded.has(id)) {
                 expanded.delete(id);
             } else {
@@ -44,12 +44,23 @@
 
     // Helper function to format URLs
     const formatUrl = (url: string) => {
+        const truncateText = (text: string, maxLength: number) => {
+            return text.length > maxLength
+                ? "..." + text.slice(-maxLength)
+                : text;
+        };
+
         const githubMatch = url.match(/github\.com\/(.+)/);
         if (githubMatch) {
-            return { icon: "mdi:github", text: githubMatch[1].replace(/\//g, '-') };
+            const formattedText = githubMatch[1].replace(/\//g, "-");
+            return {
+                icon: "mdi:github",
+                text: truncateText(formattedText, 50),
+            };
         } else {
             const urlObj = new URL(url);
-            return { icon: "mdi:web", text: urlObj.pathname.slice(1).replace(/\//g, '/') };
+            const formattedText = urlObj.pathname.slice(1).replace(/\//g, "/");
+            return { icon: "mdi:web", text: truncateText(formattedText, 50) };
         }
     };
 
@@ -166,9 +177,15 @@
                             {#each (message.references || []).slice(0, $expandedMessages.has(message.role + index) ? message?.references?.length : 2) as link}
                                 {#if link.url}
                                     {#await Promise.resolve(formatUrl(link.url)) then { icon, text }}
-                                        <a href={link.url} target="_blank" class="cursor-pointer hover:text-violet-500 underline">
-                                            <span class="icon inline-flex flex-row items-center">
-                                                <Icon icon={icon} />
+                                        <a
+                                            href={link.url}
+                                            target="_blank"
+                                            class="cursor-pointer hover:text-violet-500 underline"
+                                        >
+                                            <span
+                                                class="icon inline-flex flex-row items-center"
+                                            >
+                                                <Icon {icon} />
                                                 /{text}
                                             </span>
                                         </a>
@@ -176,8 +193,14 @@
                                 {/if}
                             {/each}
                             {#if (message.references || []).length > 2}
-                                <span on:click={() => toggleShowLinks(message.role + index)} class="mt-2 text-blue-500 hover:text-blue-700 underline cursor-pointer">
-                                    {$expandedMessages.has(message.role + index) ? "Read Less" : "Read More"}
+                                <span
+                                    on:click={() =>
+                                        toggleShowLinks(message.role + index)}
+                                    class="mt-2 text-blue-500 hover:text-blue-700 underline cursor-pointer"
+                                >
+                                    {$expandedMessages.has(message.role + index)
+                                        ? "Read Less"
+                                        : "Read More"}
                                 </span>
                             {/if}
                         {/if}
