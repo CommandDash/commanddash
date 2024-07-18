@@ -1,9 +1,11 @@
 <script lang="ts">
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
+    import Icon from "@iconify/svelte";
 
     export let agentDisplayName: string = "";
     export let agentDescription: string = "";
     export let agentLogo: string = "";
+    export let agentIsDataSourceIndexed: boolean = true;
 
     const questionnaires: Array<{
         id: string;
@@ -60,15 +62,40 @@
         </div>
     </div>
     <div class="lg:col-span-2 lg:pl-24 hidden md:block">
-        <div class="overflow-hidden rounded border dark:border-gray-800 cursor-pointer">
-			<a href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt" target="_blank" class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg">
+        <div
+            class="overflow-hidden rounded border dark:border-gray-800 cursor-pointer"
+        >
+            <a
+                href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
+                target="_blank"
+                class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
+            >
                 <IconVisualStudio />
                 <div class="text-sm text-white">VSCode</div>
             </a>
-		</div>
+        </div>
     </div>
     <div class="lg:col-span-3 lg:mt-6">
-        <!-- <p class="mb-3 text-gray-600 dark:text-gray-300">Use case</p> -->
+        {#if !agentIsDataSourceIndexed}
+            <div class="overflow-hidden rounded-xl border dark:border-gray-800">
+                <div class="flex p-3">
+                    <div
+                        class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
+                    >
+                        Data source is currently being indexed. Please visit us again later. Thank you for your patience.
+                    </div>
+                    <p
+                        class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
+                    >
+                        <Icon
+                            icon="material-symbols:info"
+                            width="24px"
+                            height="24px"
+                        />
+                    </p>
+                </div>
+            </div>
+        {/if}
         <div class="grid gap-3 lg:grid-cols-2 lg:gap-5">
             <!-- {#each questionnaires as questionnaire}
                 <button

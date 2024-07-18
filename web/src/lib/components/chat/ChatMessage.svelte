@@ -1,19 +1,29 @@
 <script lang="ts">
     import showdown from "showdown";
+    import { writable } from "svelte/store";
+    import Icon from "@iconify/svelte";
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
     import type { Message } from "$lib/types/Message";
 
     export let messages: Message[] = [];
     export let agentLogo: string = "";
     export let agentDisplayName: string = "";
-    export let agentReferences: Array<any> = [];
 
     let showAllLinks: boolean = false;
 
-    $: validReferences = agentReferences.filter((link) => link.url);
+    // Store to track which messages have their links expanded
+    const expandedMessages = writable(new Set<string>());
 
-    const toggleShowLinks = () => {
-        showAllLinks = !showAllLinks;
+    // Toggle the expanded state for a specific message
+    const toggleShowLinks = (id: string) => {
+        expandedMessages.update((expanded) => {
+            if (expanded.has(id)) {
+                expanded.delete(id);
+            } else {
+                expanded.add(id);
+            }
+            return expanded;
+        });
     };
 
     const markdownToPlain = (message: string) => {
@@ -30,6 +40,28 @@
             extensions: [startAttributeExtension],
         });
         return converter.makeHtml(message);
+    };
+
+    // Helper function to format URLs
+    const formatUrl = (url: string) => {
+        const truncateText = (text: string, maxLength: number) => {
+            return text.length > maxLength
+                ? "..." + text.slice(-maxLength)
+                : text;
+        };
+
+        const githubMatch = url.match(/github\.com\/(.+)/);
+        if (githubMatch) {
+            const formattedText = githubMatch[1].replace(/\//g, "-");
+            return {
+                icon: "mdi:github",
+                text: truncateText(formattedText, 50),
+            };
+        } else {
+            const urlObj = new URL(url);
+            const formattedText = urlObj.pathname.slice(1).replace(/\//g, "/");
+            return { icon: "mdi:web", text: truncateText(formattedText, 50) };
+        }
     };
 
     const isInsideCodeBlock = (line: string, codeBlockRegex: RegExp) => {
@@ -97,8 +129,8 @@
     };
 </script>
 
-{#each messages as message}
-    {#if message?.role === "user"}
+{#each messages as message, index}
+    {#if message.role === "user"}
         <div
             class="group relative w-full items-start justify-start gap-4 max-sm:text-sm"
             role="presentation"
@@ -140,24 +172,35 @@
                 </div>
                 <div class="mx-auto grid gap-4 md:grid-cols-2">
                     <div class="md:col-span-1 inline-flex flex-col">
-                        {#if validReferences.length > 0}
+                        {#if (message.references || []).length > 0}
                             <span> Source </span>
-                            {#each validReferences.slice(0, showAllLinks ? validReferences.length : 2) as link}
+                            {#each (message.references || []).slice(0, $expandedMessages.has(message.role + index) ? message?.references?.length : 2) as link}
                                 {#if link.url}
-                                    <a
-                                        href={link.url}
-                                        target="_blank"
-                                        class="cursor-pointer hover:text-violet-500 underline"
-                                        >{link.url}</a
-                                    >
+                                    {#await Promise.resolve(formatUrl(link.url)) then { icon, text }}
+                                        <a
+                                            href={link.url}
+                                            target="_blank"
+                                            class="cursor-pointer hover:text-violet-500 underline"
+                                        >
+                                            <span
+                                                class="icon inline-flex flex-row items-center"
+                                            >
+                                                <Icon {icon} />
+                                                /{text}
+                                            </span>
+                                        </a>
+                                    {/await}
                                 {/if}
                             {/each}
-                            {#if validReferences.length > 2}
+                            {#if (message.references || []).length > 2}
                                 <span
-                                    on:click={toggleShowLinks}
+                                    on:click={() =>
+                                        toggleShowLinks(message.role + index)}
                                     class="mt-2 text-blue-500 hover:text-blue-700 underline cursor-pointer"
                                 >
-                                    {showAllLinks ? "Read Less" : "Read More"}
+                                    {$expandedMessages.has(message.role + index)
+                                        ? "Read Less"
+                                        : "Read More"}
                                 </span>
                             {/if}
                         {/if}
