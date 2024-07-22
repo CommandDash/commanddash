@@ -7,6 +7,8 @@
     export let agentLogo: string = "";
     export let agentIsDataSourceIndexed: boolean = true;
 
+    let emailValue: string = "";
+
     const questionnaires: Array<{
         id: string;
         message: string;
@@ -41,6 +43,22 @@
             },
         },
     ];
+
+    async function notify() {
+        try {
+            const response = await fetch("", {
+                method: "POST",
+                body: "",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            await response.json();
+        } catch (error) {
+            console.log("error", error);
+        }
+    }
 </script>
 
 <div class="my-auto grid gap-4 lg:grid-cols-2">
@@ -76,13 +94,14 @@
         </div>
     </div>
     <div class="lg:col-span-3 lg:mt-6">
-        {#if !agentIsDataSourceIndexed}
+        {#if agentIsDataSourceIndexed}
             <div class="overflow-hidden rounded-xl border dark:border-gray-800">
                 <div class="flex p-3">
                     <div
                         class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
                     >
-                        Data source is currently being indexed. Please visit us again later. Thank you for your patience.
+                        Data source is currently being indexed. Please visit us
+                        again later. Thank you for your patience.
                     </div>
                     <p
                         class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
@@ -93,6 +112,24 @@
                             height="24px"
                         />
                     </p>
+                </div>
+                <div class="flex px-3 pb-3">
+                    <input
+                        bind:value={emailValue}
+                        autocomplete="email"
+                        autocorrect="off"
+                        autocapitalize="none"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        name="email"
+                        placeholder="Email address"
+                        required=""
+                        type="text"
+                    />
+                    <button
+                        on:submit={notify}
+                        class="flex items-center justify-center w-full md:w-auto h-12 px-8 mx-2 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
+                        >Notify</button
+                    >
                 </div>
             </div>
         {/if}
