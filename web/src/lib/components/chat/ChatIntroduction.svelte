@@ -94,7 +94,7 @@
         </div>
     </div>
     <div class="lg:col-span-3 lg:mt-6">
-        {#if agentIsDataSourceIndexed}
+        {#if !agentIsDataSourceIndexed}
             <div class="overflow-hidden rounded-xl border dark:border-gray-800">
                 <div class="flex p-3">
                     <div
