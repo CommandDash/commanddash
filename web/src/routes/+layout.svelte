@@ -1,20 +1,44 @@
 <script lang="ts">
     import "../styles/main.css";
-    import {onMount} from "svelte";
+    import { onMount } from "svelte";
     import { browser } from "$app/environment";
     import NavMenu from "$lib/components/NavMenu.svelte";
+    import MobileNav from "$lib/components/MobileNav.svelte";
+    import ExpandNavigation from "$lib/components/ExpandNavigation.svelte";
+
+    let isNavCollapsed = true;
+    let isNavOpen = false;
 
     onMount(() => {
         if (browser) {
-            window.document.documentElement.classList.add('dark')
+            window.document.documentElement.classList.add("dark");
         }
-    })
+    });
 </script>
 
-<div class="grid h-full w-screen grid-cols-1 grid-rows-[auto,1fr] overflow-hidden text-smd md:grid-cols-[280px,1fr] md:grid-rows-[1fr] dark:text-gray-300">
-    <!--TODO: Uncomment the nav menu -->
+<ExpandNavigation
+	isCollapsed={isNavCollapsed}
+	on:click={() => (isNavCollapsed = !isNavCollapsed)}
+	classNames="absolute z-10 my-auto {!isNavCollapsed
+		? 'left-[280px]'
+		: 'left-0'} *:transition-transform"
+/>
+
+<div
+    class="grid h-full w-screen grid-cols-1 grid-rows-[auto,1fr] overflow-hidden text-smd {!isNavCollapsed
+        ? 'md:grid-cols-[280px,1fr]'
+        : 'md:grid-cols-[0px,1fr]'} transition-[300ms] [transition-property:grid-template-columns] md:grid-rows-[1fr] dark:text-gray-300"
+>
+    <MobileNav
+        title="CommandDash"
+        isOpen={isNavOpen}
+        on:toggle={(ev) => (isNavOpen = ev.detail)}
+    >
+        <NavMenu />
+    </MobileNav>
+
     <nav
-        class="grid max-h-screen grid-cols-1 grid-rows-[auto,1fr,auto] overflow-hidden *:w-[280px] max-md:hidden"
+        class=" grid max-h-screen grid-cols-1 grid-rows-[auto,1fr,auto] overflow-hidden *:w-[280px] max-md:hidden"
     >
         <NavMenu />
     </nav>
