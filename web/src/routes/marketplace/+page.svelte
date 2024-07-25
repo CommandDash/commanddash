@@ -12,7 +12,10 @@
     let filteredAgents: Agent[] = [];
     let searchValue: string = "";
 
+    $: loading = true;
+
     onMount(async () => {
+        loading = true;
         const response = await fetch(
             "https://api.commanddash.dev/agent/web/get-agent-list",
             {
@@ -26,9 +29,11 @@
 
         const _response = await response.json();
         if (!response.ok) {
+            loading = false;
         }
         agents = _response;
         filteredAgents = _response;
+        loading = false;
     });
 
     const navigateAgents = (agent: Agent) => {
@@ -101,44 +106,87 @@
 				<CarbonAdd />Create quick agent
 			</a> -->
         </div>
-        <div
-            class="mt-7 flex flex-wrap items-center gap-x-2 gap-y-3 text-sm"
-        ></div>
-        <div
-            class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
-        >
-            {#each filteredAgents as agent}
-                <button
-                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                    on:click={() => navigateAgents(agent)}
-                >
-                    <img
-                        src={agent.metadata.avatar_id}
-                        alt="Avatar"
-                        class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                    />
-                    <h3
-                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+        {#if loading}
+            <div class="flex-col w-full h-48 px-2 py-3">
+                <div class="inline-flex flex-row items-end px-2">
+                    <span id="workspace-loader-text">Loading results</span>
+                    <div class="typing-loader mx-2"></div>
+                </div>
+            </div>
+        {:else}
+            <div
+                class="mt-7 flex flex-wrap items-center gap-x-2 gap-y-3 text-sm"
+            ></div>
+            <div
+                class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
+            >
+                {#each filteredAgents as agent}
+                    <button
+                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                        on:click={() => navigateAgents(agent)}
                     >
-                        {agent.metadata.display_name}
-                    </h3>
-                    <p
-                        class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
-                    >
-                        {agent.metadata.description}
-                    </p>
-                    <p
-                        class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500"
-                    >
-                        Created by <a
-                            class="hover:underline"
-                            href="https://github.com/{agent.author.github_id}"
+                        <img
+                            src={agent.metadata.avatar_id}
+                            alt="Avatar"
+                            class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                        />
+                        <h3
+                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
                         >
-                            {agent.author.name}
-                        </a>
-                    </p>
-                </button>
-            {/each}
-        </div>
+                            {agent.metadata.display_name}
+                        </h3>
+                        <p
+                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
+                        >
+                            {agent.metadata.description}
+                        </p>
+                        <p
+                            class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500"
+                        >
+                            Created by <a
+                                class="hover:underline"
+                                href="https://github.com/{agent.author
+                                    .github_id}"
+                            >
+                                {agent.author.name}
+                            </a>
+                        </p>
+                    </button>
+                {/each}
+            </div>
+        {/if}
     </div>
 </div>
+<style>
+
+    .typing-loader {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        animation: loading 1s linear infinite alternate;
+        margin-bottom: 4px;
+    }
+
+    @keyframes loading {
+        0% {
+            background-color: #0e70c0;
+            box-shadow:
+                8px 0px 0px 0px #d4d4d4,
+                16px 0px 0px 0px #d4d4d4;
+        }
+
+        25% {
+            background-color: #d4d4d4;
+            box-shadow:
+                8px 0px 0px 0px #0e70c0,
+                16px 0px 0px 0px #d4d4d4;
+        }
+
+        75% {
+            background-color: #d4d4d4;
+            box-shadow:
+                8px 0px 0px 0px #d4d4d4,
+                16px 0px 0px 0px #0e70c0;
+        }
+    }
+</style>
