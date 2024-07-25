@@ -5,7 +5,7 @@
     import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
 
     onMount(() => {
-        goto('agent/dash');
+        goto('/marketplace');
     });
 </script>
 

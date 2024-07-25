@@ -1,46 +1,46 @@
 <script lang="ts">
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
+    import {toastStore} from "$lib/stores/ToastStores";
+
     import Icon from "@iconify/svelte";
+    import { ToastType } from "$lib/types/Toast";
+    import Toast from "../Toast.svelte";
 
     export let agentDisplayName: string = "";
     export let agentDescription: string = "";
     export let agentLogo: string = "";
+    export let agentId: string = "";
     export let agentIsDataSourceIndexed: boolean = true;
 
-    const questionnaires: Array<{
-        id: string;
-        message: string;
-        icon: { svg: string };
-    }> = [
-        {
-            id: "explore-marketplace",
-            message: "Explore marketplace",
-            icon: {
-                svg: `<svg width="20px" height="20px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" version="1.1" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="m10.25 8c0 3.25 4 3.25 4 0 0-3.45178-2.7982-6.25-6.25-6.25-3.45178 0-6.25 2.79822-6.25 6.25s2.79822 6.25 6.25 6.25c2.25 0 3.25-1 3.25-1"/><circle cx="8" cy="8" r="2.25"/></svg>`,
-            },
-        },
-        {
-            id: "commanddash-questionaire",
-            message: "What can CommandDash do?",
-            icon: {
-                svg: `<svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 14C12 14 12 13.3223 12 12.5C12 11.6777 15.5 11.5 15.5 9C15.5 7.5 14 6.5 12 6.5C10.5 6.5 9 7.5 9 9" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.2271 16.9535C13.2271 17.6313 12.6777 18.1807 11.9999 18.1807C11.3221 18.1807 10.7726 17.6313 10.7726 16.9535C10.7726 16.2757 11.3221 15.7262 11.9999 15.7262C12.6777 15.7262 13.2271 16.2757 13.2271 16.9535Z" fill="#000000"/></svg>`,
-            },
-        },
-        {
-            id: "attach-code",
-            message: "How to attach code snippets",
-            icon: {
-                svg: `<svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17L22 12L17 7M7 7L2 12L7 17M14 3L10 21" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-            },
-        },
-        {
-            id: "create-agents",
-            message: "Can I create my own agents?",
-            icon: {
-                svg: "",
-            },
-        },
-    ];
+    let emailValue: string = "";
+
+    const notify = async () => {
+        const data = {"name": agentId, "recipient_mail": emailValue, "notify_for": "data_index"};
+        debugger;
+        try {
+            const response = await fetch("https://api.commanddash.dev/agent/notify", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            debugger;
+
+            const _response = await response.json();
+
+            if (!response.ok) {
+                toastStore.set({message: _response.message, type: ToastType.ERROR});
+                return;
+            }
+
+            console.log('response', _response);
+            toastStore.set({message: 'Notification sent successfully', type: ToastType.SUCCESS});
+        } catch (error) {
+            console.log("error", error);
+            toastStore.set({message: 'Ops! Something went wrong', type: ToastType.ERROR});
+        }
+    }
 </script>
 
 <div class="my-auto grid gap-4 lg:grid-cols-2">
@@ -82,7 +82,8 @@
                     <div
                         class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
                     >
-                        Data source is currently being indexed. Please visit us again later. Thank you for your patience.
+                        Data source is currently being indexed. Please visit us
+                        again later. Thank you for your patience.
                     </div>
                     <p
                         class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
@@ -93,6 +94,23 @@
                             height="24px"
                         />
                     </p>
+                </div>
+                <div class="flex px-3 pb-3">
+                    <input
+                        bind:value={emailValue}
+                        autocomplete="email"
+                        autocorrect="off"
+                        autocapitalize="none"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        name="email"
+                        placeholder="Email address"
+                        type="text"
+                    />
+                    <button
+                        on:click={notify}
+                        class="flex items-center justify-center w-full md:w-auto h-12 px-8 mx-2 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
+                        >Notify</button
+                    >
                 </div>
             </div>
         {/if}
