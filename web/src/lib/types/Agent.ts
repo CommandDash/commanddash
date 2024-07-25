@@ -1,4 +1,10 @@
 export type Agent = {
+    author: {
+        github_id: string,
+        id: string,
+        name: string,
+        source_url: string | null
+    },
     chat_mode: {
         data_sources: string[],
         system_prompt: string,
