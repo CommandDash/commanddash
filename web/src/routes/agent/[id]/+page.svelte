@@ -50,6 +50,7 @@
         agentDisplayName={currentAgentDetails?.metadata?.display_name}
         agentDescription={currentAgentDetails?.metadata?.description}
         agentLogo={currentAgentDetails?.metadata?.avatar_id}
+        agentId={currentAgentDetails?.name}
     />
 {/if}
 

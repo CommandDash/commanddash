@@ -13,6 +13,7 @@
     export let loading = false;
     export let agentName: string = "dash";
     export let agentDisplayName: string = "Dash";
+    export let agentId: string = "";
     export let agentDescription: string = "Default Agent Dash";
     export let agentLogo: string = "";
     export let agentVersion: string = "1.0.3";
@@ -65,6 +66,8 @@
                 ...messages,
                 { role: "model", text: modelResponse.response, references: modelResponse.references },
             ];
+
+            console.log('model response', modelResponse);
         } catch (error) {
             console.log("error", error);
         }
@@ -113,6 +116,7 @@
                         {agentDisplayName}
                         {agentLogo}
                         {agentIsDataSourceIndexed}
+                        {agentId}
                     />
                 {/if}
             </div>

@@ -1,27 +1,56 @@
 <script lang="ts">
     import "../styles/main.css";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import { browser } from "$app/environment";
     import NavMenu from "$lib/components/NavMenu.svelte";
     import MobileNav from "$lib/components/MobileNav.svelte";
     import ExpandNavigation from "$lib/components/ExpandNavigation.svelte";
+    import Toast from "$lib/components/Toast.svelte";
+    import { ToastType } from "$lib/types/Toast";
+    import { toastStore } from "$lib/stores/ToastStores";
 
     let isNavCollapsed = true;
     let isNavOpen = false;
+    let toastMessage: string | null = null;
+    let toastType: ToastType | null = null;
+    let toastTimeout: ReturnType<typeof setTimeout>;
+
+    const unsubscribe = toastStore.subscribe((value) => {
+        if (value) {
+            toastMessage = value.message;
+            toastType = value.type;
+
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+            }
+
+            toastTimeout = setTimeout(() => {
+                toastMessage = null;
+                toastType = null;
+            }, 3000);
+        } else {
+            toastMessage = null;
+            toastType = null;
+        }
+    });
 
     onMount(() => {
         if (browser) {
             window.document.documentElement.classList.add("dark");
         }
     });
+
+    onDestroy(() => {
+        unsubscribe();
+    });
 </script>
 
 <ExpandNavigation
-	isCollapsed={isNavCollapsed}
-	on:click={() => (isNavCollapsed = !isNavCollapsed)}
-	classNames="absolute z-10 my-auto {!isNavCollapsed
-		? 'left-[280px]'
-		: 'left-0'} *:transition-transform"
+    isCollapsed={isNavCollapsed}
+    on:click={() => (isNavCollapsed = !isNavCollapsed)}
+    classNames="absolute z-10 my-auto {!isNavCollapsed
+        ? 'left-[280px]'
+        : 'left-0'} *:transition-transform"
 />
 
 <div
@@ -42,5 +71,8 @@
     >
         <NavMenu />
     </nav>
+    {#if toastMessage}
+        <Toast message={toastMessage} {toastType} />
+    {/if}
     <slot />
 </div>
