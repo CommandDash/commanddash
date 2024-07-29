@@ -67,7 +67,6 @@
                 { role: "model", text: modelResponse.response, references: modelResponse.references },
             ];
 
-            console.log('model response', modelResponse);
         } catch (error) {
             console.log("error", error);
         }

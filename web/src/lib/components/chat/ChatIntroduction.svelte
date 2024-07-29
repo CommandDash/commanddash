@@ -34,7 +34,6 @@
                 return;
             }
 
-            console.log('response', _response);
             toastStore.set({message: 'Notification sent successfully', type: ToastType.SUCCESS});
         } catch (error) {
             console.log("error", error);
