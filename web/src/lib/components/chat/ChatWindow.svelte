@@ -64,8 +64,9 @@
             const modelResponse = await response.json();
             messages = [
                 ...messages,
-                { role: "model", text: modelResponse.response, references: modelResponse.references },
+                { role: "model", text: modelResponse.response },
             ];
+            agentReferences = modelResponse?.references
 
         } catch (error) {
             console.log("error", error);
