@@ -20,24 +20,24 @@
 
     onMount(async () => {
         loading = false;
-        // const response = await fetch(
-        //     "https://api.commanddash.dev/agent/web/get-agent-list",
-        //     {
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         method: "POST",
-        //         body: JSON.stringify({ cli_version: "0.0.1" }),
-        //     },
-        // );
+        const response = await fetch(
+            "https://api.commanddash.dev/agent/web/get-agent-list",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify({ cli_version: "0.0.1" }),
+            },
+        );
 
-        // const _response = await response.json();
-        // if (!response.ok) {
-        //     loading = false;
-        // }
-        // agents = _response;
-        // filteredAgents = _response;
-        // loading = false;
+        const _response = await response.json();
+        if (!response.ok) {
+            loading = false;
+        }
+        agents = _response;
+        filteredAgents = _response;
+        loading = false;
     });
 
     const navigateAgents = (agent: Agent) => {
