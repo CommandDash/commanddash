@@ -8,11 +8,13 @@
     import { goto } from "$app/navigation";
     import { debounce } from "$lib/utils/debounce";
     import { base } from "$app/paths";
+    import CreateAgentDialog from "$lib/components/CreateAgentDialog.svelte";
 
     const SEARCH_DEBOUNCE_DELAY = 400;
     let agents: Agent[] = [];
     let filteredAgents: Agent[] = [];
     let searchValue: string = "";
+    let showModal: boolean = false;
 
     $: loading = true;
 
@@ -86,7 +88,7 @@
             <button
                 class="flex ml-auto h-8 items-center gap-1 whitespace-nowrap rounded-lg border bg-white py-1 pl-1.5 pr-2.5 shadow-sm hover:bg-gray-50 hover:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-700"
                 on:click={() => {
-                    goto(`${base}/create-agent`)
+                    showModal = true;
                 }}
             >
                 <CarbonAdd />Create an agent
@@ -179,21 +181,25 @@
                     </button>
                 {/each}
                 {#if filteredAgents.length === 0}
-                <button
+                    <button
                         class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
                         on:click={() => {
-                            goto(`${base}/create-agent`)
+                            showModal = true;
                         }}
                     >
-                    <CarbonAdd 
-                    height="5.5em"
-                    width="5.5em"/>
-                </button>
+                        <CarbonAdd height="5.5em" width="5.5em" />
+                    </button>
                 {/if}
             </div>
         {/if}
     </div>
 </div>
+<CreateAgentDialog
+    bind:showModal
+    onClose={() => {
+        showModal = false;
+    }}
+/>
 
 <style>
     .typing-loader {

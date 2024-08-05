@@ -4,7 +4,6 @@
 
     import Icon from "@iconify/svelte";
     import { ToastType } from "$lib/types/Toast";
-    import Toast from "../Toast.svelte";
 
     export let agentDisplayName: string = "";
     export let agentDescription: string = "";
