@@ -2,15 +2,10 @@
     import "../styles/main.css";
     import { onDestroy, onMount } from "svelte";
     import { browser } from "$app/environment";
-    import NavMenu from "$lib/components/NavMenu.svelte";
-    import MobileNav from "$lib/components/MobileNav.svelte";
-    import ExpandNavigation from "$lib/components/ExpandNavigation.svelte";
     import Toast from "$lib/components/Toast.svelte";
     import { ToastType } from "$lib/types/Toast";
     import { toastStore } from "$lib/stores/ToastStores";
 
-    let isNavCollapsed = true;
-    let isNavOpen = false;
     let toastMessage: string | null = null;
     let toastType: ToastType | null = null;
     let toastTimeout: ReturnType<typeof setTimeout>;

@@ -39,13 +39,13 @@
     >
         <dialog
             bind:this={dialog}
-            class="flex flex-col content-center items-center gap-x-10 gap-y-3 overflow-hidden rounded-2xl bg-white p-4 pt-6 text-center shadow-2xl outline-none max-sm:w-[85dvw] max-sm:px-6 md:w-96 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
+            class="flex flex-col content-center items-center gap-x-10 gap-y-3 overflow-hidden rounded-2xl bg-gradient-to-r from-[#19202d] to-[#111827] p-4 pt-6 text-center shadow-2xl outline-none max-sm:w-[85dvw] max-sm:px-6 md:w-96 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
             on:close={() => dialog.close()}
             open={showModal}
         >
-            <h1 class="text-xl font-bold">Create Agent</h1>
+            <h1 class="text-xl font-bold text-white">Create Agent</h1>
             <input
-                class="border-gray-300 text-black rounded-md top-0 m-0 h-full w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-2 bg-transparent p-3"
+                class="border-gray-300 text-white rounded-md top-0 m-0 h-full w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-2 bg-transparent p-3 "
                 placeholder="Github url"
                 type="url"
                 {value}
