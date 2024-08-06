@@ -4,6 +4,7 @@
     import { goto } from "$app/navigation";
     import { toastStore } from "$lib/stores/ToastStores";
     import { ToastType } from "$lib/types/Toast";
+	import IconClose from "~icons/carbon/close";
 
     export let showModal: boolean;
     export let onClose: () => void;
@@ -43,23 +44,25 @@
             on:close={() => dialog.close()}
             open={showModal}
         >
-            <h1 class="text-xl font-bold text-white">Create Agent</h1>
+            <div class="absolute right-0 top-0 mr-2 mt-2">
+                <button
+					class="flex items-center px-2.5 py-1 text-sm text-white"
+					on:click={onClose}
+				>
+					<IconClose class="mr-1.5 text-xl" />
+				</button>
+            </div>
+            <h1 class="text-xl font-bold text-white">Create An Agent</h1>
             <input
-                class="border-gray-300 text-white rounded-md top-0 m-0 h-full w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-2 bg-transparent p-3 "
+                class="border-gray-300 text-white rounded-md top-0 m-0 h-12 w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-2 bg-transparent p-3 "
                 placeholder="Github url"
                 type="url"
                 {value}
                 on:input={(e) => addGithubURL(e.currentTarget.value)}
             />
             <button
-                class="mt-4 w-full rounded-full bg-gray-200 px-4 py-2 font-semibold text-gray-700"
-                on:click={onClose}
-            >
-                Cancel
-            </button>
-            <button
                 on:click={onCreateAgent}
-                class=" w-full rounded-full bg-black px-4 py-3 font-semibold text-white"
+                class="mt-4 w-full rounded-full bg-black px-4 py-3 font-semibold text-white"
             >
                 Create Agent
             </button>

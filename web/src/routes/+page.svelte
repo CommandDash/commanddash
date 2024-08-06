@@ -20,25 +20,25 @@
     $: loading = true;
 
     onMount(async () => {
-        loading = false;
-        // const response = await fetch(
-        //     "https://api.commanddash.dev/agent/web/get-agent-list",
-        //     {
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         method: "POST",
-        //         body: JSON.stringify({ cli_version: "0.0.1" }),
-        //     },
-        // );
+        loading = true;
+        const response = await fetch(
+            "https://api.commanddash.dev/agent/web/get-agent-list",
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify({ cli_version: "0.0.1" }),
+            },
+        );
 
-        // const _response = await response.json();
-        // if (!response.ok) {
-        //     loading = false;
-        // }
-        // agents = _response;
-        // filteredAgents = _response;
-        // loading = false;
+        const _response = await response.json();
+        if (!response.ok) {
+            loading = false;
+        }
+        agents = _response;
+        filteredAgents = _response;
+        loading = false;
     });
 
     const navigateAgents = (agent: Agent) => {
@@ -87,7 +87,7 @@
                 </h3>
             </div>
             <button
-                class="flex ml-auto h-8 items-center gap-1 whitespace-nowrap rounded-lg border bg-white py-1 pl-1.5 pr-2.5 shadow-sm hover:bg-gray-50 hover:shadow-none dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-700"
+                class="flex ml-auto h-8 items-center gap-1 whitespace-nowrap rounded-lg border bg-black py-1 pl-1.5 pr-2.5 shadow-sm hover:bg-gray-500 hover:shadow-none dark:border-black dark:bg-black dark:hover:bg-gray-700"
                 on:click={() => {
                     showModal = true;
                 }}
@@ -181,16 +181,19 @@
                         {/if}
                     </button>
                 {/each}
-                {#if filteredAgents.length === 0}
-                    <button
-                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                        on:click={() => {
-                            showModal = true;
-                        }}
+                <button
+                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                    on:click={() => {
+                        showModal = true;
+                    }}
+                >
+                    <CarbonAdd height="5.5em" width="5.5em" />
+                    <h3
+                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
                     >
-                        <CarbonAdd height="5.5em" width="5.5em" />
-                    </button>
-                {/if}
+                        Create from github
+                    </h3>
+                </button>
             </div>
         {/if}
     </div>
