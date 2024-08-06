@@ -5,6 +5,8 @@
     import { toastStore } from "$lib/stores/ToastStores";
     import { ToastType } from "$lib/types/Toast";
 	import IconClose from "~icons/carbon/close";
+    import CarbonSearch from "~icons/carbon/search";
+    import CarbonGithub from "~icons/carbon/logo-github";
 
     export let showModal: boolean;
     export let onClose: () => void;
@@ -40,7 +42,7 @@
     >
         <dialog
             bind:this={dialog}
-            class="flex flex-col content-center items-center gap-x-10 gap-y-3 overflow-hidden rounded-2xl bg-gradient-to-r from-[#19202d] to-[#111827] p-4 pt-6 text-center shadow-2xl outline-none max-sm:w-[85dvw] max-sm:px-6 md:w-96 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
+            class="flex flex-col content-center items-center gap-x-10 gap-y-3 overflow-hidden rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950 dark:hover:bg-gray-950 max-sm:w-[85dvw] max-sm:px-6 md:w-96 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
             on:close={() => dialog.close()}
             open={showModal}
         >
@@ -53,16 +55,25 @@
 				</button>
             </div>
             <h1 class="text-xl font-bold text-white">Create An Agent</h1>
-            <input
-                class="border-gray-300 text-white rounded-md top-0 m-0 h-12 w-full resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-2 bg-transparent p-3 "
-                placeholder="Github url"
-                type="url"
-                {value}
-                on:input={(e) => addGithubURL(e.currentTarget.value)}
-            />
+            <div
+                class="relative flex h-[50px] min-w-full items-center rounded-md border px-2 has-[:focus]:border-gray-400 sm:w-64 dark:border-gray-600"
+            >
+                <CarbonGithub
+                    height="1.5em"
+                    width="1.5em"
+                    class="pointer-events-none absolute left-2 text-xs text-gray-400"
+                />
+                <input
+                    class="h-[50px] w-full bg-transparent pl-7 focus:outline-none text-white"
+                    placeholder="Github URL"
+                    type="url"
+                    {value}
+                    on:input={(e) => addGithubURL(e.currentTarget.value)}
+                />
+            </div>
             <button
                 on:click={onCreateAgent}
-                class="mt-4 w-full rounded-full bg-black px-4 py-3 font-semibold text-white"
+                class="mt-4 w-full rounded-full bg-gray-300 px-4 py-3 font-semibold text-black"
             >
                 Create Agent
             </button>

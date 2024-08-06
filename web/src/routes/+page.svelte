@@ -52,7 +52,8 @@
                 agent.metadata.display_name
                     .toLowerCase()
                     .includes(searchValue) ||
-                agent.author.name.toLowerCase().includes(searchValue)
+                agent.author.name.toLowerCase().includes(searchValue) ||
+                agent.author.source_url?.toLowerCase().includes(searchValue)
             );
         });
     }, SEARCH_DEBOUNCE_DELAY);
@@ -87,12 +88,12 @@
                 </h3>
             </div>
             <button
-                class="flex ml-auto h-8 items-center gap-1 whitespace-nowrap rounded-lg border bg-black py-1 pl-1.5 pr-2.5 shadow-sm hover:bg-gray-500 hover:shadow-none dark:border-black dark:bg-black dark:hover:bg-gray-700"
+                class="flex ml-auto h-9 items-center gap-1 whitespace-nowrap rounded-lg border bg-black py-1 px-3 shadow-lg hover:bg-gray-700 hover:shadow-md dark:border-black dark:bg-black dark:hover:bg-gray-600 transition duration-200 ease-in-out transform hover:-translate-y-1"
                 on:click={() => {
                     showModal = true;
                 }}
             >
-                <CarbonGithub />Create github agent
+                <CarbonGithub />Create agent
             </button>
         </div>
         <div class="mt-6 flex flex-wrap gap-2 items-center">
@@ -187,9 +188,9 @@
                         showModal = true;
                     }}
                 >
-                    <CarbonAdd height="5.5em" width="5.5em" />
+                    <CarbonGithub height="5.5em" width="5.5em" />
                     <h3
-                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm mt-2"
                     >
                         Create from github
                     </h3>
