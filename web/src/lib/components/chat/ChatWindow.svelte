@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
 
     import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
     import type { Message } from "$lib/types/Message";
@@ -38,7 +38,7 @@
         
             switch (questionnaire?.id) {
                 case "generate-summary":
-                    message = `Please give me a complete summary about ${agentId}`;
+                    message = `Please give me a complete summary about ${agentDisplayName}`;
                     handleSubmit();
                     break;
                 case "ask-about":
@@ -54,7 +54,13 @@
         })
     });
 
+    onDestroy(() => {
+        message = "";
+        questionnaireStore.set({id: "", message: ""});
+    });
+
     const onHome = () => {
+        message = "";
         goto('/');
     }
 
