@@ -1,9 +1,11 @@
 <script lang="ts">
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
-    import {toastStore} from "$lib/stores/ToastStores";
+    import { toastStore } from "$lib/stores/ToastStores";
 
     import Icon from "@iconify/svelte";
     import { ToastType } from "$lib/types/Toast";
+    import type { Questionnaire } from "$lib/types/Questionnaires";
+    import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
 
     export let agentDisplayName: string = "";
     export let agentDescription: string = "";
@@ -12,33 +14,60 @@
     export let agentIsDataSourceIndexed: boolean = true;
 
     let emailValue: string = "";
+    let questionnaires: Array<Questionnaire> = [
+        { id: "generate-summary", message: "Generate Summary" },
+        { id: "ask-about", message: "Ask about a feature" },
+        { id: "search-code", message: "Search for code or issues" },
+        { id: "get-help", message: "Get help fixing an issue" },
+    ];
 
     const notify = async () => {
-        const data = {"name": agentId, "recipient_mail": emailValue, "notify_for": "data_index"};
+        const data = {
+            name: agentId,
+            recipient_mail: emailValue,
+            notify_for: "data_index",
+        };
         debugger;
         try {
-            const response = await fetch("https://api.commanddash.dev/agent/notify", {
-                method: "POST",
-                body: JSON.stringify(data),
-                headers: {
-                    "Content-Type": "application/json",
+            const response = await fetch(
+                "https://api.commanddash.dev/agent/notify",
+                {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                 },
-            });
+            );
             debugger;
 
             const _response = await response.json();
 
             if (!response.ok) {
-                toastStore.set({message: _response.message, type: ToastType.ERROR});
+                toastStore.set({
+                    message: _response.message,
+                    type: ToastType.ERROR,
+                });
                 return;
             }
 
-            toastStore.set({message: 'Notification sent successfully', type: ToastType.SUCCESS});
+            toastStore.set({
+                message: "Notification sent successfully",
+                type: ToastType.SUCCESS,
+            });
         } catch (error) {
             console.log("error", error);
-            toastStore.set({message: 'Ops! Something went wrong', type: ToastType.ERROR});
+            toastStore.set({
+                message: "Ops! Something went wrong",
+                type: ToastType.ERROR,
+            });
         }
+    };
+
+    const onQuestionnaire = (questionnaire: Questionnaire) => {
+        questionnaireStore.set(questionnaire);
     }
+
 </script>
 
 <div class="my-auto grid gap-4 lg:grid-cols-2">
@@ -112,19 +141,14 @@
                 </div>
             </div>
         {/if}
-        <div class="grid gap-3 lg:grid-cols-2 lg:gap-5">
-            <!-- {#each questionnaires as questionnaire}
+        <div class="grid gap-3 lg:grid-cols-2 lg:gap-5 mt-3">
+            {#each questionnaires as questionnaire}
                 <button
-                    class={`relative rounded-xl border ${questionnaire.id === "explore-marketplace" ? "bg-[#497BEF] text-gray-300 border-[#497BEF] hover:bg-[#287CEB] hover:border-[#287CEB]" : "bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100"} p-3 max-xl:text-sm xl:p-3.5`}
-                >
+                    class={`relative rounded-xl border ${questionnaire.id === "generate-summary" ? "bg-[#497BEF] text-gray-300 border-[#497BEF] hover:bg-[#287CEB] hover:border-[#287CEB]" : "bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100"} p-3 max-xl:text-sm xl:p-3.5`}
+                    on:click={() => onQuestionnaire(questionnaire)}>
                     {questionnaire.message}
-                    <div
-                        class="absolute mx-2 my-1 bottom-0 right-0 bg-white p-1 rounded-full"
-                    >
-                        {@html questionnaire.icon.svg}
-                    </div>
                 </button>
-            {/each} -->
+            {/each}
         </div>
     </div>
 </div>

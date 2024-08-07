@@ -58,8 +58,19 @@
         });
     }, SEARCH_DEBOUNCE_DELAY);
 
+    const formatGithubUrl = (url: string) => {
+        const urlObj = new URL(url);
+        const paths = urlObj.pathname.split("/").filter(Boolean);
+        const [author, repo] = paths.slice(-2);
+        return { author, repo };
+    };
+
     const formatText = (url: string, maxLength: number) => {
-        return url.length > maxLength ? url.slice(0, maxLength) + "..." : url;
+        const { author, repo } = formatGithubUrl(url);
+        const formattedText = `${author}/${repo}`;
+        return formattedText.length > maxLength
+            ? formattedText.slice(0, maxLength) + "..."
+            : formattedText;
     };
 </script>
 
@@ -159,10 +170,11 @@
                         {#if agent.author.source_url}
                             <a
                                 href={agent.author.source_url}
-                                class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline"
+                                class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
                                 target="_blank"
                                 rel="noreferrer"
                             >
+                                <CarbonGithub class="mx-1" />
                                 {formatText(agent.author.source_url, 20)}
                             </a>
                         {:else}

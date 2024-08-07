@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
 
+    import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
     import type { Message } from "$lib/types/Message";
     import ChatInput from "./ChatInput.svelte";
     import ChatIntroduction from "./ChatIntroduction.svelte";
@@ -8,6 +9,10 @@
     import ChatMessage from "./ChatMessage.svelte";
 
     import CarbonSendAltFilled from "~icons/carbon/send-alt-filled";
+    import CarbonHome from "~icons/carbon/home";
+
+    import type { Questionnaire } from "$lib/types/Questionnaires";
+    import { goto } from "$app/navigation";
 
     export let messages: Message[] = [];
     export let loading = false;
@@ -28,7 +33,36 @@
     onMount(async () => {
         const module = await import("@lottiefiles/svelte-lottie-player");
         LottiePlayer = module.LottiePlayer;
+
+        questionnaireStore.subscribe((questionnaire: Questionnaire) => {
+        
+            switch (questionnaire?.id) {
+                case "generate-summary":
+                    message = `Please give me a complete summary about ${agentDisplayName}`;
+                    handleSubmit();
+                    break;
+                case "ask-about":
+                    message = "Help me understand (x) feature in detail with helpful links to read more about it";
+                    break;
+                case "search-code":
+                    message = "Where can I find the code that does (y). Please help me with links to it";
+                    break;
+                case "get-help":
+                    message = "Help me resolve the (z) problem I'm facing. Here is some helpful code: (code)";
+                    break;
+            }
+        })
     });
+
+    onDestroy(() => {
+        message = "";
+        questionnaireStore.set({id: "", message: ""});
+    });
+
+    const onHome = () => {
+        message = "";
+        goto('/');
+    }
 
     const handleSubmit = async () => {
         if (messageLoading || loading) {
@@ -62,9 +96,10 @@
             );
             
             const modelResponse = await response.json();
+            console.log('model response', modelResponse);
             messages = [
                 ...messages,
-                { role: "model", text: modelResponse.response },
+                { role: "model", text: modelResponse.response, references: modelResponse.references },
             ];
             agentReferences = modelResponse?.references
 
@@ -77,9 +112,12 @@
 </script>
 
 <div class="relative min-h-0 min-w-0 h-screen">
+    <div class="mx-3 my-3.5">
+        <button on:click={onHome}><CarbonHome class="text-lg" /></button>
+    </div>
     <div class="scrollbar-custom mr-1 h-full overflow-y-auto">
         <div
-            class="mx-auto flex h-full max-w-5xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-5xl xl:pt-10"
+            class="mx-auto flex h-full max-w-5xl flex-col gap-6 px-5 pt-4 sm:gap-8 xl:max-w-5xl xl:pt-7"
         >
             <div class="flex h-max flex-col gap-6 pb-40 2xl:gap-7">
                 {#if messages.length > 0}

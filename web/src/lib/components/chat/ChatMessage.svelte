@@ -1,5 +1,8 @@
 <script lang="ts">
     import showdown from "showdown";
+    import hljs from "highlight.js";
+    import DOMPurify from "isomorphic-dompurify";
+
     import { writable } from "svelte/store";
     import Icon from "@iconify/svelte";
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
@@ -37,9 +40,47 @@
             ghCodeBlocks: true,
             strikethrough: true,
             tasklists: true,
-            extensions: [startAttributeExtension],
+            extensions: [highlightExtension, startAttributeExtension],
         });
         return converter.makeHtml(message);
+    };
+
+    const highlightExtension = () => {
+        function htmlunencode(text: string) {
+            return text
+                .replace(/&amp;/g, "&")
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">");
+        }
+        return [
+            {
+                type: "output",
+                filter: function (text: string) {
+                    var left = "<pre><code\\b[^>]*>",
+                        right = "</code></pre>",
+                        flags = "g",
+                        replacement = function (
+                            wholeMatch,
+                            match,
+                            left,
+                            right,
+                        ) {
+                            // unescape match to prevent double escaping
+                            match = htmlunencode(match);
+                            return (
+                                left + hljs.highlightAuto(match).value + right
+                            );
+                        };
+                    return showdown.helper.replaceRecursiveRegExp(
+                        text,
+                        replacement,
+                        left,
+                        right,
+                        flags,
+                    );
+                },
+            },
+        ];
     };
 
     // Helper function to format URLs
@@ -121,6 +162,18 @@
 
                         text = lines.join("\n");
                     }
+                    const codeBlockRegex =
+                        /<pre><code class="(\w+)">([\s\S]*?)<\/code><\/pre>/g;
+                    text = text.replace(codeBlockRegex, (match, lang, code) => {
+                        if (hljs.getLanguage(lang)) {
+                            const highlightedCode = hljs.highlight(
+                                lang,
+                                code,
+                            ).value;
+                            return `<pre><code class="hljs">${DOMPurify.sanitize(highlightedCode)}</code></pre>`;
+                        }
+                        return match; // return original if language is not found
+                    });
 
                     return text;
                 },
