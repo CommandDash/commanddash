@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
     import type { Message } from "$lib/types/Message";
     import ChatInput from "./ChatInput.svelte";
     import ChatIntroduction from "./ChatIntroduction.svelte";
@@ -8,6 +9,7 @@
     import ChatMessage from "./ChatMessage.svelte";
 
     import CarbonSendAltFilled from "~icons/carbon/send-alt-filled";
+    import type { Questionnaire } from "$lib/types/Questionnaires";
 
     export let messages: Message[] = [];
     export let loading = false;
@@ -28,6 +30,25 @@
     onMount(async () => {
         const module = await import("@lottiefiles/svelte-lottie-player");
         LottiePlayer = module.LottiePlayer;
+
+        questionnaireStore.subscribe((questionnaire: Questionnaire) => {
+        
+            switch (questionnaire.id) {
+                case "generate-summary":
+                    message = `Please give me a complete summary about ${agentName}`;
+                    handleSubmit();
+                    break;
+                case "ask-about":
+                    message = "Help me understand (x) feature in detail with helpful links to read more about it";
+                    break;
+                case "search-code":
+                    message = "Where can I find the code that does (y). Please help me with links to it";
+                    break;
+                case "get-help":
+                    message = "Help me resolve the (z) problem I'm facing. Here is some helpful code: (code)";
+                    break;
+            }
+        })
     });
 
     const handleSubmit = async () => {
