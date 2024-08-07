@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
 
     import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
     import type { Message } from "$lib/types/Message";
@@ -36,9 +36,9 @@
 
         questionnaireStore.subscribe((questionnaire: Questionnaire) => {
         
-            switch (questionnaire.id) {
+            switch (questionnaire?.id) {
                 case "generate-summary":
-                    message = `Please give me a complete summary about ${agentName}`;
+                    message = `Please give me a complete summary about ${agentDisplayName}`;
                     handleSubmit();
                     break;
                 case "ask-about":
@@ -54,7 +54,13 @@
         })
     });
 
+    onDestroy(() => {
+        message = "";
+        questionnaireStore.set({id: "", message: ""});
+    });
+
     const onHome = () => {
+        message = "";
         goto('/');
     }
 
@@ -90,9 +96,10 @@
             );
             
             const modelResponse = await response.json();
+            console.log('model response', modelResponse);
             messages = [
                 ...messages,
-                { role: "model", text: modelResponse.response },
+                { role: "model", text: modelResponse.response, references: modelResponse.references },
             ];
             agentReferences = modelResponse?.references
 
