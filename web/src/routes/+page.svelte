@@ -99,13 +99,13 @@
                 </h3>
             </div>
             <button
-                class="flex ml-auto h-9 items-center gap-1 whitespace-nowrap rounded-lg border bg-black py-1 px-3 shadow-lg hover:bg-gray-700 hover:shadow-md dark:border-black dark:bg-black dark:hover:bg-gray-600 transition duration-200 ease-in-out transform hover:-translate-y-1"
-                on:click={() => {
-                    showModal = true;
-                }}
-            >
-                <CarbonGithub />Create agent
-            </button>
+    class="flex ml-auto h-9 items-center gap-1 whitespace-nowrap rounded-lg border border-gray-300 bg-gradient-to-r from-gray-700 via-gray-900 to-black text-white py-1 px-3 shadow-lg hover:bg-gradient-to-r hover:from-gray-600 hover:via-gray-800 hover:to-black hover:shadow-md dark:border-gray-700 dark:bg-gradient-to-r dark:from-gray-800 dark:via-gray-900 dark:to-black dark:hover:from-gray-700 dark:hover:via-gray-800 dark:hover:to-black transition duration-200 ease-in-out transform hover:-translate-y-1"
+    on:click={() => {
+        showModal = true;
+    }}
+>
+    <CarbonGithub />Create Agent
+</button>
         </div>
         <div class="mt-6 flex flex-wrap gap-2 items-center">
             <div

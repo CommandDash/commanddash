@@ -54,7 +54,7 @@
 					<IconClose class="mr-1.5 text-xl" />
 				</button>
             </div>
-            <h1 class="text-xl font-bold text-white">Create An Agent</h1>
+            <h1 class="text-xl font-bold text-white">Create Agent with Github</h1>
             <div
                 class="relative flex h-[50px] min-w-full items-center rounded-md border px-2 has-[:focus]:border-gray-400 sm:w-64 dark:border-gray-600"
             >
@@ -65,7 +65,7 @@
                 />
                 <input
                     class="h-[50px] w-full bg-transparent pl-7 focus:outline-none text-white"
-                    placeholder="Github URL"
+                    placeholder="Github Repo URL"
                     type="url"
                     {value}
                     on:input={(e) => addGithubURL(e.currentTarget.value)}
@@ -75,7 +75,7 @@
                 on:click={onCreateAgent}
                 class="mt-4 w-full rounded-full bg-gray-300 px-4 py-3 font-semibold text-black"
             >
-                Create Agent
+                Submit
             </button>
         </dialog>
     </div>
