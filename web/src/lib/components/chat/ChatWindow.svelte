@@ -9,7 +9,10 @@
     import ChatMessage from "./ChatMessage.svelte";
 
     import CarbonSendAltFilled from "~icons/carbon/send-alt-filled";
+    import CarbonHome from "~icons/carbon/home";
+
     import type { Questionnaire } from "$lib/types/Questionnaires";
+    import { goto } from "$app/navigation";
 
     export let messages: Message[] = [];
     export let loading = false;
@@ -50,6 +53,10 @@
             }
         })
     });
+
+    const onHome = () => {
+        goto('/');
+    }
 
     const handleSubmit = async () => {
         if (messageLoading || loading) {
@@ -98,9 +105,12 @@
 </script>
 
 <div class="relative min-h-0 min-w-0 h-screen">
+    <div class="mx-3 my-3.5">
+        <button on:click={onHome}><CarbonHome class="text-lg" /></button>
+    </div>
     <div class="scrollbar-custom mr-1 h-full overflow-y-auto">
         <div
-            class="mx-auto flex h-full max-w-5xl flex-col gap-6 px-5 pt-6 sm:gap-8 xl:max-w-5xl xl:pt-10"
+            class="mx-auto flex h-full max-w-5xl flex-col gap-6 px-5 pt-4 sm:gap-8 xl:max-w-5xl xl:pt-7"
         >
             <div class="flex h-max flex-col gap-6 pb-40 2xl:gap-7">
                 {#if messages.length > 0}
