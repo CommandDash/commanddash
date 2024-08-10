@@ -3,5 +3,8 @@ import { defineConfig } from 'vite';
 import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
-	plugins: [sveltekit(), Icons({compiler: "svelte"})]
+	define: {
+		'import.meta.env.VITE_INSTRUMENTATION_KEY': JSON.stringify(process.env.VITE_INSTRUMENTATION_KEY)
+	},
+	plugins: [sveltekit(), Icons({ compiler: "svelte" })]
 });
