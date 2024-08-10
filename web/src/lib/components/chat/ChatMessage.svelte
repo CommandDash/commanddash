@@ -2,7 +2,7 @@
     import showdown from "showdown";
     import hljs from "highlight.js";
     import DOMPurify from "isomorphic-dompurify";
-    import appInsights from "$lib/utils/appInsights"; 
+
     import { writable } from "svelte/store";
     import Icon from "@iconify/svelte";
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
@@ -180,13 +180,6 @@
             },
         ];
     };
-
-    const trackLinkClick = () => {
-        appInsights.trackEvent({
-            name: 'VSCodeLinkClicked',
-        
-        });
-    }
 </script>
 
 {#each messages as message, index}
@@ -273,7 +266,6 @@
                                 href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
                                 target="_blank"
                                 class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
-                                on:click={trackLinkClick}
                             >
                                 <IconVisualStudio />
                                 <div class="text-sm text-white">VSCode</div>
