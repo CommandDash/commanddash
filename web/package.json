@@ -35,7 +35,9 @@
 	"type": "module",
 	"dependencies": {
 		"@lottiefiles/svelte-lottie-player": "^0.3.1",
+		"@microsoft/applicationinsights-web": "^3.3.1",
 		"@tailwindcss/typography": "^0.5.13",
+		"dotenv": "^16.4.5",
 		"highlight.js": "^11.10.0",
 		"isomorphic-dompurify": "^2.14.0",
 		"showdown": "^2.1.0",
