@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
     import { error as pageError } from "@sveltejs/kit";
     import { page } from "$app/stores";
-    import appInsights from "$lib/utils/appInsights";
 
     import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
     import { type Agent } from "$lib/types/Agent";
@@ -15,10 +14,6 @@
     onMount(async () => {
         loading = true;
         const ref: string = $page.url.searchParams.get("github") || "";
-
-        appInsights.trackPageView({
-            name: "AgentPage",
-        });
 
         const response = await fetch(
             "https://api.commanddash.dev/agent/get-latest-agent",
@@ -35,21 +30,11 @@
         if (!response.ok) {
             loading = false;
             errorMessage = _response.message;
-            appInsights.trackException({ error: new Error(_response.message) }); // Track exception
             throw pageError(response.status, _response.message);
         }
 
         currentAgentDetails = _response as Agent;
         loading = false;
-        // Track custom event for agent details loaded
-        appInsights.trackEvent({
-            name: "AgentDetailsLoaded",
-            properties: {
-                agentName: currentAgentDetails.name,
-                agentVersion: currentAgentDetails.version,
-                agentDisplayName: currentAgentDetails.metadata.display_name,
-            },
-        });
     });
 </script>
 
@@ -70,7 +55,9 @@
 {#if loading}
     <LoadingPage />
 {:else if !loading && !currentAgentDetails}
-    <div class="h-screen inline-flex justify-center items-center flex-col">
+    <div
+        class="h-screen inline-flex justify-center items-center flex-col"
+    >
         <h1 class="text-2xl">Error:</h1>
         <h1 class="text-xl">{errorMessage}</h1>
     </div>
