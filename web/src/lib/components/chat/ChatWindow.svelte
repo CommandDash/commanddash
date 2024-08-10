@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
+    import appInsights from "$lib/utils/appInsights";
 
     import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
     import type { Message } from "$lib/types/Message";
@@ -35,34 +36,37 @@
         LottiePlayer = module.LottiePlayer;
 
         questionnaireStore.subscribe((questionnaire: Questionnaire) => {
-        
             switch (questionnaire?.id) {
                 case "generate-summary":
                     message = `Please give me a complete summary about ${agentDisplayName}`;
                     handleSubmit();
                     break;
                 case "ask-about":
-                    message = "Help me understand (x) feature in detail with helpful links to read more about it";
+                    message =
+                        "Help me understand (x) feature in detail with helpful links to read more about it";
                     break;
                 case "search-code":
-                    message = "Where can I find the code that does (y). Please help me with links to it";
+                    message =
+                        "Where can I find the code that does (y). Please help me with links to it";
                     break;
                 case "get-help":
-                    message = "Help me resolve the (z) problem I'm facing. Here is some helpful code: (code)";
+                    message =
+                        "Help me resolve the (z) problem I'm facing. Here is some helpful code: (code)";
                     break;
             }
-        })
+        });
     });
 
     onDestroy(() => {
         message = "";
-        questionnaireStore.set({id: "", message: ""});
+        questionnaireStore.set({ id: "", message: "" });
     });
 
     const onHome = () => {
         message = "";
-        goto('/');
-    }
+        goto("/");
+        appInsights.trackEvent({ name: "NavigateHome" });
+    };
 
     const handleSubmit = async () => {
         if (messageLoading || loading) {
@@ -71,7 +75,6 @@
         messageLoading = true;
 
         messages = [...messages, { role: "user", text: message }];
-
 
         const agentData = {
             agent_name: agentName,
@@ -94,15 +97,25 @@
                     },
                 },
             );
-            
+
             const modelResponse = await response.json();
-            console.log('model response', modelResponse);
+            console.log("model response", modelResponse);
             messages = [
                 ...messages,
-                { role: "model", text: modelResponse.response, references: modelResponse.references },
+                {
+                    role: "model",
+                    text: modelResponse.response,
+                    references: modelResponse.references,
+                },
             ];
-            agentReferences = modelResponse?.references
-
+            agentReferences = modelResponse?.references;
+            appInsights.trackEvent({
+                name: "MessageSent",
+                properties: {
+                    agentName,
+                    agentVersion,
+                },
+            });
         } catch (error) {
             console.log("error", error);
         }
@@ -122,16 +135,20 @@
             <div class="flex h-max flex-col gap-6 pb-40 2xl:gap-7">
                 {#if messages.length > 0}
                     {#if !loading}
-                        <ChatMessage {messages} {agentLogo} {agentDisplayName} />
+                        <ChatMessage
+                            {messages}
+                            {agentLogo}
+                            {agentDisplayName}
+                        />
                         {#if messageLoading}
                             {#if LottiePlayer}
-                                <div
-                                    class="flex-col w-full h-48 px-2 py-3"
-                                >
+                                <div class="flex-col w-full h-48 px-2 py-3">
                                     <div
                                         class="inline-flex flex-row items-end px-2"
                                     >
-                                        <span id="workspace-loader-text">Preparing results</span>
+                                        <span id="workspace-loader-text"
+                                            >Preparing results</span
+                                        >
                                         <div class="typing-loader mx-2"></div>
                                     </div>
                                 </div>

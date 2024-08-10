@@ -1,6 +1,7 @@
 <script lang="ts">
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
     import { toastStore } from "$lib/stores/ToastStores";
+    import appInsights from "$lib/utils/appInsights"; // Import the appInsights instance
 
     import Icon from "@iconify/svelte";
     import { ToastType } from "$lib/types/Toast";
@@ -48,6 +49,9 @@
                     message: _response.message,
                     type: ToastType.ERROR,
                 });
+                appInsights.trackException({
+                    error: new Error(_response.message),
+                }); // Track exception
                 return;
             }
 
@@ -55,19 +59,46 @@
                 message: "Notification sent successfully",
                 type: ToastType.SUCCESS,
             });
+
+            // Track custom event for notification sent
+            appInsights.trackEvent({
+                name: "NotificationSent",
+                properties: {
+                    agentId,
+                    emailValue,
+                },
+            });
         } catch (error) {
             console.log("error", error);
             toastStore.set({
                 message: "Ops! Something went wrong",
                 type: ToastType.ERROR,
             });
+            appInsights.trackException({ error: new Error(`${error}`) }); // Track exception
         }
     };
 
     const onQuestionnaire = (questionnaire: Questionnaire) => {
         questionnaireStore.set(questionnaire);
-    }
 
+        // Track custom event for questionnaire selected
+        appInsights.trackEvent({
+            name: "QuestionnaireSelected",
+            properties: {
+                agentId,
+                questionnaireId: questionnaire.id,
+                questionnaireMessage: questionnaire.message,
+            },
+        });
+    };
+    const trackLinkClick = () => {
+        appInsights.trackEvent({
+            name: "VSCodeLinkClicked",
+            properties: {
+                agentId,
+            },
+        });
+    };
 </script>
 
 <div class="my-auto grid gap-4 lg:grid-cols-2">
@@ -96,6 +127,7 @@
                 href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
                 target="_blank"
                 class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
+                on:click={trackLinkClick}
             >
                 <IconVisualStudio />
                 <div class="text-sm text-white">VSCode</div>
@@ -145,7 +177,8 @@
             {#each questionnaires as questionnaire}
                 <button
                     class={`relative rounded-xl border ${questionnaire.id === "generate-summary" ? "bg-[#497BEF] text-gray-300 border-[#497BEF] hover:bg-[#287CEB] hover:border-[#287CEB]" : "bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100"} p-3 max-xl:text-sm xl:p-3.5`}
-                    on:click={() => onQuestionnaire(questionnaire)}>
+                    on:click={() => onQuestionnaire(questionnaire)}
+                >
                     {questionnaire.message}
                 </button>
             {/each}
