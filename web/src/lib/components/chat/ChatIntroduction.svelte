@@ -7,12 +7,16 @@
     import { ToastType } from "$lib/types/Toast";
     import type { Questionnaire } from "$lib/types/Questionnaires";
     import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
+    import SettingsAgent from "$lib/components/SettingsAgent.svelte";
 
     export let agentDisplayName: string = "";
     export let agentDescription: string = "";
     export let agentLogo: string = "";
     export let agentId: string = "";
     export let agentIsDataSourceIndexed: boolean = true;
+    export let agentDataSources: Array<any> = [];
+
+    let showModalSettings: boolean = false;
 
     let emailValue: string = "";
     let questionnaires: Array<Questionnaire> = [
@@ -28,7 +32,6 @@
             recipient_mail: emailValue,
             notify_for: "data_index",
         };
-        debugger;
         try {
             const response = await fetch(
                 "https://api.commanddash.dev/agent/notify",
@@ -40,7 +43,6 @@
                     },
                 },
             );
-            debugger;
 
             const _response = await response.json();
 
@@ -119,21 +121,25 @@
             </p>
         </div>
     </div>
-    <div class="lg:col-span-2 lg:pl-24 hidden md:block">
-        <div
-            class="overflow-hidden rounded border dark:border-gray-800 cursor-pointer"
+    <div
+        class="lg:col-span-2 lg:pl-24 flex justify-between sm:justify-end space-x-2"
+    >
+        <a
+            href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
+            target="_blank"
+            class="flex items-center justify-center h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
         >
-            <a
-                href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
-                target="_blank"
-                class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
-                on:click={trackLinkClick}
-            >
-                <IconVisualStudio />
-                <div class="text-sm text-white">VSCode</div>
-            </a>
-        </div>
+            <IconVisualStudio />
+            <div class="text-sm text-white">VSCode</div>
+        </a>
+        <button
+            class="flex items-center justify-center h-12 px-6 font-medium transition-colors duration-150 ease-in-out border bg-gray-50 dark:bg-gray-800 dark:text-gray-300 rounded-md dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100 border-gray-800 space-x-2 shadow-lg"
+            on:click={() => showModalSettings = true}>
+            <Icon icon="bi:gear-fill" width="24px" height="24px" />
+            <div class="text-sm text-white">Settings</div>
+        </button>
     </div>
+
     <div class="lg:col-span-3 lg:mt-6">
         {#if !agentIsDataSourceIndexed}
             <div class="overflow-hidden rounded-xl border dark:border-gray-800">
@@ -185,3 +191,15 @@
         </div>
     </div>
 </div>
+
+<SettingsAgent
+    bind:showModalSettings
+    bind:agentDisplayName
+    bind:agentDescription
+    bind:agentId
+    bind:agentLogo
+    bind:agentDataSources
+    onClose={() => {
+        showModalSettings = false;
+    }}
+/>

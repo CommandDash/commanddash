@@ -10,6 +10,10 @@
     let currentAgentDetails: Agent;
     let errorMessage: string = "Something went wrong";
     let errorStatus: number = 0;
+    let agentDataSources: Array<any> = [];
+    
+    const limit: number = 10;
+
     $: loading = true;
 
     onMount(async () => {
@@ -36,9 +40,29 @@
         }
 
         currentAgentDetails = _response as Agent;
-
+        agentDataSources = extractUris(currentAgentDetails?.data_sources);
         loading = false;
     });
+
+    const extractUris = (
+        data: { id: string; uri: { type: string; uri: string }[] }[],
+    ): { type: string; uri: string }[] => {
+        const result: { type: string; uri: string }[] = [];
+        data.forEach((item) => {
+            item.uri.forEach((uriItem) => {
+                if (result.length < limit) {
+                    result.push({
+                        type: uriItem.type,
+                        uri: uriItem.uri,
+                    });
+                } else {
+                    return result;
+                }
+            });
+        });
+        return result;
+    };
+
 </script>
 
 {#if currentAgentDetails}
@@ -52,6 +76,7 @@
         agentLogo={currentAgentDetails?.metadata?.avatar_id}
         agentIsDataSourceIndexed={currentAgentDetails.data_sources_indexed}
         agentId={currentAgentDetails?.name}
+        agentDataSources={agentDataSources}
     />
 {/if}
 

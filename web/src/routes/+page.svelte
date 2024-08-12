@@ -5,6 +5,8 @@
     import CarbonSearch from "~icons/carbon/search";
     import CarbonAdd from "~icons/carbon/add";
     import CarbonGithub from "~icons/carbon/logo-github";
+    import CarbonSettings from "~icons/carbon/settings";
+
     import type { Agent } from "$lib/types/Agent";
     import { goto } from "$app/navigation";
     import { debounce } from "$lib/utils/debounce";
@@ -16,6 +18,7 @@
     let filteredAgents: Agent[] = [];
     let searchValue: string = "";
     let showModal: boolean = false;
+    let currentAgent: Agent;
 
     $: loading = true;
 

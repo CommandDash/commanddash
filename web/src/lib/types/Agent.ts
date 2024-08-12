@@ -19,6 +19,13 @@ export type Agent = {
         tags: string [],
         version: string,
     },
+    data_sources: {
+        id: string,
+        uri: {
+            type: string,
+            uri: string
+        }[]
+    }[],
     min_cli_version: string,
     name: string,
     publisher_id: string,

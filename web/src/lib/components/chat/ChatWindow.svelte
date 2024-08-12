@@ -25,6 +25,7 @@
     export let agentVersion: string = "1.0.3";
     export let agentPrivate: boolean = false;
     export let agentIsDataSourceIndexed: boolean = true;
+    export let agentDataSources: Array<any> = [];
 
     let agentReferences: Array<any> = [];
     let messageLoading: boolean = false;
@@ -172,6 +173,7 @@
                         {agentLogo}
                         {agentIsDataSourceIndexed}
                         {agentId}
+                        {agentDataSources}
                     />
                 {/if}
             </div>

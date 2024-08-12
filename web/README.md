@@ -1,5 +1,5 @@
 # create-svelte
-
+<a href="https://app.commanddash.io/agent/github_abpframework_abp"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
 ## Creating a project
