@@ -17,17 +17,12 @@
 
     $: selectedOption = "info";
 
-    const badgeMarkdown = `<a href="https://app.commanddash.io/agent/${agentId}"><img src="https://img.shields.io/badge/Ask-AI%20Assist-EB9FDA?style=for-the-badge"></a>`;
+    const badgeMarkdown = `<a href="https://app.commanddash.io/agent/${agentId}"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>`;
     const badgeUrl = `https://app.commanddash.io/agent/${agentId}`;
 
     function copyBadgeCode() {
         copyToClipboard(badgeMarkdown);
-        alert("Badge code copied to clipboard!");
-    }
-
-    function copyBadgeUrl() {
-        copyToClipboard(badgeUrl);
-        alert("URL copied to clipboard!");
+        alert("Badge code copied.");
     }
 </script>
 
@@ -102,7 +97,7 @@
                                     <h2 class="text-lg font-semibold text-white">Link Badge in README or Documentation</h2>
                                     <div class="flex items-center gap-4">
                                         <a href={badgeUrl}>
-                                            <img src="https://img.shields.io/badge/Ask-AI%20Assist-EB9FDA?style=for-the-badge" alt="Ask AI Assist Badge">
+                                            <img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA?style=for-the-badge" alt="AI Code Agent Badge">
                                         </a>
                                         <button class="btn text-gray-500" on:click={copyBadgeCode}>Copy Badge Code</button>
                                     </div>
