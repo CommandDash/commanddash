@@ -9,58 +9,11 @@
 
     export let showModalSettings: boolean;
     export let onClose: () => void;
-    export let currentAgent: Agent;
-
-    let errorMessage: string = "Something went wrong";
-    let errorStatus: number = 0;
-    let limit: number = 10;
-
-    $: sourceDatas = [];
-
-    $: if (showModalSettings) {
-        fetchAgentDetails();
-    }
-
-    const fetchAgentDetails = async () => {
-        const id = currentAgent?.name;
-        const response = await fetch(
-            "https://api.commanddash.dev/agent/get-latest-agent",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ name: id }),
-            },
-        );
-
-        const _response = await response.json();
-        if (!response.ok) {
-            errorMessage = _response.message;
-            errorStatus = response.status;
-        }
-        const agentData = _response as Agent;
-        sourceDatas = extractUris(agentData.data_sources);
-    };
-
-    const extractUris = (
-        data: { id: string; uri: { type: string; uri: string }[] }[],
-    ): { type: string; uri: string }[] => {
-        const result: { type: string; uri: string }[] = [];
-        data.forEach((item) => {
-            item.uri.forEach((uriItem) => {
-                if (result.length < limit) {
-                    result.push({
-                        type: uriItem.type,
-                        uri: uriItem.uri,
-                    });
-                } else {
-                    return result;
-                }
-            });
-        });
-        return result;
-    };
+    export let agentDisplayName: string = "";
+    export let agentDescription: string = "";
+    export let agentLogo: string = "";
+    export let agentId: string = "";
+    export let agentDataSources: Array<any> = [];
 </script>
 
 {#if showModalSettings}
@@ -99,6 +52,9 @@
                     >
                         Options
                     </h3>
+                    <button class="group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm text-gray-500 hover:bg-gray-100 md:rounded-xl  !bg-gray-100 !text-gray-800">
+                        Info
+                    </button>
                 </div>
                 <div
                     class="col-span-1 w-full overflow-y-auto overflow-x-clip px-1 max-md:pt-4 md:col-span-2 md:row-span-2"
@@ -108,14 +64,14 @@
                             <img
                                 alt="Avatar"
                                 class="size-16 flex-none rounded-full object-cover sm:size-24"
-                                src={currentAgent.metadata.avatar_id}
+                                src={agentLogo}
                             />
                             <div class="flex-1">
                                 <div class="mb-1.5">
                                     <h1
                                         class="mr-1 inline text-xl font-semibold"
                                     >
-                                        {currentAgent.metadata.display_name}
+                                        {agentDisplayName}
                                     </h1>
                                     <!-- <span
                                         class="ml-1 rounded-full border px-2 py-0.5 text-sm leading-none text-gray-500">{currentAgent.version}</span> -->
@@ -123,21 +79,21 @@
                                 <p
                                     class="mb-2 line-clamp-2 text-sm text-gray-500"
                                 >
-                                    {currentAgent.description}
+                                    {agentDescription}
                                 </p>
-                                <p class="text-sm text-gray-500">
+                                <!-- <p class="text-sm text-gray-500">
                                     Created by <a
                                         class="underline"
                                         target="_blank"
                                         href={currentAgent.author.source_url}
                                         >{currentAgent.author.name}</a
                                     >
-                                </p>
+                                </p> -->
                             </div>
                         </div>
                         <div>
                             <h2 class="text-lg font-semibold">Data sources</h2>
-                            {#each sourceDatas as sourceData}
+                            {#each agentDataSources as sourceData}
                                 <a
                                     class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-xl !bg-gray-100 !text-gray-800 mt-1"
                                     href="#"
@@ -153,7 +109,7 @@
                                         {:else if sourceData.type === "web_page"}
                                             <CarbonWorld />
                                         {:else}
-                                        <CarbonCode />
+                                            <CarbonCode />
                                         {/if}
                                     </div>
                                 </a>

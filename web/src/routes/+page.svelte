@@ -12,14 +12,12 @@
     import { debounce } from "$lib/utils/debounce";
     import { base } from "$app/paths";
     import CreateAgentDialog from "$lib/components/CreateAgentDialog.svelte";
-    import SettingsAgent from "$lib/components/SettingsAgent.svelte";
 
     const SEARCH_DEBOUNCE_DELAY = 400;
     let agents: Agent[] = [];
     let filteredAgents: Agent[] = [];
     let searchValue: string = "";
     let showModal: boolean = false;
-    let showModalSettings: boolean = false;
     let currentAgent: Agent;
 
     $: loading = true;
@@ -76,12 +74,6 @@
         return formattedText.length > maxLength
             ? formattedText.slice(0, maxLength) + "..."
             : formattedText;
-    };
-
-    const onSettingsClicked = (e: MouseEvent, _agent: Agent) => {
-        e.stopPropagation();
-        showModalSettings = true;
-        currentAgent = _agent
     };
 </script>
 
@@ -163,13 +155,6 @@
                         class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
                         on:click={() => navigateAgents(agent)}
                     >
-                        <div
-                            class="absolute right-3 top-3 flex items-center gap-1 text-xs text-gray-400"
-                            title="Settings"
-                            on:click={(e) => onSettingsClicked(e, agent)}
-                        >
-                            <CarbonSettings />
-                        </div>
                         <img
                             src={agent.metadata.avatar_id}
                             alt="Avatar"
@@ -233,14 +218,6 @@
     bind:showModal
     onClose={() => {
         showModal = false;
-    }}
-/>
-
-<SettingsAgent
-    bind:showModalSettings
-    bind:currentAgent
-    onClose={() => {
-        showModalSettings = false;
     }}
 />
 
