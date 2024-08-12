@@ -4,7 +4,8 @@
     import { goto } from "$app/navigation";
     import { toastStore } from "$lib/stores/ToastStores";
     import { ToastType } from "$lib/types/Toast";
-	import IconClose from "~icons/carbon/close";
+    import appInsights from "$lib/utils/appInsights"; // Import the appInsights instance
+    import IconClose from "~icons/carbon/close";
     import CarbonSearch from "~icons/carbon/search";
     import CarbonGithub from "~icons/carbon/logo-github";
 
@@ -26,6 +27,14 @@
 
     const onCreateAgent = () => {
         if (validateGithubURL(value)) {
+            // Track custom event for form submission
+            appInsights.trackEvent({
+                name: "CreateAgentSubmitted",
+                properties: {
+                    githubUrl: value,
+                },
+            });
+
             goto(`${base}/agent?github=${value}`);
         } else {
             toastStore.set({
@@ -34,6 +43,13 @@
             });
         }
     };
+
+    $: if (showModal) {
+        // Track custom event for dialog opened
+        appInsights.trackEvent({
+            name: "CreateAgentDialogOpened",
+        });
+    }
 </script>
 
 {#if showModal}
@@ -48,13 +64,13 @@
         >
             <div class="absolute right-0 top-0 mr-2 mt-2">
                 <button
-					class="flex items-center px-2.5 py-1 text-sm text-white"
-					on:click={onClose}
-				>
-					<IconClose class="mr-1.5 text-xl" />
-				</button>
+                    class="flex items-center px-2.5 py-1 text-sm text-white"
+                    on:click={onClose}
+                >
+                    <IconClose class="mr-1.5 text-xl" />
+                </button>
             </div>
-            <h1 class="text-xl font-bold text-white">Create An Agent</h1>
+            <h1 class="text-xl font-bold text-white">Create Agent with Github</h1>
             <div
                 class="relative flex h-[50px] min-w-full items-center rounded-md border px-2 has-[:focus]:border-gray-400 sm:w-64 dark:border-gray-600"
             >
@@ -65,7 +81,7 @@
                 />
                 <input
                     class="h-[50px] w-full bg-transparent pl-7 focus:outline-none text-white"
-                    placeholder="Github URL"
+                    placeholder="Github Repo URL"
                     type="url"
                     {value}
                     on:input={(e) => addGithubURL(e.currentTarget.value)}
@@ -75,7 +91,7 @@
                 on:click={onCreateAgent}
                 class="mt-4 w-full rounded-full bg-gray-300 px-4 py-3 font-semibold text-black"
             >
-                Create Agent
+                Submit
             </button>
         </dialog>
     </div>

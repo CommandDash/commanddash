@@ -1,9 +1,9 @@
 <script lang="ts">
-
-    import Icon from "@iconify/svelte";
-
     import IconVisualStudio from "../icons/IconVisualStudio.svelte";
     import { toastStore } from "$lib/stores/ToastStores";
+    import appInsights from "$lib/utils/appInsights"; // Import the appInsights instance
+
+    import Icon from "@iconify/svelte";
     import { ToastType } from "$lib/types/Toast";
     import type { Questionnaire } from "$lib/types/Questionnaires";
     import { questionnaireStore } from "$lib/stores/QuestionnaireStores";
@@ -51,6 +51,9 @@
                     message: _response.message,
                     type: ToastType.ERROR,
                 });
+                appInsights.trackException({
+                    error: new Error(_response.message),
+                }); // Track exception
                 return;
             }
 
@@ -58,17 +61,45 @@
                 message: "Notification sent successfully",
                 type: ToastType.SUCCESS,
             });
+
+            // Track custom event for notification sent
+            appInsights.trackEvent({
+                name: "NotificationSent",
+                properties: {
+                    agentId,
+                    emailValue,
+                },
+            });
         } catch (error) {
             console.log("error", error);
             toastStore.set({
                 message: "Ops! Something went wrong",
                 type: ToastType.ERROR,
             });
+            appInsights.trackException({ error: new Error(`${error}`) }); // Track exception
         }
     };
 
     const onQuestionnaire = (questionnaire: Questionnaire) => {
         questionnaireStore.set(questionnaire);
+
+        // Track custom event for questionnaire selected
+        appInsights.trackEvent({
+            name: "QuestionnaireSelected",
+            properties: {
+                agentId,
+                questionnaireId: questionnaire.id,
+                questionnaireMessage: questionnaire.message,
+            },
+        });
+    };
+    const trackLinkClick = () => {
+        appInsights.trackEvent({
+            name: "VSCodeLinkClicked",
+            properties: {
+                agentId,
+            },
+        });
     };
 </script>
 
