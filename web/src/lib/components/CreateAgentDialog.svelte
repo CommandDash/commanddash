@@ -89,7 +89,7 @@
             </div>
             <button
                 on:click={onCreateAgent}
-                class="mt-4 w-full rounded-full bg-gray-300 px-4 py-3 font-semibold text-black"
+                class="mt-4 w-full rounded bg-gray-300 px-4 py-3 font-semibold text-black"
             >
                 Submit
             </button>

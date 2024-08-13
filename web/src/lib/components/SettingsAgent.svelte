@@ -2,10 +2,13 @@
     import { onMount } from "svelte";
     import type { Agent } from "$lib/types/Agent";
     import { fade, fly } from "svelte/transition";
+    import { toastStore } from "$lib/stores/ToastStores";
     import CarbonClose from "~icons/carbon/close";
     import CarbonGithub from "~icons/carbon/logo-github";
     import CarbonCode from "~icons/carbon/code";
     import CarbonWorld from "~icons/carbon/wikis";
+    import { ToastType } from "$lib/types/Toast";
+
     import { copyToClipboard } from "$lib/utils/copyToClipboard";
     export let showModalSettings: boolean;
     export let onClose: () => void;
@@ -15,14 +18,83 @@
     export let agentId: string = "";
     export let agentDataSources: Array<any> = [];
 
+    let urlType: string = "github";
+    let url: string = "";
+
     $: selectedOption = "info";
 
+    const handleSubmitContribution = async (e: any) => {
+        const ACTION_URL = e.target.action;
+        const formData = new FormData(e.target);
+        const additionalSources = [];
+        const urlPattern =
+            /^(https?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(\/[^\s]*)?$/;
+
+        if (!urlPattern.test(url)) {
+            toastStore.set({
+                message: "Please enter a valid URL.",
+                type: ToastType.ERROR,
+            });
+            return;
+        }
+
+        for (let field of formData) {
+            const [key, value] = field;
+
+            if (key === "url") {
+                additionalSources.push({
+                    type: urlType,
+                    uri: value,
+                });
+            }
+        }
+
+        const requestBody = {
+            name: agentId, // Replace with the dynamic agent name if needed
+            additional_sources: additionalSources,
+        };
+
+        try {
+            const response = await fetch(ACTION_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            const _response = await response.json();
+            if (!response.ok) {
+                toastStore.set({
+                    message: _response.message,
+                    type: ToastType.ERROR,
+                });
+                return;
+            }
+
+            toastStore.set({
+                message: "Successfully added the data source",
+                type: ToastType.SUCCESS,
+            });
+        } catch (error) {
+            console.log("error", error);
+            toastStore.set({
+                message: "Something went wrong",
+                type: ToastType.ERROR,
+            });
+        } finally {
+            onClose();
+        }
+    };
     const badgeMarkdown = `<a href="https://app.commanddash.io/agent/${agentId}"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>`;
     const badgeUrl = `https://app.commanddash.io/agent/${agentId}`;
 
     function copyBadgeCode() {
         copyToClipboard(badgeMarkdown);
-        alert("Badge code copied.");
+        toastStore.set({
+            message: "Badge code copied.",
+            type: ToastType.SUCCESS,
+        });
     }
 </script>
 
@@ -65,6 +137,22 @@
                     >
                         Info
                     </button>
+                    <button
+                        class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "datasources" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
+                        on:click={() => {
+                            selectedOption = "datasources";
+                        }}
+                    >
+                        Data Sources
+                    </button>
+                    <!-- <button
+                        class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "share" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
+                        on:click={() => {
+                            selectedOption = "share";
+                        }}
+                    >
+                        Share
+                    </button> -->
                 </div>
                 <div
                     class="col-span-1 w-full overflow-y-auto overflow-x-clip px-1 max-md:pt-4 md:col-span-2 md:row-span-2"
@@ -94,15 +182,69 @@
                             </div>
                             <div class="flex flex-col gap-4">
                                 <div>
-                                    <h2 class="text-lg font-semibold text-white">Link Badge in README or Documentation</h2>
+                                    <h2
+                                        class="text-lg font-semibold text-white"
+                                    >
+                                        Link Badge in README or Documentation
+                                    </h2>
                                     <div class="flex items-center gap-4">
                                         <a href={badgeUrl}>
-                                            <img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA?style=for-the-badge" alt="AI Code Agent Badge">
+                                            <img
+                                                src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA?style=for-the-badge"
+                                                alt="AI Code Agent Badge"
+                                            />
                                         </a>
-                                        <button class="btn text-gray-500" on:click={copyBadgeCode}>Copy Badge Code</button>
+                                        <button
+                                            class="btn text-gray-500"
+                                            on:click={copyBadgeCode}
+                                            >Copy Badge Code</button
+                                        >
                                     </div>
                                 </div>
                             </div>
+                        {:else if selectedOption === "share"}
+                            <!-- <span class="text-white">share</span> -->
+                        {:else if selectedOption === "datasources"}
+                            <h1
+                                class="mr-1 inline text-xl font-semibold text-white"
+                            >
+                                Contribute
+                            </h1>
+                            <form
+                                method="POST"
+                                on:submit|preventDefault={handleSubmitContribution}
+                                class="w-full"
+                                action="https://api.commanddash.dev/agent/contribute-source"
+                            >
+                                <div class="flex flex-row">
+                                    <select
+                                        name="urlType"
+                                        class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
+                                        bind:value={urlType}
+                                    >
+                                        <option value="github">Github</option>
+                                        <option value="sitemap">Sitemap</option>
+                                        <option value="deep_crawl_page"
+                                            >Website</option
+                                        >
+                                        <option value="web_page">Webpage</option
+                                        >
+                                    </select>
+                                    <input
+                                        autocorrect="off"
+                                        autocapitalize="none"
+                                        class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        name="url"
+                                        placeholder="URL"
+                                        type="url"
+                                        bind:value={url}
+                                    />
+                                </div>
+                                <button
+                                    class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
+                                    type="submit">Submit</button
+                                >
+                            </form>
                             <div class="mt-6">
                                 <h2 class="text-lg font-semibold text-white">
                                     Data Sources
@@ -110,7 +252,9 @@
                                 {#each agentDataSources as sourceData}
                                     <a
                                         class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-xl !bg-gray-100 !text-gray-800 mt-1"
-                                        href="#"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        href={sourceData.uri}
                                     >
                                         <div class="truncate">
                                             {sourceData.uri}
@@ -129,8 +273,6 @@
                                     </a>
                                 {/each}
                             </div>
-                        {:else if selectedOption === "share"}
-                            <span class="text-white">share</span>
                         {/if}
                     </div>
                 </div>

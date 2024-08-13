@@ -101,6 +101,7 @@
             },
         });
     };
+
 </script>
 
 <div class="my-auto grid gap-4 lg:grid-cols-2">
