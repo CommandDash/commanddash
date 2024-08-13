@@ -138,12 +138,12 @@
                         Info
                     </button>
                     <button
-                        class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "contribute" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
+                        class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "datasources" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
                         on:click={() => {
-                            selectedOption = "contribute";
+                            selectedOption = "datasources";
                         }}
                     >
-                        Contribute
+                        Data Sources
                     </button>
                     <!-- <button
                         class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "share" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
@@ -204,7 +204,7 @@
                             </div>
                         {:else if selectedOption === "share"}
                             <!-- <span class="text-white">share</span> -->
-                        {:else if selectedOption === "contribute"}
+                        {:else if selectedOption === "datasources"}
                             <h1
                                 class="mr-1 inline text-xl font-semibold text-white"
                             >
