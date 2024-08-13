@@ -5,6 +5,7 @@
     import { ToastType } from "$lib/types/Toast";
     import appInsights from "$lib/utils/appInsights";
     import IconClose from "~icons/carbon/close";
+    import CarbonGithub from "~icons/carbon/logo-github";
 
     export let showModal: boolean;
     export let onClose: () => void;
@@ -13,19 +14,19 @@
     let selectedPlatform: string = "github";
 
     const platforms = [
-        { id: 'github', icon: 'github.png', label: 'GitHub' },
+        { id: 'github', icon: CarbonGithub, label: 'GitHub'},
         { id: 'npm', icon: 'npm.png', label: 'NPM' },
         { id: 'pypi', icon: 'python.png', label: 'PyPI' },
         { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub' },
         { id: 'go', icon: 'go.png', label: 'Go' }
     ];
-
     const validateURL = (url: string): boolean => {
         const patterns = {
             github: /^(https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?)$/,
             npm: /^(https:\/\/www\.npmjs\.com\/package\/[A-Za-z0-9_.-]+\/?)$/,
             pypi: /^(https:\/\/pypi\.org\/project\/[A-Za-z0-9_.-]+\/?)$/,
-            pub: /^(https:\/\/pub\.dev\/packages\/[A-Za-z0-9_.-]+\/?)$/
+            pub: /^(https:\/\/pub\.dev\/packages\/[A-Za-z0-9_.-]+\/?)$/,
+            go: /^(https:\/\/pkg\.go\.dev\/[A-Za-z0-9_.-\/]+\/?)$/
         };
         return patterns[selectedPlatform].test(url);
     };
@@ -60,14 +61,21 @@
                 </button>
             </div>
 
-            <div class="flex justify-center space-x-4 mb-6">
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
                 {#each platforms as platform}
                     <button
                         on:click={() => selectedPlatform = platform.id}
                         class="flex flex-col items-center focus:outline-none transition-all duration-200 ease-in-out"
                         class:selected={selectedPlatform === platform.id}
                     >
-                        <img src={platform.icon} alt={platform.label} class="w-8 h-8 mb-1" />
+                        <div class="relative">
+                            {#if platform.id === 'github'}
+                                <svelte:component this={platform.icon} class="w-10 h-10 mb-1 text-black-600" />
+                            {:else}
+                                <img src={platform.icon} alt={platform.label} class="w-10 h-10 mb-1" />
+                            {/if}
+        
+                        </div>
                         <span class="text-xs text-gray-300">{platform.label}</span>
                     </button>
                 {/each}
@@ -75,16 +83,20 @@
 
             <div class="relative mb-4">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <img 
-                        src={platforms.find(p => p.id === selectedPlatform).icon} 
-                        alt={selectedPlatform} 
-                        class="w-5 h-5"
-                    />
+                    {#if selectedPlatform === 'github'}
+                        <CarbonGithub class="w-5 h-5 text-gray-400" />
+                    {:else}
+                        <img 
+                            src={platforms.find(p => p.id === selectedPlatform).icon} 
+                            alt={selectedPlatform} 
+                            class="w-5 h-5"
+                        />
+                    {/if}
                 </div>
                 <input
                     type="url"
                     bind:value
-                    placeholder="{selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Repo URL"
+                    placeholder="{selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Package URL"
                     class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
                 />
             </div>
