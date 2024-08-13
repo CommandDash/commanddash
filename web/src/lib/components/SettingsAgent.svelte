@@ -9,6 +9,7 @@
     import CarbonWorld from "~icons/carbon/wikis";
     import { ToastType } from "$lib/types/Toast";
 
+    import { copyToClipboard } from "$lib/utils/copyToClipboard";
     export let showModalSettings: boolean;
     export let onClose: () => void;
     export let agentDisplayName: string = "";
@@ -85,6 +86,16 @@
             onClose();
         }
     };
+    const badgeMarkdown = `<a href="https://app.commanddash.io/agent/${agentId}"><img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA"></a>`;
+    const badgeUrl = `https://app.commanddash.io/agent/${agentId}`;
+
+    function copyBadgeCode() {
+        copyToClipboard(badgeMarkdown);
+        toastStore.set({
+            message: "Badge code copied.",
+            type: ToastType.SUCCESS,
+        })
+    }
 </script>
 
 {#if showModalSettings}
@@ -95,7 +106,7 @@
         <dialog
             in:fly={{ y: 100 }}
             open
-            class="h-[95dvh] w-[90dvw] overflow-hidden rounded-2xl border-gray-800/70 bg-gray-950 hover:bg-gray-950 shadow-2xl outline-none sm:h-[85dvh] xl:w-[1200px] 2xl:h-[75dvh]"
+            class="h-[95dvh] w-[90dvw] overflow-hidden rounded-2xl border-gray-800/70 bg-gray-950 shadow-2xl outline-none sm:h-[85dvh] xl:w-[1200px] 2xl:h-[75dvh]"
         >
             <div
                 class="grid h-full w-full grid-cols-1 grid-rows-[auto,1fr] content-start gap-x-4 overflow-hidden p-4 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
@@ -118,11 +129,6 @@
                 <div
                     class="col-span-1 flex flex-col overflow-y-auto whitespace-nowrap max-md:-mx-4 max-md:h-[245px] max-md:border max-md:border-b-2 md:pr-6"
                 >
-                    <!-- <h3
-                        class="pb-3 pl-3 pt-2 text-[.8rem] text-gray-800 sm:pl-1"
-                    >
-                        Options
-                    </h3> -->
                     <button
                         class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "info" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
                         on:click={() => {
@@ -151,7 +157,7 @@
                 <div
                     class="col-span-1 w-full overflow-y-auto overflow-x-clip px-1 max-md:pt-4 md:col-span-2 md:row-span-2"
                 >
-                    <div class="flex h-full flex-col gap-2">
+                    <div class="flex h-full flex-col gap-4">
                         {#if selectedOption === "info"}
                             <div class="flex gap-6">
                                 <img
@@ -166,27 +172,28 @@
                                         >
                                             {agentDisplayName}
                                         </h1>
-                                        <!-- <span
-                                        class="ml-1 rounded-full border px-2 py-0.5 text-sm leading-none text-gray-500">{currentAgent.version}</span> -->
                                     </div>
                                     <p
                                         class="mb-2 line-clamp-2 text-sm text-gray-500"
                                     >
                                         {agentDescription}
                                     </p>
-                                    <!-- <p class="text-sm text-gray-500">
-                                    Created by <a
-                                        class="underline"
-                                        target="_blank"
-                                        href={currentAgent.author.source_url}
-                                        >{currentAgent.author.name}</a
-                                    >
-                                </p> -->
                                 </div>
                             </div>
-                            <div>
+                            <div class="flex flex-col gap-4">
+                                <div>
+                                    <h2 class="text-lg font-semibold text-white">Link Badge in README or Documentation</h2>
+                                    <div class="flex items-center gap-4">
+                                        <a href={badgeUrl}>
+                                            <img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA?style=for-the-badge" alt="AI Code Agent Badge">
+                                        </a>
+                                        <button class="btn text-gray-500" on:click={copyBadgeCode}>Copy Badge Code</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6">
                                 <h2 class="text-lg font-semibold text-white">
-                                    Data sources
+                                    Data Sources
                                 </h2>
                                 {#each agentDataSources as sourceData}
                                     <a
