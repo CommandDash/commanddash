@@ -14,12 +14,12 @@
     let selectedPlatform: string = "github";
 
     const platforms = [
-        { id: 'github', icon: CarbonGithub, label: 'GitHub'},
-        { id: 'npm', icon: 'npm.png', label: 'NPM' },
-        { id: 'pypi', icon: 'python.png', label: 'PyPI' },
-        { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub' },
-        { id: 'go', icon: 'go.png', label: 'Go' }
+        { id: 'github', icon: CarbonGithub, label: 'GitHub', placeholder: 'https://github.com/user/repo' },
+        { id: 'npm', icon: 'npm.png', label: 'NPM', placeholder: 'https://www.npmjs.com/package/name' },
+        { id: 'pypi', icon: 'python.png', label: 'PyPI', placeholder: 'https://pypi.org/project/name' },
+        { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub', placeholder: 'https://pub.dev/packages/name' },
     ];
+
     const validateURL = (url: string): boolean => {
         const patterns = {
             github: /^(https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?)$/,
@@ -96,7 +96,7 @@
                 <input
                     type="url"
                     bind:value
-                    placeholder="{selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Package URL"
+                    placeholder={platforms.find(p => p.id === selectedPlatform).placeholder}
                     class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
                 />
             </div>
