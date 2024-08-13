@@ -240,6 +240,7 @@
                                         <a
                                             href={link.url}
                                             target="_blank"
+                                            rel="noreferrer"
                                             class="cursor-pointer hover:text-violet-500 underline"
                                         >
                                             <span
@@ -272,6 +273,7 @@
                             <a
                                 href="https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt"
                                 target="_blank"
+                                rel="noreferrer"
                                 class="flex items-center justify-center w-full md:w-auto h-12 px-6 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
                                 on:click={trackLinkClick}
                             >

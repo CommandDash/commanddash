@@ -27,13 +27,14 @@
         const ACTION_URL = e.target.action;
         const formData = new FormData(e.target);
         const additionalSources = [];
-        const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(\/[^\s]*)?$/;
+        const urlPattern =
+            /^(https?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(\/[^\s]*)?$/;
 
         if (!urlPattern.test(url)) {
             toastStore.set({
-                message: 'Please enter a valid URL.',
+                message: "Please enter a valid URL.",
                 type: ToastType.ERROR,
-            })
+            });
             return;
         }
 
@@ -72,10 +73,9 @@
             }
 
             toastStore.set({
-                    message: 'Successfully added the data source',
-                    type: ToastType.SUCCESS,
-                });
-
+                message: "Successfully added the data source",
+                type: ToastType.SUCCESS,
+            });
         } catch (error) {
             console.log("error", error);
             toastStore.set({
@@ -94,7 +94,7 @@
         toastStore.set({
             message: "Badge code copied.",
             type: ToastType.SUCCESS,
-        })
+        });
     }
 </script>
 
@@ -145,14 +145,14 @@
                     >
                         Contribute
                     </button>
-                    <button
+                    <!-- <button
                         class={`group flex h-10 flex-none items-center gap-2 pl-3 pr-2 text-sm hover:bg-gray-100 hover:text-gray-800 md:rounded-xl ${selectedOption === "share" ? "!bg-gray-100 !text-gray-800" : "text-white"}`}
                         on:click={() => {
                             selectedOption = "share";
                         }}
                     >
                         Share
-                    </button>
+                    </button> -->
                 </div>
                 <div
                     class="col-span-1 w-full overflow-y-auto overflow-x-clip px-1 max-md:pt-4 md:col-span-2 md:row-span-2"
@@ -182,43 +182,28 @@
                             </div>
                             <div class="flex flex-col gap-4">
                                 <div>
-                                    <h2 class="text-lg font-semibold text-white">Link Badge in README or Documentation</h2>
+                                    <h2
+                                        class="text-lg font-semibold text-white"
+                                    >
+                                        Link Badge in README or Documentation
+                                    </h2>
                                     <div class="flex items-center gap-4">
                                         <a href={badgeUrl}>
-                                            <img src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA?style=for-the-badge" alt="AI Code Agent Badge">
+                                            <img
+                                                src="https://img.shields.io/badge/AI-Code%20Agent-EB9FDA?style=for-the-badge"
+                                                alt="AI Code Agent Badge"
+                                            />
                                         </a>
-                                        <button class="btn text-gray-500" on:click={copyBadgeCode}>Copy Badge Code</button>
+                                        <button
+                                            class="btn text-gray-500"
+                                            on:click={copyBadgeCode}
+                                            >Copy Badge Code</button
+                                        >
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-6">
-                                <h2 class="text-lg font-semibold text-white">
-                                    Data Sources
-                                </h2>
-                                {#each agentDataSources as sourceData}
-                                    <a
-                                        class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-xl !bg-gray-100 !text-gray-800 mt-1"
-                                        href="#"
-                                    >
-                                        <div class="truncate">
-                                            {sourceData.uri}
-                                        </div>
-                                        <div
-                                            class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
-                                        >
-                                            {#if sourceData.type === "github"}
-                                                <CarbonGithub />
-                                            {:else if sourceData.type === "web_page"}
-                                                <CarbonWorld />
-                                            {:else}
-                                                <CarbonCode />
-                                            {/if}
-                                        </div>
-                                    </a>
-                                {/each}
-                            </div>
                         {:else if selectedOption === "share"}
-                            <span class="text-white">share</span>
+                            <!-- <span class="text-white">share</span> -->
                         {:else if selectedOption === "contribute"}
                             <h1
                                 class="mr-1 inline text-xl font-semibold text-white"
@@ -260,6 +245,34 @@
                                     type="submit">Submit</button
                                 >
                             </form>
+                            <div class="mt-6">
+                                <h2 class="text-lg font-semibold text-white">
+                                    Data Sources
+                                </h2>
+                                {#each agentDataSources as sourceData}
+                                    <a
+                                        class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-xl !bg-gray-100 !text-gray-800 mt-1"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        href={sourceData.uri}
+                                    >
+                                        <div class="truncate">
+                                            {sourceData.uri}
+                                        </div>
+                                        <div
+                                            class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
+                                        >
+                                            {#if sourceData.type === "github"}
+                                                <CarbonGithub />
+                                            {:else if sourceData.type === "web_page"}
+                                                <CarbonWorld />
+                                            {:else}
+                                                <CarbonCode />
+                                            {/if}
+                                        </div>
+                                    </a>
+                                {/each}
+                            </div>
                         {/if}
                     </div>
                 </div>
