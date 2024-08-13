@@ -1,98 +1,109 @@
 <script lang="ts">
     import { base } from "$app/paths";
-    import { clickOutside } from "$lib/actions/clickOutside";
     import { goto } from "$app/navigation";
     import { toastStore } from "$lib/stores/ToastStores";
     import { ToastType } from "$lib/types/Toast";
-    import appInsights from "$lib/utils/appInsights"; // Import the appInsights instance
+    import appInsights from "$lib/utils/appInsights";
     import IconClose from "~icons/carbon/close";
     import CarbonSearch from "~icons/carbon/search";
     import CarbonGithub from "~icons/carbon/logo-github";
+    import CarbonNpm from "~icons/carbon/logo-npm";
+    import CarbonPypi from "~icons/carbon/logo-python";
+    import CarbonPub from "~icons/carbon/logo-delicious";
 
     export let showModal: boolean;
     export let onClose: () => void;
 
-    let dialog: HTMLDialogElement;
     let value: string = "";
+    let selectedPlatform: string = "github";
 
-    const validateGithubURL = (url: string): boolean => {
-        const githubUrlPattern =
-            /^(https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?)$/;
-        return githubUrlPattern.test(url);
-    };
+    const platforms = [
+        { id: 'github', icon: CarbonGithub, label: 'GitHub' },
+        { id: 'npm', icon: CarbonNpm, label: 'NPM' },
+        { id: 'pypi', icon: CarbonPypi, label: 'PyPI' },
+        { id: 'pub', icon: CarbonPub, label: 'Pub' }
+    ];
 
-    const addGithubURL = (url: string) => {
-        value = url;
+    const validateURL = (url: string): boolean => {
+        const patterns = {
+            github: /^(https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?)$/,
+            npm: /^(https:\/\/www\.npmjs\.com\/package\/[A-Za-z0-9_.-]+\/?)$/,
+            pypi: /^(https:\/\/pypi\.org\/project\/[A-Za-z0-9_.-]+\/?)$/,
+            pub: /^(https:\/\/pub\.dev\/packages\/[A-Za-z0-9_.-]+\/?)$/
+        };
+        return patterns[selectedPlatform].test(url);
     };
 
     const onCreateAgent = () => {
-        if (validateGithubURL(value)) {
-            // Track custom event for form submission
+        if (validateURL(value)) {
             appInsights.trackEvent({
                 name: "CreateAgentSubmitted",
-                properties: {
-                    githubUrl: value,
-                },
+                properties: { platform: selectedPlatform, url: value },
             });
-
-            goto(`${base}/agent?github=${value}`);
+            goto(`${base}/agent?platform=${selectedPlatform}&url=${value}`);
         } else {
             toastStore.set({
-                message: "Please enter valid Github URL",
+                message: `Please enter a valid ${selectedPlatform} URL`,
                 type: ToastType.ERROR,
             });
         }
     };
 
     $: if (showModal) {
-        // Track custom event for dialog opened
-        appInsights.trackEvent({
-            name: "CreateAgentDialogOpened",
-        });
+        appInsights.trackEvent({ name: "CreateAgentDialogOpened" });
     }
 </script>
 
 {#if showModal}
-    <div
-        class="fixed inset-0 z-20 flex items-center justify-center bg-transparent backdrop-blur-sm"
-    >
-        <dialog
-            bind:this={dialog}
-            class="flex flex-col content-center items-center gap-x-10 gap-y-3 overflow-hidden rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950 dark:hover:bg-gray-950 max-sm:w-[85dvw] max-sm:px-6 md:w-96 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
-            on:close={() => dialog.close()}
-            open={showModal}
-        >
-            <div class="absolute right-0 top-0 mr-2 mt-2">
-                <button
-                    class="flex items-center px-2.5 py-1 text-sm text-white"
-                    on:click={onClose}
-                >
-                    <IconClose class="mr-1.5 text-xl" />
+    <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Create Agent with URL</h2>
+                <button on:click={onClose} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <IconClose />
                 </button>
             </div>
-            <h1 class="text-xl font-bold text-white">Create Agent with Github</h1>
-            <div
-                class="relative flex h-[50px] min-w-full items-center rounded-md border px-2 has-[:focus]:border-gray-400 sm:w-64 dark:border-gray-600"
-            >
-                <CarbonGithub
-                    height="1.5em"
-                    width="1.5em"
-                    class="pointer-events-none absolute left-2 text-xs text-gray-400"
-                />
+
+            <div class="flex justify-center space-x-4 mb-4">
+                {#each platforms as platform}
+                    <button
+                        on:click={() => selectedPlatform = platform.id}
+                        class="flex flex-col items-center focus:outline-none"
+                        class:selected={selectedPlatform === platform.id}
+                    >
+                        <svelte:component this={platform.icon} class="text-2xl" />
+                        <span class="text-xs mt-1">{platform.label}</span>
+                    </button>
+                {/each}
+            </div>
+
+            <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svelte:component this={platforms.find(p => p.id === selectedPlatform).icon} class="text-gray-400" />
+                </div>
                 <input
-                    class="h-[50px] w-full bg-transparent pl-7 focus:outline-none text-white"
-                    placeholder="Github Repo URL"
                     type="url"
-                    {value}
-                    on:input={(e) => addGithubURL(e.currentTarget.value)}
+                    bind:value
+                    placeholder="{selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Repo URL"
+                    class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
             </div>
+
             <button
                 on:click={onCreateAgent}
-                class="mt-4 w-full rounded bg-gray-300 px-4 py-3 font-semibold text-black"
+                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
                 Submit
             </button>
-        </dialog>
+        </div>
     </div>
 {/if}
+
+<style>
+    .selected {
+        color: #3b82f6; /* blue-500 */
+    }
+    .selected span {
+        font-weight: bold;
+    }
+</style>

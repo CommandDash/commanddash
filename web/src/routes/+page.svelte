@@ -116,7 +116,7 @@
                     showModal = true;
                 }}
             >
-                <CarbonGithub />Create Agent
+                <CarbonAdd />Create Agent
             </button>
         </div>
         <div class="mt-6 flex flex-wrap gap-2 items-center">
