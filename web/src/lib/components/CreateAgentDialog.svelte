@@ -5,11 +5,6 @@
     import { ToastType } from "$lib/types/Toast";
     import appInsights from "$lib/utils/appInsights";
     import IconClose from "~icons/carbon/close";
-    import CarbonSearch from "~icons/carbon/search";
-    import CarbonGithub from "~icons/carbon/logo-github";
-    import CarbonNpm from "~icons/carbon/logo-npm";
-    import CarbonPypi from "~icons/carbon/logo-python";
-    import CarbonPub from "~icons/carbon/logo-delicious";
 
     export let showModal: boolean;
     export let onClose: () => void;
@@ -18,10 +13,11 @@
     let selectedPlatform: string = "github";
 
     const platforms = [
-        { id: 'github', icon: CarbonGithub, label: 'GitHub' },
-        { id: 'npm', icon: CarbonNpm, label: 'NPM' },
-        { id: 'pypi', icon: CarbonPypi, label: 'PyPI' },
-        { id: 'pub', icon: CarbonPub, label: 'Pub' }
+        { id: 'github', icon: 'github.png', label: 'GitHub' },
+        { id: 'npm', icon: 'npm.png', label: 'NPM' },
+        { id: 'pypi', icon: 'python.png', label: 'PyPI' },
+        { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub' },
+        { id: 'go', icon: 'go.png', label: 'Go' }
     ];
 
     const validateURL = (url: string): boolean => {
@@ -56,42 +52,46 @@
 
 {#if showModal}
     <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <div class="bg-gray-900 rounded-lg p-6 w-full max-w-md border border-gray-700">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Create Agent with URL</h2>
-                <button on:click={onClose} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h2 class="text-xl font-bold text-gray-100">Create Agent with URL</h2>
+                <button on:click={onClose} class="text-gray-400 hover:text-gray-200">
                     <IconClose />
                 </button>
             </div>
 
-            <div class="flex justify-center space-x-4 mb-4">
+            <div class="flex justify-center space-x-4 mb-6">
                 {#each platforms as platform}
                     <button
                         on:click={() => selectedPlatform = platform.id}
-                        class="flex flex-col items-center focus:outline-none"
+                        class="flex flex-col items-center focus:outline-none transition-all duration-200 ease-in-out"
                         class:selected={selectedPlatform === platform.id}
                     >
-                        <svelte:component this={platform.icon} class="text-2xl" />
-                        <span class="text-xs mt-1">{platform.label}</span>
+                        <img src={platform.icon} alt={platform.label} class="w-8 h-8 mb-1" />
+                        <span class="text-xs text-gray-300">{platform.label}</span>
                     </button>
                 {/each}
             </div>
 
             <div class="relative mb-4">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svelte:component this={platforms.find(p => p.id === selectedPlatform).icon} class="text-gray-400" />
+                    <img 
+                        src={platforms.find(p => p.id === selectedPlatform).icon} 
+                        alt={selectedPlatform} 
+                        class="w-5 h-5"
+                    />
                 </div>
                 <input
                     type="url"
                     bind:value
                     placeholder="{selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Repo URL"
-                    class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
                 />
             </div>
 
             <button
                 on:click={onCreateAgent}
-                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
             >
                 Submit
             </button>
@@ -101,9 +101,10 @@
 
 <style>
     .selected {
-        color: #3b82f6; /* blue-500 */
+        transform: scale(1.1);
     }
     .selected span {
+        color: #60a5fa; /* blue-400 */
         font-weight: bold;
     }
 </style>
