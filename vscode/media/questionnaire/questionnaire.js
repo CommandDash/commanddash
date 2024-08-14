@@ -8,7 +8,7 @@ class Questionnaire {
 
     buildQuestionnaire() {
         const grid = document.getElementById("questionnaire-grid");
-        
+        grid.innerHTML = "";
         let container = null;
         this.json.forEach(({ id, message, onclick, icon, isGradient }) => {
             container = document.createElement("div");

@@ -19,7 +19,7 @@ class AgentUIBuilder {
             textHtml = textHtml.replace(`<${input.id}>`, inputElement.outerHTML);
         });
 
-        activeCommandsAttach.textContent = `${slug}`;
+        // activeCommandsAttach.textContent = `${slug}`;
         this.container.innerHTML = `${textHtml}`;
         this.ref.appendChild(this.container);
         this.registerCodeInputListener();

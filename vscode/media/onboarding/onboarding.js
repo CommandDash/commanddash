@@ -246,7 +246,10 @@ const questionnaireContainer = document.getElementById("questionaire-container")
 const executableContainer = document.getElementById("executable-container");
 const fileUpload = document.getElementById("file-upload");
 const activeAgentAttach = document.getElementById("agents");
-const activeCommandsAttach = document.getElementById("slash-commands");
+// const activeCommandsAttach = document.getElementById("slash-commands");
+const headerLogo = document.getElementById("header-logo");
+const headerText = document.getElementById("header-text");
+const headerAgentName = document.getElementById("header-agent-name");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -264,6 +267,7 @@ let currentActiveAgent = '';
 let isGithubLoginPending = false;
 let isExecutableDownloadPending = false;
 let codeInputId = 0;
+let agentName = 'Dash';
 
 const agentInputsJson = [];
 
@@ -757,7 +761,7 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
             currentActiveAgent = "@dash";
-            activeAgentAttach.textContent = '@Dash';
+            // activeAgentAttach.textContent = '@Dash';
             commandEnable = false;
         },
         icon: questionIcon,
@@ -772,7 +776,7 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
             currentActiveAgent = "@dash";
-            activeAgentAttach.textContent = '@Dash';
+            // activeAgentAttach.textContent = '@Dash';
             commandEnable = false;
         },
         icon: codeSnippetIcon,
@@ -787,8 +791,48 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
             currentActiveAgent = "@dash";
-            activeAgentAttach.textContent = '@Dash';
+            // activeAgentAttach.textContent = '@Dash';
             commandEnable = false;
+        },
+        icon: dashAI,
+    }
+];
+
+const webQuestionnaire = [
+    {
+        id: "generate-summary",
+        message: "Generate summary",
+        isGradient: true,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Please give me a complete summary about ${agentName}`;
+            submitResponse();
+        },
+        icon: marketPlaceIcon,
+    },
+    {
+        id: "ask-about",
+        message: "Ask about a feature",
+        isGradient: false,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Help me understand (x) feature in detail with helpful links to read more about it`;
+        },
+        icon: questionIcon,
+    },
+    {
+        id: "search-code",
+        message: "Search for code or issues",
+        isGradient: false,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Where can I find the code that does (y). Please help me with links to it`;
+        },
+        icon: codeSnippetIcon,
+    },
+    {
+        id: "get-help",
+        message: "Get help fixing an issue",
+        isGradient: false,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Help me resolve the (z) problem I'm facing. Here is some helpful code: (code)`;
         },
         icon: dashAI,
     }
@@ -835,8 +879,6 @@ const questionnaire = [
 
     githubLogin.addEventListener("click", githubListener);
 
-    new Questionnaire(questionnaire, textInput).buildQuestionnaire();
-
     vscode.postMessage({
         type: "initialized",
     });
@@ -845,15 +887,29 @@ const questionnaire = [
     });
 
     enableDefaultAgent();
+    switchBottomTipMessage();
 })();
+
+function switchBottomTipMessage() {
+    if (getAgents().length <= 2) {
+        activeAgentAttach.textContent = `Go to “@” marketplace to install agents`;
+        new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+    } else if (getAgents().length >= 3 && agentName === "Dash") {
+        activeAgentAttach.textContent = `Type “@” to switch agent`;
+        new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+    } else if (getAgents().length >= 3 && agentName !== "Dash") {
+        activeAgentAttach.textContent = `Attach code snippets from right click menu`;
+        new Questionnaire(webQuestionnaire, textInput).buildQuestionnaire();
+    }
+}
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@Dash';
+    // activeAgentAttach.textContent = '@Dash';
     activeAgent = true;
     commandEnable = false;
-    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
-    activeCommandsAttach.textContent = "/";
+    // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+    // activeCommandsAttach.textContent = "/";
     currentActiveAgent = '@dash';
 }
 
@@ -920,8 +976,8 @@ async function submitResponse() {
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
             commandEnable = false;
-            activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
-            activeCommandsAttach.textContent = "/";
+            // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+            // activeCommandsAttach.textContent = "/";
             agentInputsJson.length = 0;
         }
     } else if (activeAgent && !commandEnable) {
@@ -1053,7 +1109,7 @@ function handleSubmit(event) {
             if (textInput.textContent.trim().length === 0) {
                 // Perform some action
                 commandEnable = false;
-                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+                // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
             }
         }, 2500);
 
@@ -1104,7 +1160,7 @@ function setCaretToEnd(target) {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Ask Dash") {
+    if (textInput.textContent.trim() === `# Ask ${agentName}`) {
         textInput.textContent = '';
         textInput.classList.remove('placeholder');
     }
@@ -1113,7 +1169,7 @@ function removePlaceholder() {
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Ask Dash';
+        textInput.textContent = `# Ask ${agentName}`;
         textInput.classList.add('placeholder');
     }
 }
@@ -1256,6 +1312,7 @@ function handleTriggerMessage(event) {
         case 'getStoredAgents':
             const _agents = parseAgents(message.value.agents);
             appendAgents(_agents.agents);
+            switchBottomTipMessage();
             break;
     }
 }
