@@ -3,6 +3,7 @@
     import { error as pageError } from "@sveltejs/kit";
     import { page } from "$app/stores";
     import appInsights from "$lib/utils/appInsights";
+    import { validateURL } from "$lib/utils/validateURL";
 
     import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
     import { type Agent } from "$lib/types/Agent";
@@ -11,14 +12,60 @@
     let currentAgentDetails: Agent;
     let errorMessage: string = "Something went wrong";
     let agentDataSources: Array<any> = [];
-    
+
     const limit: number = 10;
 
     $: loading = true;
 
     onMount(async () => {
         loading = true;
-        const ref: string = $page.url.searchParams.get("github") || "";
+        const githubRef: string = $page.url.searchParams.get("github") || "";
+        const npmRef: string = $page.url.searchParams.get("npm") || "";
+        const pypiRef: string = $page.url.searchParams.get("pypi") || "";
+        const pubRef: string = $page.url.searchParams.get("pub") || "";
+
+        let referrer = "";
+        let referrer_kind = "";
+
+        if (githubRef) {
+            referrer = githubRef;
+            referrer_kind = "github";
+        } else if (npmRef) {
+            const { isValid, packageName } = validateURL(npmRef, "npm");
+            if (!isValid) {
+                loading = false;
+                errorMessage = "Invalid NPM URL";
+                appInsights.trackException({ error: new Error(errorMessage) }); // Track exception
+                throw pageError(400, errorMessage);
+            }
+            referrer = packageName;
+            referrer_kind = "npm";
+        } else if (pypiRef) {
+            const { isValid, packageName } = validateURL(pypiRef, "pypi");
+            if (!isValid) {
+                loading = false;
+                errorMessage = "Invalid PyPI URL";
+                appInsights.trackException({ error: new Error(errorMessage) }); // Track exception
+                throw pageError(400, errorMessage);
+            }
+            referrer = packageName;
+            referrer_kind = "pypi";
+        } else if (pubRef) {
+            const { isValid, packageName } = validateURL(pubRef, "pub");
+            if (!isValid) {
+                loading = false;
+                errorMessage = "Invalid Pub URL";
+                appInsights.trackException({ error: new Error(errorMessage) }); // Track exception
+                throw pageError(400, errorMessage);
+            }
+            referrer = packageName;
+            referrer_kind = "pub";
+        } else {
+            loading = false;
+            errorMessage = "A source is required";
+            appInsights.trackException({ error: new Error(errorMessage) }); // Track exception
+            throw pageError(400, errorMessage);
+        }
 
         appInsights.trackPageView({
             name: "AgentPage",
@@ -31,7 +78,7 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ referrer: ref }),
+                body: JSON.stringify({ referrer, referrer_kind }),
             },
         );
 
