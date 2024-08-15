@@ -11,27 +11,52 @@
     let currentAgentDetails: Agent;
     let errorMessage: string = "Something went wrong";
     let agentDataSources: Array<any> = [];
-    
+
     const limit: number = 10;
 
     $: loading = true;
 
     onMount(async () => {
         loading = true;
-        const ref: string = $page.url.searchParams.get("github") || "";
+        const githubRef: string = $page.url.searchParams.get("github") || "";
+        const npmRef: string = $page.url.searchParams.get("npm") || "";
+        const pypiRef: string = $page.url.searchParams.get("pypi") || "";
+        const pubRef: string = $page.url.searchParams.get("pub") || "";
+
+        let referrer = "";
+        let referrer_kind = "";
+
+        if (githubRef) {
+            referrer = githubRef;
+            referrer_kind = "github";
+        } else if (npmRef) {
+            referrer = npmRef;
+            referrer_kind = "npm";
+        } else if (pypiRef) {
+            referrer = pypiRef;
+            referrer_kind = "pypi";
+        } else if (pubRef) {
+            referrer = pubRef;
+            referrer_kind = "pub";
+        } else {
+            loading = false;
+            errorMessage = "A source is required";
+            appInsights.trackException({ error: new Error(errorMessage) }); // Track exception
+            throw pageError(400, errorMessage);
+        }
 
         appInsights.trackPageView({
             name: "AgentPage",
         });
 
         const response = await fetch(
-            "https://api.commanddash.dev/agent/get-latest-agent",
+            "http://127.0.0.1:5000/agent/get-latest-agent",
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ referrer: ref }),
+                body: JSON.stringify({ referrer, referrer_kind }),
             },
         );
 

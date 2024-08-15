@@ -89,7 +89,7 @@
 
         try {
             const response = await fetch(
-                "https://api.commanddash.dev/v2/ai/agent/answer",
+                "http://127.0.0.1:5000/v2/ai/agent/answer",
                 {
                     method: "POST",
                     body: JSON.stringify(agentData),

@@ -20,24 +20,44 @@
         { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub', placeholder: 'https://pub.dev/packages/name' },
     ];
 
-    const validateURL = (url: string): boolean => {
+    const validateURL = (url: string): { isValid: boolean, packageName: string } => {
+        // validate against these
+        // https://pub.dev/packages/webview_flutter 
+        // https://pub.dev/packages/webview_flutter/install
+        //  requests for:
+        //  https://pypi.org/project/requests/ 
+        // https://pypi.org/project/requests/#history 
+        // mock for: 
+        // https://www.npmjs.com/package/mock
+        //  https://www.npmjs.com/package/mock?activeTab=dependencies 
+        // @octokit/graphql for:
+        //  https://www.npmjs.com/package/@octokit/graphql
         const patterns = {
             github: /^(https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?)$/,
-            npm: /^(https:\/\/www\.npmjs\.com\/package\/[A-Za-z0-9_.-]+\/?)$/,
-            pypi: /^(https:\/\/pypi\.org\/project\/[A-Za-z0-9_.-]+\/?)$/,
-            pub: /^(https:\/\/pub\.dev\/packages\/[A-Za-z0-9_.-]+\/?)$/,
-            go: /^(https:\/\/pkg\.go\.dev\/[A-Za-z0-9_.-\/]+\/?)$/
+            npm: /^(https:\/\/www\.npmjs\.com\/package\/(@?[A-Za-z0-9_.-]+\/?[A-Za-z0-9_.-]+))\/?.*$/,
+            pypi: /^(https:\/\/pypi\.org\/project\/([A-Za-z0-9_.-]+))\/?.*$/,
+            pub: /^(https:\/\/pub\.dev\/packages\/([A-Za-z0-9_.-]+))\/?.*$/,
         };
-        return patterns[selectedPlatform].test(url);
+
+        const match = url.match(patterns[selectedPlatform]);
+        if (match) {
+            return { isValid: true, packageName: match[2] };
+        } else {
+            return { isValid: false, packageName: "" };
+        }
     };
 
     const onCreateAgent = () => {
-        if (validateURL(value)) {
+        value = value.trim()
+        const { isValid, packageName } = validateURL(value);
+        if (isValid) {
             appInsights.trackEvent({
                 name: "CreateAgentSubmitted",
                 properties: { platform: selectedPlatform, url: value },
             });
-            goto(`${base}/agent?platform=${selectedPlatform}&url=${value}`);
+            const queryParam = selectedPlatform === 'github' ? value : packageName;
+            console.log(queryParam)
+            goto(`${base}/agent?${selectedPlatform}=${queryParam}`);
         } else {
             toastStore.set({
                 message: `Please enter a valid ${selectedPlatform} URL`,
@@ -74,7 +94,7 @@
                             {:else}
                                 <img src={platform.icon} alt={platform.label} class="w-10 h-10 mb-1" />
                             {/if}
-        
+
                         </div>
                         <span class="text-xs text-gray-300">{platform.label}</span>
                     </button>
@@ -93,6 +113,7 @@
                         />
                     {/if}
                 </div>
+                <!-- TODO: Auto change the selected platform if the url validates againt another platform. like if github is selected but the url is an npm package. -->
                 <input
                     type="url"
                     bind:value

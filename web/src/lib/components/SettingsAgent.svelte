@@ -214,7 +214,7 @@
                                 method="POST"
                                 on:submit|preventDefault={handleSubmitContribution}
                                 class="w-full"
-                                action="https://api.commanddash.dev/agent/contribute-source"
+                                action="http://127.0.0.1:5000/agent/contribute-source"
                             >
                                 <div class="flex flex-row">
                                     <select
