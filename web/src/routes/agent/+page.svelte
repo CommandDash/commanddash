@@ -72,7 +72,7 @@
         });
 
         const response = await fetch(
-            "http://127.0.0.1:5000/agent/get-latest-agent",
+            "https://api.commanddash.dev/agent/get-latest-agent",
             {
                 method: "POST",
                 headers: {

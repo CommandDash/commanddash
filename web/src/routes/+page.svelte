@@ -25,7 +25,7 @@
     onMount(async () => {
         loading = true;
         const response = await fetch(
-            "http://127.0.0.1:5000/agent/web/get-agent-list",
+            "https://api.commanddash.dev/agent/web/get-agent-list",
             {
                 headers: {
                     "Content-Type": "application/json",
