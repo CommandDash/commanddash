@@ -250,6 +250,7 @@ const activeAgentAttach = document.getElementById("agents");
 const headerLogo = document.getElementById("header-logo");
 const headerText = document.getElementById("header-text");
 const headerAgentName = document.getElementById("header-agent-name");
+const headerAgentDescription = document.getElementById("header-agent-description");
 
 //initialising variables
 let isApiKeyValid = false;

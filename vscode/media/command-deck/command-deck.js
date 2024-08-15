@@ -141,6 +141,8 @@ class CommandDeck {
                 headerText.classList.add("hidden");
                 headerAgentName.classList.remove("hidden");
                 headerAgentName.textContent = option?.metadata.display_name;
+                headerAgentDescription.classList.remove("hidden");
+                headerAgentDescription.textContent = option?.metadata.description;
                 switchBottomTipMessage();
                 activeAgent = true;
                 commandEnable = false;
