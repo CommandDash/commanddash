@@ -22,7 +22,7 @@
             <div class="py-3 sticky top-0 z-[11] flex w-full px-5 flex-col justify-start" id="header">
                 <div class="flex flex-row justify-start items-center">
                     <img src="{{headerImageUri}}" class="w-18 h-11" id="header-logo" />
-                    <span class="ml-1 text-2xl font-semibold hidden" id="header-agent-name"></span>
+                    <span class="ml-1 text-xl font-semibold hidden" id="header-agent-name"></span>
                     <svg width="300" height="46" viewBox="0 0 487 46" fill="none" xmlns="http://www.w3.org/2000/svg"
                         id="header-text">
                         <path
@@ -37,7 +37,7 @@
                         </defs>
                     </svg>
                 </div>
-                <span class="ml-1 text-lg hidden" id="header-agent-description"></span>
+                <span class="ml-1 text-sm text-gray-400 mt-2 hidden" id="header-agent-description"></span>
             </div>
         </a>
 
@@ -71,7 +71,7 @@
         </div>
         <div class="flex-1 flex" id="bottom-container">
             <div class="w-full h-20 absolute inset-0 m-auto" id="questionaire-container" , style="bottom: 180px;">
-                <div class="grid grid-cols-1 gap-1" id="questionnaire-grid">
+                <div class="grid grid-cols-1 gap-1 px-5" id="questionnaire-grid">
                 </div>
             </div>
             <div class="self-end flex-col max-w-full flex-1">
@@ -96,7 +96,7 @@
                             <p contenteditable="true" id="text-input"># Ask Dash</p>
                             <div class="inline-flex flex-row mt-2 items-center justify-between w-full">
                                 <div class="inline-flex">
-                                    <p class="text-center inline-flex justify-center items-center cursor-pointer"
+                                    <p class="text-center inline-flex justify-center items-center cursor-pointer text-sm"
                                         title="Specialized agents" id="agents">
                                         Type "@" to switch agent
                                     </p>

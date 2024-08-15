@@ -16,7 +16,7 @@ class Questionnaire {
             container.classList.add("max-w-full", "p-1", "cursor-pointer");
 
             const cardContainer = document.createElement("div");
-            cardContainer.classList.add("w-full", "rounded-lg", isGradient ? "questionnaire-card-gradient" : "questionnaire-card", "py-5", "px-3", "relative", "text-center");
+            cardContainer.classList.add("w-full", "rounded-lg", isGradient ? "questionnaire-card-gradient" : "questionnaire-card", "py-3", "px-3", "relative", "text-center");
             cardContainer.addEventListener("click", () => onclick(this.ref));
 
             const _message = document.createElement("span");
