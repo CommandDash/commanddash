@@ -897,13 +897,15 @@ function switchBottomTipMessage() {
     if (getAgents().length <= 2) {
         activeAgentAttach.textContent = `Go to “@” marketplace to install agents`;
         new Questionnaire(questionnaire, textInput).buildQuestionnaire();
-    } else if (getAgents().length >= 3 && conversationHistory.length === 0) {
-        activeAgentAttach.textContent = `@${agentName}`;
     } else if (getAgents().length >= 3 && agentName === "Dash") {
         activeAgentAttach.textContent = `Type “@” to switch agent`;
         new Questionnaire(questionnaire, textInput).buildQuestionnaire();
     } else if (getAgents().length >= 3 && agentName !== "Dash") {
-        activeAgentAttach.textContent = `Attach code snippets from right click menu`;
+        if (conversationHistory.length === 0) {
+            activeAgentAttach.textContent = `@${agentName}`;
+        } else {
+            activeAgentAttach.textContent = `Attach code snippets from right click menu`;
+        }
         new Questionnaire(webQuestionnaire, textInput).buildQuestionnaire();
     }
 }
