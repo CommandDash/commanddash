@@ -293,6 +293,7 @@ let data = [
         },
         "min_cli_version": "0.0.1",
         "name": "@dash",
+        "search": "@dash",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             // {
@@ -449,6 +450,7 @@ let data = [
         "description": "Get help with writing tests.",
         "min_cli_version": "0.0.1",
         "name": "@test",
+        "search": "@test",
         "metadata": {
             "display_name": "Test"
         },
@@ -1042,7 +1044,11 @@ function handleSubmit(event) {
             if (query.length === 0) {
                 matchingItems = getAgents();
             } else {
-                matchingItems = getAgents().filter(item => item.name?.toLowerCase().startsWith(query.toLowerCase()));
+                
+                matchingItems = getAgents().filter(item => {
+                    console.log('name', item);
+                    return item.search?.toLowerCase().startsWith(query.toLowerCase());
+                });
             }
         }
 
@@ -1127,7 +1133,7 @@ function getAgents() {
     const agents = [];
     data.forEach(agent => {
         if (agent.name.trim().length > 0) {
-            agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata });
+            agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata, search: agent.search });
         }
     });
 

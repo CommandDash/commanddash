@@ -31,7 +31,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
 
     // In the constructor, we store the URI of the extension
     constructor(private readonly _extensionUri: vscode.Uri,
-        private context: vscode.ExtensionContext) {}
+        private context: vscode.ExtensionContext) { }
 
     // Public method to post a message to the webview
     public postMessageToWebview(message: any): void {
@@ -175,6 +175,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             }
         });
         this._fetchAgentsAPI(true);
+        this._migrateAgentsStorage();
         // StorageManager.instance.deleteAgents();
 
         webviewView.onDidChangeVisibility(() => {
@@ -194,7 +195,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         //TODO: search agents on marketplace
         //TODO: following up message proper placement
         //TODO: Remove dart icon and show icons based on file type
-        
+
 
         logEvent('new-chat-start', { from: 'command-deck' });
         // this._installAgent();
@@ -286,19 +287,52 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    private async _migrateAgentsStorage() {
+        try {
+            const existingAgents = await StorageManager.instance.getInstallAgents();
+            const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+    
+            let isMigrationNeeded = false;
+    
+            const migratedAgents = Object.keys(_parsedExsistingAgents.agents).reduce((acc: any, key: string) => {
+                const agent = _parsedExsistingAgents.agents[key];
+                if (!agent.search) {
+                    agent.search = `@${agent.metadata.display_name}`;
+                    isMigrationNeeded = true;
+                }
+                acc[key] = agent;
+                return acc;
+            }, {});
+    
+            if (isMigrationNeeded) {
+                const updatedAgents = {
+                    agents: migratedAgents,
+                    agentsList: _parsedExsistingAgents.agentsList
+                };
+    
+                await StorageManager.instance.setInstallAgents(updatedAgents);
+                console.log('Migration completed: @search field added to existing agents.');
+            }
+        } catch (error) {
+            console.error('Error during agents storage migration:', error);
+        }
+    }    
+
     private async _storingAgentsLocally(agentDetails: any) {
         try {
-            const { name } = agentDetails;
+            const { name, metadata } = agentDetails;
 
             // StorageManager.instance.deleteAgents();
             const existingAgents = await StorageManager.instance.getInstallAgents();
             const _parsedExsistingAgents = existingAgents ? JSON.parse(existingAgents) : { agents: {}, agentsList: [] };
+
             const updatedAgents = {
                 agents: {
                     ..._parsedExsistingAgents?.agents,
                     [`@${name}`]: {
                         ...agentDetails,
                         name: `@${name}`,
+                        search: `@${metadata.display_name}`,
                         supported_commands: agentDetails?.supported_commands.map((command: any) => ({
                             ...command,
                             slug: `/${command.slug}`
