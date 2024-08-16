@@ -45,7 +45,13 @@
         agents = _response;
         filteredAgents = _response;
         loading = false;
-        appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event   });
+        appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
+
+        // Check if the 'create' query parameter is set to 'true'
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('create') === 'true') {
+            showModal = true;
+        }
     });
 
     const navigateAgents = (agent: Agent) => {
