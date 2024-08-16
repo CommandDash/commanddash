@@ -6,7 +6,6 @@
     import CarbonAdd from "~icons/carbon/add";
     import CarbonGithub from "~icons/carbon/logo-github";
     import CarbonSettings from "~icons/carbon/settings";
-    import IconCollage from "$lib/components/IconCollage.svelte";
     import type { Agent } from "$lib/types/Agent";
     import { goto } from "$app/navigation";
     import { debounce } from "$lib/utils/debounce";
@@ -195,20 +194,19 @@
                                 <CarbonGithub class="mx-1" />
                                 {formatText(agent.author.source_url, 20)}
                             </a>
-                        {:else}
+                        <!-- {:else}
                             <p
                                 class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500"
                             >
-                                Created by <a
+                                By <a
                                     class="hover:underline"
-                                    href="https://github.com/{agent.author
-                                        .github_id}"
-                                    target="_blank"
-                                    rel="noreferrer"
+                                        href="https://github.com/commanddash"
+                                        target="_blank"
+                                        rel="noreferrer"
                                 >
-                                    {agent.author.name}
+                                    CommandDash
                                 </a>
-                            </p>
+                            </p> -->
                         {/if}
                     </button>
                 {/each}
