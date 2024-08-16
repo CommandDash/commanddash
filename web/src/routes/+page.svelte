@@ -6,7 +6,6 @@
     import CarbonAdd from "~icons/carbon/add";
     import CarbonGithub from "~icons/carbon/logo-github";
     import CarbonSettings from "~icons/carbon/settings";
-
     import type { Agent } from "$lib/types/Agent";
     import { goto } from "$app/navigation";
     import { debounce } from "$lib/utils/debounce";
@@ -110,10 +109,10 @@
         <div class="flex flex-row">
             <div>
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold">Marketplace</h1>
+                    <h1 class="text-2xl font-bold">AI Agents for Libraries and SDKs</h1>
                 </div>
                 <h3 class="text-gray-500">
-                    Explore the agents in the marketplace made by dev community
+                    Build apps faster with specialized agents at your command.
                 </h3>
             </div>
             <button
@@ -136,7 +135,7 @@
                 />
                 <input
                     class="h-[50px] w-full bg-transparent pl-7 focus:outline-none"
-                    placeholder="Search agents in the marketplace"
+                    placeholder="Search any library or SDK"
                     maxlength="150"
                     type="search"
                     value={searchValue}
@@ -195,20 +194,19 @@
                                 <CarbonGithub class="mx-1" />
                                 {formatText(agent.author.source_url, 20)}
                             </a>
-                        {:else}
+                        <!-- {:else}
                             <p
                                 class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500"
                             >
-                                Created by <a
+                                By <a
                                     class="hover:underline"
-                                    href="https://github.com/{agent.author
-                                        .github_id}"
-                                    target="_blank"
-                                    rel="noreferrer"
+                                        href="https://github.com/commanddash"
+                                        target="_blank"
+                                        rel="noreferrer"
                                 >
-                                    {agent.author.name}
+                                    CommandDash
                                 </a>
-                            </p>
+                            </p> -->
                         {/if}
                     </button>
                 {/each}
@@ -218,11 +216,11 @@
                         showModal = true;
                     }}
                 >
-                    <CarbonGithub height="5.5em" width="5.5em" />
+                    <CarbonAdd height="5.5em" width="5.5em" />
                     <h3
                         class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm mt-2"
                     >
-                        Create from github
+                        Create Agent
                     </h3>
                 </button>
             </div>
