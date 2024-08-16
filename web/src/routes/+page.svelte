@@ -110,10 +110,10 @@
         <div class="flex flex-row">
             <div>
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold">Marketplace</h1>
+                    <h1 class="text-2xl font-bold">AI Agents for Libraries and Frameworks</h1>
                 </div>
                 <h3 class="text-gray-500">
-                    Explore the agents in the marketplace made by dev community
+                    Explore and contribute to agents created by community.
                 </h3>
             </div>
             <button
