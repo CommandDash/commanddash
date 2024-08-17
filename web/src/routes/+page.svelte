@@ -28,7 +28,7 @@
         },
         author: {
             name: "Mellowtel",
-            source_url: "https://www.mellowtel.dev/flutter/"
+            source_url: "https://mellowtel.dev/flutter?utm_source=web&utm_medium=promotedcard&utm_campaign=commanddash"
         }
     };
 
