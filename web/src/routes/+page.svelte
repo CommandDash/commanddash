@@ -19,6 +19,19 @@
     let showModal: boolean = false;
     let currentAgent: Agent;
 
+    const promotedAgent: Agent = {
+        name: "promoted-agent",
+        metadata: {
+            display_name: "Mellowtel",
+            description: "Transparent monetization engine for Flutter Apps",
+            avatar_id: "mellowtel.png"
+        },
+        author: {
+            name: "Mellowtel",
+            source_url: "https://www.mellowtel.dev/flutter/"
+        }
+    };
+
     $: loading = true;
 
     onMount(async () => {
@@ -142,13 +155,6 @@
                     on:input={(e) => search(e.currentTarget.value)}
                 />
             </div>
-            <!-- <select
-                class="rounded-lg border border-gray-300 bg-gray-50 px-2 py-1 text-sm text-gray-900 focus:border-blue-700 focus:ring-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            >
-                <option value={SortKey.TRENDING}>{SortKey.TRENDING}</option>
-                <option value={SortKey.POPULAR}>{SortKey.POPULAR}</option>
-                <option value={SortKey.NEW}>{SortKey.NEW}</option>
-            </select> -->
         </div>
         {#if loading}
             <div class="flex-col w-full h-48 px-2 py-3">
@@ -164,52 +170,143 @@
             <div
                 class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
             >
-                {#each filteredAgents as agent}
+                {#if filteredAgents.length > 0}
+                    {#each filteredAgents as agent, index}
+                        {#if index === 2}
+                            <button
+                                class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
+                                on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
+                            >
+                                <img
+                                    src={promotedAgent.metadata.avatar_id}
+                                    alt="Avatar"
+                                    class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                                />
+                                <h3
+                                    class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
+                                >
+                                    {promotedAgent.metadata.display_name}
+                                </h3>
+                                <p
+                                    class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
+                                >
+                                    {promotedAgent.metadata.description}
+                                </p>
+                                <span class="promoted-indicator">Promoted</span>
+                            </button>
+                        {/if}
+                        <button
+                            class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                            on:click={() => navigateAgents(agent)}
+                        >
+                            <img
+                                src={agent.metadata.avatar_id}
+                                alt="Avatar"
+                                class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                            />
+                            <h3
+                                class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+                            >
+                                {agent.metadata.display_name}
+                            </h3>
+                            <p
+                                class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
+                            >
+                                {agent.metadata.description}
+                            </p>
+                            {#if agent.author.source_url}
+                                <a
+                                    href={agent.author.source_url}
+                                    class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <CarbonGithub class="mx-1" />
+                                    {formatText(agent.author.source_url, 20)}
+                                </a>
+                            {/if}
+                        </button>
+                    {/each}
+                    {#if filteredAgents.length <= 2}
+                        <button
+                            class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
+                            on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
+                        >
+                            <img
+                                src={promotedAgent.metadata.avatar_id}
+                                alt="Avatar"
+                                class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                            />
+                            <h3
+                                class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
+                            >
+                                {promotedAgent.metadata.display_name}
+                            </h3>
+                            <p
+                                class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
+                            >
+                                {promotedAgent.metadata.description}
+                            </p>
+                            <span class="promoted-indicator">Promoted</span>
+                        </button>
+                    {/if}
+                {:else}
                     <button
-                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                        on:click={() => navigateAgents(agent)}
+                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
+                        on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
                     >
                         <img
-                            src={agent.metadata.avatar_id}
+                            src={promotedAgent.metadata.avatar_id}
                             alt="Avatar"
                             class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
                         />
                         <h3
-                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
                         >
-                            {agent.metadata.display_name}
+                            {promotedAgent.metadata.display_name}
                         </h3>
                         <p
-                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
+                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
                         >
-                            {agent.metadata.description}
+                            {promotedAgent.metadata.description}
                         </p>
-                        {#if agent.author.source_url}
-                            <a
-                                href={agent.author.source_url}
-                                class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                <CarbonGithub class="mx-1" />
-                                {formatText(agent.author.source_url, 20)}
-                            </a>
-                        <!-- {:else}
-                            <p
-                                class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500"
-                            >
-                                By <a
-                                    class="hover:underline"
-                                        href="https://github.com/commanddash"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                >
-                                    CommandDash
-                                </a>
-                            </p> -->
-                        {/if}
+                        <span class="promoted-indicator">Promoted</span>
                     </button>
-                {/each}
+                    {#each filteredAgents as agent}
+                        <button
+                            class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                            on:click={() => navigateAgents(agent)}
+                        >
+                            <img
+                                src={agent.metadata.avatar_id}
+                                alt="Avatar"
+                                class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                            />
+                            <h3
+                                class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+                            >
+                                {agent.metadata.display_name}
+                            </h3>
+                            <p
+                                class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
+                            >
+                                {agent.metadata.description}
+                            </p>
+                            {#if agent.author.source_url}
+                                <a
+                                    href={agent.author.source_url}
+                                    class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <CarbonGithub class="mx-1" />
+                                    {formatText(agent.author.source_url, 20)}
+                                    <span class="ml-1">→</span>
+                                </a>
+                            {/if}
+                        </button>
+                    {/each}
+                {/if}
                 <button
                     class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
                     on:click={() => {
@@ -264,5 +361,27 @@
                 8px 0px 0px 0px #d4d4d4,
                 16px 0px 0px 0px #0e70c0;
         }
+    }
+
+    .promoted-card {
+        border: 2px solid #1e90ff; /* Blue border */
+        background-color: #e6f7ff; /* Light blue background */
+    }
+
+    .promoted-indicator {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #1e90ff; /* Blue background */
+        color: #fff; /* White text */
+        padding: 0.2em 0.5em;
+        font-size: 0.75em;
+        font-weight: bold;
+        border-bottom-left-radius: 0.5em;
+    }
+
+    .promoted-text {
+        color: #003366; /* Dark blue text */
+        text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1); /* Subtle text shadow */
     }
 </style>
