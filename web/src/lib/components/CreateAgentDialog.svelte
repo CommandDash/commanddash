@@ -21,10 +21,22 @@
         { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub', placeholder: 'https://pub.dev/packages/name' },
     ];
 
+    let soundEffect: HTMLAudioElement | null = null;
+
+    if (typeof window !== 'undefined') {
+        // Preload the sound effect
+        soundEffect = new Audio('whoosh.mp3');
+        soundEffect.preload = 'auto';
+        soundEffect.volume = 0.5
+    }
+
     const onCreateAgent = () => {
         value = value.trim();
         const { isValid } = validateURL(value, selectedPlatform);
         if (isValid) {
+            // Play the sound effect
+            soundEffect?.play();
+
             appInsights.trackEvent({
                 name: "CreateAgentSubmitted",
                 properties: { platform: selectedPlatform, url: value },
