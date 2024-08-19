@@ -6,7 +6,8 @@
 <h1 align="center">CommandDash</h1>
 <div align = "center">
 
-[![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
+[![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow?style=for-the-badge)](/LICENSE) <a href="https://app.commanddash.io/agent/dash"><img src="https://img.shields.io/badge/Ask-AI%20Assist-EB9FDA?style=for-the-badge"></a>
+
 </div>
 
 <h3 align="center">Integrate APIs, SDKs or Packages with AI Agents</h3>
