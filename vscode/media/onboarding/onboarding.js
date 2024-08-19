@@ -890,10 +890,10 @@ const webQuestionnaire = [
     });
 
     enableDefaultAgent();
-    switchBottomTipMessage();
+    switchBottomTipMessage(conversationHistory);
 })();
 
-function switchBottomTipMessage() {
+function switchBottomTipMessage(_conversationHistory) {
     if (getAgents().length <= 2) {
         activeAgentAttach.textContent = `Go to “@” marketplace to install agents`;
         new Questionnaire(questionnaire, textInput).buildQuestionnaire();
@@ -901,7 +901,8 @@ function switchBottomTipMessage() {
         activeAgentAttach.textContent = `Type “@” to switch agent`;
         new Questionnaire(questionnaire, textInput).buildQuestionnaire();
     } else if (getAgents().length >= 3 && agentName !== "Dash") {
-        if (conversationHistory.length === 0) {
+        debugger
+        if (_conversationHistory.length === 0) {
             activeAgentAttach.textContent = `@${agentName}`;
         } else {
             activeAgentAttach.textContent = `Attach code snippets from right click menu`;
@@ -1003,7 +1004,6 @@ async function submitResponse() {
         textInput.textContent = "";
         chipsData = {};
     }
-
     adjustHeight();
 }
 
@@ -1200,9 +1200,7 @@ function handleTriggerMessage(event) {
         case "displayMessages":
             conversationHistory = message.value;
             displayMessages(conversationHistory);
-            header.classList.add("hidden");
             scrollToBottom();
-            switchBottomTipMessage();
             break;
         case "showLoadingIndicator":
             sendButton.classList.remove("cursor-pointer");
@@ -1227,7 +1225,7 @@ function handleTriggerMessage(event) {
         case 'clearCommandDeck':
             clearChat();
             header.classList.remove("hidden");
-            switchBottomTipMessage();
+            switchBottomTipMessage(conversationHistory);
             break;
         case 'addToReference':
             removePlaceholder();
@@ -1691,8 +1689,10 @@ function displayMessages() {
     const _conversationHistory = conversationHistory.filter(data => Object.keys(data)[0] === currentActiveAgent);
     if (_conversationHistory.length === 0) {
         questionnaireContainer.classList.remove("hidden");
+        header.classList.remove("hidden");
     } else {
         questionnaireContainer.classList.add("hidden");
+        header.classList.add("hidden");
     }
     const _agentData = data.find((_data) => _data.name === currentActiveAgent);
     _conversationHistory.forEach((_message) => {
@@ -1779,6 +1779,7 @@ function displayMessages() {
         scrollToBottom();
     });
     setResponse();
+    switchBottomTipMessage(_conversationHistory);
 }
 
 function handleButtonEvent(agent, data, messageId, buttonType) {

@@ -135,7 +135,7 @@ class CommandDeck {
             if (option?.name.startsWith('@')) {
                 console.log('agents options', option?.metadata);
                 activeAgentAttach.style = "color: #497BEF; !important";
-                // activeAgentAttach.textContent = `@${option?.metadata.display_name}`;
+                
                 agentName = option?.metadata.display_name;
                 headerLogo.src = option.metadata.avatar_id;
                 headerText.classList.add("hidden");
@@ -143,11 +143,9 @@ class CommandDeck {
                 headerAgentName.textContent = option?.metadata.display_name;
                 headerAgentDescription.classList.remove("hidden");
                 headerAgentDescription.textContent = option?.metadata.description;
-                switchBottomTipMessage();
                 activeAgent = true;
                 commandEnable = false;
-                // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
-                // activeCommandsAttach.textContent = "/";
+                
                 currentActiveAgent = option.name;
                 this.closeMenu();
                 // Move the cursor to the end of the word
