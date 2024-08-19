@@ -1173,7 +1173,7 @@ function setCaretToEnd(target) {
 function removePlaceholder() {
     if (textInput.textContent.trim() === `# Ask ${agentName}`) {
         textInput.textContent = '';
-        textInput.classList.remove('placeholder');
+        // textInput.classList.remove('placeholder');
     }
 }
 
@@ -1181,7 +1181,7 @@ function removePlaceholder() {
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
         textInput.textContent = `# Ask ${agentName}`;
-        textInput.classList.add('placeholder');
+        // textInput.classList.add('placeholder');
     }
 }
 
