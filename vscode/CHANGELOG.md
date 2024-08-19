@@ -4,6 +4,9 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.4.9]
+- Set minimum VSCode engine to 1.77.0
+
 ## [0.4.8]
 - Don't ask for Gemini API Key
 - Removed google generative ai package dependencies
