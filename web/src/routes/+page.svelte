@@ -18,6 +18,7 @@
     let searchValue: string = "";
     let showModal: boolean = false;
     let currentAgent: Agent;
+    let sections: { [key: string]: Agent[] } = {};
 
     const promotedAgent: Agent = {
         name: "promoted-agent",
@@ -36,33 +37,51 @@
 
     onMount(async () => {
         loading = true;
-        const response = await fetch(
-            "https://api.commanddash.dev/agent/web/get-agent-list",
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-                body: JSON.stringify({ cli_version: "0.0.1" }),
-            },
-        );
+        try {
+            const [existingResponse, newResponse] = await Promise.all([
+                fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ cli_version: "0.0.1" }),
+                }),
+                fetch("https://api.commanddash.dev/agent/web/get-highlighted-agent-list", {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ cli_version: "0.0.1" }),
+                })
+            ]);
 
-        const _response = await response.json();
-        if (!response.ok) {
+            const existingAgents = await existingResponse.json();
+            const newAgents = await newResponse.json();
+
+            if (!existingResponse.ok || !newResponse.ok) {
+                throw new Error("Failed to fetch agents");
+            }
+
+            agents = existingAgents;
+            filteredAgents = existingAgents;
+
+            // Combine agents from new API into sections
+            sections = newAgents;
+
+            // Add existing agents under "All Agents" section
+            sections["All Agents"] = existingAgents;
+
+            appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
+
+            // Check if the 'create' query parameter is set to 'true'
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('create') === 'true') {
+                showModal = true;
+            }
+        } catch (error) {
+            appInsights.trackException({ error });
+        } finally {
             loading = false;
-            appInsights.trackException({
-                error: new Error("Failed to fetch agents"),
-            }); // Track
-        }
-        agents = _response;
-        filteredAgents = _response;
-        loading = false;
-        appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
-
-        // Check if the 'create' query parameter is set to 'true'
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('create') === 'true') {
-            showModal = true;
         }
     });
 
@@ -81,11 +100,11 @@
                 agent.metadata.display_name
                     .toLowerCase()
                     .includes(searchValue) ||
-                agent.author.name.toLowerCase().includes(searchValue) ||
-                agent.author.source_url?.toLowerCase().includes(searchValue)
+                agent.author?.name.toLowerCase().includes(searchValue) ||
+                agent.author?.source_url?.toLowerCase().includes(searchValue)
             );
         });
-        appInsights.trackEvent({ name: "Search", properties: { searchValue } }); // Track cus
+        appInsights.trackEvent({ name: "Search", properties: { searchValue } }); // Track custom event
     }, SEARCH_DEBOUNCE_DELAY);
 
     const formatGithubUrl = (url: string) => {
@@ -122,10 +141,10 @@
         <div class="flex flex-row">
             <div>
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold">AI Agents for Libraries and SDKs</h1>
+                    <h1 class="text-2xl font-bold">AI Agents for Libraries</h1>
                 </div>
                 <h3 class="text-gray-500">
-                    Build apps faster with specialized agents at your command.
+                    Personalized answers from expert agents at your command
                 </h3>
             </div>
             <button
@@ -164,163 +183,71 @@
                 </div>
             </div>
         {:else}
-            <div
-                class="mt-7 flex flex-wrap items-center gap-x-2 gap-y-3 text-sm"
-            ></div>
-            <div
-                class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
-            >
-                {#if filteredAgents.length > 0}
-                    {#each filteredAgents as agent, index}
-                        {#if index === 2}
+            {#each Object.keys(sections) as section}
+                <div class="mt-7">
+                    <h2 class="text-xl font-semibold">{section}</h2>
+                    <div
+                        class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
+                    >
+                        {#each sections[section] as agent, index}
+                            {#if index === 2 && section === "All Agents"}
+                                <button
+                                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
+                                    on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
+                                >
+                                    <img
+                                        src={promotedAgent.metadata.avatar_id}
+                                        alt="Avatar"
+                                        class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                                    />
+                                    <h3
+                                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
+                                    >
+                                        {promotedAgent.metadata.display_name}
+                                    </h3>
+                                    <p
+                                        class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
+                                    >
+                                        {promotedAgent.metadata.description}
+                                    </p>
+                                    <span class="promoted-indicator">Promoted</span>
+                                </button>
+                            {/if}
                             <button
-                                class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
-                                on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
+                                class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                                on:click={() => navigateAgents(agent)}
                             >
                                 <img
-                                    src={promotedAgent.metadata.avatar_id}
+                                    src={agent.metadata.avatar_id}
                                     alt="Avatar"
                                     class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
                                 />
                                 <h3
-                                    class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
+                                    class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
                                 >
-                                    {promotedAgent.metadata.display_name}
+                                    {agent.metadata.display_name}
                                 </h3>
                                 <p
-                                    class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
+                                    class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
                                 >
-                                    {promotedAgent.metadata.description}
+                                    {agent.metadata.description}
                                 </p>
-                                <span class="promoted-indicator">Promoted</span>
+                                {#if agent.author?.source_url}
+                                    <a
+                                        href={agent.author.source_url}
+                                        class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <CarbonGithub class="mx-1" />
+                                        {formatText(agent.author.source_url, 20)}
+                                    </a>
+                                {/if}
                             </button>
-                        {/if}
-                        <button
-                            class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                            on:click={() => navigateAgents(agent)}
-                        >
-                            <img
-                                src={agent.metadata.avatar_id}
-                                alt="Avatar"
-                                class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                            />
-                            <h3
-                                class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
-                            >
-                                {agent.metadata.display_name}
-                            </h3>
-                            <p
-                                class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
-                            >
-                                {agent.metadata.description}
-                            </p>
-                            {#if agent.author.source_url}
-                                <a
-                                    href={agent.author.source_url}
-                                    class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    <CarbonGithub class="mx-1" />
-                                    {formatText(agent.author.source_url, 20)}
-                                </a>
-                            {/if}
-                        </button>
-                    {/each}
-                    {#if filteredAgents.length <= 2}
-                        <button
-                            class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
-                            on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
-                        >
-                            <img
-                                src={promotedAgent.metadata.avatar_id}
-                                alt="Avatar"
-                                class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                            />
-                            <h3
-                                class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
-                            >
-                                {promotedAgent.metadata.display_name}
-                            </h3>
-                            <p
-                                class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
-                            >
-                                {promotedAgent.metadata.description}
-                            </p>
-                            <span class="promoted-indicator">Promoted</span>
-                        </button>
-                    {/if}
-                {:else}
-                    <button
-                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
-                        on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
-                    >
-                        <img
-                            src={promotedAgent.metadata.avatar_id}
-                            alt="Avatar"
-                            class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                        />
-                        <h3
-                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
-                        >
-                            {promotedAgent.metadata.display_name}
-                        </h3>
-                        <p
-                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
-                        >
-                            {promotedAgent.metadata.description}
-                        </p>
-                        <span class="promoted-indicator">Promoted</span>
-                    </button>
-                    {#each filteredAgents as agent}
-                        <button
-                            class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                            on:click={() => navigateAgents(agent)}
-                        >
-                            <img
-                                src={agent.metadata.avatar_id}
-                                alt="Avatar"
-                                class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                            />
-                            <h3
-                                class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
-                            >
-                                {agent.metadata.display_name}
-                            </h3>
-                            <p
-                                class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
-                            >
-                                {agent.metadata.description}
-                            </p>
-                            {#if agent.author.source_url}
-                                <a
-                                    href={agent.author.source_url}
-                                    class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    <CarbonGithub class="mx-1" />
-                                    {formatText(agent.author.source_url, 20)}
-                                    <span class="ml-1">→</span>
-                                </a>
-                            {/if}
-                        </button>
-                    {/each}
-                {/if}
-                <button
-                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                    on:click={() => {
-                        showModal = true;
-                    }}
-                >
-                    <CarbonAdd height="5.5em" width="5.5em" />
-                    <h3
-                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm mt-2"
-                    >
-                        Create Agent
-                    </h3>
-                </button>
-            </div>
+                        {/each}
+                    </div>
+                </div>
+            {/each}
         {/if}
     </div>
 </div>

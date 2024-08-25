@@ -27,7 +27,15 @@
         // Preload the sound effect
         soundEffect = new Audio('whoosh.mp3');
         soundEffect.preload = 'auto';
-        soundEffect.volume = 0.5
+        soundEffect.volume = 0.5;
+
+        // Preload the images
+        platforms.forEach(platform => {
+            if (platform.id !== 'github') {
+                const img = new Image();
+                img.src = platform.icon;
+            }
+        });
     }
 
     const onCreateAgent = () => {
@@ -78,7 +86,6 @@
                             {:else}
                                 <img src={platform.icon} alt={platform.label} class="w-10 h-10 mb-1" />
                             {/if}
-
                         </div>
                         <span class="text-xs text-gray-300">{platform.label}</span>
                     </button>
