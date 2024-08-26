@@ -78,6 +78,11 @@
             if (urlParams.get('create') === 'true') {
                 showModal = true;
             }
+
+            // Perform initial search if there is a value in the search input
+            if (searchValue) {
+                search(searchValue);
+            }
         } catch (error) {
             appInsights.trackException({ error });
         } finally {
@@ -95,7 +100,7 @@
 
     const search = debounce(async (value: string) => {
         searchValue = value.toLowerCase();
-        filteredAgents = agents.filter((agent) => {
+        filteredAgents = sections["All Agents"].filter((agent) => {
             return (
                 agent.metadata.display_name
                     .toLowerCase()
@@ -170,7 +175,7 @@
                     placeholder="Search any library or SDK"
                     maxlength="150"
                     type="search"
-                    value={searchValue}
+                    bind:value={searchValue}
                     on:input={(e) => search(e.currentTarget.value)}
                 />
             </div>
@@ -183,36 +188,13 @@
                 </div>
             </div>
         {:else}
-            {#each Object.keys(sections) as section}
+            {#if searchValue}
                 <div class="mt-7">
-                    <h2 class="text-xl font-semibold">{section}</h2>
+                    <h2 class="text-xl font-semibold">Search Results</h2>
                     <div
                         class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
                     >
-                        {#each sections[section] as agent, index}
-                            {#if index === 2 && section === "All Agents"}
-                                <button
-                                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
-                                    on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
-                                >
-                                    <img
-                                        src={promotedAgent.metadata.avatar_id}
-                                        alt="Avatar"
-                                        class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                                    />
-                                    <h3
-                                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
-                                    >
-                                        {promotedAgent.metadata.display_name}
-                                    </h3>
-                                    <p
-                                        class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
-                                    >
-                                        {promotedAgent.metadata.description}
-                                    </p>
-                                    <span class="promoted-indicator">Promoted</span>
-                                </button>
-                            {/if}
+                        {#each filteredAgents as agent}
                             <button
                                 class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
                                 on:click={() => navigateAgents(agent)}
@@ -247,7 +229,73 @@
                         {/each}
                     </div>
                 </div>
-            {/each}
+            {:else}
+                {#each Object.keys(sections) as section}
+                    <div class="mt-7">
+                        <h2 class="text-xl font-semibold">{section}</h2>
+                        <div
+                            class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
+                        >
+                            {#each sections[section] as agent, index}
+                                <!-- {#if index === 2 && section === "All Agents"}
+                                    <button
+                                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
+                                        on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
+                                    >
+                                        <img
+                                            src={promotedAgent.metadata.avatar_id}
+                                            alt="Avatar"
+                                            class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                                        />
+                                        <h3
+                                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
+                                        >
+                                            {promotedAgent.metadata.display_name}
+                                        </h3>
+                                        <p
+                                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
+                                        >
+                                            {promotedAgent.metadata.description}
+                                        </p>
+                                        <span class="promoted-indicator">Promoted</span>
+                                    </button>
+                                {/if} -->
+                                <button
+                                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                                    on:click={() => navigateAgents(agent)}
+                                >
+                                    <img
+                                        src={agent.metadata.avatar_id}
+                                        alt="Avatar"
+                                        class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                                    />
+                                    <h3
+                                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+                                    >
+                                        {agent.metadata.display_name}
+                                    </h3>
+                                    <p
+                                        class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
+                                    >
+                                        {agent.metadata.description}
+                                    </p>
+                                    {#if agent.author?.source_url}
+                                        <a
+                                            href={agent.author.source_url}
+                                            class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <CarbonGithub class="mx-1" />
+                                            {formatText(agent.author.source_url, 20)}
+                                        </a>
+                                    {/if}
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
+                {/each}
+            {/if}
         {/if}
     </div>
 </div>
