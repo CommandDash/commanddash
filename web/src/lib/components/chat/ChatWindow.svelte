@@ -156,7 +156,7 @@
       }
 
       toastStore.set({
-        message: "Notification sent successfully",
+        message: "Notification will be sent successfully",
         type: ToastType.SUCCESS,
       });
 
