@@ -246,7 +246,11 @@ const questionnaireContainer = document.getElementById("questionaire-container")
 const executableContainer = document.getElementById("executable-container");
 const fileUpload = document.getElementById("file-upload");
 const activeAgentAttach = document.getElementById("agents");
-const activeCommandsAttach = document.getElementById("slash-commands");
+// const activeCommandsAttach = document.getElementById("slash-commands");
+const headerLogo = document.getElementById("header-logo");
+const headerText = document.getElementById("header-text");
+const headerAgentName = document.getElementById("header-agent-name");
+const headerAgentDescription = document.getElementById("header-agent-description");
 
 //initialising variables
 let isApiKeyValid = false;
@@ -264,6 +268,7 @@ let currentActiveAgent = '';
 let isGithubLoginPending = false;
 let isExecutableDownloadPending = false;
 let codeInputId = 0;
+let agentName = 'Dash';
 
 const agentInputsJson = [];
 
@@ -288,6 +293,7 @@ let data = [
         },
         "min_cli_version": "0.0.1",
         "name": "@dash",
+        "search": "@dash",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
         "supported_commands": [
             // {
@@ -444,6 +450,7 @@ let data = [
         "description": "Get help with writing tests.",
         "min_cli_version": "0.0.1",
         "name": "@test",
+        "search": "@test",
         "metadata": {
             "display_name": "Test"
         },
@@ -757,7 +764,7 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
             currentActiveAgent = "@dash";
-            activeAgentAttach.textContent = '@Dash';
+            // activeAgentAttach.textContent = '@Dash';
             commandEnable = false;
         },
         icon: questionIcon,
@@ -772,7 +779,7 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
             currentActiveAgent = "@dash";
-            activeAgentAttach.textContent = '@Dash';
+            // activeAgentAttach.textContent = '@Dash';
             commandEnable = false;
         },
         icon: codeSnippetIcon,
@@ -787,8 +794,48 @@ const questionnaire = [
             setTimeout(() => adjustHeight(), 0);
             activeAgent = true;
             currentActiveAgent = "@dash";
-            activeAgentAttach.textContent = '@Dash';
+            // activeAgentAttach.textContent = '@Dash';
             commandEnable = false;
+        },
+        icon: dashAI,
+    }
+];
+
+const webQuestionnaire = [
+    {
+        id: "generate-summary",
+        message: "Generate summary",
+        isGradient: true,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Please give me a complete summary about ${agentName}`;
+            submitResponse();
+        },
+        icon: marketPlaceIcon,
+    },
+    {
+        id: "ask-about",
+        message: "Ask about a feature",
+        isGradient: false,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Help me understand (x) feature in detail with helpful links to read more about it`;
+        },
+        icon: questionIcon,
+    },
+    {
+        id: "search-code",
+        message: "Search for code or issues",
+        isGradient: false,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Where can I find the code that does (y). Please help me with links to it`;
+        },
+        icon: codeSnippetIcon,
+    },
+    {
+        id: "get-help",
+        message: "Get help fixing an issue",
+        isGradient: false,
+        onclick: (_textInput) => {
+            _textInput.textContent = `Help me resolve the (z) problem I'm facing. Here is some helpful code: (code)`;
         },
         icon: dashAI,
     }
@@ -835,8 +882,6 @@ const questionnaire = [
 
     githubLogin.addEventListener("click", githubListener);
 
-    new Questionnaire(questionnaire, textInput).buildQuestionnaire();
-
     vscode.postMessage({
         type: "initialized",
     });
@@ -845,15 +890,34 @@ const questionnaire = [
     });
 
     enableDefaultAgent();
+    switchBottomTipMessage(conversationHistory);
 })();
+
+function switchBottomTipMessage(_conversationHistory) {
+    if (getAgents().length <= 2) {
+        activeAgentAttach.textContent = `Go to “@” marketplace to install agents`;
+        new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+    } else if (getAgents().length >= 3 && agentName === "Dash") {
+        activeAgentAttach.textContent = `Type “@” to switch agent`;
+        new Questionnaire(questionnaire, textInput).buildQuestionnaire();
+    } else if (getAgents().length >= 3 && agentName !== "Dash") {
+        debugger
+        if (_conversationHistory.length === 0) {
+            activeAgentAttach.textContent = `@${agentName}`;
+        } else {
+            activeAgentAttach.textContent = `Attach code snippets from right click menu`;
+        }
+        new Questionnaire(webQuestionnaire, textInput).buildQuestionnaire();
+    }
+}
 
 function enableDefaultAgent() {
     activeAgentAttach.style = "color: #497BEF; !important";
-    activeAgentAttach.textContent = '@Dash';
+    // activeAgentAttach.textContent = '@Dash';
     activeAgent = true;
     commandEnable = false;
-    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
-    activeCommandsAttach.textContent = "/";
+    // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+    // activeCommandsAttach.textContent = "/";
     currentActiveAgent = '@dash';
 }
 
@@ -920,8 +984,8 @@ async function submitResponse() {
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
             commandEnable = false;
-            activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
-            activeCommandsAttach.textContent = "/";
+            // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+            // activeCommandsAttach.textContent = "/";
             agentInputsJson.length = 0;
         }
     } else if (activeAgent && !commandEnable) {
@@ -940,7 +1004,6 @@ async function submitResponse() {
         textInput.textContent = "";
         chipsData = {};
     }
-
     adjustHeight();
 }
 
@@ -985,7 +1048,11 @@ function handleSubmit(event) {
             if (query.length === 0) {
                 matchingItems = getAgents();
             } else {
-                matchingItems = getAgents().filter(item => item.name?.toLowerCase().startsWith(query.toLowerCase()));
+
+                matchingItems = getAgents().filter(item => {
+                    console.log('name', item);
+                    return item.search?.toLowerCase().startsWith(query.toLowerCase());
+                });
             }
         }
 
@@ -1053,7 +1120,7 @@ function handleSubmit(event) {
             if (textInput.textContent.trim().length === 0) {
                 // Perform some action
                 commandEnable = false;
-                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+                // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
             }
         }, 2500);
 
@@ -1070,7 +1137,7 @@ function getAgents() {
     const agents = [];
     data.forEach(agent => {
         if (agent.name.trim().length > 0) {
-            agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata });
+            agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata, search: agent.search });
         }
     });
 
@@ -1104,17 +1171,17 @@ function setCaretToEnd(target) {
 }
 
 function removePlaceholder() {
-    if (textInput.textContent.trim() === "# Ask Dash") {
+    if (textInput.textContent.trim() === `# Ask ${agentName}`) {
         textInput.textContent = '';
-        textInput.classList.remove('placeholder');
+        // textInput.classList.remove('placeholder');
     }
 }
 
 // Function to add placeholder when the element is blurred and empty
 function addPlaceholder() {
     if (textInput.textContent.trim() === '') {
-        textInput.textContent = '# Ask Dash';
-        textInput.classList.add('placeholder');
+        textInput.textContent = `# Ask ${agentName}`;
+        // textInput.classList.add('placeholder');
     }
 }
 
@@ -1133,7 +1200,6 @@ function handleTriggerMessage(event) {
         case "displayMessages":
             conversationHistory = message.value;
             displayMessages(conversationHistory);
-            header.classList.add("hidden");
             scrollToBottom();
             break;
         case "showLoadingIndicator":
@@ -1158,6 +1224,8 @@ function handleTriggerMessage(event) {
             break;
         case 'clearCommandDeck':
             clearChat();
+            header.classList.remove("hidden");
+            switchBottomTipMessage(conversationHistory);
             break;
         case 'addToReference':
             removePlaceholder();
@@ -1256,6 +1324,7 @@ function handleTriggerMessage(event) {
         case 'getStoredAgents':
             const _agents = parseAgents(message.value.agents);
             appendAgents(_agents.agents);
+            switchBottomTipMessage();
             break;
     }
 }
@@ -1620,8 +1689,10 @@ function displayMessages() {
     const _conversationHistory = conversationHistory.filter(data => Object.keys(data)[0] === currentActiveAgent);
     if (_conversationHistory.length === 0) {
         questionnaireContainer.classList.remove("hidden");
+        header.classList.remove("hidden");
     } else {
         questionnaireContainer.classList.add("hidden");
+        header.classList.add("hidden");
     }
     const _agentData = data.find((_data) => _data.name === currentActiveAgent);
     _conversationHistory.forEach((_message) => {
@@ -1708,6 +1779,7 @@ function displayMessages() {
         scrollToBottom();
     });
     setResponse();
+    switchBottomTipMessage(_conversationHistory);
 }
 
 function handleButtonEvent(agent, data, messageId, buttonType) {

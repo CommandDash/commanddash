@@ -143,7 +143,7 @@
 
     <div class="lg:col-span-3 lg:mt-6">
         {#if !agentIsDataSourceIndexed}
-            <div class="overflow-hidden rounded-xl border dark:border-gray-800">
+            <!-- <div class="overflow-hidden rounded-xl border dark:border-gray-800">
                 <div class="flex p-3">
                     <div
                         class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
@@ -177,18 +177,19 @@
                         >Notify</button
                     >
                 </div>
+            </div> -->
+            {:else}
+            <div class="grid gap-3 lg:grid-cols-2 lg:gap-5 mt-3">
+                {#each questionnaires as questionnaire}
+                    <button
+                        class={`relative rounded-xl border ${questionnaire.id === "generate-summary" ? "bg-[#497BEF] text-gray-300 border-[#497BEF] hover:bg-[#287CEB] hover:border-[#287CEB]" : "bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100"} p-3 max-xl:text-sm xl:p-3.5`}
+                        on:click={() => onQuestionnaire(questionnaire)}
+                    >
+                        {questionnaire.message}
+                    </button>
+                {/each}
             </div>
         {/if}
-        <div class="grid gap-3 lg:grid-cols-2 lg:gap-5 mt-3">
-            {#each questionnaires as questionnaire}
-                <button
-                    class={`relative rounded-xl border ${questionnaire.id === "generate-summary" ? "bg-[#497BEF] text-gray-300 border-[#497BEF] hover:bg-[#287CEB] hover:border-[#287CEB]" : "bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 text-gray-600 hover:bg-gray-100"} p-3 max-xl:text-sm xl:p-3.5`}
-                    on:click={() => onQuestionnaire(questionnaire)}
-                >
-                    {questionnaire.message}
-                </button>
-            {/each}
-        </div>
     </div>
 </div>
 

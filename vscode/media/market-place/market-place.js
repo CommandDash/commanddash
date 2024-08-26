@@ -132,7 +132,7 @@ function renderAgentsList(_agents) {
         // topDiv.appendChild(installContainer);
 
         const pDescription = document.createElement("p");
-        pDescription.className = "text-xs truncate text-gray-500 my-1 description";
+        pDescription.className = "text-xs truncate text-gray-400 my-1 description";
         pDescription.style.color = "rgb(148 163 184)";
         pDescription.style.marginTop = "0.5rem";
         pDescription.style.marginBottom = "0.5rem";
@@ -157,7 +157,7 @@ function renderAgentsList(_agents) {
         divRowInner.className = "inline-flex flex-row";
 
         const spanAuthor = document.createElement("span");
-        spanAuthor.className = "text-xs text-gray-500 px-1 border-b border-gray-500";
+        spanAuthor.className = "text-xs text-gray-400 px-1 border-b border-gray-500";
         spanAuthor.innerHTML = `<a target="_blank" href="https://github.com/${agent.author.github_id}">${agent.author.github_id}</a>`;
 
         const divAuthor = document.createElement("div");
