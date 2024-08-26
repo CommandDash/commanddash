@@ -253,25 +253,18 @@
           </div>
         </form>
       {:else}
-        <div
-          class="overflow-hidden rounded-xl border dark:border-gray-800 bg-gradient-to-tr from-[#FF9900] from-0% via-[#FF4D00] via-50% to-[#FF4900] to-100%"
-        >
+        <div class="overflow-hidden rounded-xl border dark:border-gray-800">
           <div class="flex p-3">
             <div
-              class="flex items-center gap-1.5 font-semibold max-sm:text-smd text-white"
+              class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
             >
               Your agent will be ready in a few minutes. Please drop your email
               to be notified.
             </div>
             <p
-              class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100"
+              class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
             >
-              <Icon
-                icon="material-symbols:info"
-                width="24px"
-                height="24px"
-                class="text-gray-500"
-              />
+              <Icon icon="material-symbols:info" width="24px" height="24px" />
             </p>
           </div>
           <div class="flex w-full flex-1 px-3 pb-3">
