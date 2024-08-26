@@ -143,7 +143,7 @@
 
     <div class="lg:col-span-3 lg:mt-6">
         {#if !agentIsDataSourceIndexed}
-            <div class="overflow-hidden rounded-xl border dark:border-gray-800">
+            <!-- <div class="overflow-hidden rounded-xl border dark:border-gray-800">
                 <div class="flex p-3">
                     <div
                         class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
@@ -177,7 +177,7 @@
                         >Notify</button
                     >
                 </div>
-            </div>
+            </div> -->
             {:else}
             <div class="grid gap-3 lg:grid-cols-2 lg:gap-5 mt-3">
                 {#each questionnaires as questionnaire}
