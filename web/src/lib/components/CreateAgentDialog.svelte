@@ -1,98 +1,133 @@
 <script lang="ts">
     import { base } from "$app/paths";
-    import { clickOutside } from "$lib/actions/clickOutside";
     import { goto } from "$app/navigation";
     import { toastStore } from "$lib/stores/ToastStores";
     import { ToastType } from "$lib/types/Toast";
-    import appInsights from "$lib/utils/appInsights"; // Import the appInsights instance
+    import appInsights from "$lib/utils/appInsights";
     import IconClose from "~icons/carbon/close";
-    import CarbonSearch from "~icons/carbon/search";
     import CarbonGithub from "~icons/carbon/logo-github";
+    import { validateURL } from "$lib/utils/validateURL";
 
     export let showModal: boolean;
     export let onClose: () => void;
 
-    let dialog: HTMLDialogElement;
     let value: string = "";
+    let selectedPlatform: string = "github";
 
-    const validateGithubURL = (url: string): boolean => {
-        const githubUrlPattern =
-            /^(https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?)$/;
-        return githubUrlPattern.test(url);
-    };
+    const platforms = [
+        { id: 'github', icon: CarbonGithub, label: 'GitHub', placeholder: 'https://github.com/user/repo' },
+        { id: 'npm', icon: 'npm.png', label: 'NPM', placeholder: 'https://www.npmjs.com/package/name' },
+        { id: 'pypi', icon: 'python.png', label: 'PyPI', placeholder: 'https://pypi.org/project/name' },
+        { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub', placeholder: 'https://pub.dev/packages/name' },
+    ];
 
-    const addGithubURL = (url: string) => {
-        value = url;
-    };
+    let soundEffect: HTMLAudioElement | null = null;
+
+    if (typeof window !== 'undefined') {
+        // Preload the sound effect
+        soundEffect = new Audio('whoosh.mp3');
+        soundEffect.preload = 'auto';
+        soundEffect.volume = 0.5;
+
+        // Preload the images
+        platforms.forEach(platform => {
+            if (platform.id !== 'github') {
+                const img = new Image();
+                img.src = platform.icon;
+            }
+        });
+    }
 
     const onCreateAgent = () => {
-        if (validateGithubURL(value)) {
-            // Track custom event for form submission
+        value = value.trim();
+        const { isValid } = validateURL(value, selectedPlatform);
+        if (isValid) {
+            // Play the sound effect
+            soundEffect?.play();
+
             appInsights.trackEvent({
                 name: "CreateAgentSubmitted",
-                properties: {
-                    githubUrl: value,
-                },
+                properties: { platform: selectedPlatform, url: value },
             });
-
-            goto(`${base}/agent?github=${value}`);
+            goto(`${base}/agent?${selectedPlatform}=${value}`);
         } else {
             toastStore.set({
-                message: "Please enter valid Github URL",
+                message: `Please enter a valid ${selectedPlatform} URL`,
                 type: ToastType.ERROR,
             });
         }
     };
 
     $: if (showModal) {
-        // Track custom event for dialog opened
-        appInsights.trackEvent({
-            name: "CreateAgentDialogOpened",
-        });
+        appInsights.trackEvent({ name: "CreateAgentDialogOpened" });
     }
 </script>
 
 {#if showModal}
-    <div
-        class="fixed inset-0 z-20 flex items-center justify-center bg-transparent backdrop-blur-sm"
-    >
-        <dialog
-            bind:this={dialog}
-            class="flex flex-col content-center items-center gap-x-10 gap-y-3 overflow-hidden rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950 dark:hover:bg-gray-950 max-sm:w-[85dvw] max-sm:px-6 md:w-96 md:grid-cols-3 md:grid-rows-[auto,1fr] md:p-8"
-            on:close={() => dialog.close()}
-            open={showModal}
-        >
-            <div class="absolute right-0 top-0 mr-2 mt-2">
-                <button
-                    class="flex items-center px-2.5 py-1 text-sm text-white"
-                    on:click={onClose}
-                >
-                    <IconClose class="mr-1.5 text-xl" />
+    <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-gray-900 rounded-lg p-6 w-full max-w-md border border-gray-700">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-100">Create Agent with URL</h2>
+                <button on:click={onClose} class="text-gray-400 hover:text-gray-200">
+                    <IconClose />
                 </button>
             </div>
-            <h1 class="text-xl font-bold text-white">Create Agent with Github</h1>
-            <div
-                class="relative flex h-[50px] min-w-full items-center rounded-md border px-2 has-[:focus]:border-gray-400 sm:w-64 dark:border-gray-600"
-            >
-                <CarbonGithub
-                    height="1.5em"
-                    width="1.5em"
-                    class="pointer-events-none absolute left-2 text-xs text-gray-400"
-                />
+
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                {#each platforms as platform}
+                    <button
+                        on:click={() => selectedPlatform = platform.id}
+                        class="flex flex-col items-center focus:outline-none transition-all duration-200 ease-in-out"
+                        class:selected={selectedPlatform === platform.id}
+                    >
+                        <div class="relative">
+                            {#if platform.id === 'github'}
+                                <svelte:component this={platform.icon} class="w-10 h-10 mb-1 text-black-600" />
+                            {:else}
+                                <img src={platform.icon} alt={platform.label} class="w-10 h-10 mb-1" />
+                            {/if}
+                        </div>
+                        <span class="text-xs text-gray-300">{platform.label}</span>
+                    </button>
+                {/each}
+            </div>
+
+            <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    {#if selectedPlatform === 'github'}
+                        <CarbonGithub class="w-5 h-5 text-gray-400" />
+                    {:else}
+                        <img 
+                            src={platforms.find(p => p.id === selectedPlatform).icon} 
+                            alt={selectedPlatform} 
+                            class="w-5 h-5"
+                        />
+                    {/if}
+                </div>
                 <input
-                    class="h-[50px] w-full bg-transparent pl-7 focus:outline-none text-white"
-                    placeholder="Github Repo URL"
                     type="url"
-                    {value}
-                    on:input={(e) => addGithubURL(e.currentTarget.value)}
+                    bind:value
+                    placeholder={platforms.find(p => p.id === selectedPlatform).placeholder}
+                    class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
                 />
             </div>
+
             <button
                 on:click={onCreateAgent}
-                class="mt-4 w-full rounded bg-gray-300 px-4 py-3 font-semibold text-black"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
             >
                 Submit
             </button>
-        </dialog>
+        </div>
     </div>
 {/if}
+
+<style>
+    .selected {
+        transform: scale(1.1);
+    }
+    .selected span {
+        color: #60a5fa; /* blue-400 */
+        font-weight: bold;
+    }
+</style>

@@ -6,7 +6,6 @@
     import CarbonAdd from "~icons/carbon/add";
     import CarbonGithub from "~icons/carbon/logo-github";
     import CarbonSettings from "~icons/carbon/settings";
-
     import type { Agent } from "$lib/types/Agent";
     import { goto } from "$app/navigation";
     import { debounce } from "$lib/utils/debounce";
@@ -19,33 +18,71 @@
     let searchValue: string = "";
     let showModal: boolean = false;
     let currentAgent: Agent;
+    let sections: { [key: string]: Agent[] } = {};
+
+    const promotedAgent: Agent = {
+        name: "promoted-agent",
+        metadata: {
+            display_name: "Mellowtel",
+            description: "Transparent monetization engine for Flutter Apps",
+            avatar_id: "mellowtel.png"
+        },
+        author: {
+            name: "Mellowtel",
+            source_url: "https://mellowtel.dev/flutter?utm_source=web&utm_medium=promotedcard&utm_campaign=commanddash"
+        }
+    };
 
     $: loading = true;
 
     onMount(async () => {
         loading = true;
-        const response = await fetch(
-            "https://api.commanddash.dev/agent/web/get-agent-list",
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-                body: JSON.stringify({ cli_version: "0.0.1" }),
-            },
-        );
+        try {
+            const [existingResponse, newResponse] = await Promise.all([
+                fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ cli_version: "0.0.1" }),
+                }),
+                fetch("https://api.commanddash.dev/agent/web/get-highlighted-agent-list", {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ cli_version: "0.0.1" }),
+                })
+            ]);
 
-        const _response = await response.json();
-        if (!response.ok) {
+            const existingAgents = await existingResponse.json();
+            const newAgents = await newResponse.json();
+
+            if (!existingResponse.ok || !newResponse.ok) {
+                throw new Error("Failed to fetch agents");
+            }
+
+            agents = existingAgents;
+            filteredAgents = existingAgents;
+
+            // Combine agents from new API into sections
+            sections = newAgents;
+
+            // Add existing agents under "All Agents" section
+            sections["All Agents"] = existingAgents;
+
+            appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
+
+            // Check if the 'create' query parameter is set to 'true'
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('create') === 'true') {
+                showModal = true;
+            }
+        } catch (error) {
+            appInsights.trackException({ error });
+        } finally {
             loading = false;
-            appInsights.trackException({
-                error: new Error("Failed to fetch agents"),
-            }); // Track
         }
-        agents = _response;
-        filteredAgents = _response;
-        loading = false;
-        appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event   });
     });
 
     const navigateAgents = (agent: Agent) => {
@@ -63,11 +100,11 @@
                 agent.metadata.display_name
                     .toLowerCase()
                     .includes(searchValue) ||
-                agent.author.name.toLowerCase().includes(searchValue) ||
-                agent.author.source_url?.toLowerCase().includes(searchValue)
+                agent.author?.name.toLowerCase().includes(searchValue) ||
+                agent.author?.source_url?.toLowerCase().includes(searchValue)
             );
         });
-        appInsights.trackEvent({ name: "Search", properties: { searchValue } }); // Track cus
+        appInsights.trackEvent({ name: "Search", properties: { searchValue } }); // Track custom event
     }, SEARCH_DEBOUNCE_DELAY);
 
     const formatGithubUrl = (url: string) => {
@@ -104,10 +141,10 @@
         <div class="flex flex-row">
             <div>
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold">Marketplace</h1>
+                    <h1 class="text-2xl font-bold">AI Agents for Libraries</h1>
                 </div>
                 <h3 class="text-gray-500">
-                    Explore the agents in the marketplace made by dev community
+                    Personalized answers from expert agents at your command
                 </h3>
             </div>
             <button
@@ -116,7 +153,7 @@
                     showModal = true;
                 }}
             >
-                <CarbonGithub />Create Agent
+                <CarbonAdd />Create Agent
             </button>
         </div>
         <div class="mt-6 flex flex-wrap gap-2 items-center">
@@ -130,20 +167,13 @@
                 />
                 <input
                     class="h-[50px] w-full bg-transparent pl-7 focus:outline-none"
-                    placeholder="Search agents in the marketplace"
+                    placeholder="Search any library or SDK"
                     maxlength="150"
                     type="search"
                     value={searchValue}
                     on:input={(e) => search(e.currentTarget.value)}
                 />
             </div>
-            <!-- <select
-                class="rounded-lg border border-gray-300 bg-gray-50 px-2 py-1 text-sm text-gray-900 focus:border-blue-700 focus:ring-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            >
-                <option value={SortKey.TRENDING}>{SortKey.TRENDING}</option>
-                <option value={SortKey.POPULAR}>{SortKey.POPULAR}</option>
-                <option value={SortKey.NEW}>{SortKey.NEW}</option>
-            </select> -->
         </div>
         {#if loading}
             <div class="flex-col w-full h-48 px-2 py-3">
@@ -153,73 +183,71 @@
                 </div>
             </div>
         {:else}
-            <div
-                class="mt-7 flex flex-wrap items-center gap-x-2 gap-y-3 text-sm"
-            ></div>
-            <div
-                class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
-            >
-                {#each filteredAgents as agent}
-                    <button
-                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                        on:click={() => navigateAgents(agent)}
+            {#each Object.keys(sections) as section}
+                <div class="mt-7">
+                    <h2 class="text-xl font-semibold">{section}</h2>
+                    <div
+                        class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
                     >
-                        <img
-                            src={agent.metadata.avatar_id}
-                            alt="Avatar"
-                            class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                        />
-                        <h3
-                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
-                        >
-                            {agent.metadata.display_name}
-                        </h3>
-                        <p
-                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
-                        >
-                            {agent.metadata.description}
-                        </p>
-                        {#if agent.author.source_url}
-                            <a
-                                href={agent.author.source_url}
-                                class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                <CarbonGithub class="mx-1" />
-                                {formatText(agent.author.source_url, 20)}
-                            </a>
-                        {:else}
-                            <p
-                                class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500"
-                            >
-                                Created by <a
-                                    class="hover:underline"
-                                    href="https://github.com/{agent.author
-                                        .github_id}"
-                                    target="_blank"
-                                    rel="noreferrer"
+                        {#each sections[section] as agent, index}
+                            {#if index === 2 && section === "All Agents"}
+                                <button
+                                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
+                                    on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
                                 >
-                                    {agent.author.name}
-                                </a>
-                            </p>
-                        {/if}
-                    </button>
-                {/each}
-                <button
-                    class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
-                    on:click={() => {
-                        showModal = true;
-                    }}
-                >
-                    <CarbonGithub height="5.5em" width="5.5em" />
-                    <h3
-                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm mt-2"
-                    >
-                        Create from github
-                    </h3>
-                </button>
-            </div>
+                                    <img
+                                        src={promotedAgent.metadata.avatar_id}
+                                        alt="Avatar"
+                                        class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                                    />
+                                    <h3
+                                        class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
+                                    >
+                                        {promotedAgent.metadata.display_name}
+                                    </h3>
+                                    <p
+                                        class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
+                                    >
+                                        {promotedAgent.metadata.description}
+                                    </p>
+                                    <span class="promoted-indicator">Promoted</span>
+                                </button>
+                            {/if}
+                            <button
+                                class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                                on:click={() => navigateAgents(agent)}
+                            >
+                                <img
+                                    src={agent.metadata.avatar_id}
+                                    alt="Avatar"
+                                    class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
+                                />
+                                <h3
+                                    class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm"
+                                >
+                                    {agent.metadata.display_name}
+                                </h3>
+                                <p
+                                    class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400"
+                                >
+                                    {agent.metadata.description}
+                                </p>
+                                {#if agent.author?.source_url}
+                                    <a
+                                        href={agent.author.source_url}
+                                        class="mt-auto pt-2 text-xs text-gray-400 dark:text-gray-500 line-clamp-1 hover:underline inline-flex flex-row items-center"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <CarbonGithub class="mx-1" />
+                                        {formatText(agent.author.source_url, 20)}
+                                    </a>
+                                {/if}
+                            </button>
+                        {/each}
+                    </div>
+                </div>
+            {/each}
         {/if}
     </div>
 </div>
@@ -260,5 +288,27 @@
                 8px 0px 0px 0px #d4d4d4,
                 16px 0px 0px 0px #0e70c0;
         }
+    }
+
+    .promoted-card {
+        border: 2px solid #1e90ff; /* Blue border */
+        background-color: #e6f7ff; /* Light blue background */
+    }
+
+    .promoted-indicator {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #1e90ff; /* Blue background */
+        color: #fff; /* White text */
+        padding: 0.2em 0.5em;
+        font-size: 0.75em;
+        font-weight: bold;
+        border-bottom-left-radius: 0.5em;
+    }
+
+    .promoted-text {
+        color: #003366; /* Dark blue text */
+        text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1); /* Subtle text shadow */
     }
 </style>
