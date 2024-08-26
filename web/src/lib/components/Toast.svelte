@@ -18,7 +18,7 @@
 	class="pointer-events-none fixed right-0 top-12 z-30 bg-gradient-to-bl from-red-500/20 via-red-500/0 to-red-500/0 pb-36 pl-36 pr-2 pt-2 md:top-0 md:pr-8 md:pt-5"
 >
 	<div
-		class="pointer-events-auto flex items-center rounded-full bg-white/90 px-3 py-1 shadow-sm dark:bg-gray-900/80"
+		class="pointer-events-auto flex items-center rounded-full bg-white/90 px-3 py-1 shadow-sm"
 	>
 		{#if ToastType.SUCCESS === toastType}
 		<CarbonCheck color="green" height="1.5em" width="1.5em" class="mx-2" />
@@ -27,6 +27,6 @@
 		{:else if ToastType.ERROR === toastType}
 		<CarbonError color="red" height="1.5em" width="1.5em" class="mx-2" />
 		{/if}
-		<h2 class="font-semibold mx-2 text-white">{message}</h2>
+		<h2 class="font-semibold mx-2">{message}</h2>
 	</div>
 </div>
