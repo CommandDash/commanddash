@@ -258,8 +258,7 @@
             <div
               class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
             >
-              Your agent will be ready in a few minutes. Please drop your email
-              to be notified.
+              We're experiencing high usage due to Product Hunt Launch. We will notify you once agent is ready to use.
             </div>
             <p
               class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
@@ -275,7 +274,7 @@
               autocapitalize="none"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               name="email"
-              placeholder="Email address"
+              placeholder="Email Address"
               type="text"
             />
             <button
