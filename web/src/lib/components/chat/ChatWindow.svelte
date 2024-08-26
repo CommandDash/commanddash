@@ -194,10 +194,12 @@
                         maxRows={6}
                         on:submit={handleSubmit}
                         bind:value={message}
+                        disabled={!agentIsDataSourceIndexed}
                     />
                     <button
-                        class="btn mx-1 my-1 h-[2.4rem] self-end rounded bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+                        class="btn mx-1 my-1 h-[2.4rem] self-end rounded bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:cursor-not-allowed enabled:cursor-pointer disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
                         type="submit"
+                        disabled={!agentIsDataSourceIndexed}
                     >
                         <CarbonSendAltFilled />
                     </button>
