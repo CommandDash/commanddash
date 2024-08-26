@@ -258,7 +258,7 @@
             <div
               class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
             >
-              We're experiencing high usage due to Product Hunt Launch. We will notify you once agent is ready to use.
+              We're processing the agent. Please leave your email to be notified when it is ready to use.
             </div>
             <p
               class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
