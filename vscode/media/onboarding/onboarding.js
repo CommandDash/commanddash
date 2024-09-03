@@ -1732,7 +1732,7 @@ function displayMessages() {
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]/[.2]");
 
             contentElement.classList.add("text-sm", "block", "px-2.5", "py-1.5", "pt-2", "break-words", "leading-relaxed", "bg-[#497BEF]/[.2]");
-            contentElement.innerHTML = markdownToPlain(message.parts);
+            contentElement.innerHTML = markdownToPlain(message.text);
 
         } else if (message.role === "user") {
             roleElement.innerHTML = "<strong>You</strong>";
@@ -1742,13 +1742,13 @@ function displayMessages() {
             roleElement.appendChild(agents);
             agents.innerHTML = `<span class="text-[#497BEF]">@${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
-            contentElement.innerHTML = markdownToPlain(message.parts);
+            contentElement.innerHTML = markdownToPlain(message.text);
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-[#497BEF]");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-[#497BEF]", "text-white");
-            contentElement.innerHTML = markdownToPlain(message.parts);
+            contentElement.innerHTML = markdownToPlain(message.text);
             buttonContainer.classList.add("inline-flex", "w-full", "px-2.5", "py-1.5",
                 "bg-[#497BEF]");
             const messageIndex = conversationHistory.indexOf(message);
@@ -1768,7 +1768,7 @@ function displayMessages() {
             roleElement.innerHTML = "<strong class='text-white'>Error</strong>";
             roleElement.classList.add("block", "w-full", "px-2.5", "py-1.5", "bg-red-700");
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "bg-red-700", "text-white");
-            contentElement.innerHTML = markdownToPlain(message.parts);
+            contentElement.innerHTML = markdownToPlain(message.text);
         }
         messageElement.classList.add("mt-1");
         messageElement.appendChild(roleElement);
