@@ -1055,7 +1055,7 @@ function handleSubmit(event) {
                 });
             }
         }
-
+ //' `vscode` what is this code'
         // When triggered with /
         else if (type === 'slash') {
             // If no agent selected yet

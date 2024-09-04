@@ -1,21 +1,13 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as os from "os";
-import { dartCodeExtensionIdentifier } from "../shared/types/constants";
 import { logError, logEvent } from "../utilities/telemetry-reporter";
-import { refactorCode } from "../tools/refactor/refactor_from_instructions";
-import { RefactorActionManager } from "../action-managers/refactor-agent";
 import { DiffViewAgent } from "../action-managers/diff-view-agent";
 import { shortcutInlineCodeRefactor } from "../utilities/shortcut-hint-utils";
-import { DartCLIClient } from "../utilities/commanddash-integration/dart-cli-client";
-import { CacheManager } from "../utilities/cache-manager";
-import { handleDiffViewAndMerge } from "../utilities/diff-utils";
 import {
   SetupManager,
   SetupStep,
 } from "../utilities/setup-manager/setup-manager";
-import { ContextualCodeProvider } from "../utilities/contextual-code";
-import { Auth } from "../utilities/auth/auth";
 import { StorageManager } from "../utilities/storage-manager";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
@@ -27,7 +19,6 @@ import {
 export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "dash.chatView";
   private _view?: vscode.WebviewView;
-  private _currentMessageNumber = 0;
   private setupManager = SetupManager.getInstance();
   private _activeAgent: string = "";
   private tasksMap: any = {};
@@ -35,6 +26,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     [agent: string]: {
       role: string;
       text: string;
+      references?: Array<string>;
       messageId?: string;
       data?: any;
       buttons?: string[];
@@ -477,24 +469,25 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     const conversationHistory = this._publicConversationHistory
       .filter((obj) => Object.keys(obj)[0] === this._activeAgent)
       .map((obj) => obj[this._activeAgent]);
+    const conversationReference = conversationHistory.filter((obj) => obj.role === "model") ?? [];
 
     const agentName = agentResponse["agent"];
     const data = {
       agent_name: agentName.split("@")[1],
       agent_version: agentResponse["agent_version"],
       chat_history: conversationHistory,
-      included_references: [],
+      included_references: conversationReference.length > 0 ? conversationReference[conversationReference.length - 1].references : [],
       private: false,
     };
     try {
-      const modelResponse = await makeHttpRequest<{ response: string }>({
+      const modelResponse = await makeHttpRequest<{ response: string, references: Array<string> }>({
         url: "https://api.commanddash.dev/v2/ai/agent/answer",
         method: "post",
         headers: { "Content-Type": "application/json" },
         data: JSON.stringify(data),
       });
       this._publicConversationHistory.push({
-        [this._activeAgent]: { role: "model", text: modelResponse.response },
+        [this._activeAgent]: { role: "model", text: modelResponse.response, references: modelResponse.references },
       });
       this._view?.webview.postMessage({
         type: "displayMessages",
@@ -515,244 +508,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         value: this._publicConversationHistory,
       });
     } finally {
-        this?._view?.webview?.postMessage({ type: "hideLoadingIndicator" });
-    }
-  }
-
-  private async handleAgents(response: any, isCommandLess: boolean) {
-    let agentResponse = response;
-    this._activeAgent = agentResponse["agent"];
-    const client = DartCLIClient.getInstance();
-    const task = client.newTask();
-
-    // task.onProcessStep('context', async (message) => {
-    //     const args = message.params.args;
-    //     let uri: vscode.Uri = vscode.Uri.parse(args.filePath);
-    //     let document = await vscode.workspace.openTextDocument(uri);
-
-    //     let range = new vscode.Range(
-    //         new vscode.Position(args.range.start.line, args.range.start.character),
-    //         new vscode.Position(args.range.end.line - 1, args.range.end.character),
-    //     );
-    //     try {
-    //         let contextualCode = await new ContextualCodeProvider().getContextualCodeInput(
-    //             document, range, this.analyzer!, undefined
-    //         );
-
-    //         task.sendStepResponse(message, {
-    //             "context": contextualCode,
-    //         });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // });
-
-    task.onProcessStep("append_to_chat", async (message) => {
-      this._publicConversationHistory.push({
-        [this._activeAgent]: {
-          role: "model",
-          text: message.params.args.message,
-        },
-      });
-      this._view?.webview.postMessage({
-        type: "displayMessages",
-        value: this._publicConversationHistory,
-      });
-      this._view?.webview.postMessage({ type: "hideLoadingIndicator" });
-
-      task.sendStepResponse(message, {});
-    });
-
-    task.onProcessStep("chat_document_update", async (message) => {
-      this.chatDocuments[this._activeAgent] = message.params.args.content;
-      task.sendStepResponse(message, {});
-    });
-
-    task.onProcessStep("prompt_update", async (message) => {
-      if (this._publicConversationHistory.length === 0) {
-        task.sendStepResponse(message, {});
-        return;
-      }
-      // In private conversation history, to the last user message, append the prompt
-      if (
-        !this._publicConversationHistory[
-          this._publicConversationHistory.length - 1
-        ].data
-      ) {
-        this._publicConversationHistory[
-          this._publicConversationHistory.length - 1
-        ][this._activeAgent].data = { prompt: message.params.args.prompt };
-      } else {
-        this._publicConversationHistory[
-          this._publicConversationHistory.length - 1
-        ][this._activeAgent].data.prompt = message.params.args.prompt;
-      }
-      task.sendStepResponse(message, {});
-    });
-
-    task.onProcessStep("loader_update", async (message) => {
-      task.sendStepResponse(message, {});
-      this._view?.webview.postMessage({
-        type: "loaderUpdate",
-        value: JSON.stringify(message?.params?.args),
-      });
-    });
-    task.onProcessStep("cache", async (message) => {
-      const cache = await CacheManager.getInstance().getGeminiCache();
-      task.sendStepResponse(message, { value: cache });
-    });
-    task.onProcessStep("update_cache", async (message) => {
-      const embd = JSON.parse(message.params.args.embeddings);
-      var cacheMap: {
-        [filePath: string]: {
-          codehash: string;
-          embedding: { values: number[] };
-        };
-      } = {};
-
-      // Iterate over each object in the list
-      for (const cacheItem of embd) {
-        // Extract filePath from the keys of each object in the list
-        const filePath = Object.keys(cacheItem)[0];
-
-        // Add the extracted object to the map
-        cacheMap[filePath] = cacheItem[filePath];
-      }
-      await CacheManager.getInstance().setGeminiCache(cacheMap);
-      task.sendStepResponse(message, {});
-    });
-    task.onProcessStep("workspace_details", async (message) => {
-      const workspaceFolder =
-        vscode.workspace.workspaceFolders &&
-        vscode.workspace.workspaceFolders[0];
-      if (!workspaceFolder) {
-        task.sendStepResponse(message, { path: null });
-        return;
-      }
-      task.sendStepResponse(message, { path: workspaceFolder.uri.fsPath });
-    });
-
-    task.onProcessStep("replace_in_file", async (message) => {
-      const { originalCode, path, optimizedCode } = message.params.args.file;
-      const editor = vscode.window.activeTextEditor;
-
-      if (editor) {
-        this.tasksMap = { [task.getTaskId()]: task };
-        handleDiffViewAndMerge(
-          editor,
-          path,
-          originalCode,
-          optimizedCode,
-          this.context
-        );
-        this._publicConversationHistory.push({
-          [this._activeAgent]: {
-            role: "dash",
-            text: "Do you want to merge these changes?",
-            buttons: ["accept", "decline"],
-            data: { taskId: task.getTaskId(), message },
-          },
-        });
-        this._view?.webview.postMessage({
-          type: "displayMessages",
-          value: this._publicConversationHistory,
-        });
-      }
-      task.sendStepResponse(message, {});
-    });
-
-    //change agents on the select of agents
-    let prompt = "";
-    const conversationHistory = this._publicConversationHistory
-      .filter((obj) => Object.keys(obj)[0] === this._activeAgent)
-      .map((obj) => obj[this._activeAgent]);
-    agentResponse = {
-      ...agentResponse,
-      registered_inputs: [
-        ...agentResponse.registered_inputs,
-        {
-          type: "chat_query_input",
-          value: JSON.stringify(conversationHistory),
-          id: Math.floor(Date.now() / 1000).toString(),
-        },
-      ],
-      chat_documents: this.chatDocuments[this._activeAgent],
-    };
-    if (isCommandLess) {
-      prompt = agentResponse.prompt;
-    } else {
-      prompt = this.formatPrompt(agentResponse);
-    }
-
-    this._publicConversationHistory.push({
-      [this._activeAgent]: {
-        role: "user",
-        text: prompt,
-        agent: agentResponse.metadata.display_name,
-        slug: agentResponse.slug,
-      },
-    });
-    this._view?.webview.postMessage({
-      type: "displayMessages",
-      value: this._publicConversationHistory,
-    });
-    try {
-      let auth = Auth.getInstance();
-      /// Request the client to process the task and handle result or error
-      let agentTrackData = {
-        agent_name: (agentResponse["agent"] as string).substring(1),
-        slash_command: agentResponse["slug"],
-        agent_version: agentResponse["agent_version"],
-      };
-      logEvent("agent_start", agentTrackData);
-      const response = await task.run({
-        kind: "agent-execute",
-        data: {
-          auth_details: {
-            type: "gemini",
-            key: auth.getApiKey(),
-            github_token: auth.getGithubAccessToken(),
-          },
-          ...agentResponse,
-          agent_name: (agentResponse["agent"] as string).substring(1), // remove the '@'
-        },
-      });
-      logEvent("agent_success", agentTrackData);
-      console.log("Processing completed: ", response);
-    } catch (error) {
-      console.error("Processing error: ", error);
-      this._publicConversationHistory.push({
-        [this._activeAgent]: {
-          role: "error",
-          text:
-            error instanceof Error
-              ? (error as Error).message
-              : (error as any).toString(),
-        },
-      });
-      this._view?.webview.postMessage({
-        type: "displayMessages",
-        value: this._publicConversationHistory,
-      });
       this?._view?.webview?.postMessage({ type: "hideLoadingIndicator" });
     }
-  }
-
-  private formatPrompt(response: any): string {
-    let prompt: string = "";
-    response?.registered_inputs?.forEach(
-      ({ type, value }: { type: string; value: string }) => {
-        if (type === "string_input" && value) {
-          prompt += value;
-        }
-        if (type === "code_input" && value) {
-          const parsedValue = JSON.parse(value);
-          prompt += "\n" + parsedValue?.referenceContent;
-        }
-      }
-    );
-
-    return prompt;
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
