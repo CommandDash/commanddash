@@ -236,14 +236,11 @@ const textInputContainer = document.getElementById("text-input-container");
 const header = document.getElementById("header");
 const chips = document.getElementById("chips");
 const codeSnippetButton = document.getElementById("code-snippets");
-const executableProgress = document.getElementById("executable-progress");
 const githubLogin = document.getElementById("github-sign-in");
-const executableTick = document.getElementById("executable-tick");
 const onboardingSetup = document.getElementById("onboarding-setup");
 const workspaceLoader = document.getElementById('workspace-loader');
 const workspaceLoaderText = document.getElementById('workspace-loader-text');
 const questionnaireContainer = document.getElementById("questionaire-container");
-const executableContainer = document.getElementById("executable-container");
 const fileUpload = document.getElementById("file-upload");
 const activeAgentAttach = document.getElementById("agents");
 // const activeCommandsAttach = document.getElementById("slash-commands");
@@ -1274,13 +1271,6 @@ function handleTriggerMessage(event) {
                         case 0:
                             isGithubLoginPending = true;
                             githubLogin.classList.remove("hidden");
-                            executableContainer.classList.add("hidden");
-                            break;
-
-                        case 1:
-                            isExecutableDownloadPending = true;
-                            executableTick.classList.add('hidden');
-                            executableProgress.classList.remove("hidden");
                             break;
                     }
                 });
@@ -1289,33 +1279,14 @@ function handleTriggerMessage(event) {
             if (!isGithubLoginPending) {
                 isGithubLoginPending = false;
                 githubLogin.classList.add("hidden");
-                executableContainer.classList.remove("hidden");
-                vscode.postMessage({
-                    type: "executeDownload",
-                });
-            }
-            if (!isExecutableDownloadPending) {
-                isExecutableDownloadPending = false;
-                executableTick.classList.remove("hidden");
-                executableProgress.classList.add("hidden");
             }
 
             allStepsCompleted();
             setLoading(false);
             break;
-        case 'executableDownloadProgress':
-            executableProgress.value = message.value;
-            break;
-        case 'executableDownloaded':
-            isExecutableDownloadPending = false;
-            executableTick.classList.remove("hidden");
-            executableProgress.classList.add("hidden");
-            allStepsCompleted();
-            break;
         case 'githubLoggedIn':
             isGithubLoginPending = false;
             githubLogin.classList.add("hidden");
-            executableContainer.classList.remove("hidden");
             allStepsCompleted();
             break;
         case 'cleanUpEventListener':
@@ -1410,7 +1381,7 @@ function toggleLoader(isShowLoader) {
 }
 
 function allStepsCompleted() {
-    if (!isGithubLoginPending && !isExecutableDownloadPending) {
+    if (!isGithubLoginPending) {
         onboardingSetup.classList.add("hidden");
         bottomContainer.classList.add("flex");
         bottomContainer.classList.remove("hidden");

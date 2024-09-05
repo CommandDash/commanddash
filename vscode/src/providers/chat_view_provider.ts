@@ -163,19 +163,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
           this._fetchAgentsAPI();
           break;
         }
-        case "executeDownload": {
-          this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
-            if (steps === SetupStep.executable) {
-              this.setupManager.setupExecutable((progress: number) => {
-                this.postMessageToWebview({
-                  type: "executableDownloadProgress",
-                  value: progress,
-                });
-              });
-            }
-          });
-          break;
-        }
         case "setMarketPlace": {
           this.setMarketPlaceWebView();
           break;
@@ -184,6 +171,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     });
     this._fetchAgentsAPI(true);
     this._migrateAgentsStorage();
+    this.setupManager.deleteGithub();
     // StorageManager.instance.deleteAgents();
 
     webviewView.onDidChangeVisibility(() => {
@@ -422,19 +410,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
       switch (event) {
         case SetupStep.github:
           this._view?.webview.postMessage({ type: "githubLoggedIn" });
-          this.setupManager.pendingSetupSteps.forEach((steps: SetupStep) => {
-            if (steps === SetupStep.executable) {
-              this.setupManager.setupExecutable((progress: number) => {
-                this.postMessageToWebview({
-                  type: "executableDownloadProgress",
-                  value: progress,
-                });
-              });
-            }
-          });
-          break;
-        case SetupStep.executable:
-          this._view?.webview.postMessage({ type: "executableDownloaded" });
           break;
       }
     });
