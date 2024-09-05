@@ -171,7 +171,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     });
     this._fetchAgentsAPI(true);
     this._migrateAgentsStorage();
-    this.setupManager.deleteGithub();
     // StorageManager.instance.deleteAgents();
 
     webviewView.onDidChangeVisibility(() => {
