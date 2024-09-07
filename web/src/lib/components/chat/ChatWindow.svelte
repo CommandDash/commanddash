@@ -79,7 +79,7 @@
     const savedAccessKey = localStorage.getItem(`accessKey_${agentId}`);
     if (savedAccessKey) {
       accessKey = savedAccessKey;
-      agentKeyValid = await validateAccessKey();
+      agentKeyValid = !!accessKey;
     }
   };
 
