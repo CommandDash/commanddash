@@ -31,5 +31,6 @@ export type Agent = {
     publisher_id: string,
     supported_commands: any,
     testing: boolean,
-    version: string
+    version: string,
+    enterprise: boolean
 }

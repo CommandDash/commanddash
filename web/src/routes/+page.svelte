@@ -38,27 +38,27 @@
     onMount(async () => {
         loading = true;
         try {
-            const [existingResponse, newResponse] = await Promise.all([
-                fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
+            const [existingResponse] = await Promise.all([
+                fetch("https://stage.commanddash.dev/agent/web/get-agent-list", {
                     headers: {
                         "Content-Type": "application/json",
                     },
                     method: "POST",
                     body: JSON.stringify({ cli_version: "0.0.1" }),
                 }),
-                fetch("https://api.commanddash.dev/agent/web/get-highlighted-agent-list", {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    method: "POST",
-                    body: JSON.stringify({ cli_version: "0.0.1" }),
-                })
+                // fetch("https://stage.commanddash.dev/agent/web/get-highlighted-agent-list", {
+                //     headers: {
+                //         "Content-Type": "application/json",
+                //     },
+                //     method: "POST",
+                //     body: JSON.stringify({ cli_version: "0.0.1" }),
+                // })
             ]);
 
             const existingAgents = await existingResponse.json();
-            const newAgents = await newResponse.json();
+            // const newAgents = await newResponse.json();
 
-            if (!existingResponse.ok || !newResponse.ok) {
+            if (!existingResponse.ok) {
                 throw new Error("Failed to fetch agents");
             }
 
@@ -66,7 +66,7 @@
             filteredAgents = existingAgents;
 
             // Combine agents from new API into sections
-            sections = newAgents;
+            // sections = newAgents;
 
             // Add existing agents under "All Agents" section
             sections["All Agents"] = existingAgents;
