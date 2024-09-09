@@ -214,7 +214,7 @@
                                 method="POST"
                                 on:submit|preventDefault={handleSubmitContribution}
                                 class="w-full"
-                                action="https://stage.commanddash.dev/agent/contribute-source"
+                                action="https://api.commanddash.dev/agent/contribute-source"
                             >
                                 <div class="flex flex-row">
                                     <select

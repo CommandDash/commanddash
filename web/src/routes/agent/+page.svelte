@@ -72,7 +72,7 @@
         });
 
         const response = await fetch(
-            "https://stage.commanddash.dev/agent/get-latest-agent",
+            "https://api.commanddash.dev/agent/get-latest-agent",
             {
                 method: "POST",
                 headers: {

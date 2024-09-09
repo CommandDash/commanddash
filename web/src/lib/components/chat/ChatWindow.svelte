@@ -110,7 +110,7 @@
 
     try {
       const response = await fetch(
-        "https://stage.commanddash.dev/v2/ai/agent/answer",
+        "https://api.commanddash.dev/v2/ai/agent/answer",
         {
           method: "POST",
           body: JSON.stringify(agentData),
@@ -153,7 +153,7 @@
     };
     try {
       const response = await fetch(
-        "https://stage.commanddash.dev/agent/notify",
+        "https://api.commanddash.dev/agent/notify",
         {
           method: "POST",
           body: JSON.stringify(data),
@@ -221,7 +221,7 @@
     try {
       loading = true;
       const response = await fetch(
-        "https://stage.commanddash.dev/agent/validate-access",
+        "https://api.commanddash.dev/agent/validate-access",
         {
           headers: {
             "Content-Type": "application/json",
