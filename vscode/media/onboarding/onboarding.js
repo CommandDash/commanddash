@@ -976,7 +976,7 @@ async function submitResponse() {
         if (checkValueExists(agentsData.registered_inputs)) {
             const currentAgentData = data.find((agent) => agent.name === currentActiveAgent);
             toggleLoader(true);
-            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: currentAgentData?.version, testing: currentAgentData?.testing, metadata: currentAgentData?.metadata }, isCommandLess: false } });
+            vscode.postMessage({ type: "agents", value: { data: { ...agentsData, agent: currentActiveAgent, agent_version: currentAgentData?.version ?? currentAgentData.versions[0].version, testing: currentAgentData?.testing, metadata: currentAgentData?.metadata }, isCommandLess: false } });
 
             questionnaireContainer.classList.add("hidden");
             textInput.textContent = "";
@@ -995,7 +995,7 @@ async function submitResponse() {
         commandLessData.prompt = value;
 
         const activeAgentData = data.find(agent => agent.name === currentActiveAgent);
-        const commandLess = { agent_version: activeAgentData.version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData, testing: activeAgentData?.testing, metadata: activeAgentData?.metadata };
+        const commandLess = { agent_version: activeAgentData.version ?? activeAgentData.versions[0].version, agent: activeAgentData.name, chat_mode: activeAgentData?.chat_mode, ...commandLessData, testing: activeAgentData?.testing, metadata: activeAgentData?.metadata };
         vscode.postMessage({ type: "agents", value: { data: { ...commandLess }, isCommandLess: true } });
         questionnaireContainer.classList.add("hidden");
         textInput.textContent = "";

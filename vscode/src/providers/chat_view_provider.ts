@@ -294,12 +294,12 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     try {
       const { value } = data;
       const _parsedAgent = JSON.parse(value);
-      const agentDetails = ((await this._fetchAgent(
-        _parsedAgent.name,
-        _parsedAgent.versions[0].version,
-        _parsedAgent.testing
-      )) as any) ?? { agent: { name: "", version: "" } };
-      this._storingAgentsLocally(agentDetails);
+      // const agentDetails = ((await this._fetchAgent(
+      //   _parsedAgent.name,
+      //   _parsedAgent.versions[0].version,
+      //   _parsedAgent.testing
+      // )) as any) ?? { agent: { name: "", version: "" } };
+      this._storingAgentsLocally(_parsedAgent);
     } catch (error) {
       console.error("Error installing agents:", error);
     }
@@ -360,7 +360,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
             ...agentDetails,
             name: `@${name}`,
             search: `@${metadata.display_name}`,
-            supported_commands: agentDetails?.supported_commands.map(
+            supported_commands: agentDetails?.supported_commands?.map(
               (command: any) => ({
                 ...command,
                 slug: `/${command.slug}`,
@@ -448,7 +448,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     const agentName = agentResponse["agent"];
     const data = {
       agent_name: agentName.split("@")[1],
-      agent_version: agentResponse["agent_version"],
+      agent_version: agentResponse["agent_version"] ?? "1.0.0",
       chat_history: conversationHistory,
       included_references: conversationReference.length > 0 ? conversationReference[conversationReference.length - 1].references : [],
       private: false,
