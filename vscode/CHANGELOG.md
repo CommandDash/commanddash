@@ -4,6 +4,10 @@ All notable changes to the "commanddash" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.5.1]
+- Replacing CLI with REST APIs to interact with model
+- Crashing fixes
+
 ## [0.5.0]
 - User Experience Improvements
 
