@@ -15,6 +15,7 @@
 	},
 	"devDependencies": {
 		"@iconify-json/carbon": "^1.1.36",
+		"@iconify/svelte": "^4.0.2",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-node": "^5.2.0",
 		"@sveltejs/kit": "^2.0.0",
@@ -34,7 +35,12 @@
 	"type": "module",
 	"dependencies": {
 		"@lottiefiles/svelte-lottie-player": "^0.3.1",
+		"@microsoft/applicationinsights-web": "^3.3.1",
 		"@tailwindcss/typography": "^0.5.13",
+		"cheerio": "^1.0.0",
+		"dotenv": "^16.4.5",
+		"highlight.js": "^11.10.0",
+		"isomorphic-dompurify": "^2.14.0",
 		"showdown": "^2.1.0",
 		"tailwind-scrollbar": "^3.1.0"
 	}
