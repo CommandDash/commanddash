@@ -1047,7 +1047,6 @@ function handleSubmit(event) {
             } else {
 
                 matchingItems = getAgents().filter(item => {
-                    console.log('name', item);
                     return item.search?.toLowerCase().startsWith(query.toLowerCase());
                 });
             }

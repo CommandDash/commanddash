@@ -4,12 +4,13 @@
     import { toastStore } from "$lib/stores/ToastStores";
     import { ToastType } from "$lib/types/Toast";
     import appInsights from "$lib/utils/appInsights";
-    import IconClose from "~icons/carbon/close";
     import CarbonGithub from "~icons/carbon/logo-github";
     import { validateURL } from "$lib/utils/validateURL";
+    import IconInternet from "$lib/components/icons/IconInternet.svelte";
 
     export let showModal: boolean;
     export let onClose: () => void;
+    export let onPrivateAgent: () => void;
 
     let value: string = "";
     let selectedPlatform: string = "github";
@@ -68,8 +69,9 @@
         <div class="bg-gray-900 rounded-lg p-6 w-full max-w-md border border-gray-700">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-100">Create Agent with URL</h2>
-                <button on:click={onClose} class="text-gray-400 hover:text-gray-200">
-                    <IconClose />
+                <button on:click={onPrivateAgent} class="flex items-center rounded-full border border-gray-200 px-2.5 py-1 text-sm text-gray-900 bg-white">
+                    <IconInternet classNames="mr-1"/>
+                    Private agents
                 </button>
             </div>
 
@@ -117,6 +119,12 @@
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
             >
                 Submit
+            </button>
+            <button
+                on:click={onClose}
+                class="w-full text-white py-2 px-4 rounded-md mt-2"
+            >
+                Cancel
             </button>
         </div>
     </div>

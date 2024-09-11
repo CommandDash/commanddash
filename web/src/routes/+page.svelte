@@ -11,12 +11,14 @@
     import { debounce } from "$lib/utils/debounce";
     import { base } from "$app/paths";
     import CreateAgentDialog from "$lib/components/CreateAgentDialog.svelte";
+  import PrivateAgentDialog from "$lib/components/PrivateAgentDialog.svelte";
 
     const SEARCH_DEBOUNCE_DELAY = 400;
     let agents: Agent[] = [];
     let filteredAgents: Agent[] = [];
     let searchValue: string = "";
     let showModal: boolean = false;
+    let showPrivateModal: boolean = false;
     let currentAgent: Agent;
     let sections: { [key: string]: Agent[] } = {};
 
@@ -304,7 +306,13 @@
     onClose={() => {
         showModal = false;
     }}
+    onPrivateAgent={() => {
+        showModal = false;
+        showPrivateModal = true;
+    }}
 />
+<PrivateAgentDialog bind:showPrivateModal />
+
 
 <style>
     .typing-loader {
