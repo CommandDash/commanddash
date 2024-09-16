@@ -7,12 +7,10 @@ import { activateTelemetry, logEvent } from './utilities/telemetry-reporter';
 import * as dotenv from 'dotenv';
 import path = require('path');
 // import { ExtensionVersionManager } from './utilities/update-check';
-import { dartCodeExtensionIdentifier } from './shared/types/constants';
 import { FlutterGPTViewProvider } from './providers/chat_view_provider';
 import { initCommands, registerCommand } from './utilities/command-manager';
 import { CacheManager } from './utilities/cache-manager';
 import { tempScheme, virtualDocumentProvider } from './utilities/virtual-document-provider';
-import { Auth } from './utilities/auth/auth';
 import { SetupManager, SetupStep } from './utilities/setup-manager/setup-manager';
 import { StorageManager } from './utilities/storage-manager';
 

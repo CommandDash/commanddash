@@ -28,9 +28,12 @@
   export let agentPrivate: boolean = false;
   export let agentIsDataSourceIndexed: boolean = true;
   export let agentDataSources: Array<any> = [];
+  export let agentEnterprise: boolean = false;
 
   let agentReferences: Array<any> = [];
   let emailValue: string = "";
+  let accessKey: string = "";
+  let agentKeyValid: boolean = false;
   let messageLoading: boolean = false;
   let message: string = "";
   let LottiePlayer: any;
@@ -59,12 +62,26 @@
           break;
       }
     });
+
+    if (agentEnterprise) {
+      getAccessKey();
+    } else {
+      agentKeyValid = true;
+    }
   });
 
   onDestroy(() => {
     message = "";
     questionnaireStore.set({ id: "", message: "" });
   });
+
+  const getAccessKey = async () => {
+    const savedAccessKey = localStorage.getItem(`accessKey_${agentId}`);
+    if (savedAccessKey) {
+      accessKey = savedAccessKey;
+      agentKeyValid = !!accessKey;
+    }
+  };
 
   const onHome = () => {
     message = "";
@@ -86,6 +103,7 @@
       chat_history: messages,
       included_references: agentReferences,
       private: agentPrivate,
+      access_key: accessKey,
     };
 
     message = "";
@@ -103,7 +121,7 @@
       );
 
       const modelResponse = await response.json();
-      console.log("model response", modelResponse);
+
       messages = [
         ...messages,
         {
@@ -134,13 +152,16 @@
       notify_for: "data_index",
     };
     try {
-      const response = await fetch("https://api.commanddash.dev/agent/notify", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "https://api.commanddash.dev/agent/notify",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const _response = await response.json();
 
@@ -175,6 +196,62 @@
         type: ToastType.ERROR,
       });
       appInsights.trackException({ error: new Error(`${error}`) }); // Track exception
+    }
+  };
+
+  const submit = async () => {
+    loading = true;
+    try {
+      agentKeyValid = await validateAccessKey();
+      if (agentKeyValid) {
+        //save the access key in the local storage and when every time this agent is mount get the saved access key
+        localStorage.setItem(`accessKey_${agentId}`, accessKey);
+      }
+    } catch (error) {
+      toastStore.set({
+        message: "An error occurred. Please try again.",
+        type: ToastType.ERROR,
+      });
+    } finally {
+      loading = false;
+    }
+  };
+
+  const validateAccessKey = async (): Promise<boolean> => {
+    try {
+      loading = true;
+      const response = await fetch(
+        "https://api.commanddash.dev/agent/validate-access",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({
+            agent_id: agentId,
+            access_key: accessKey,
+          }),
+        }
+      );
+      const _response = await response.json();
+
+      if (!response.ok) {
+        loading = false;
+        toastStore.set({
+          message: _response.message,
+          type: ToastType.ERROR,
+        });
+      }
+      return _response.result;
+    } catch (error) {
+      toastStore.set({
+        message: "An error occurred. Please try again.",
+        type: ToastType.ERROR,
+      });
+
+      return false;
+    } finally {
+      loading = false;
     }
   };
 </script>
@@ -229,7 +306,16 @@
     class="dark:via-gray-80 pointer-events-none absolute inset-x-0 bottom-0 z-0 mx-auto flex w-full max-w-5xl flex-col items-center justify-center bg-gradient-to-t from-white via-white/80 to-white/0 px-3.5 py-4 max-md:border-t max-md:bg-white sm:px-5 md:py-8 xl:max-w-5xl dark:border-gray-800 dark:from-gray-900 dark:to-gray-900/0 max-md:dark:bg-gray-900 [&>*]:pointer-events-auto"
   >
     <div class="w-full">
-      {#if agentIsDataSourceIndexed}
+      {#if loading}
+        {#if LottiePlayer}
+          <div class="flex-col w-full h-48 px-2 py-3">
+            <div class="inline-flex flex-row items-end px-2 justify-center">
+              <span id="workspace-loader-text">Validating</span>
+              <div class="typing-loader mx-2"></div>
+            </div>
+          </div>
+        {/if}
+      {:else if agentIsDataSourceIndexed && agentKeyValid}
         <form
           tabindex="-1"
           class="relative flex w-full max-w-5xl flex-1 items-center rounded border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500"
@@ -252,13 +338,14 @@
             </button>
           </div>
         </form>
-      {:else}
+      {:else if !agentIsDataSourceIndexed && !agentEnterprise}
         <div class="overflow-hidden rounded-xl border dark:border-gray-800">
           <div class="flex p-3">
             <div
               class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
             >
-              We're processing the agent. Please leave your email to be notified when it is ready to use.
+              We're processing the agent. Please leave your email to be notified
+              when it is ready to use.
             </div>
             <p
               class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
@@ -281,6 +368,37 @@
               on:click={notify}
               class="flex items-center justify-center w-full md:w-auto h-12 px-8 mx-2 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
               >Notify</button
+            >
+          </div>
+        </div>
+      {:else if agentEnterprise && !agentKeyValid}
+        <div class="overflow-hidden rounded-xl border dark:border-gray-800">
+          <div class="flex p-3">
+            <div
+              class="flex items-center gap-1.5 font-semibold max-sm:text-smd"
+            >
+              Please enter the access key
+            </div>
+            <p
+              class="btn ml-auto flex self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
+            >
+              <Icon icon="material-symbols:info" width="24px" height="24px" />
+            </p>
+          </div>
+          <div class="flex w-full flex-1 px-3 pb-3">
+            <input
+              bind:value={accessKey}
+              autocorrect="off"
+              autocapitalize="none"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              name="text"
+              placeholder="Access Key"
+              type="text"
+            />
+            <button
+              on:click={submit}
+              class="flex items-center justify-center w-full md:w-auto h-12 px-8 mx-2 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg"
+              >Submit</button
             >
           </div>
         </div>

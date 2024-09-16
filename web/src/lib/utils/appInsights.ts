@@ -1,6 +1,8 @@
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 
-const instrumentationKey = import.meta.env.VITE_INSTRUMENTATION_KEY;
+// const instrumentationKey = import.meta.env.VITE_INSTRUMENTATION_KEY;
+const instrumentationKey = '';
+
 
 if (!instrumentationKey) {
   console.log('instrumentation key not found');

@@ -77,6 +77,7 @@
         agentIsDataSourceIndexed={currentAgentDetails.data_sources_indexed}
         agentId={currentAgentDetails?.name}
         agentDataSources={agentDataSources}
+        agentEnterprise={currentAgentDetails.enterprise}
     />
 {/if}
 

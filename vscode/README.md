@@ -1,12 +1,12 @@
 <div align="center">
-<h3>Integrate APIs, SDKs or Packages with AI Agents</h3>
+<h3>Integrate Packages and SDKs with AI Agents</h3>
 
 [![VScode Downloads](https://img.shields.io/visual-studio-marketplace/d/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![VScode version](https://img.shields.io/visual-studio-marketplace/v/WelltestedAI.fluttergpt)](https://marketplace.visualstudio.com/items?itemName=WelltestedAI.fluttergpt&ssr=false#overview) [![License: APACHE](https://img.shields.io/badge/License-APACHE%202.0-yellow)](/LICENSE)
 </div>
 <img src="/assets/docs/poster.jpg"></a>
 
 -----------------
-CommandDash is a marketplace of AI agents that are expert at integrating APIs and SDKs.
+CommandDash is a marketplace of AI agents that are expert at integrating Packages and SDKs.
 
 Dash Agents are trained on the latest documentation, examples and issues enabling you to integrate any library without reading its docs by generating integration code contextualized to your codebase.
 
@@ -14,7 +14,7 @@ Dash Agents are trained on the latest documentation, examples and issues enablin
 ##### 🤝 Supports all languages
 ##### 👨🏼‍💻 Free for every developer
 
-Currently in Beta, CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
+CommandDash is being built in [open-sourced](https://github.com/CommandDash/commanddash) with the community.
 
 -----------------
 
@@ -54,7 +54,7 @@ Note: Commands are optionally offered by agents depending on the usecase.
 
 ## Contributing
 
-CommanDash is hub of AI agents on docs of any APIs, SDKs and more.
+CommanDash is hub of AI agents on docs of any Packages, SDKs and Github Libraries.
 
 You can suggest agents to add to the marketplace, or contribute to the VSCODE or IntelliJ extension or also to the shared [engine](https://github.com/CommandDash/packages).
 
@@ -62,11 +62,11 @@ You can suggest agents to add to the marketplace, or contribute to the VSCODE or
 
 -  **Pick up open issues**: Pick up and fix existing issues open to the community in [issues board](https://github.com/CommandDash/commanddash/issues).
 
--  **Request agents in the marketplace**: You can submit requests to add agents for your most used APIs or SDKs. [Fill Form](https://airtable.com/app22SBaii3xYD5aR/shrLv4mDsEtnFjmtj).
+-  **Create agents in the marketplace**: You can create agents for any Packages or SDKs in one-click. [Create Here](https://app.commanddash.io/?create=true).
 
 ## Community
 
-Do you love devtools but hate documentation? Join our community and help developers build without leaving their IDE: [Join Now](https://join.slack.com/t/welltested-ai/shared_invite/zt-25u09fty8-gaggH9HbmopB~4tialTrlA) 👋🏼
+Do you love devtools but hate documentation? Join our community and help developers build without leaving their IDE: [Join Now](https://discord.gg/szUCAnrsHQ) 👋🏼
 
 ## License
 

@@ -55,16 +55,22 @@
                 })
             ]);
 
-            const existingAgents = await existingResponse.json();
-            const newAgents = await newResponse.json();
+            let existingAgents = await existingResponse.json();
+            let newAgents = await newResponse.json();
 
-            if (!existingResponse.ok || !newResponse.ok) {
+            debugger
+            if (!existingResponse.ok && !newResponse.ok) {
                 throw new Error("Failed to fetch agents");
+            }
+
+            if (!newResponse.ok) {
+                newAgents = [];
             }
 
             agents = existingAgents;
             filteredAgents = existingAgents;
 
+            debugger;
             // Combine agents from new API into sections
             sections = newAgents;
 
