@@ -11,6 +11,8 @@
   import CarbonWorld from "~icons/carbon/wikis";
 
   import IconInternet from "./icons/IconInternet.svelte";
+  import { ToastType } from "$lib/types/Toast";
+  import { goto } from "$app/navigation";
 
   type ActionData = {
     error: boolean;
@@ -49,15 +51,9 @@
         "https://stage.commanddash.dev/account/github/url/web?override_uri=http://localhost:5173"
       );
       const _response = await response.json();
-      console.log("response", _response);
 
       if (response.ok) {
         const oauthWindow = window.open(_response.github_oauth_url, "_blank");
-        console.log("oatuhwidnwo", oauthWindow?.location.origin);
-
-        window.addEventListener('message', (event) => {
-          console.log('event', event);
-        })
 
         const interval = setInterval(() => {
           try {
@@ -68,7 +64,6 @@
               accessToken = urlParams.get("access_token");
               refreshToken = urlParams.get("refresh_token");
               if (accessToken && refreshToken) {
-
                 localStorage.setItem("accessToken", accessToken);
                 localStorage.setItem("refreshToken", refreshToken);
                 // Close the OAuth window
@@ -88,11 +83,8 @@
   }
 
   async function handleSubmitDataSources() {
-    debugger;
     if (urlType === "github") {
-      await validatingRepositoryAccess(
-        "https://github.com/wadhia-yash/shopping-demo"
-      );
+      await validatingRepositoryAccess(url);
     } else {
       agentDataSources = [...agentDataSources, { uri: url, type: urlType }];
     }
@@ -113,7 +105,7 @@
         agentDataSources = [...agentDataSources, { uri: url, type: urlType }];
       }
 
-      if (response.status === 422) {
+      if (response.status === 422 || response.status === 404) {
         openPopup(
           "https://github.com/apps/staging-commanddash/installations/select_target"
         );
@@ -135,39 +127,54 @@
     }
   }
 
-  async function handleSubmitAgentCreation(e: any) {
-    const ACTION_URL = e.target.action;
-
+  async function handleSubmitAgentCreation() {
     const body = {
-      agent_info: {
-        agent_id: "x_test",
-        metadata: {
-          display_name: agentName,
-          avatar_profile: agentAvatar,
-          tags: [],
-          description: agentDescription,
-        },
-        chat_mode: {
-          system_prompt: agentSystemPrompt,
-          data_source: agentDataSources,
-        },
+      name: agentName.toLowerCase().replace(/ /g, "_"),
+      metadata: {
+        display_name: agentName,
+        avatar_profile: agentAvatar,
+        tags: [],
+        description: agentDescription,
       },
-      testing: false,
+      chat_mode: {
+        system_prompt: agentSystemPrompt,
+      },
+      is_private: false,
       data_sources: agentDataSources,
     };
 
-    const response = await fetch(ACTION_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+      const response = await fetch(
+        "https://stage.commanddash.dev/agent/deploy-agent/web",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + accessToken,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+      const _response = await response.json();
+
+      if (!response.ok) {
+        toastStore.set({
+          message: _response.message,
+          type: ToastType.ERROR,
+        });
+        return;
+      }
+      onClose();
+      goto(`/agent/${agentName.toLowerCase().replace(/ /g, "_")}`);
+    } catch (error) {
+      console.log("error", error);
+    }
   }
 
   function onFilesChange(e: Event) {
     const inputEl = e.target as HTMLInputElement;
     if (inputEl.files?.length && inputEl.files[0].size > 0) {
+      const file = inputEl.files[0];
       if (!inputEl.files[0].type.includes("image")) {
         inputEl.files = null;
         files = null;
@@ -178,6 +185,14 @@
         };
         return;
       }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        agentAvatar = base64String;
+      };
+      reader.readAsDataURL(file);
+
       files = inputEl.files;
       resetErrors();
       deleteExistingAvatar = false;
@@ -194,16 +209,7 @@
     // Fetch tokens from localStorage when the component mounts
     accessToken = localStorage.getItem("accessToken");
     refreshToken = localStorage.getItem("refreshToken");
-
-    if (accessToken && refreshToken) {
-      console.log("Access Token:", accessToken);
-      console.log("Refresh Token:", refreshToken);
-    } else {
-      console.log("No tokens found in local storage.");
-    }
   });
-
-  console.log('files', files)
 </script>
 
 {#if showPrivateModal}
@@ -214,22 +220,18 @@
     <dialog
       in:fly={{ y: 100 }}
       open
-      class="h-[95dvh] w-[90dvw] overflow-hidden rounded-2xl border-gray-800/70 bg-gray-900 shadow-2xl outline-none sm:h-[85dvh] xl:w-[1200px] 2xl:h-[75dvh]"
+      class="h-[95dvh] w-[90dvw] overflow-hidden rounded-2xl border-gray-800/70 bg-gray-900 shadow-2xl outline-none sm:h-[85dvh] xl:w-[600px] 2xl:h-[75dvh]"
     >
-      <form
-        class="relative flex h-full flex-col overflow-y-auto p-4 md:p-8"
-        on:submit|preventDefault={handleSubmitAgentCreation}
-        action="https://staging.commanddash.dev/agent/deploy-agent"
-      >
+      <div class="relative flex h-full flex-col overflow-y-auto p-4 md:p-8">
         <h2 class="text-xl font-semibold text-white">Create new agent</h2>
         <p class="mb-6 text-sm text-gray-400">
           Create and share your own AI Agents.
         </p>
         <div
-          class="grid h-full w-full flex-1 grid-cols-2 gap-6 text-sm max-sm:grid-cols-1"
+          class="grid h-full w-full flex-1 grid-cols-1 gap-6 text-sm max-sm:grid-cols-1"
         >
           <div class="col-span-1 flex flex-col gap-4">
-            <div>
+            <!-- <div>
               <div class="mb-1 block pb-2 text-sm font-semibold text-white">
                 Avatar
               </div>
@@ -281,7 +283,7 @@
                   </label>
                 </div>
               {/if}
-            </div>
+            </div> -->
             <label>
               <div class="mb-1 font-semibold text-white">Name</div>
               <input
@@ -292,7 +294,7 @@
               />
               <p class="text-xs text-red-500">{getError("name", form)}</p>
             </label>
-            <label>
+            <!-- <label>
               <div class="mb-1 font-semibold text-white">Description</div>
               <textarea
                 name="description"
@@ -302,8 +304,8 @@
               <p class="text-xs text-red-500">
                 {getError("description", form)}
               </p>
-            </label>
-            <label>
+            </label> -->
+            <!-- <label>
               <div class="mb-1 font-semibold text-white">
                 Instructions (System Prompt)
               </div>
@@ -315,7 +317,7 @@
               <p class="text-xs text-red-500">
                 {getError("description", form)}
               </p>
-            </label>
+            </label> -->
             <div class="flex flex-col flex-nowrap pb-4">
               <span class="mt-2 text-smd font-semibold text-white"
                 >Internet access
@@ -336,69 +338,63 @@
                 </span>
               </label>
             </div>
-          </div>
-          {#if !!accessToken && !!refreshToken}
-            <div class="relative col-span-1 flex h-full flex-col">
-              <div class="mb-1 flex justify-between text-sm">
-                <span class="block font-semibold text-white">
-                  Add data sources
-                </span>
-              </div>
-              <div class="flex flex-row">
-                <select
-                  name="urlType"
-                  class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
-                  on:change={({ target }) => {
-                    urlType = target?.value;
-                  }}
-                >
-                  <option value="github">Github</option>
-                  <option value="deep_crawl_page">Website</option>
-                  <option value="web_page">Webpage</option>
-                  <option value="sitemap">Sitemap</option>
-                </select>
-                <input
-                  autocorrect="off"
-                  autocapitalize="none"
-                  class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  name="url"
-                  placeholder="URL"
-                  type="url"
-                  bind:value={url}
-                />
-              </div>
-              <button
-                class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
-                on:click={handleSubmitDataSources}>Submit</button
+            <div class="mb-1 flex justify-between text-sm">
+              <span class="block font-semibold text-white">
+                Add data sources
+              </span>
+            </div>
+            <div class="flex flex-row">
+              <select
+                name="urlType"
+                class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
+                on:change={({ target }) => {
+                  urlType = target?.value;
+                }}
               >
-              <div class="mt-6">
-                <span class="block font-semibold text-white">
-                  Data sources
-                </span>
-                {#each agentDataSources as sourceData}
-                  <a
-                    class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-lg !bg-gray-100 !text-gray-800 mt-1"
-                    target="_blank"
-                    rel="noreferrer"
-                    href={sourceData.uri}
+                <option value="github">Github</option>
+                <option value="deep_crawl_page">Website</option>
+                <option value="web_page">Webpage</option>
+                <option value="sitemap">Sitemap</option>
+              </select>
+              <input
+                autocorrect="off"
+                autocapitalize="none"
+                class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                name="url"
+                placeholder="URL"
+                type="url"
+                bind:value={url}
+              />
+            </div>
+            <button
+              class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
+              on:click={handleSubmitDataSources}>Add data sources</button
+            >
+            <div class="mt-6">
+              <span class="block font-semibold text-white"> Data sources </span>
+              {#each agentDataSources as sourceData}
+                <a
+                  class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-lg !bg-gray-100 !text-gray-800 mt-1"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={sourceData.uri}
+                >
+                  <div class="truncate">
+                    {sourceData.uri}
+                  </div>
+                  <div
+                    class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
                   >
-                    <div class="truncate">
-                      {sourceData.uri}
-                    </div>
-                    <div
-                      class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
-                    >
-                      {#if sourceData.type === "github"}
-                        <CarbonGithub />
-                      {:else if sourceData.type === "web_page"}
-                        <CarbonWorld />
-                      {:else}
-                        <CarbonCode />
-                      {/if}
-                    </div>
-                  </a>
-                {/each}
-              </div>
+                    {#if sourceData.type === "github"}
+                      <CarbonGithub />
+                    {:else if sourceData.type === "web_page"}
+                      <CarbonWorld />
+                    {:else}
+                      <CarbonCode />
+                    {/if}
+                  </div>
+                </a>
+              {/each}
             </div>
             <div
               class="absolute bottom-6 flex w-full justify-end gap-2 md:right-0 md:w-fit mr-7"
@@ -412,6 +408,27 @@
               <button
                 type="submit"
                 class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
+                on:click={handleSubmitAgentCreation}
+              >
+                Create
+              </button>
+            </div>
+          </div>
+          <!-- {#if !!accessToken && !!refreshToken}
+            <div class="relative col-span-1 flex h-full flex-col"></div>
+            <div
+              class="absolute bottom-6 flex w-full justify-end gap-2 md:right-0 md:w-fit mr-7"
+            >
+              <button
+                class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"
+                on:click={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
+                on:click={handleSubmitAgentCreation}
               >
                 Create
               </button>
@@ -428,9 +445,9 @@
                 Sign in with GitHub
               </button>
             </div>
-          {/if}
+          {/if} -->
         </div>
-      </form>
+      </div>
     </dialog>
   </div>
 {/if}

@@ -42,7 +42,7 @@
     loading = true;
     try {
       const [existingResponse, newResponse] = await Promise.all([
-        fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
+        fetch("https://stage.commanddash.dev/agent/web/get-agent-list", {
           headers: {
             "Content-Type": "application/json",
           },
@@ -50,7 +50,7 @@
           body: JSON.stringify({ cli_version: "0.0.1" }),
         }),
         fetch(
-          "https://api.commanddash.dev/agent/web/get-highlighted-agent-list",
+          "https://stage.commanddash.dev/agent/web/get-highlighted-agent-list",
           {
             headers: {
               "Content-Type": "application/json",
