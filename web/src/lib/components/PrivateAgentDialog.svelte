@@ -399,19 +399,29 @@
             <div
               class="absolute bottom-6 flex w-full justify-end gap-2 md:right-0 md:w-fit mr-7"
             >
-              <button
-                class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"
-                on:click={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
-                on:click={handleSubmitAgentCreation}
-              >
-                Create
-              </button>
+              {#if !!accessToken && !!refreshToken}
+                <button
+                  class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"
+                  on:click={onClose}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
+                  on:click={handleSubmitAgentCreation}
+                >
+                  Create
+                </button>
+              {:else}
+                <button
+                  class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+                  on:click={onSigninGithub}
+                >
+                  <CarbonGithub class="w-5 h-5 text-gray-400 mr-1.5" />
+                  Sign in with GitHub
+                </button>
+              {/if}
             </div>
           </div>
           <!-- {#if !!accessToken && !!refreshToken}
@@ -434,17 +444,7 @@
               </button>
             </div>
           {:else}
-            <div
-              class="relative col-span-1 flex h-full flex-col items-center justify-center"
-            >
-              <button
-                class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
-                on:click={onSigninGithub}
-              >
-                <CarbonGithub class="w-5 h-5 text-gray-400 mr-1.5" />
-                Sign in with GitHub
-              </button>
-            </div>
+            
           {/if} -->
         </div>
       </div>
