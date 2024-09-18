@@ -35,6 +35,7 @@
   let agentSystemPrompt: string = "";
   let agentAvatar: string = "";
   let agentDataSources: Array<{ uri: string; type: string }> = [];
+  let agentIsPrivate: string = "private";
   let accessToken: string | null = "";
   let refreshToken: string | null = "";
 
@@ -96,12 +97,12 @@
         ...options,
         headers: {
           ...options.headers,
-          'Authorization': 'Bearer ' + accessToken
-        }
-      })
+          Authorization: "Bearer " + accessToken,
+        },
+      });
 
       if (response.status === 401) {
-        const refreshed = await refreshAccessToken()
+        const refreshed = await refreshAccessToken();
         if (refreshed) {
           // Retry the request with the refreshed token
           options.headers = {
@@ -114,13 +115,13 @@
 
       return response;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
   async function refreshAccessToken() {
     try {
-      const refreshToken = localStorage.getItem("refreshToken")
+      const refreshToken = localStorage.getItem("refreshToken");
       debugger;
       const response = await fetch(
         "https://stage.commanddash.dev/account/github/refresh",
@@ -128,7 +129,7 @@
           method: "POST",
           headers: {
             Authorization: `Bearer ${refreshToken}`,
-          }
+          },
         }
       );
       const _response = await response.json();
@@ -146,7 +147,7 @@
       console.error("refreshAccessToken: error", error);
       return false;
     }
-  };
+  }
 
   async function validatingRepositoryAccess(url: string) {
     try {
@@ -197,13 +198,13 @@
       chat_mode: {
         system_prompt: agentSystemPrompt,
       },
-      is_private: false,
+      is_private: agentIsPrivate === "private",
       data_sources: agentDataSources,
     };
 
     try {
       const response = await apiRequest(
-        "https://stage.commanddash.dev/agent/deploy-agent/web",
+        "https://stage.commanddash.dev/agent/deploy-agent/webw",
         {
           method: "POST",
           headers: {
@@ -376,59 +377,61 @@
                 {getError("description", form)}
               </p>
             </label> -->
+            <div>
+              <div class="mb-1 flex justify-between text-sm">
+                <span class="block font-semibold text-white">
+                  Add data sources
+                </span>
+              </div>
+              <div class="flex flex-row">
+                <select
+                  name="urlType"
+                  class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
+                  on:change={({ target }) => {
+                    urlType = target?.value;
+                  }}
+                >
+                  <option value="github">Github</option>
+                  <option value="deep_crawl_page">Website</option>
+                  <option value="web_page">Webpage</option>
+                  <option value="sitemap">Sitemap</option>
+                </select>
+                <input
+                  autocorrect="off"
+                  autocapitalize="none"
+                  class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  name="url"
+                  placeholder="URL"
+                  type="url"
+                  bind:value={url}
+                />
+              </div>
+            <button
+            class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
+            on:click={handleSubmitDataSources}>Add data sources</button
+          >
+            </div>
             <div class="flex flex-col flex-nowrap pb-4">
               <span class="mt-2 text-smd font-semibold text-white"
                 >Internet access
                 <IconInternet classNames="inline text-sm text-blue-600" />
               </span>
               <label class="mt-1">
-                <input type="radio" name="ragMode" value={false} />
+                <input type="radio" name="ragMode" value={agentIsPrivate === "public"} on:change={() => (agentIsPrivate = "public")} />
                 <span class="my-2 text-sm text-white"> Public </span>
                 <span class="block text-xs text-gray-400 ml-1">
                   Agents will be available publicly.
                 </span>
               </label>
               <label class="mt-1">
-                <input type="radio" name="ragMode" value={false} />
+                <input type="radio" name="ragMode" value={agentIsPrivate === "private"} on:change={() => (agentIsPrivate === "private")} />
                 <span class="my-2 text-sm text-white"> Private </span>
                 <span class="block text-xs text-gray-400 ml-1">
                   Agents will not be available publicly.
                 </span>
               </label>
             </div>
-            <div class="mb-1 flex justify-between text-sm">
-              <span class="block font-semibold text-white">
-                Add data sources
-              </span>
-            </div>
-            <div class="flex flex-row">
-              <select
-                name="urlType"
-                class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
-                on:change={({ target }) => {
-                  urlType = target?.value;
-                }}
-              >
-                <option value="github">Github</option>
-                <option value="deep_crawl_page">Website</option>
-                <option value="web_page">Webpage</option>
-                <option value="sitemap">Sitemap</option>
-              </select>
-              <input
-                autocorrect="off"
-                autocapitalize="none"
-                class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                name="url"
-                placeholder="URL"
-                type="url"
-                bind:value={url}
-              />
-            </div>
-            <button
-              class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
-              on:click={handleSubmitDataSources}>Add data sources</button
-            >
-            <div class="mt-6">
+            <div class="mt-0">
               <span class="block font-semibold text-white"> Data sources </span>
               {#each agentDataSources as sourceData}
                 <a

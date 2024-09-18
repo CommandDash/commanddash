@@ -1,141 +1,179 @@
 <script lang="ts">
-    import { base } from "$app/paths";
-    import { goto } from "$app/navigation";
-    import { toastStore } from "$lib/stores/ToastStores";
-    import { ToastType } from "$lib/types/Toast";
-    import appInsights from "$lib/utils/appInsights";
-    import CarbonGithub from "~icons/carbon/logo-github";
-    import { validateURL } from "$lib/utils/validateURL";
-    import IconInternet from "$lib/components/icons/IconInternet.svelte";
+  import { base } from "$app/paths";
+  import { goto } from "$app/navigation";
+  import { toastStore } from "$lib/stores/ToastStores";
+  import { ToastType } from "$lib/types/Toast";
+  import appInsights from "$lib/utils/appInsights";
+  import CarbonGithub from "~icons/carbon/logo-github";
+  import { validateURL } from "$lib/utils/validateURL";
+  import IconInternet from "$lib/components/icons/IconInternet.svelte";
+  import IconClose from "~icons/carbon/close";
 
-    export let showModal: boolean;
-    export let onClose: () => void;
-    export let onPrivateAgent: () => void;
+  export let showModal: boolean;
+  export let onClose: () => void;
+  export let onPrivateAgent: () => void;
 
-    let value: string = "";
-    let selectedPlatform: string = "github";
+  let value: string = "";
+  let selectedPlatform: string = "github";
 
-    const platforms = [
-        { id: 'github', icon: CarbonGithub, label: 'GitHub', placeholder: 'https://github.com/user/repo' },
-        { id: 'npm', icon: 'npm.png', label: 'NPM', placeholder: 'https://www.npmjs.com/package/name' },
-        { id: 'pypi', icon: 'python.png', label: 'PyPI', placeholder: 'https://pypi.org/project/name' },
-        { id: 'pub', icon: 'icons8-dart-96.png', label: 'Pub', placeholder: 'https://pub.dev/packages/name' },
-    ];
+  const platforms = [
+    {
+      id: "github",
+      icon: CarbonGithub,
+      label: "GitHub",
+      placeholder: "https://github.com/user/repo",
+    },
+    {
+      id: "npm",
+      icon: "npm.png",
+      label: "NPM",
+      placeholder: "https://www.npmjs.com/package/name",
+    },
+    {
+      id: "pypi",
+      icon: "python.png",
+      label: "PyPI",
+      placeholder: "https://pypi.org/project/name",
+    },
+    {
+      id: "pub",
+      icon: "icons8-dart-96.png",
+      label: "Pub",
+      placeholder: "https://pub.dev/packages/name",
+    },
+    { id: "custom", label: "Custom" },
+  ];
 
-    let soundEffect: HTMLAudioElement | null = null;
+  let soundEffect: HTMLAudioElement | null = null;
 
-    if (typeof window !== 'undefined') {
-        // Preload the sound effect
-        soundEffect = new Audio('whoosh.mp3');
-        soundEffect.preload = 'auto';
-        soundEffect.volume = 0.5;
+  if (typeof window !== "undefined") {
+    // Preload the sound effect
+    soundEffect = new Audio("whoosh.mp3");
+    soundEffect.preload = "auto";
+    soundEffect.volume = 0.5;
 
-        // Preload the images
-        platforms.forEach(platform => {
-            if (platform.id !== 'github') {
-                const img = new Image();
-                img.src = platform.icon;
-            }
-        });
+    // Preload the images
+    platforms.forEach((platform) => {
+      if (platform.id !== "github") {
+        const img = new Image();
+        img.src = platform.icon;
+      }
+    });
+  }
+
+  const onCreateAgent = () => {
+    value = value.trim();
+    const { isValid } = validateURL(value, selectedPlatform);
+    if (isValid) {
+      // Play the sound effect
+      soundEffect?.play();
+
+      appInsights.trackEvent({
+        name: "CreateAgentSubmitted",
+        properties: { platform: selectedPlatform, url: value },
+      });
+      goto(`${base}/agent?${selectedPlatform}=${value}`);
+    } else {
+      toastStore.set({
+        message: `Please enter a valid ${selectedPlatform} URL`,
+        type: ToastType.ERROR,
+      });
     }
+  };
 
-    const onCreateAgent = () => {
-        value = value.trim();
-        const { isValid } = validateURL(value, selectedPlatform);
-        if (isValid) {
-            // Play the sound effect
-            soundEffect?.play();
-
-            appInsights.trackEvent({
-                name: "CreateAgentSubmitted",
-                properties: { platform: selectedPlatform, url: value },
-            });
-            goto(`${base}/agent?${selectedPlatform}=${value}`);
-        } else {
-            toastStore.set({
-                message: `Please enter a valid ${selectedPlatform} URL`,
-                type: ToastType.ERROR,
-            });
-        }
-    };
-
-    $: if (showModal) {
-        appInsights.trackEvent({ name: "CreateAgentDialogOpened" });
-    }
+  $: if (showModal) {
+    appInsights.trackEvent({ name: "CreateAgentDialogOpened" });
+  }
 </script>
 
 {#if showModal}
-    <div class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-gray-900 rounded-lg p-6 w-full max-w-md border border-gray-700">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-100">Create Agent with URL</h2>
-                <button on:click={onPrivateAgent} class="flex items-center rounded-full border border-gray-200 px-2.5 py-1 text-sm text-gray-900 bg-white">
-                    <IconInternet classNames="mr-1"/>
-                    Private agents
-                </button>
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-4 mb-6">
-                {#each platforms as platform}
-                    <button
-                        on:click={() => selectedPlatform = platform.id}
-                        class="flex flex-col items-center focus:outline-none transition-all duration-200 ease-in-out"
-                        class:selected={selectedPlatform === platform.id}
-                    >
-                        <div class="relative">
-                            {#if platform.id === 'github'}
-                                <svelte:component this={platform.icon} class="w-10 h-10 mb-1 text-black-600" />
-                            {:else}
-                                <img src={platform.icon} alt={platform.label} class="w-10 h-10 mb-1" />
-                            {/if}
-                        </div>
-                        <span class="text-xs text-gray-300">{platform.label}</span>
-                    </button>
-                {/each}
-            </div>
-
-            <div class="relative mb-4">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    {#if selectedPlatform === 'github'}
-                        <CarbonGithub class="w-5 h-5 text-gray-400" />
-                    {:else}
-                        <img 
-                            src={platforms.find(p => p.id === selectedPlatform).icon} 
-                            alt={selectedPlatform} 
-                            class="w-5 h-5"
-                        />
-                    {/if}
-                </div>
-                <input
-                    type="url"
-                    bind:value
-                    placeholder={platforms.find(p => p.id === selectedPlatform).placeholder}
-                    class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
-                />
-            </div>
-
-            <button
-                on:click={onCreateAgent}
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
-            >
-                Submit
-            </button>
-            <button
-                on:click={onClose}
-                class="w-full text-white py-2 px-4 rounded-md mt-2"
-            >
-                Cancel
-            </button>
+  <div
+    class="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50"
+  >
+    <div
+      class="bg-gray-900 rounded-lg p-6 w-full max-w-md border border-gray-700"
+    >
+      <div class="flex justify-between items-center mb-4 relative">
+        <h2 class="text-xl font-bold text-gray-100">Create Agent with URL</h2>
+        <div class="absolute right-0 top-0">
+          <button
+            class="flex items-center px-2.5 py-1 text-sm text-white"
+            on:click={onClose}
+          >
+            <IconClose class="mr-1.5 text-xl" />
+          </button>
         </div>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 mb-6">
+        {#each platforms as platform}
+          <button
+            on:click={() => (selectedPlatform = platform.id)}
+            class="flex flex-col items-center focus:outline-none transition-all duration-200 ease-in-out"
+            class:selected={selectedPlatform === platform.id}
+          >
+            <div class="relative">
+              {#if platform.id === "github"}
+                <svelte:component
+                  this={platform.icon}
+                  class="w-10 h-10 mb-1 text-black-600"
+                />
+              {:else if platform.id === "custom"}
+                <button on:click={onPrivateAgent}>
+                  <IconInternet classNames="w-11 h-11" />
+                </button>
+              {:else}
+                <img
+                  src={platform.icon}
+                  alt={platform.label}
+                  class="w-10 h-10 mb-1"
+                />
+              {/if}
+            </div>
+            <span class="text-xs text-gray-300">{platform.label}</span>
+          </button>
+        {/each}
+      </div>
+
+      <div class="relative mb-4">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
+          {#if selectedPlatform === "github"}
+            <CarbonGithub class="w-5 h-5 text-gray-400" />
+          {:else}
+            <img
+              src={platforms.find((p) => p.id === selectedPlatform).icon}
+              alt={selectedPlatform}
+              class="w-5 h-5"
+            />
+          {/if}
+        </div>
+        <input
+          type="url"
+          bind:value
+          placeholder={platforms.find((p) => p.id === selectedPlatform)
+            .placeholder}
+          class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
+        />
+      </div>
+
+      <button
+        on:click={onCreateAgent}
+        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
+      >
+        Submit
+      </button>
     </div>
+  </div>
 {/if}
 
 <style>
-    .selected {
-        transform: scale(1.1);
-    }
-    .selected span {
-        color: #60a5fa; /* blue-400 */
-        font-weight: bold;
-    }
+  .selected {
+    transform: scale(1.1);
+  }
+  .selected span {
+    color: #60a5fa; /* blue-400 */
+    font-weight: bold;
+  }
 </style>
