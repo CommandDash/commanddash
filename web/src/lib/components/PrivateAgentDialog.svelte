@@ -35,7 +35,8 @@
   let agentSystemPrompt: string = "";
   let agentAvatar: string = "";
   let agentDataSources: Array<{ uri: string; type: string }> = [];
-  let agentIsPrivate: string = "private";
+  let agentIsPrivate: boolean = false;
+  let isRepoAccessible: boolean = true;
   let accessToken: string | null = "";
   let refreshToken: string | null = "";
 
@@ -160,14 +161,14 @@
           },
         }
       );
+      const _response = await response.json();
+      agentIsPrivate = _response.private;
       if (response.ok) {
         agentDataSources = [...agentDataSources, { uri: url, type: urlType }];
       }
 
       if (response.status === 422 || response.status === 404) {
-        openPopup(
-          "https://github.com/apps/staging-commanddash/installations/select_target"
-        );
+        isRepoAccessible = false;
       }
     } catch (error) {
       console.log("validatingRepositoryAccess: error", error);
@@ -186,6 +187,12 @@
     }
   }
 
+  function adjustGithubPermissions() {
+    openPopup(
+      "https://github.com/apps/staging-commanddash/installations/select_target"
+    );
+  }
+
   async function handleSubmitAgentCreation() {
     const body = {
       name: agentName.toLowerCase().replace(/ /g, "_"),
@@ -198,7 +205,7 @@
       chat_mode: {
         system_prompt: agentSystemPrompt,
       },
-      is_private: agentIsPrivate === "private",
+      is_private: agentIsPrivate,
       data_sources: agentDataSources,
     };
 
@@ -406,12 +413,23 @@
                   bind:value={url}
                 />
               </div>
-            <button
-            class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
-            on:click={handleSubmitDataSources}>Add data sources</button
-          >
+              {#if !isRepoAccessible}
+                <button
+                  class="inline-flex flex-row mt-1 text-xs"
+                  on:click={adjustGithubPermissions}
+                >
+                  <span class="text-white">Missing Git repository?</span><span
+                    class="text-blue-500 mx-1"
+                    >Adjust Github App Permissions ➜</span
+                  >
+                </button>
+              {/if}
+              <button
+                class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
+                on:click={handleSubmitDataSources}>Add data sources</button
+              >
             </div>
-            <div class="flex flex-col flex-nowrap pb-4">
+            <!-- <div class="flex flex-col flex-nowrap pb-4">
               <span class="mt-2 text-smd font-semibold text-white"
                 >Internet access
                 <IconInternet classNames="inline text-sm text-blue-600" />
@@ -430,7 +448,7 @@
                   Agents will not be available publicly.
                 </span>
               </label>
-            </div>
+            </div> -->
             <div class="mt-0">
               <span class="block font-semibold text-white"> Data sources </span>
               {#each agentDataSources as sourceData}
