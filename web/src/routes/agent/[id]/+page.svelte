@@ -19,6 +19,8 @@
 
   onMount(async () => {
     loading = true;
+    accessToken = localStorage.getItem("accessToken");
+    
     const id: string = $page.params?.id;
     const ref: string = $page.url.searchParams.get("github") || "";
 
@@ -34,7 +36,6 @@
     currentAgentDetails = _response as Agent;
     agentDataSources = extractUris(currentAgentDetails?.data_sources);
     loading = false;
-    accessToken = localStorage.getItem("accessToken");
   });
 
   const getLatestAgent = async (id: string, ref: string) => {
