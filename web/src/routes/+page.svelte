@@ -40,6 +40,7 @@
 
   onMount(async () => {
     loading = true;
+
     try {
       const [existingResponse, newResponse] = await Promise.all([
         fetch("https://stage.commanddash.dev/agent/web/get-agent-list", {

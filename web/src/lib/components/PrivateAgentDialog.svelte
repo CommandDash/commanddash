@@ -57,6 +57,16 @@
       if (response.ok) {
         const oauthWindow = window.open(_response.github_oauth_url, "_blank");
 
+        // if (!oauthWindow) {
+        //   const isAllow = window.confirm("Popup blocked! Please allow popups for this site.");
+        //   if (isAllow) {
+        //     const a = document.createElement('a');
+        //     a.href = _response.github_oauth_url;
+        //     a.target = "_blank";
+        //     a.click();
+        //   }
+        // }
+
         const interval = setInterval(() => {
           try {
             if (oauthWindow?.location.origin === "http://localhost:5173") {
@@ -271,10 +281,17 @@
     );
   }
 
-  onMount(async () => {
-    // Fetch tokens from localStorage when the component mounts
+  function getStorageData() {
     accessToken = localStorage.getItem("accessToken");
     refreshToken = localStorage.getItem("refreshToken");
+  }
+
+  $: if (showPrivateModal) {
+    getStorageData();
+  }
+
+  onMount(async () => {
+    getStorageData();
   });
 </script>
 
