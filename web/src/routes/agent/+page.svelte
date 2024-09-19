@@ -99,7 +99,7 @@
   });
 
   const getLatestAgent = async (kind: string, ref: string) => {
-    if (!!accessToken) {
+    if (accessToken?.length === 0 || accessToken === null || accessToken === undefined) {
       return fetch("https://stage.commanddash.dev/agent/get-latest-agent", {
         method: "POST",
         headers: {
@@ -167,7 +167,7 @@
       const _response = await response.json();
       if (response.ok) {
         accessToken = _response.access_token;
-        if (!!accessToken) {
+        if (accessToken?.length === 0) {
           localStorage.setItem("accessToken", accessToken);
         }
         return true;
