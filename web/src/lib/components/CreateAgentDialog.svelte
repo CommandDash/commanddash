@@ -79,7 +79,7 @@
       if (selectedPlatform === "github") {
         await validatingRepositoryAccess(value);
       } else {
-        goto(`${base}/agent?${selectedPlatform}=${value}&private=false`);
+        goto(`${base}/agent?${selectedPlatform}=${value}`);
       }
     } else {
       toastStore.set({
@@ -102,7 +102,7 @@
       );
       const _response = await response.json()
       if (response.ok) {
-        goto(`${base}/agent?${selectedPlatform}=${url}&private=${_response.private}`);
+        goto(`${base}/agent?${selectedPlatform}=${url}`);
       }
 
       if (response.status === 422 || response.status === 404) {

@@ -21,7 +21,6 @@
     loading = true;
     const id: string = $page.params?.id;
     const ref: string = $page.url.searchParams.get("github") || "";
-    const private: string = $page.url.searchParams.get("private") || "";
 
     const response = await fetch(
       "https://stage.commanddash.dev/agent/get-latest-agent",
@@ -47,11 +46,7 @@
     accessToken = localStorage.getItem("accessToken");
   });
 
-  const getLatestAgent = (_private: boolean) => {
-    if (_private) {
-        
-    }
-  };
+  const getLatestAgent = () => {};
 
   async function apiRequest(url: string, options: RequestInit) {
     try {

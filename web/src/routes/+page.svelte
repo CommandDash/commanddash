@@ -41,6 +41,19 @@
   onMount(async () => {
     loading = true;
 
+    const interval = setInterval(() => {
+      if (window.location.origin === "http://localhost:5173") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get("access_token");
+        const refreshToken = urlParams.get("refresh_token");
+        if (accessToken && refreshToken) {
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+          clearInterval(interval);
+        }
+      }
+    }, 1000);
+
     try {
       const [existingResponse, newResponse] = await Promise.all([
         fetch("https://stage.commanddash.dev/agent/web/get-agent-list", {
