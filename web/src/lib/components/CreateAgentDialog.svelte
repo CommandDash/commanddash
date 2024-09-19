@@ -100,7 +100,7 @@
           },
         }
       );
-      const _response = await response.json()
+      
       if (response.ok) {
         goto(`${base}/agent?${selectedPlatform}=${url}`);
       }

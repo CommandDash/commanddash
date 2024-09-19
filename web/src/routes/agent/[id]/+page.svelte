@@ -22,16 +22,7 @@
     const id: string = $page.params?.id;
     const ref: string = $page.url.searchParams.get("github") || "";
 
-    const response = await fetch(
-      "https://stage.commanddash.dev/agent/get-latest-agent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: id, referrer: ref }),
-      }
-    );
+    const response = await getLatestAgent(id, ref);
     const _response = await response.json();
     if (!response.ok) {
       loading = false;
@@ -46,10 +37,33 @@
     accessToken = localStorage.getItem("accessToken");
   });
 
-  const getLatestAgent = () => {};
+  const getLatestAgent = async (id: string, ref: string) => {
+    if (!!accessToken) {
+      return fetch("https://stage.commanddash.dev/agent/get-latest-agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: id, referrer: ref }),
+      });
+    } else {
+      return apiRequest(
+        "https://stage.commanddash.dev/agent/get-latest-agent-auth",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({ name: id, referrer: ref }),
+        }
+      );
+    }
+  };
 
   async function apiRequest(url: string, options: RequestInit) {
     try {
+    const accessToken = localStorage.getItem("accessToken");
       const response = await fetch(url, {
         ...options,
         headers: {

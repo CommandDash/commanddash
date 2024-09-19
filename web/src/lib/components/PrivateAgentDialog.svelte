@@ -34,7 +34,7 @@
   let agentDescription: string = "";
   let agentSystemPrompt: string = "";
   let agentAvatar: string = "";
-  let agentDataSources: Array<{ uri: string; type: string }> = [];
+  let agentDataSources: Array<{ uri: string; type: string, is_private: boolean }> = [];
   let agentIsPrivate: boolean = false;
   let isRepoAccessible: boolean = true;
   let accessToken: string | null = "Hi";
@@ -98,7 +98,8 @@
     if (urlType === "github") {
       await validatingRepositoryAccess(url);
     } else {
-      agentDataSources = [...agentDataSources, { uri: url, type: urlType }];
+      agentDataSources = [...agentDataSources, { uri: url, type: urlType, is_private: false }];
+      url = "";
     }
   }
 
@@ -160,10 +161,10 @@
     }
   }
 
-  async function validatingRepositoryAccess(url: string) {
+  async function validatingRepositoryAccess(_url: string) {
     try {
       const response = await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access?repo=${url}`,
+        `https://stage.commanddash.dev/github/repo/verify-access?repo=${_url}`,
         {
           method: "GET",
           headers: {
@@ -172,9 +173,10 @@
         }
       );
       const _response = await response.json();
-      agentIsPrivate = _response.private;
+      
       if (response.ok) {
-        agentDataSources = [...agentDataSources, { uri: url, type: urlType }];
+        agentDataSources = [...agentDataSources, { uri: _url, type: urlType, is_private: _response.private }];
+        url = ""
       }
 
       if (response.status === 422 || response.status === 404) {
@@ -215,13 +217,13 @@
       chat_mode: {
         system_prompt: agentSystemPrompt,
       },
-      is_private: agentIsPrivate,
+      is_private: agentDataSources.some(({is_private}) => is_private === true),
       data_sources: agentDataSources,
     };
 
     try {
       const response = await apiRequest(
-        "https://stage.commanddash.dev/agent/deploy-agent/webw",
+        "https://stage.commanddash.dev/agent/deploy-agent/web",
         {
           method: "POST",
           headers: {
@@ -241,7 +243,7 @@
         return;
       }
       onClose();
-      goto(`/agent/${agentName.toLowerCase().replace(/ /g, "_")}?private=${agentIsPrivate}`);
+      goto(`/agent/${agentName.toLowerCase().replace(/ /g, "_")}`);
     } catch (error) {
       console.log("error", error);
     }
