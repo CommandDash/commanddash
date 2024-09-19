@@ -37,8 +37,8 @@
   let agentDataSources: Array<{ uri: string; type: string }> = [];
   let agentIsPrivate: boolean = false;
   let isRepoAccessible: boolean = true;
-  let accessToken: string | null = "";
-  let refreshToken: string | null = "";
+  let accessToken: string | null = "Hi";
+  let refreshToken: string | null = "Hi";
 
   function resetErrors() {
     if (form) {
@@ -231,7 +231,7 @@
         return;
       }
       onClose();
-      goto(`/agent/${agentName.toLowerCase().replace(/ /g, "_")}`);
+      goto(`/agent/${agentName.toLowerCase().replace(/ /g, "_")}?private=${agentIsPrivate}`);
     } catch (error) {
       console.log("error", error);
     }
@@ -271,7 +271,7 @@
     );
   }
 
-  onMount(() => {
+  onMount(async () => {
     // Fetch tokens from localStorage when the component mounts
     accessToken = localStorage.getItem("accessToken");
     refreshToken = localStorage.getItem("refreshToken");

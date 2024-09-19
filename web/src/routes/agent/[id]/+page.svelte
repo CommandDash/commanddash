@@ -20,6 +20,7 @@
         loading = true;
         const id: string = $page.params?.id;
         const ref: string = $page.url.searchParams.get("github") || "";
+        const private: string = $page.url.searchParams.get("private") || "";
 
         const response = await fetch(
             "https://stage.commanddash.dev/agent/get-latest-agent",
@@ -43,6 +44,10 @@
         agentDataSources = extractUris(currentAgentDetails?.data_sources);
         loading = false;
     });
+
+    const getLatestAgent = () => {
+        
+    }
 
     const extractUris = (
         data: { id: string; uri: { type: string; uri: string }[] }[],
