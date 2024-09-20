@@ -74,7 +74,21 @@
       name: "AgentPage",
     });
 
-    const response = await getLatestAgent(referrer_kind, referrer);
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (!!accessToken && accessToken.length > 0) {
+      headers.Authorization = "Bearer " + accessToken;
+    };
+
+    const response = await apiRequest(
+        "https://stage.commanddash.dev/agent/get-latest-agent",
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({ referrer: referrer, kind: referrer_kind }),
+        }
+      );
 
     const _response = await response.json();
     if (!response.ok) {
@@ -98,30 +112,6 @@
     });
   });
 
-  const getLatestAgent = async (kind: string, ref: string) => {
-    if (accessToken?.length === 0 || accessToken === null || accessToken === undefined) {
-      return fetch("https://stage.commanddash.dev/agent/get-latest-agent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ kind: kind, referrer: ref }),
-      });
-    } else {
-      return apiRequest(
-        "https://stage.commanddash.dev/agent/get-latest-agent-auth",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({ referrer: ref }),
-        }
-      );
-    }
-  };
-
   async function apiRequest(url: string, options: RequestInit) {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -129,7 +119,6 @@
         ...options,
         headers: {
           ...options.headers,
-          Authorization: "Bearer " + accessToken,
         },
       });
 

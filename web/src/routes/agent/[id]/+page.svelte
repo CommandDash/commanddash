@@ -24,7 +24,24 @@
     const id: string = $page.params?.id;
     const ref: string = $page.url.searchParams.get("github") || "";
 
-    const response = await getLatestAgent(id, ref);
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (!!accessToken && accessToken.length > 0) {
+      headers.Authorization = "Bearer " + accessToken;
+    };
+
+    const response = await apiRequest(
+        "https://stage.commanddash.dev/agent/get-latest-agent",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({ name: id, referrer: ref }),
+        }
+      );;
     const _response = await response.json();
     if (!response.ok) {
       loading = false;
@@ -38,30 +55,6 @@
     loading = false;
   });
 
-  const getLatestAgent = async (id: string, ref: string) => {
-    if (accessToken?.length === 0 || accessToken === null || accessToken === undefined) {
-      return fetch("https://stage.commanddash.dev/agent/get-latest-agent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: id, referrer: ref }),
-      });
-    } else {
-      return apiRequest(
-        "https://stage.commanddash.dev/agent/get-latest-agent-auth",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({ name: id, referrer: ref }),
-        }
-      );
-    }
-  };
-
   async function apiRequest(url: string, options: RequestInit) {
     try {
     const accessToken = localStorage.getItem("accessToken");
@@ -69,7 +62,6 @@
         ...options,
         headers: {
           ...options.headers,
-          Authorization: "Bearer " + accessToken,
         },
       });
 

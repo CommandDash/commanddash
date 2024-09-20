@@ -90,9 +90,21 @@
   };
 
   async function validatingRepositoryAccess(url: string) {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (accessToken) {
+      headers.Authorization = "Bearer " + accessToken;
+    }
     try {
-      const response = await getVerifyAccess(url);
-      
+      const response = await apiRequest(
+        `https://stage.commanddash.dev/github/repo/verify-access?repo=${url}`,
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
       if (response.ok) {
         goto(`${base}/agent?${selectedPlatform}=${url}`);
       }
@@ -105,34 +117,12 @@
     }
   }
 
-  async function getVerifyAccess(_url: string) {
-    if (accessToken?.length === 0 || accessToken === null || accessToken === undefined) {
-      return await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access?repo=${_url}`,
-        {
-          method: "GET",
-        }
-      );
-    } else {
-      return await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access-auth?repo=${_url}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      )
-    }
-  }
-
   async function apiRequest(url: string, options: RequestInit) {
     try {
       const response = await fetch(url, {
         ...options,
         headers: {
           ...options.headers,
-          Authorization: "Bearer " + accessToken,
         },
       });
 
@@ -253,7 +243,6 @@
     // Fetch tokens from localStorage when the component mounts
     getStorageData();
   });
-
 </script>
 
 {#if showModal}
@@ -346,7 +335,7 @@
           Sign in with GitHub
         </button>
       {:else}
-      <button
+        <button
           on:click={onCreateAgent}
           class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
         >
