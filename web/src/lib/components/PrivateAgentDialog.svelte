@@ -162,14 +162,18 @@
   }
 
   async function validatingRepositoryAccess(_url: string) {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (accessToken) {
+      headers.Authorization = "Bearer " + accessToken;
+    }
     try {
       const response = await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access-auth?repo=${_url}`,
+        `https://stage.commanddash.dev/github/repo/verify-access?repo=${_url}`,
         {
           method: "GET",
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
+          headers: headers
         }
       );
       const _response = await response.json();
