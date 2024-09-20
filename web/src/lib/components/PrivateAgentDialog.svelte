@@ -164,7 +164,7 @@
   async function validatingRepositoryAccess(_url: string) {
     try {
       const response = await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access?repo=${_url}`,
+        `https://stage.commanddash.dev/github/repo/verify-access-auth?repo=${_url}`,
         {
           method: "GET",
           headers: {

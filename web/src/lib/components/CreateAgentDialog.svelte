@@ -91,15 +91,7 @@
 
   async function validatingRepositoryAccess(url: string) {
     try {
-      const response = await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access?repo=${url}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + accessToken,
-          },
-        }
-      );
+      const response = await getVerifyAccess(url);
       
       if (response.ok) {
         goto(`${base}/agent?${selectedPlatform}=${url}`);
@@ -110,6 +102,27 @@
       }
     } catch (error) {
       console.log("validatingRepositoryAccess: error", error);
+    }
+  }
+
+  async function getVerifyAccess(_url: string) {
+    if (accessToken?.length === 0 || accessToken === null || accessToken === undefined) {
+      return await apiRequest(
+        `https://stage.commanddash.dev/github/repo/verify-access?repo=${_url}`,
+        {
+          method: "GET",
+        }
+      );
+    } else {
+      return await apiRequest(
+        `https://stage.commanddash.dev/github/repo/verify-access-auth?repo=${_url}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + accessToken,
+          },
+        }
+      )
     }
   }
 
@@ -324,20 +337,20 @@
           >
         </button>
       {/if}
-      {#if accessToken?.length > 0 && refreshToken?.length > 0}
-        <button
-          on:click={onCreateAgent}
-          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
-        >
-          Submit
-        </button>
-      {:else}
+      {#if !isRepoAccessible && !accessToken}
         <button
           class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center w-full"
           on:click={onSigninGithub}
         >
           <CarbonGithub class="w-5 h-5 text-gray-400 mr-1.5" />
           Sign in with GitHub
+        </button>
+      {:else}
+      <button
+          on:click={onCreateAgent}
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
+        >
+          Submit
         </button>
       {/if}
     </div>
