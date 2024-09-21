@@ -31,14 +31,13 @@
   let url: string = "";
   let deleteExistingAvatar = true;
   let agentName: string = "";
-  let agentDescription: string = "";
-  let agentSystemPrompt: string = "";
   let agentAvatar: string = "";
   let agentDataSources: Array<{ uri: string; type: string, is_private: boolean }> = [];
   let agentIsPrivate: boolean = false;
   let isRepoAccessible: boolean = true;
   let accessToken: string | null = "Hi";
   let refreshToken: string | null = "Hi";
+  let agentPurpose: string = "";
 
   function resetErrors() {
     if (form) {
@@ -211,20 +210,20 @@
 
   async function handleSubmitAgentCreation() {
     const body = {
-      name: agentName.toLowerCase().replace(/ /g, "_"),
+      name: agentName,
       metadata: {
         display_name: agentName,
         avatar_profile: agentAvatar,
         tags: [],
-        description: agentDescription,
       },
       chat_mode: {
-        system_prompt: agentSystemPrompt,
+        system_prompt: agentPurpose,
       },
       is_private: agentDataSources.some(({is_private}) => is_private === true),
       data_sources: agentDataSources,
     };
 
+    debugger;
     try {
       const response = await apiRequest(
         "https://stage.commanddash.dev/agent/deploy-agent/web",
@@ -238,7 +237,7 @@
         }
       );
       const _response = await response.json();
-
+      debugger;
       if (!response.ok) {
         toastStore.set({
           message: _response.message,
@@ -312,9 +311,9 @@
       class="h-[95dvh] w-[90dvw] overflow-hidden rounded-2xl border-gray-800/70 bg-gray-900 shadow-2xl outline-none sm:h-[85dvh] xl:w-[600px] 2xl:h-[75dvh]"
     >
       <div class="relative flex h-full flex-col overflow-y-auto p-4 md:p-8">
-        <h2 class="text-xl font-semibold text-white">Create new agent</h2>
+        <h2 class="text-xl font-semibold text-white">Create New Agent</h2>
         <p class="mb-6 text-sm text-gray-400">
-          Create and share your own AI Agents.
+          Create and share your own AI Code Agents.
         </p>
         <div
           class="grid h-full w-full flex-1 grid-cols-1 gap-6 text-sm max-sm:grid-cols-1"
@@ -378,10 +377,22 @@
               <input
                 name="name"
                 class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-                placeholder="Agent Name"
+                placeholder="Svelte Projects AI"
                 bind:value={agentName}
               />
               <p class="text-xs text-red-500">{getError("name", form)}</p>
+            </label>
+
+            <!-- New field for agent purpose -->
+            <label>
+              <div class="mb-1 font-semibold text-white">What will the agent do?</div>
+              <input
+                name="purpose"
+                class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
+                placeholder="Answer questions or generate code for my svelte projects"
+                bind:value={agentPurpose}
+              />
+              <p class="text-xs text-red-500">{getError("purpose", form)}</p>
             </label>
             <!-- <label>
               <div class="mb-1 font-semibold text-white">Description</div>
@@ -410,7 +421,7 @@
             <div>
               <div class="mb-1 flex justify-between text-sm">
                 <span class="block font-semibold text-white">
-                  Add data sources
+                  Add Data Sources
                 </span>
               </div>
               <div class="flex flex-row">
@@ -449,7 +460,7 @@
               {/if}
               <button
                 class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
-                on:click={handleSubmitDataSources}>Add data sources</button
+                on:click={handleSubmitDataSources}>Add Data Source</button
               >
             </div>
             <!-- <div class="flex flex-col flex-nowrap pb-4">
@@ -473,7 +484,7 @@
               </label>
             </div> -->
             <div class="mt-0">
-              <span class="block font-semibold text-white"> Data sources </span>
+              <span class="block font-semibold text-white"> Data Sources </span>
               {#each agentDataSources as sourceData}
                 <a
                   class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-lg !bg-gray-100 !text-gray-800 mt-1"

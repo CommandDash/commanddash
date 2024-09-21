@@ -20,34 +20,52 @@
   onMount(async () => {
     loading = true;
     accessToken = localStorage.getItem("accessToken");
-    
+
     const id: string = $page.params?.id;
     const ref: string = $page.url.searchParams.get("github") || "";
+    const passcode: string = $page.url.searchParams.get("passcode") || "";
 
     const headers = {
       "Content-Type": "application/json",
     };
     if (!!accessToken && accessToken.length > 0) {
       headers.Authorization = "Bearer " + accessToken;
-    };
+    }
 
     const response = await apiRequest(
-        "https://stage.commanddash.dev/agent/get-latest-agent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      "https://stage.commanddash.dev/agent/get-latest-agent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify({ name: id, referrer: ref }),
-        }
-      );;
+        body: JSON.stringify({ name: id, referrer: ref, passcode: passcode }),
+      },
+    );
     const _response = await response.json();
+    console.log(_response);
+    debugger;
     if (!response.ok) {
       loading = false;
       errorMessage = _response.message;
       errorStatus = response.status;
       throw error(response.status, _response.message);
+    }
+    _response.passcode = "EXT";
+    // Check if passcode exists in the response
+    if (_response.passcode) {
+      const currentUrl = new URL(window.location.href);
+      const passcodeParam = `passcode=${_response.passcode}`;
+
+      // Check if there are already query parameters
+      if (currentUrl.search) {
+        currentUrl.search += `&${passcodeParam}`;
+      } else {
+        currentUrl.search = `?${passcodeParam}`;
+      }
+
+      window.history.replaceState({}, "", currentUrl);
     }
 
     currentAgentDetails = _response as Agent;
@@ -57,7 +75,7 @@
 
   async function apiRequest(url: string, options: RequestInit) {
     try {
-    const accessToken = localStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken");
       const response = await fetch(url, {
         ...options,
         headers: {
@@ -94,7 +112,7 @@
           headers: {
             Authorization: `Bearer ${refreshToken}`,
           },
-        }
+        },
       );
       const _response = await response.json();
       if (response.ok) {
@@ -114,7 +132,7 @@
   }
 
   const extractUris = (
-    data: { id: string; uri: { type: string; uri: string }[] }[]
+    data: { id: string; uri: { type: string; uri: string }[] }[],
   ): { type: string; uri: string }[] => {
     const result: { type: string; uri: string }[] = [];
     data.forEach((item) => {
