@@ -83,7 +83,7 @@
         }
 
         const response = await apiRequest(
-            "http://127.0.0.1:5000/agent/get-latest-agent",
+            "https://stage.commanddash.dev/agent/get-latest-agent",
             {
                 method: "POST",
                 headers: headers,

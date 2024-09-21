@@ -246,7 +246,7 @@
         return;
       }
       onClose();
-      goto(`/agent/${agentName.toLowerCase().replace(/ /g, "_")}`);
+      goto(`/agent/${_response.agent_id}`);
     } catch (error) {
       console.log("error", error);
     }
