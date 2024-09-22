@@ -15,6 +15,7 @@
 
   const SEARCH_DEBOUNCE_DELAY = 400;
   let agents: Agent[] = [];
+  let ownedAgents: Agent[] = [];
   let filteredAgents: Agent[] = [];
   let searchValue: string = "";
   let showModal: boolean = false;
@@ -41,6 +42,62 @@
   onMount(async () => {
     loading = true;
 
+    const checkAccessToken = () => localStorage.getItem("accessToken");
+
+    const callApis = async () => {
+      const accessToken = checkAccessToken();
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
+
+      try {
+        const _response = await fetch(
+          "https://api.commanddash.dev/agent/web/get-agent-list-v2",
+          {
+            headers: headers,
+            method: "POST",
+            body: JSON.stringify({ cli_version: "0.0.1" }),
+          }
+        );
+
+        const _agents = await _response.json();
+
+        if (!_response.ok) {
+          throw new Error("Failed to fetch agents");
+        }
+
+        agents = _agents.public_agents;
+        ownedAgents = _agents.owned_agents
+
+        // Combine agents from new API into sections
+        sections["Owned Agents"] = ownedAgents;
+        // Add existing agents under "All Agents" section
+        sections["All Agents"] = agents;
+
+        appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
+
+        // Check if the 'create' query parameter is set to 'true'
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("create") === "true") {
+          showModal = true;
+        }
+
+        // Perform initial search if there is a value in the search input
+        if (searchValue) {
+          search(searchValue);
+        }
+      } catch (error) {
+        appInsights.trackException({ error });
+      } finally {
+        loading = false;
+      }
+    };
+
     const interval = setInterval(() => {
       if (window.location.origin === "https://app.commanddash.io") {
         const urlParams = new URLSearchParams(window.location.search);
@@ -50,64 +107,13 @@
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
           clearInterval(interval);
+
+          callApis()
         }
       }
     }, 1000);
-
-    try {
-      const [existingResponse, newResponse] = await Promise.all([
-        fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({ cli_version: "0.0.1" }),
-        }),
-        fetch(
-          "https://api.commanddash.dev/agent/web/get-highlighted-agent-list",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            method: "POST",
-            body: JSON.stringify({ cli_version: "0.0.1" }),
-          }
-        ),
-      ]);
-
-      const existingAgents = await existingResponse.json();
-      const newAgents = await newResponse.json();
-
-      if (!existingResponse.ok && !newResponse.ok) {
-        throw new Error("Failed to fetch agents");
-      }
-
-      agents = existingAgents;
-      filteredAgents = existingAgents;
-
-      // Combine agents from new API into sections
-      sections = newAgents;
-
-      // Add existing agents under "All Agents" section
-      sections["All Agents"] = existingAgents;
-
-      appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
-
-      // Check if the 'create' query parameter is set to 'true'
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("create") === "true") {
-        showModal = true;
-      }
-
-      // Perform initial search if there is a value in the search input
-      if (searchValue) {
-        search(searchValue);
-      }
-    } catch (error) {
-      appInsights.trackException({ error });
-    } finally {
-      loading = false;
-    }
+    
+    callApis();
   });
 
   const navigateAgents = (agent: Agent) => {
