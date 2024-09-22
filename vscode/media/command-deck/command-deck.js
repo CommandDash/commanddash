@@ -133,7 +133,6 @@ class CommandDeck {
                 this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
             }
             if (option?.name.startsWith('@')) {
-                console.log('agents options', option?.metadata);
                 activeAgentAttach.style = "color: #497BEF; !important";
                 
                 agentName = option?.metadata.display_name;

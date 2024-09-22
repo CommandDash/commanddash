@@ -174,7 +174,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     // StorageManager.instance.deleteAgents();
 
     webviewView.onDidChangeVisibility(() => {
-      console.log("webview", webviewView.visible);
       if (webviewView.visible && this._view) {
         this._view?.webview.postMessage({ type: "focusChatInput" });
       }
@@ -454,6 +453,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
       private: false,
     };
     try {
+      console.log(JSON.stringify(data));
       const modelResponse = await makeHttpRequest<{ response: string, references: Array<string> }>({
         url: "https://api.commanddash.dev/v2/ai/agent/answer",
         method: "post",
@@ -468,19 +468,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         value: this._publicConversationHistory,
       });
     } catch (error) {
-      this._publicConversationHistory.push({
-        [this._activeAgent]: {
-          role: "error",
-          text:
-            error instanceof Error
-              ? (error as Error).message
-              : (error as any).toString(),
-        },
-      });
-      this._view?.webview.postMessage({
-        type: "displayMessages",
-        value: this._publicConversationHistory,
-      });
+      // this._publicConversationHistory.push({
+      //   [this._activeAgent]: {
+      //     role: "error",
+      //     text:
+      //       error instanceof Error
+      //         ? (error as Error).message
+      //         : (error as any).toString(),
+      //   },
+      // });
     } finally {
       this?._view?.webview?.postMessage({ type: "hideLoadingIndicator" });
     }
@@ -730,19 +726,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     } catch (error) {
       console.error(error);
       logError("command-deck-conversation-error", error);
-      this._publicConversationHistory.push({
-        [this._activeAgent]: {
-          role: "error",
-          text:
-            error instanceof Error
-              ? (error as Error).message
-              : (error as any).toString(),
-        },
-      });
-      this._view?.webview.postMessage({
-        type: "displayMessages",
-        value: this._publicConversationHistory,
-      });
+      // this._publicConversationHistory.push({
+      //   [this._activeAgent]: {
+      //     role: "error",
+      //     text:
+      //       error instanceof Error
+      //         ? (error as Error).message
+      //         : (error as any).toString(),
+      //   },
+      // });
     } finally {
       this._view?.webview.postMessage({ type: "hideLoadingIndicator" });
       this._view?.webview.postMessage({
