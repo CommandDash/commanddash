@@ -42,7 +42,7 @@
     loading = true;
 
     const interval = setInterval(() => {
-      if (window.location.origin === "http://localhost:5173") {
+      if (window.location.origin === "https://app.commanddash.io") {
         const urlParams = new URLSearchParams(window.location.search);
         const accessToken = urlParams.get("access_token");
         const refreshToken = urlParams.get("refresh_token");
@@ -56,7 +56,7 @@
 
     try {
       const [existingResponse, newResponse] = await Promise.all([
-        fetch("https://stage.commanddash.dev/agent/web/get-agent-list", {
+        fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
           headers: {
             "Content-Type": "application/json",
           },
@@ -64,7 +64,7 @@
           body: JSON.stringify({ cli_version: "0.0.1" }),
         }),
         fetch(
-          "https://stage.commanddash.dev/agent/web/get-highlighted-agent-list",
+          "https://api.commanddash.dev/agent/web/get-highlighted-agent-list",
           {
             headers: {
               "Content-Type": "application/json",

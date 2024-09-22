@@ -28,13 +28,13 @@
     const headers = {
       "Content-Type": "application/json",
     };
-    debugger;
+    
     if (!!accessToken && accessToken.length > 0) {
       headers.Authorization = "Bearer " + accessToken;
     }
 
     const response = await apiRequest(
-      "https://stage.commanddash.dev/agent/get-latest-agent",
+      "https://api.commanddash.dev/agent/get-latest-agent",
       {
         method: "POST",
         headers: headers,
@@ -43,28 +43,30 @@
     );
     const _response = await response.json();
     console.log(_response);
-    debugger;
+    
     if (!response.ok) {
       loading = false;
       errorMessage = _response.message;
       errorStatus = response.status;
       throw error(response.status, _response.message);
     }
-    // Check if passcode exists in the response
+
     if (_response.passcode) {
-      const currentUrl = new URL(window.location.href);
-      const passcodeParam = `passcode=${_response.passcode}`;
+    const currentUrl = new URL(window.location.href);
+    const passcodeParam = `passcode=${_response.passcode}`;
 
-      // Check if there are already query parameters
-      if (currentUrl.search) {
-        currentUrl.search += `&${passcodeParam}`;
-      } else {
-        currentUrl.search = `?${passcodeParam}`;
-      }
+    // Check if the passcode parameter already exists
+    if (!currentUrl.searchParams.has('passcode')) {
+        // Check if there are already query parameters
+        if (currentUrl.search) {
+            currentUrl.search += `&${passcodeParam}`;
+        } else {
+            currentUrl.search = `?${passcodeParam}`;
+        }
 
-      window.history.replaceState({}, "", currentUrl);
+        window.history.replaceState({}, "", currentUrl);
     }
-
+}
     currentAgentDetails = _response as Agent;
     agentDataSources = extractUris(currentAgentDetails?.data_sources);
     loading = false;
@@ -101,9 +103,9 @@
   async function refreshAccessToken() {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
-      debugger;
+      
       const response = await fetch(
-        "https://stage.commanddash.dev/account/github/refresh",
+        "https://api.commanddash.dev/account/github/refresh",
         {
           method: "POST",
           headers: {

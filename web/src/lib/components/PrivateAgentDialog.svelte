@@ -38,6 +38,7 @@
   let accessToken: string | null = "Hi";
   let refreshToken: string | null = "Hi";
   let agentPurpose: string = "";
+  let isLoading: boolean = false; // Add a reactive variable for loading state
 
   function resetErrors() {
     if (form) {
@@ -49,26 +50,16 @@
   async function onSigninGithub() {
     try {
       const response = await fetch(
-        "https://stage.commanddash.dev/account/github/url/web?override_uri=http://localhost:5173"
+        "https://api.commanddash.dev/account/github/url/web?override_uri=https://app.commanddash.io"
       );
       const _response = await response.json();
 
       if (response.ok) {
         const oauthWindow = window.open(_response.github_oauth_url, "_blank");
 
-        // if (!oauthWindow) {
-        //   const isAllow = window.confirm("Popup blocked! Please allow popups for this site.");
-        //   if (isAllow) {
-        //     const a = document.createElement('a');
-        //     a.href = _response.github_oauth_url;
-        //     a.target = "_blank";
-        //     a.click();
-        //   }
-        // }
-
         const interval = setInterval(() => {
           try {
-            if (oauthWindow?.location.origin === "http://localhost:5173") {
+            if (oauthWindow?.location.origin === "https://app.commanddash.io") {
               const urlParams = new URLSearchParams(
                 oauthWindow.location.search
               );
@@ -133,9 +124,8 @@
   async function refreshAccessToken() {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
-      debugger;
       const response = await fetch(
-        "https://stage.commanddash.dev/account/github/refresh",
+        "https://api.commanddash.dev/account/github/refresh",
         {
           method: "POST",
           headers: {
@@ -169,14 +159,14 @@
     }
     try {
       const response = await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access?repo=${_url}`,
+        `https://api.commanddash.dev/github/repo/verify-access?repo=${_url}`,
         {
           method: "GET",
           headers: headers
         }
       );
       const _response = await response.json();
-      
+
       if (response.ok) {
         agentDataSources = [...agentDataSources, { uri: _url, type: urlType, is_private: _response.private }];
         url = ""
@@ -204,7 +194,7 @@
 
   function adjustGithubPermissions() {
     openPopup(
-      "https://github.com/apps/staging-commanddash/installations/select_target"
+      "https://github.com/apps/commanddash/installations/select_target"
     );
   }
 
@@ -213,8 +203,8 @@
       name: agentName,
       metadata: {
         display_name: agentName,
-        avatar_profile: agentAvatar,
         tags: [],
+        description: agentPurpose
       },
       chat_mode: {
         system_prompt: agentPurpose,
@@ -222,11 +212,10 @@
       is_private: agentDataSources.some(({is_private}) => is_private === true),
       data_sources: agentDataSources,
     };
-
-    debugger;
+    
     try {
       const response = await apiRequest(
-        "https://stage.commanddash.dev/agent/deploy-agent/web",
+        "https://api.commanddash.dev/agent/deploy-agent/web",
         {
           method: "POST",
           headers: {
@@ -237,7 +226,7 @@
         }
       );
       const _response = await response.json();
-      debugger;
+      
       if (!response.ok) {
         toastStore.set({
           message: _response.message,
@@ -246,6 +235,9 @@
         return;
       }
       onClose();
+      isLoading = true; // Set loading state to true
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Add a 5-second delay
+      isLoading = false; // Set loading state to false
       goto(`/agent/${_response.agent_id}`);
     } catch (error) {
       console.log("error", error);
@@ -315,251 +307,138 @@
         <p class="mb-6 text-sm text-gray-400">
           Create and share your own AI Code Agents.
         </p>
-        <div
-          class="grid h-full w-full flex-1 grid-cols-1 gap-6 text-sm max-sm:grid-cols-1"
-        >
-          <div class="col-span-1 flex flex-col gap-4">
-            <!-- <div>
-              <div class="mb-1 block pb-2 text-sm font-semibold text-white">
-                Avatar
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                name="avatar"
-                id="avatar"
-                class="hidden"
-                on:change={onFilesChange}
-              />
-              {#if (files && files[0]) || !deleteExistingAvatar}
-                <div class="group relative mx-auto h-12 w-12">
-                  {#if files && files[0]}
-                    <img
-                      src={URL.createObjectURL(files[0])}
-                      alt="avatar"
-                      class="crop mx-auto h-12 w-12 cursor-pointer rounded-full object-cover"
-                    />
-                  {/if}
-                  <label
-                    for="avatar"
-                    class="invisible absolute bottom-0 h-12 w-12 rounded-full bg-black bg-opacity-50 p-1 group-hover:visible hover:visible"
-                  >
-                    <CarbonPen
-                      class="mx-auto my-auto h-full cursor-pointer text-center text-white"
-                    />
-                  </label>
-                </div>
-                <div class="mx-auto w-max pt-1">
-                  <button
-                    type="button"
-                    on:click|stopPropagation|preventDefault={() => {
-                      files = null;
-                      deleteExistingAvatar = true;
-                    }}
-                    class="mx-auto w-max text-center text-xs text-gray-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </div>
-              {:else}
-                <div class="mb-1 flex w-max flex-row gap-4">
-                  <label
-                    for="avatar"
-                    class="btn flex h-8 rounded-lg border bg-white px-3 py-1 text-gray-500 shadow-sm transition-all hover:bg-gray-100 items-center"
-                  >
-                    <CarbonUpload class="mr-2 text-xs " /> Upload
-                  </label>
-                </div>
-              {/if}
-            </div> -->
-            <label>
-              <div class="mb-1 font-semibold text-white">Name</div>
-              <input
-                name="name"
-                class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-                placeholder="Svelte Projects AI"
-                bind:value={agentName}
-              />
-              <p class="text-xs text-red-500">{getError("name", form)}</p>
-            </label>
-
-            <!-- New field for agent purpose -->
-            <label>
-              <div class="mb-1 font-semibold text-white">What will the agent do?</div>
-              <input
-                name="purpose"
-                class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-                placeholder="Answer questions or generate code for my svelte projects"
-                bind:value={agentPurpose}
-              />
-              <p class="text-xs text-red-500">{getError("purpose", form)}</p>
-            </label>
-            <!-- <label>
-              <div class="mb-1 font-semibold text-white">Description</div>
-              <textarea
-                name="description"
-                class="h-15 w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-                placeholder="Agent Description"
-              />
-              <p class="text-xs text-red-500">
-                {getError("description", form)}
-              </p>
-            </label> -->
-            <!-- <label>
-              <div class="mb-1 font-semibold text-white">
-                Instructions (System Prompt)
-              </div>
-              <textarea
-                name="description"
-                class="h-20 w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
-                placeholder="You'll act as..."
-              />
-              <p class="text-xs text-red-500">
-                {getError("description", form)}
-              </p>
-            </label> -->
-            <div>
-              <div class="mb-1 flex justify-between text-sm">
-                <span class="block font-semibold text-white">
-                  Add Data Sources
-                </span>
-              </div>
-              <div class="flex flex-row">
-                <select
-                  name="urlType"
-                  class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
-                  on:change={({ target }) => {
-                    urlType = target?.value;
-                  }}
-                >
-                  <option value="github">Github</option>
-                  <option value="deep_crawl_page">Website</option>
-                  <option value="web_page">Webpage</option>
-                  <option value="sitemap">Sitemap</option>
-                </select>
+        {#if isLoading}
+          <div class="flex items-center justify-center h-full">
+            <p class="text-white text-lg">Creating agent...</p>
+          </div>
+        {:else}
+          <div
+            class="grid h-full w-full flex-1 grid-cols-1 gap-6 text-sm max-sm:grid-cols-1"
+          >
+            <div class="col-span-1 flex flex-col gap-4">
+              <label>
+                <div class="mb-1 font-semibold text-white">Name</div>
                 <input
-                  autocorrect="off"
-                  autocapitalize="none"
-                  class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  name="url"
-                  placeholder="URL"
-                  type="url"
-                  bind:value={url}
+                  name="name"
+                  class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
+                  placeholder="Svelte Projects AI"
+                  bind:value={agentName}
                 />
+                <p class="text-xs text-red-500">{getError("name", form)}</p>
+              </label>
+
+              <!-- New field for agent purpose -->
+              <label>
+                <div class="mb-1 font-semibold text-white">What will the agent do?</div>
+                <input
+                  name="purpose"
+                  class="w-full rounded-lg border-2 border-gray-200 bg-gray-100 p-2"
+                  placeholder="Answer questions or generate code for my svelte projects"
+                  bind:value={agentPurpose}
+                />
+                <p class="text-xs text-red-500">{getError("purpose", form)}</p>
+              </label>
+              <div>
+                <div class="mb-1 flex justify-between text-sm">
+                  <span class="block font-semibold text-white">
+                    Add Data Sources
+                  </span>
+                </div>
+                <div class="flex flex-row">
+                  <select
+                    name="urlType"
+                    class="border-2 border-gray-200 bg-gray-100 p-2 rounded mr-2 w-[50%] md:w-[20%]"
+                    on:change={({ target }) => {
+                      urlType = target?.value;
+                    }}
+                  >
+                    <option value="github">Github</option>
+                    <option value="deep_crawl_page">Website</option>
+                    <option value="web_page">Webpage</option>
+                    <option value="sitemap">Sitemap</option>
+                  </select>
+                  <input
+                    autocorrect="off"
+                    autocapitalize="none"
+                    class="w-[50%] md:w-[80%] border text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block p-2.5 bg-gray-100 border-gray-200 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    name="url"
+                    placeholder="URL"
+                    type="url"
+                    bind:value={url}
+                  />
+                </div>
+                {#if !isRepoAccessible}
+                  <button
+                    class="inline-flex flex-row mt-1 text-xs"
+                    on:click={adjustGithubPermissions}
+                  >
+                    <span class="text-white">Missing access to the repository.</span><span
+                      class="text-blue-500 mx-1"
+                      >Provide Github Permissions ➜</span
+                    >
+                  </button>
+                {/if}
+                <button
+                  class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
+                  on:click={handleSubmitDataSources}>Add Data Source</button
+                >
               </div>
-              {#if !isRepoAccessible}
-                <button
-                  class="inline-flex flex-row mt-1 text-xs"
-                  on:click={adjustGithubPermissions}
-                >
-                  <span class="text-white">Missing Git repository?</span><span
-                    class="text-blue-500 mx-1"
-                    >Adjust Github App Permissions ➜</span
+              <div class="mt-0">
+                <span class="block font-semibold text-white"> Data Sources </span>
+                {#each agentDataSources as sourceData}
+                  <a
+                    class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-lg !bg-gray-100 !text-gray-800 mt-1"
+                    target="_blank"
+                    rel="noreferrer"
+                    href={sourceData.uri}
                   >
-                </button>
-              {/if}
-              <button
-                class="flex items-center justify-center w-full h-12 px-8 font-medium text-white transition-colors duration-150 ease-in-out bg-blue-800 rounded-md hover:bg-blue-700 space-x-2 shadow-lg mt-2"
-                on:click={handleSubmitDataSources}>Add Data Source</button
+                    <div class="truncate">
+                      {sourceData.uri}
+                    </div>
+                    <div
+                      class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
+                    >
+                      {#if sourceData.type === "github"}
+                        <CarbonGithub />
+                      {:else if sourceData.type === "web_page"}
+                        <CarbonWorld />
+                      {:else}
+                        <CarbonCode />
+                      {/if}
+                    </div>
+                  </a>
+                {/each}
+              </div>
+              <div
+                class="absolute bottom-6 flex w-full justify-end gap-2 md:right-0 md:w-fit mr-7"
               >
-            </div>
-            <!-- <div class="flex flex-col flex-nowrap pb-4">
-              <span class="mt-2 text-smd font-semibold text-white"
-                >Internet access
-                <IconInternet classNames="inline text-sm text-blue-600" />
-              </span>
-              <label class="mt-1">
-                <input type="radio" name="ragMode" value={agentIsPrivate === "public"} on:change={() => (agentIsPrivate = "public")} />
-                <span class="my-2 text-sm text-white"> Public </span>
-                <span class="block text-xs text-gray-400 ml-1">
-                  Agents will be available publicly.
-                </span>
-              </label>
-              <label class="mt-1">
-                <input type="radio" name="ragMode" value={agentIsPrivate === "private"} on:change={() => (agentIsPrivate === "private")} />
-                <span class="my-2 text-sm text-white"> Private </span>
-                <span class="block text-xs text-gray-400 ml-1">
-                  Agents will not be available publicly.
-                </span>
-              </label>
-            </div> -->
-            <div class="mt-0">
-              <span class="block font-semibold text-white"> Data Sources </span>
-              {#each agentDataSources as sourceData}
-                <a
-                  class="group flex h-10 flex-none items-center gap-2 pl-2 pr-2 text-sm hover:bg-gray-100 md:rounded-lg !bg-gray-100 !text-gray-800 mt-1"
-                  target="_blank"
-                  rel="noreferrer"
-                  href={sourceData.uri}
-                >
-                  <div class="truncate">
-                    {sourceData.uri}
-                  </div>
-                  <div
-                    class="ml-auto rounded-lg bg-black px-2 py-1.5 text-xs font-semibold leading-none text-white"
+                {#if !!accessToken && !!refreshToken}
+                  <button
+                    class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"
+                    on:click={onClose}
                   >
-                    {#if sourceData.type === "github"}
-                      <CarbonGithub />
-                    {:else if sourceData.type === "web_page"}
-                      <CarbonWorld />
-                    {:else}
-                      <CarbonCode />
-                    {/if}
-                  </div>
-                </a>
-              {/each}
-            </div>
-            <div
-              class="absolute bottom-6 flex w-full justify-end gap-2 md:right-0 md:w-fit mr-7"
-            >
-              {#if !!accessToken && !!refreshToken}
-                <button
-                  class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"
-                  on:click={onClose}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
-                  on:click={handleSubmitAgentCreation}
-                >
-                  Create
-                </button>
-              {:else}
-                <button
-                  class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
-                  on:click={onSigninGithub}
-                >
-                  <CarbonGithub class="w-5 h-5 text-gray-400 mr-1.5" />
-                  Sign in with GitHub
-                </button>
-              {/if}
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
+                    on:click={handleSubmitAgentCreation}
+                  >
+                    Create
+                  </button>
+                {:else}
+                  <button
+                    class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+                    on:click={onSigninGithub}
+                  >
+                    <CarbonGithub class="w-5 h-5 text-gray-400 mr-1.5" />
+                    Sign in with GitHub
+                  </button>
+                {/if}
+              </div>
             </div>
           </div>
-          <!-- {#if !!accessToken && !!refreshToken}
-            <div class="relative col-span-1 flex h-full flex-col"></div>
-            <div
-              class="absolute bottom-6 flex w-full justify-end gap-2 md:right-0 md:w-fit mr-7"
-            >
-              <button
-                class="flex items-center justify-center rounded-full bg-gray-200 px-5 py-2 font-semibold text-gray-600"
-                on:click={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="flex items-center justify-center rounded-full bg-blue-800 hover:bg-blue-700 px-8 py-2 font-semibold text-white"
-                on:click={handleSubmitAgentCreation}
-              >
-                Create
-              </button>
-            </div>
-          {:else}
-            
-          {/if} -->
-        </div>
+        {/if}
       </div>
     </dialog>
   </div>

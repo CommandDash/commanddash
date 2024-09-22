@@ -98,7 +98,7 @@
     }
     try {
       const response = await apiRequest(
-        `https://stage.commanddash.dev/github/repo/verify-access?repo=${url}`,
+        `https://api.commanddash.dev/github/repo/verify-access?repo=${url}`,
         {
           method: "GET",
           headers: headers,
@@ -147,9 +147,8 @@
   async function refreshAccessToken() {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
-      debugger;
       const response = await fetch(
-        "https://stage.commanddash.dev/account/github/refresh",
+        "https://api.commanddash.dev/account/github/refresh",
         {
           method: "POST",
           headers: {
@@ -176,7 +175,7 @@
 
   function adjustGithubPermissions() {
     openPopup(
-      "https://github.com/apps/staging-commanddash/installations/select_target"
+      "https://github.com/apps/commanddash/installations/select_target"
     );
   }
 
@@ -195,7 +194,7 @@
   async function onSigninGithub() {
     try {
       const response = await fetch(
-        "https://stage.commanddash.dev/account/github/url/web?override_uri=http://localhost:5173"
+        "https://api.commanddash.dev/account/github/url/web?override_uri=https://app.commanddash.io"
       );
       const _response = await response.json();
 
@@ -204,7 +203,7 @@
 
         const interval = setInterval(() => {
           try {
-            if (oauthWindow?.location.origin === "http://localhost:5173") {
+            if (oauthWindow?.location.origin === "https://app.commanddash.io") {
               const urlParams = new URLSearchParams(
                 oauthWindow.location.search
               );
@@ -316,13 +315,13 @@
           class="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-100 placeholder-gray-500"
         />
       </div>
-      {#if !isRepoAccessible}
+      {#if accessToken && !isRepoAccessible }
         <button
           class="inline-flex flex-row my-1 text-xs"
           on:click={adjustGithubPermissions}
         >
-          <span class="text-white">Missing Git repository?</span><span
-            class="text-blue-500 mx-1">Adjust Github App Permissions ➜</span
+          <span class="text-white">Missing access to the repository.</span><span
+            class="text-blue-500 mx-1">Provide Github Permissions ➜</span
           >
         </button>
       {/if}

@@ -34,7 +34,7 @@
         };
         try {
             const response = await fetch(
-                "https://stage.commanddash.dev/agent/notify",
+                "https://api.commanddash.dev/agent/notify",
                 {
                     method: "POST",
                     body: JSON.stringify(data),
