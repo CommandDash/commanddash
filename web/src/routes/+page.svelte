@@ -16,11 +16,13 @@
   const SEARCH_DEBOUNCE_DELAY = 400;
   let agents: Agent[] = [];
   let ownedAgents: Agent[] = [];
+  let sharedAgents: Agent[] = [];
   let filteredAgents: Agent[] = [];
   let searchValue: string = "";
   let showModal: boolean = false;
   let showPrivateModal: boolean = false;
   let currentAgent: Agent;
+  let accessToken: string | null = "";
   let sections: { [key: string]: Agent[] } = {};
 
   const promotedAgent: Agent = {
@@ -45,7 +47,7 @@
     const checkAccessToken = () => localStorage.getItem("accessToken");
 
     const callApis = async () => {
-      const accessToken = checkAccessToken();
+      accessToken = checkAccessToken();
 
       const headers = {
         "Content-Type": "application/json",
@@ -56,7 +58,7 @@
       }
 
       try {
-        const _response = await fetch(
+        const _response = await apiRequest(
           "https://api.commanddash.dev/agent/web/get-agent-list-v2",
           {
             headers: headers,
@@ -73,9 +75,16 @@
 
         agents = _agents.public_agents;
         ownedAgents = _agents.owned_agents
+        sharedAgents = _agents.shared_agents
 
         // Combine agents from new API into sections
-        sections["Owned Agents"] = ownedAgents;
+        if (ownedAgents?.length > 0) {
+          sections["Owned Agents"] = ownedAgents;
+        }
+
+        if (sharedAgents?.length > 0) {
+          sections["Shared Agents"] = sharedAgents;
+        }
         // Add existing agents under "All Agents" section
         sections["All Agents"] = agents;
 
@@ -115,6 +124,64 @@
     
     callApis();
   });
+
+  async function apiRequest(url: string, options: RequestInit) {
+    try {
+      debugger;
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+        },
+      });
+
+      if (response.status === 401 || response.status === 422) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          // Retry the request with the refreshed token
+          options.headers = {
+            ...options.headers,
+            Authorization: `Bearer ${accessToken}`, // use updated token
+          };
+          return await fetch(url, options);
+        }
+      }
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function refreshAccessToken() {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      const response = await fetch(
+        "https://api.commanddash.dev/account/github/refresh",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
+        }
+      );
+      debugger;
+      const _response = await response.json();
+      if (response.ok) {
+        accessToken = _response.access_token;
+        if (!!accessToken) {
+          localStorage.setItem("accessToken", accessToken);
+        }
+        return true;
+      } else {
+        console.error("Failed to refresh token");
+        return false;
+      }
+    } catch (error) {
+      console.error("refreshAccessToken: error", error);
+      return false;
+    }
+  }
 
   const navigateAgents = (agent: Agent) => {
     goto(`/agent/${agent.name}`);
