@@ -89,7 +89,7 @@
                 headers: headers,
                 body: JSON.stringify({
                     referrer: referrer,
-                    kind: referrer_kind,
+                    referrer_kind: referrer_kind,
                     passcode: passcode
                 }),
             },
