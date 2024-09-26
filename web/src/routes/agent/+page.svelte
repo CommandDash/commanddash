@@ -8,6 +8,7 @@
     import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
     import { type Agent } from "$lib/types/Agent";
     import LoadingPage from "$lib/components/LoadingPage.svelte";
+    import { apiRequest } from "$lib/utils/authenticate";
 
     let currentAgentDetails: Agent;
     let errorMessage: string = "Something went wrong";
@@ -134,64 +135,6 @@
             },
         });
     });
-
-    async function apiRequest(url: string, options: RequestInit) {
-        try {
-            const accessToken = localStorage.getItem("accessToken");
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    ...options.headers,
-                },
-            });
-
-            if (response.status === 401) {
-                const refreshed = await refreshAccessToken();
-                if (refreshed) {
-                    // Retry the request with the refreshed token
-                    options.headers = {
-                        ...options.headers,
-                        Authorization: `Bearer ${accessToken}`, // use updated token
-                    };
-                    return await fetch(url, options);
-                }
-            }
-
-            return response;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async function refreshAccessToken() {
-        try {
-            const refreshToken = localStorage.getItem("refreshToken");
-            
-            const response = await fetch(
-                "https://api.commanddash.dev/account/github/refresh",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${refreshToken}`,
-                    },
-                },
-            );
-            const _response = await response.json();
-            if (response.ok) {
-                accessToken = _response.access_token;
-                if (accessToken?.length === 0) {
-                    localStorage.setItem("accessToken", accessToken);
-                }
-                return true;
-            } else {
-                console.error("Failed to refresh token");
-                return false;
-            }
-        } catch (error) {
-            console.error("refreshAccessToken: error", error);
-            return false;
-        }
-    }
 
     const extractUris = (
         data: { id: string; uri: { type: string; uri: string }[] }[],

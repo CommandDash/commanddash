@@ -5,13 +5,12 @@
   import { toastStore } from "$lib/stores/ToastStores";
 
   import CarbonGithub from "~icons/carbon/logo-github";
-  import CarbonUpload from "~icons/carbon/upload";
-  import CarbonPen from "~icons/carbon/pen";
   import CarbonCode from "~icons/carbon/code";
   import CarbonWorld from "~icons/carbon/wikis";
 
   import IconInternet from "./icons/IconInternet.svelte";
   import { ToastType } from "$lib/types/Toast";
+  import { apiRequest } from "$lib/utils/authenticate";
   import { goto } from "$app/navigation";
 
   type ActionData = {
@@ -90,63 +89,6 @@
     } else {
       agentDataSources = [...agentDataSources, { uri: url, type: urlType, is_private: false }];
       url = "";
-    }
-  }
-
-  async function apiRequest(url: string, options: RequestInit) {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          Authorization: "Bearer " + accessToken,
-        },
-      });
-
-      if (response.status === 401) {
-        const refreshed = await refreshAccessToken();
-        if (refreshed) {
-          // Retry the request with the refreshed token
-          options.headers = {
-            ...options.headers,
-            Authorization: `Bearer ${accessToken}`, // use updated token
-          };
-          return await fetch(url, options);
-        }
-      }
-
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async function refreshAccessToken() {
-    try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      const response = await fetch(
-        "https://api.commanddash.dev/account/github/refresh",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${refreshToken}`,
-          },
-        }
-      );
-      const _response = await response.json();
-      if (response.ok) {
-        accessToken = _response.access_token;
-        if (!!accessToken) {
-          localStorage.setItem("accessToken", accessToken);
-        }
-        return true;
-      } else {
-        console.error("Failed to refresh token");
-        return false;
-      }
-    } catch (error) {
-      console.error("refreshAccessToken: error", error);
-      return false;
     }
   }
 

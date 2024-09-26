@@ -5,21 +5,24 @@
   import CarbonSearch from "~icons/carbon/search";
   import CarbonAdd from "~icons/carbon/add";
   import CarbonGithub from "~icons/carbon/logo-github";
-  import CarbonSettings from "~icons/carbon/settings";
   import type { Agent } from "$lib/types/Agent";
   import { goto } from "$app/navigation";
   import { debounce } from "$lib/utils/debounce";
-  import { base } from "$app/paths";
+  import { apiRequest } from "$lib/utils/authenticate";
   import CreateAgentDialog from "$lib/components/CreateAgentDialog.svelte";
   import PrivateAgentDialog from "$lib/components/PrivateAgentDialog.svelte";
 
   const SEARCH_DEBOUNCE_DELAY = 400;
   let agents: Agent[] = [];
+  let ownedAgents: Agent[] = [];
+  let sharedAgents: Agent[] = [];
   let filteredAgents: Agent[] = [];
+  let spotlightAgents: Agent[] = [];
   let searchValue: string = "";
   let showModal: boolean = false;
   let showPrivateModal: boolean = false;
-  let currentAgent: Agent;
+  let openAccordions: Record<string, boolean> = {};
+  let accessToken: string | null = "";
   let sections: { [key: string]: Agent[] } = {};
 
   const promotedAgent: Agent = {
@@ -41,6 +44,72 @@
   onMount(async () => {
     loading = true;
 
+    const checkAccessToken = () => localStorage.getItem("accessToken");
+
+    const callApis = async () => {
+      accessToken = checkAccessToken();
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
+
+      try {
+        const _response = await apiRequest(
+          "https://api.commanddash.dev/agent/web/get-agent-list-v2",
+          {
+            headers: headers,
+            method: "POST",
+            body: JSON.stringify({ cli_version: "0.0.1" }),
+          }
+        );
+
+        const _agents = await _response.json();
+
+        if (!_response.ok) {
+          throw new Error("Failed to fetch agents");
+        }
+
+        agents = _agents.public_agents.agents;
+        ownedAgents = _agents.owned_agents.agents;
+        sharedAgents = _agents.shared_agents.agents;
+        spotlightAgents = _agents.spotlight_agents.agents;
+
+        // Combine agents from new API into sections
+        if (ownedAgents?.length > 0) {
+          sections[_agents.owned_agents.title] = ownedAgents;
+        }
+
+        if (sharedAgents?.length > 0) {
+          sections[_agents.shared_agents.title] = sharedAgents;
+        }
+
+        sections[_agents.spotlight_agents.title] = spotlightAgents;
+        // Add existing agents under "All Agents" section
+        sections[_agents.public_agents.title] = agents;
+
+        appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
+
+        // Check if the 'create' query parameter is set to 'true'
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("create") === "true") {
+          showModal = true;
+        }
+
+        // Perform initial search if there is a value in the search input
+        if (searchValue) {
+          search(searchValue);
+        }
+      } catch (error) {
+        appInsights.trackException({ error });
+      } finally {
+        loading = false;
+      }
+    };
+
     const interval = setInterval(() => {
       if (window.location.origin === "https://app.commanddash.io") {
         const urlParams = new URLSearchParams(window.location.search);
@@ -50,64 +119,13 @@
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
           clearInterval(interval);
+
+          callApis();
         }
       }
     }, 1000);
 
-    try {
-      const [existingResponse, newResponse] = await Promise.all([
-        fetch("https://api.commanddash.dev/agent/web/get-agent-list", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({ cli_version: "0.0.1" }),
-        }),
-        fetch(
-          "https://api.commanddash.dev/agent/web/get-highlighted-agent-list",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            method: "POST",
-            body: JSON.stringify({ cli_version: "0.0.1" }),
-          }
-        ),
-      ]);
-
-      const existingAgents = await existingResponse.json();
-      const newAgents = await newResponse.json();
-
-      if (!existingResponse.ok && !newResponse.ok) {
-        throw new Error("Failed to fetch agents");
-      }
-
-      agents = existingAgents;
-      filteredAgents = existingAgents;
-
-      // Combine agents from new API into sections
-      sections = newAgents;
-
-      // Add existing agents under "All Agents" section
-      sections["All Agents"] = existingAgents;
-
-      appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
-
-      // Check if the 'create' query parameter is set to 'true'
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("create") === "true") {
-        showModal = true;
-      }
-
-      // Perform initial search if there is a value in the search input
-      if (searchValue) {
-        search(searchValue);
-      }
-    } catch (error) {
-      appInsights.trackException({ error });
-    } finally {
-      loading = false;
-    }
+    callApis();
   });
 
   const navigateAgents = (agent: Agent) => {
@@ -143,6 +161,13 @@
     return formattedText.length > maxLength
       ? formattedText.slice(0, maxLength) + "..."
       : formattedText;
+  };
+
+  const toggleAccordion = (title: string) => {
+    openAccordions = {
+      ...openAccordions,
+      [title]: !openAccordions[title]
+    }
   };
 </script>
 
@@ -247,38 +272,40 @@
         </div>
       </div>
     {:else}
-      {#each Object.keys(sections) as section}
+      {#each Object.keys(sections) as section, index}
         <div class="mt-7">
           <h2 class="text-xl font-semibold">{section}</h2>
+          <!-- <button
+            on:click={() => toggleAccordion(section)}
+            class="flex items-center justify-between w-full p-5 font-medium text-gray-500 gap-3"
+            aria-expanded={openAccordions[section]}
+            aria-controls="accordion-collapse-body-{index}"
+          >
+            
+            <svg
+              class="w-3 h-3 {openAccordions[section]
+                ? 'rotate-180'
+                : ''} shrink-0"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5L5 1 1 5"
+              />
+            </svg>
+          </button> -->
           <div
             class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
           >
-            {#each sections[section] as agent, index}
-              <!-- {#if index === 2 && section === "All Agents"}
-                                    <button
-                                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
-                                        on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
-                                    >
-                                        <img
-                                            src={promotedAgent.metadata.avatar_id}
-                                            alt="Avatar"
-                                            class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                                        />
-                                        <h3
-                                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
-                                        >
-                                            {promotedAgent.metadata.display_name}
-                                        </h3>
-                                        <p
-                                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
-                                        >
-                                            {promotedAgent.metadata.description}
-                                        </p>
-                                        <span class="promoted-indicator">Promoted</span>
-                                    </button>
-                                {/if} -->
+            {#each sections[section] as agent}
               <button
                 class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                class:hidden={openAccordions[section]}
                 on:click={() => navigateAgents(agent)}
               >
                 <img
