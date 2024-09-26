@@ -5,11 +5,10 @@
   import CarbonSearch from "~icons/carbon/search";
   import CarbonAdd from "~icons/carbon/add";
   import CarbonGithub from "~icons/carbon/logo-github";
-  import CarbonSettings from "~icons/carbon/settings";
   import type { Agent } from "$lib/types/Agent";
   import { goto } from "$app/navigation";
   import { debounce } from "$lib/utils/debounce";
-  import { base } from "$app/paths";
+  import { apiRequest } from "$lib/utils/authenticate";
   import CreateAgentDialog from "$lib/components/CreateAgentDialog.svelte";
   import PrivateAgentDialog from "$lib/components/PrivateAgentDialog.svelte";
 
@@ -128,64 +127,6 @@
 
     callApis();
   });
-
-  async function apiRequest(url: string, options: RequestInit) {
-    try {
-      debugger;
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-        },
-      });
-
-      if (response.status === 401 || response.status === 422) {
-        const refreshed = await refreshAccessToken();
-        if (refreshed) {
-          // Retry the request with the refreshed token
-          options.headers = {
-            ...options.headers,
-            Authorization: `Bearer ${accessToken}`, // use updated token
-          };
-          return await fetch(url, options);
-        }
-      }
-
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async function refreshAccessToken() {
-    try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      const response = await fetch(
-        "https://api.commanddash.dev/account/github/refresh",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${refreshToken}`,
-          },
-        }
-      );
-      debugger;
-      const _response = await response.json();
-      if (response.ok) {
-        accessToken = _response.access_token;
-        if (!!accessToken) {
-          localStorage.setItem("accessToken", accessToken);
-        }
-        return true;
-      } else {
-        console.error("Failed to refresh token");
-        return false;
-      }
-    } catch (error) {
-      console.error("refreshAccessToken: error", error);
-      return false;
-    }
-  }
 
   const navigateAgents = (agent: Agent) => {
     goto(`/agent/${agent.name}`);
@@ -333,13 +274,14 @@
     {:else}
       {#each Object.keys(sections) as section, index}
         <div class="mt-7">
-          <button
+          <h2 class="text-xl font-semibold">{section}</h2>
+          <!-- <button
             on:click={() => toggleAccordion(section)}
             class="flex items-center justify-between w-full p-5 font-medium text-gray-500 gap-3"
             aria-expanded={openAccordions[section]}
             aria-controls="accordion-collapse-body-{index}"
           >
-            <h2 class="text-xl font-semibold">{section}</h2>
+            
             <svg
               class="w-3 h-3 {openAccordions[section]
                 ? 'rotate-180'
@@ -356,7 +298,7 @@
                 d="M9 5L5 1 1 5"
               />
             </svg>
-          </button>
+          </button> -->
           <div
             class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
           >
