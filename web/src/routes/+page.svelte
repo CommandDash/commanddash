@@ -22,7 +22,7 @@
   let searchValue: string = "";
   let showModal: boolean = false;
   let showPrivateModal: boolean = false;
-  let currentAgent: Agent;
+  let openAccordions: Record<string, boolean> = {};
   let accessToken: string | null = "";
   let sections: { [key: string]: Agent[] } = {};
 
@@ -88,7 +88,7 @@
           sections[_agents.shared_agents.title] = sharedAgents;
         }
 
-        sections[_agents.spotlight_agents.title] = spotlightAgents
+        sections[_agents.spotlight_agents.title] = spotlightAgents;
         // Add existing agents under "All Agents" section
         sections[_agents.public_agents.title] = agents;
 
@@ -121,11 +121,11 @@
           localStorage.setItem("refreshToken", refreshToken);
           clearInterval(interval);
 
-          callApis()
+          callApis();
         }
       }
     }, 1000);
-    
+
     callApis();
   });
 
@@ -220,6 +220,13 @@
     return formattedText.length > maxLength
       ? formattedText.slice(0, maxLength) + "..."
       : formattedText;
+  };
+
+  const toggleAccordion = (title: string) => {
+    openAccordions = {
+      ...openAccordions,
+      [title]: !openAccordions[title]
+    }
   };
 </script>
 
@@ -324,38 +331,39 @@
         </div>
       </div>
     {:else}
-      {#each Object.keys(sections) as section}
+      {#each Object.keys(sections) as section, index}
         <div class="mt-7">
-          <h2 class="text-xl font-semibold">{section}</h2>
+          <button
+            on:click={() => toggleAccordion(section)}
+            class="flex items-center justify-between w-full p-5 font-medium text-gray-500 gap-3"
+            aria-expanded={openAccordions[section]}
+            aria-controls="accordion-collapse-body-{index}"
+          >
+            <h2 class="text-xl font-semibold">{section}</h2>
+            <svg
+              class="w-3 h-3 {openAccordions[section]
+                ? 'rotate-180'
+                : ''} shrink-0"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5L5 1 1 5"
+              />
+            </svg>
+          </button>
           <div
             class="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"
           >
-            {#each sections[section] as agent, index}
-              <!-- {#if index === 2 && section === "All Agents"}
-                                    <button
-                                        class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40 promoted-card"
-                                        on:click={() => window.open(promotedAgent.author.source_url, "_blank")}
-                                    >
-                                        <img
-                                            src={promotedAgent.metadata.avatar_id}
-                                            alt="Avatar"
-                                            class="mb-2 aspect-square size-12 flex-none rounded-full object-cover sm:mb-6 sm:size-20"
-                                        />
-                                        <h3
-                                            class="mb-2 line-clamp-2 max-w-full break-words text-center text-[.8rem] font-semibold leading-snug sm:text-sm promoted-text"
-                                        >
-                                            {promotedAgent.metadata.display_name}
-                                        </h3>
-                                        <p
-                                            class="line-clamp-4 text-xs text-gray-700 sm:line-clamp-2 dark:text-gray-400 promoted-text"
-                                        >
-                                            {promotedAgent.metadata.description}
-                                        </p>
-                                        <span class="promoted-indicator">Promoted</span>
-                                    </button>
-                                {/if} -->
+            {#each sections[section] as agent}
               <button
                 class="relative flex flex-col items-center justify-center overflow-hidden text-balance rounded-xl border bg-gray-50/50 px-4 py-6 text-center shadow hover:bg-gray-50 hover:shadow-inner max-sm:px-4 sm:h-64 sm:pb-4 xl:pt-8 dark:border-gray-800/70 dark:bg-gray-950/20 dark:hover:bg-gray-950/40"
+                class:hidden={openAccordions[section]}
                 on:click={() => navigateAgents(agent)}
               >
                 <img
