@@ -18,6 +18,7 @@
   let ownedAgents: Agent[] = [];
   let sharedAgents: Agent[] = [];
   let filteredAgents: Agent[] = [];
+  let spotlightAgents: Agent[] = [];
   let searchValue: string = "";
   let showModal: boolean = false;
   let showPrivateModal: boolean = false;
@@ -73,20 +74,23 @@
           throw new Error("Failed to fetch agents");
         }
 
-        agents = _agents.public_agents;
-        ownedAgents = _agents.owned_agents
-        sharedAgents = _agents.shared_agents
+        agents = _agents.public_agents.agents;
+        ownedAgents = _agents.owned_agents.agents;
+        sharedAgents = _agents.shared_agents.agents;
+        spotlightAgents = _agents.spotlight_agents.agents;
 
         // Combine agents from new API into sections
         if (ownedAgents?.length > 0) {
-          sections["Owned Agents"] = ownedAgents;
+          sections[_agents.owned_agents.title] = ownedAgents;
         }
 
         if (sharedAgents?.length > 0) {
-          sections["Shared Agents"] = sharedAgents;
+          sections[_agents.shared_agents.title] = sharedAgents;
         }
+
+        sections[_agents.spotlight_agents.title] = spotlightAgents
         // Add existing agents under "All Agents" section
-        sections["All Agents"] = agents;
+        sections[_agents.public_agents.title] = agents;
 
         appInsights.trackEvent({ name: "AgentsLoaded" }); // Track custom event
 
