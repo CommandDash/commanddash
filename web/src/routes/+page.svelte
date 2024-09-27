@@ -73,10 +73,10 @@
           throw new Error("Failed to fetch agents");
         }
 
-        agents = _agents.public_agents.agents;
-        ownedAgents = _agents.owned_agents.agents;
-        sharedAgents = _agents.shared_agents.agents;
-        spotlightAgents = _agents.spotlight_agents.agents;
+        agents = _agents.public_agents.agents ?? [];
+        ownedAgents = _agents.owned_agents.agents ?? [];
+        sharedAgents = _agents.shared_agents.agents ?? [];
+        spotlightAgents = _agents.spotlight_agents.agents ?? [];
 
         // Combine agents from new API into sections
         if (ownedAgents?.length > 0) {
@@ -137,16 +137,29 @@
   };
 
   const search = debounce(async (value: string) => {
-    searchValue = value.toLowerCase();
-    filteredAgents = sections["All Agents"].filter((agent) => {
-      return (
-        agent.metadata.display_name.toLowerCase().includes(searchValue) ||
-        agent.author?.name.toLowerCase().includes(searchValue) ||
-        agent.author?.source_url?.toLowerCase().includes(searchValue)
-      );
-    });
-    appInsights.trackEvent({ name: "Search", properties: { searchValue } }); // Track custom event
-  }, SEARCH_DEBOUNCE_DELAY);
+  searchValue = value;
+  filteredAgents = [];
+
+  // Combine agents from all sections to filter
+  debugger;
+  const allAgents = [
+    ...ownedAgents,
+    ...sharedAgents,
+    ...spotlightAgents,
+    ...agents
+  ];
+
+  filteredAgents = allAgents.filter((agent) => {
+    return (
+      agent.metadata.display_name.toLowerCase().includes(searchValue.toLocaleLowerCase()) ||
+      agent.author?.name?.toLowerCase().includes(searchValue.toLocaleLowerCase()) ||
+      agent.author?.source_url?.toLowerCase().includes(searchValue.toLocaleLowerCase())
+    );
+  });
+
+  appInsights.trackEvent({ name: "Search", properties: { searchValue } }); // Track custom event
+}, SEARCH_DEBOUNCE_DELAY);
+
 
   const formatGithubUrl = (url: string) => {
     const urlObj = new URL(url);
