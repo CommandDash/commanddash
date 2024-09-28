@@ -253,20 +253,25 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     try {
       const config: AxiosRequestConfig = {
         method: "post",
-        url: "https://api.commanddash.dev/agent/web/get-agent-list",
+        url: "https://api.commanddash.dev/agent/web/get-agent-list-v2",
         headers: {
           'Content-Type': 'application/json'
         },
         data: JSON.stringify({cli_version: "0.0.1"}),
       };
-      let response = await makeHttpRequest(config);
-
+      let response = await makeAuthorizedHttpRequest(config, this.context) as any;
+      const allAgents = [
+        ...(response?.public_agents?.agents ?? []),
+        ...(response?.owned_agents?.agents ?? []),
+        ...(response?.shared_agents?.agents ?? []),
+        ...(response?.spotlight_agents?.agents ?? [])
+      ];
       if (backgroundUpdate) {
-        this._updateInstalledAgents(response);
+        this._updateInstalledAgents(allAgents);
       } else {
         this._view?.webview.postMessage({
           type: "fetchedAgents",
-          value: JSON.stringify(response),
+          value: JSON.stringify(allAgents),
         });
       }
     } catch (error) {

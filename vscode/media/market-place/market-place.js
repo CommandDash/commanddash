@@ -99,11 +99,14 @@ const formatGithubUrl = (url) => {
 };
 
 function formatText(url, maxLength) {
-    const { author, repo } = formatGithubUrl(url);
-    const formattedText = `${author}/${repo}`;
-    return formattedText.length > maxLength
-        ? formattedText.slice(0, maxLength) + "..."
-        : formattedText;
+    if (!!url) {
+        const { author, repo } = formatGithubUrl(url);
+        const formattedText = `${author}/${repo}`;
+        return formattedText.length > maxLength
+            ? formattedText.slice(0, maxLength) + "..."
+            : formattedText;
+    }
+    return "";
 }
 
 function renderAgentsList(_agents) {
@@ -185,9 +188,11 @@ function renderAgentsList(_agents) {
         divAuthor.innerHTML = githubIcon;
         divAuthor.appendChild(spanAuthor);
 
-        divRowInner.appendChild(divAuthor);
-        divRow.appendChild(divRowInner);
-
+        if (!!agent?.author?.source_url) {
+            divRowInner.appendChild(divAuthor);
+            divRow.appendChild(divRowInner);
+        }
+        
         innerDiv.appendChild(topDiv);
         innerDiv.appendChild(pDescription);
         innerDiv.appendChild(ul);

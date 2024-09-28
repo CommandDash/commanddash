@@ -1538,7 +1538,7 @@ function displayMessages() {
     responseContainer.innerHTML = "";
 
     let modelCount = 0;
-
+    debugger;
     const _conversationHistory = conversationHistory.filter(data => Object.keys(data)[0] === currentActiveAgent);
     if (_conversationHistory.length === 0) {
         questionnaireContainer.classList.remove("hidden");
@@ -1595,7 +1595,8 @@ function displayMessages() {
             roleElement.appendChild(agents);
             agents.innerHTML = `<span class="text-[#497BEF]">@${message.agent ? message.agent : ""}</span><span class="text-rose-500 mx-1">${message.slug ? message.slug : ""}</span>`;
             contentElement.classList.add("text-sm", "block", "w-full", "px-2.5", "py-1.5", "break-words", "user-message");
-            contentElement.innerHTML = markdownToPlain(message.text);
+            contentElement.innerHTML = processMessage(message.text);
+            // contentElement.textContent = message.text;
         } else if (message.role === "dash") {
             //UI implementation
             roleElement.innerHTML = "<strong class='text-white'>CommandDash</strong>";
@@ -1717,6 +1718,17 @@ function setResponse() {
     });
 }
 
+function escapeHtml(input) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return input.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
 //converting markdown to html
 function markdownToPlain(input) {
     const converter = new showdown.Converter({
@@ -1733,6 +1745,27 @@ function markdownToPlain(input) {
     });
     html = converter.makeHtml(input);
     return html;
+}
+
+function isMarkdown(input) {
+    // Simple check for markdown patterns (code blocks, headers, lists, etc.)
+    const markdownPattern = /(```|#|\*|\_|~|\[.*\]\(.*\)|\!\[.*\]\(.*\))/;
+    return markdownPattern.test(input);
+}
+
+function processMessage(messageText) {
+    const isHtml = /<[a-z][\s\S]*>/i.test(messageText);  // Check if it's HTML
+    const isAlreadyMarkdown = isMarkdown(messageText);  // Check if it's already Markdown
+
+    // If it's pure HTML, convert to Markdown first, else process as it is
+    let processedText = messageText;
+
+    if (isHtml && !isAlreadyMarkdown) {
+        processedText = escapeHtml(messageText);
+    }
+
+    // Convert Markdown to final HTML
+    return markdownToPlain(processedText);
 }
 
 
