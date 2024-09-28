@@ -745,17 +745,15 @@ const webQuestionnaire = [
 
 function attachActiveAgentChip() {
     const chip = document.createElement('div');
-    chip.classList.add('inline-flex', 'center', 'px-2', 'py-1', 'rounded', 'm-3', 'border');
-    chip.style.borderColor = "#497BEF";
+    chip.classList.add('inline-flex', 'center', 'px-2', 'py-1', 'rounded', 'm-3', 'bg-[#497BEF]');
 
     const agentNameSpan = document.createElement('span');
     agentNameSpan.textContent = `@${agentName}`;
-    agentNameSpan.classList.add('mr-2');
+    agentNameSpan.classList.add('mr-2', 'text-white');
     chip.appendChild(agentNameSpan);
 
     const crossIcon = document.createElement('span');
-    crossIcon.classList.add('cursor-pointer');
-    crossIcon.style.color = "#ef4444";
+    crossIcon.classList.add('cursor-pointer', 'text-white');
     crossIcon.textContent = '✖';
     chip.appendChild(crossIcon);
 
