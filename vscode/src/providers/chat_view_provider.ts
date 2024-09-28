@@ -434,6 +434,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         agent: agentResponse.metadata.display_name,
       },
     });
+    
     this._view?.webview.postMessage({ type: "showLoadingIndicator" });
     this._view?.webview.postMessage({
       type: "displayMessages",

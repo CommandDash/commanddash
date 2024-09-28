@@ -226,7 +226,7 @@ function loadOnErrorImage(agentImage) {
 }
 
 function handleSearchInput(event) {
-    const searchText = event.target.value;
+    const searchText = event.target.value.toLowerCase();
     const agentList = document.querySelectorAll('.market-place-list-background');
 
     agentList.forEach(agent => {

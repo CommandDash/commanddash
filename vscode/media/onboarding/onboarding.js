@@ -245,6 +245,7 @@ const fileUpload = document.getElementById("file-upload");
 const activeAgentAttach = document.getElementById("agents");
 // const activeCommandsAttach = document.getElementById("slash-commands");
 const headerLogo = document.getElementById("header-logo");
+const headerAgentLogo = document.getElementById("header-logo-agent");
 const headerText = document.getElementById("header-text");
 const headerAgentName = document.getElementById("header-agent-name");
 const headerAgentDescription = document.getElementById("header-agent-description");
@@ -278,7 +279,7 @@ let data = [
             "data_sources": [
                 "501123716"
             ],
-            "system_prompt": "            CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages. If user is looking for help with any library, suggest them looking out if an agent for that exists in the marketplace.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
+            "system_prompt": "CommandDash is a marketplace of programming agents in developer's IDE that are expert at integrating any API or SDK.\n            \n            You are the @dash agent in CommandDash (which works from the users IDE). User can chat with you to get coding help and also use your /refactor, and  /document commands.\n\n            They can also attach multiple code snippets by using the option \"Attach Snippet to Dash\" from the menu bar.\n\n            You are the agent activated by default but user can also install other Dash Agents from the CommandDash marketplace by tapping the @ button on the top right which will open a listing of all the agents available with their details depending on which library they want to work with.\n\n            Example Dash Agents are Gemini, Firebase, Langchain, Stripe etc that can help you quickly build features using their packages. If user is looking for help with any library, suggest them looking out if an agent for that exists in the marketplace.\n\n            To switch to these agents after installing, type @ in the text field and choose your agent in the dropdown, then start asking your questions.\n            \n            You can also create your own Dash Agents and add them to the marketplace. More details here: https://www.commanddash.io/docs/introduction\n            \n            The users will interacting with you from their IDE and have the setup already done. Help them with any of their queries. All the best.",
             "version": "0.0.1"
         },
         "description": "Your primary agent for any usage or coding help.",
@@ -292,154 +293,6 @@ let data = [
         "name": "@dash",
         "search": "@dash",
         "publisher_id": "85fe1b9f-35a6-5732-9657-e880909c26e9",
-        "supported_commands": [
-            // {
-            //     "intent": "Ask questions on your codebase",
-            //     "registered_inputs": [
-            //         {
-            //             "display_text": "Query",
-            //             "id": "368689265",
-            //             "optional": false,
-            //             "type": "string_input",
-            //             "version": "0.0.1"
-            //         }
-            //     ],
-            //     "registered_outputs": [
-            //         {
-            //             "id": "729757158",
-            //             "type": "multi_code_output",
-            //             "version": "0.0.1"
-            //         },
-            //         {
-            //             "id": "791477237",
-            //             "type": "prompt_output",
-            //             "version": "0.0.1"
-            //         }
-            //     ],
-            //     "slug": "/workspace",
-            //     "steps": [
-            //         {
-            //             "outputs": [
-            //                 "729757158"
-            //             ],
-            //             "query": "<368689265>",
-            //             "type": "search_in_workspace",
-            //             "version": "0.0.1",
-            //             "workspace_object_type": "all"
-            //         },
-            //         {
-            //             "outputs": [
-            //                 "791477237"
-            //             ],
-            //             "prompt": "Here are the related references from user's project:\n            ```\n            <729757158>\n            ```\n            \n            Answer the user's query <Query> based on the reference shared above.\n            Query: <368689265>.\n            \n            If you cannot find the answer in the attaches references, say \"Sorry, I couldn't find the answer to your question in the workspace.\"",
-            //             "type": "prompt_query",
-            //             "version": "0.0.1"
-            //         },
-            //         {
-            //             "type": "append_to_chat",
-            //             "value": "<791477237>",
-            //             "version": "0.0.1"
-            //         }
-            //     ],
-            //     "text_field_layout": "Hi, Please share your query: <368689265>"
-            // },
-            {
-                "intent": "Refactor your code",
-                "registered_inputs": [
-                    {
-                        "display_text": "Instruction",
-                        "id": "505692143",
-                        "optional": false,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Code",
-                        "id": "963359893",
-                        "include_contextual_code": true,
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "589657894",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/refactor",
-                "steps": [
-                    {
-                        "outputs": [
-                            "589657894"
-                        ],
-                        "prompt": "You are a coding assistant helping user to write code.\n\n\n            Please find instructions provided my users <Instructions> and the code that is need to be modified <Code> based on the provided instructions:\n\n            Instructions: <505692143>\n\n            Code:\n            ```dart\n            <963359893>\n            ```\n            \n            Note: State any assumption made and improvements introduced used while modification.\n            ",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<589657894>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Please share the following info for refactoring: <505692143> <963359893>"
-            },
-            {
-                "intent": "Add inline documentation to your code",
-                "registered_inputs": [
-                    {
-                        "display_text": "Code",
-                        "id": "988682939",
-                        "include_contextual_code": true,
-                        "optional": false,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Additional Instrunction",
-                        "id": "128434866",
-                        "optional": true,
-                        "type": "string_input",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "display_text": "Reference Code",
-                        "id": "526759072",
-                        "include_contextual_code": true,
-                        "optional": true,
-                        "type": "code_input",
-                        "version": "0.0.1"
-                    }
-                ],
-                "registered_outputs": [
-                    {
-                        "id": "521137469",
-                        "type": "prompt_output",
-                        "version": "0.0.1"
-                    }
-                ],
-                "slug": "/document",
-                "steps": [
-                    {
-                        "outputs": [
-                            "521137469"
-                        ],
-                        "prompt": "You are a coding assistant and instructor who writes professional code.\n    \n    Please find the user's code <Code>, additional instructional instructions <Additional Instructions>, and relevant references <References> to update existing comments or generate inline documentation if they are not already present in the user shared code.\n    \n    Code:\n    ```dart\n    <988682939>\n    ```\n    \n    References:\n    ```dart\n    <526759072>\n    ```\n    \n    Additional Instructions: <128434866>\n    \n    Share the updated code with proper comments back. Keep it as informational as possible for other developers to understand.",
-                        "type": "prompt_query",
-                        "version": "0.0.1"
-                    },
-                    {
-                        "type": "append_to_chat",
-                        "value": "<521137469>",
-                        "version": "0.0.1"
-                    }
-                ],
-                "text_field_layout": "Hi, Let's generate inline documentation. Please share the following info: <988682939> <526759072> <128434866>"
-            }
-        ],
         "testing": false,
         "version": "1.0.3"
     },
@@ -890,6 +743,42 @@ const webQuestionnaire = [
     switchBottomTipMessage(conversationHistory);
 })();
 
+function attachActiveAgentChip() {
+    const chip = document.createElement('div');
+    chip.classList.add('inline-flex', 'center', 'px-2', 'py-1', 'rounded', 'm-3', 'border');
+    chip.style.borderColor = "#497BEF";
+
+    const agentNameSpan = document.createElement('span');
+    agentNameSpan.textContent = `@${agentName}`;
+    agentNameSpan.classList.add('mr-2');
+    chip.appendChild(agentNameSpan);
+
+    const crossIcon = document.createElement('span');
+    crossIcon.classList.add('cursor-pointer');
+    crossIcon.style.color = "#ef4444";
+    crossIcon.textContent = '✖';
+    chip.appendChild(crossIcon);
+
+    activeAgentAttach.appendChild(chip);
+
+    crossIcon.addEventListener('click', () => {
+        removePlaceholder();
+        activeAgentAttach.innerHTML = "";
+        activeAgentAttach.textContent = "Type “@” to switch agent";
+        agentName = "Dash";
+        currentActiveAgent = "@dash";
+
+        headerAgentLogo.classList.add("hidden");
+        headerLogo.classList.remove("hidden");
+
+        headerText.classList.remove("hidden");
+        headerAgentName.classList.add("hidden");
+        headerAgentDescription.classList.add("hidden");
+
+        displayMessages();
+    });
+}
+
 function switchBottomTipMessage(_conversationHistory) {
     if (getAgents().length <= 2) {
         activeAgentAttach.textContent = `Go to “@” marketplace to install agents`;
@@ -898,12 +787,8 @@ function switchBottomTipMessage(_conversationHistory) {
         activeAgentAttach.textContent = `Type “@” to switch agent`;
         new Questionnaire(questionnaire, textInput).buildQuestionnaire();
     } else if (getAgents().length >= 3 && agentName !== "Dash") {
-        debugger
-        if (_conversationHistory.length === 0) {
-            activeAgentAttach.textContent = `@${agentName}`;
-        } else {
-            activeAgentAttach.textContent = `Attach code snippets from right click menu`;
-        }
+        activeAgentAttach.textContent = "";
+        attachActiveAgentChip();
         new Questionnaire(webQuestionnaire, textInput).buildQuestionnaire();
     }
 }
@@ -953,10 +838,10 @@ function setLoading(isLoading) {
 
 function addToolTipsById() {
 
-    tippy('#agents', {
-        content: "Specialized agents",
-        theme: "flutter-blue"
-    });
+    // tippy('#agents', {
+    //     content: "Specialized agents",
+    //     theme: "flutter-blue"
+    // });
 
     tippy('#slash-commands', {
         content: "Slash commands",
@@ -1051,7 +936,7 @@ function handleSubmit(event) {
                 });
             }
         }
- //' `vscode` what is this code'
+        //' `vscode` what is this code'
         // When triggered with /
         else if (type === 'slash') {
             // If no agent selected yet
@@ -1132,7 +1017,7 @@ function handleSubmit(event) {
 function getAgents() {
     const agents = [];
     data.forEach(agent => {
-        if (agent.name.trim().length > 0) {
+        if (agent.name.trim().length > 0 && agent.name.trim() !== "@dash") {
             agents.push({ name: agent.name, description: agent.description, metadata: agent.metadata, search: agent.search });
         }
     });
