@@ -8,10 +8,12 @@
     import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
     import { type Agent } from "$lib/types/Agent";
     import LoadingPage from "$lib/components/LoadingPage.svelte";
+    import { apiRequest } from "$lib/utils/authenticate";
 
     let currentAgentDetails: Agent;
     let errorMessage: string = "Something went wrong";
     let agentDataSources: Array<any> = [];
+    let accessToken: string | null = "";
 
     const limit: number = 10;
 
@@ -19,10 +21,13 @@
 
     onMount(async () => {
         loading = true;
+        accessToken = localStorage.getItem("accessToken");
+
         const githubRef: string = $page.url.searchParams.get("github") || "";
         const npmRef: string = $page.url.searchParams.get("npm") || "";
         const pypiRef: string = $page.url.searchParams.get("pypi") || "";
         const pubRef: string = $page.url.searchParams.get("pub") || "";
+        const passcode: string = $page.url.searchParams.get("passcode") || "";
 
         let referrer = "";
         let referrer_kind = "";
@@ -71,18 +76,28 @@
             name: "AgentPage",
         });
 
-        const response = await fetch(
+        const headers = {
+            "Content-Type": "application/json",
+        };
+        if (!!accessToken && accessToken.length > 0) {
+            headers.Authorization = "Bearer " + accessToken;
+        }
+
+        const response = await apiRequest(
             "https://api.commanddash.dev/agent/get-latest-agent",
             {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ referrer, referrer_kind }),
+                headers: headers,
+                body: JSON.stringify({
+                    referrer: referrer,
+                    kind: referrer_kind,
+                    passcode: passcode
+                }),
             },
         );
 
         const _response = await response.json();
+        
         if (!response.ok) {
             loading = false;
             errorMessage = _response.message;
@@ -90,8 +105,25 @@
             throw pageError(response.status, _response.message);
         }
 
+        if (_response.passcode) {
+    const currentUrl = new URL(window.location.href);
+    const passcodeParam = `passcode=${_response.passcode}`;
+
+    // Check if the passcode parameter already exists
+    if (!currentUrl.searchParams.has('passcode')) {
+        // Check if there are already query parameters
+        if (currentUrl.search) {
+            currentUrl.search += `&${passcodeParam}`;
+        } else {
+            currentUrl.search = `?${passcodeParam}`;
+        }
+
+        window.history.replaceState({}, "", currentUrl);
+    }
+}
+
         currentAgentDetails = _response as Agent;
-        agentDataSources = extractUris(currentAgentDetails?.data_sources)
+        agentDataSources = extractUris(currentAgentDetails?.data_sources);
         loading = false;
         // Track custom event for agent details loaded
         appInsights.trackEvent({
@@ -122,7 +154,6 @@
         });
         return result;
     };
-
 </script>
 
 {#if currentAgentDetails}
@@ -136,7 +167,7 @@
         agentLogo={currentAgentDetails?.metadata?.avatar_id}
         agentIsDataSourceIndexed={currentAgentDetails.data_sources_indexed}
         agentId={currentAgentDetails?.name}
-        agentDataSources={agentDataSources}
+        {agentDataSources}
     />
 {/if}
 

@@ -36,7 +36,8 @@ export async function makeAuthorizedHttpRequest<T>(config: AxiosRequestConfig, c
     }
     config.headers = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
+        ...config.headers
     };
     try {
         const response: AxiosResponse<T> = await axios(config);

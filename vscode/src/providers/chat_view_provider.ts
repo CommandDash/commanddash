@@ -174,7 +174,6 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     // StorageManager.instance.deleteAgents();
 
     webviewView.onDidChangeVisibility(() => {
-      console.log("webview", webviewView.visible);
       if (webviewView.visible && this._view) {
         this._view?.webview.postMessage({ type: "focusChatInput" });
       }
@@ -254,20 +253,25 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     try {
       const config: AxiosRequestConfig = {
         method: "post",
-        url: "https://api.commanddash.dev/agent/web/get-agent-list",
+        url: "https://api.commanddash.dev/agent/web/get-agent-list-v2",
         headers: {
           'Content-Type': 'application/json'
         },
         data: JSON.stringify({cli_version: "0.0.1"}),
       };
-      let response = await makeHttpRequest(config);
-
+      let response = await makeAuthorizedHttpRequest(config, this.context) as any;
+      const allAgents = [
+        ...(response?.public_agents?.agents ?? []),
+        ...(response?.owned_agents?.agents ?? []),
+        ...(response?.shared_agents?.agents ?? []),
+        ...(response?.spotlight_agents?.agents ?? [])
+      ];
       if (backgroundUpdate) {
-        this._updateInstalledAgents(response);
+        this._updateInstalledAgents(allAgents);
       } else {
         this._view?.webview.postMessage({
           type: "fetchedAgents",
-          value: JSON.stringify(response),
+          value: JSON.stringify(allAgents),
         });
       }
     } catch (error) {
@@ -435,6 +439,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         agent: agentResponse.metadata.display_name,
       },
     });
+    
     this._view?.webview.postMessage({ type: "showLoadingIndicator" });
     this._view?.webview.postMessage({
       type: "displayMessages",
@@ -454,6 +459,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
       private: false,
     };
     try {
+      console.log(JSON.stringify(data));
       const modelResponse = await makeHttpRequest<{ response: string, references: Array<string> }>({
         url: "https://api.commanddash.dev/v2/ai/agent/answer",
         method: "post",
@@ -468,19 +474,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
         value: this._publicConversationHistory,
       });
     } catch (error) {
-      this._publicConversationHistory.push({
-        [this._activeAgent]: {
-          role: "error",
-          text:
-            error instanceof Error
-              ? (error as Error).message
-              : (error as any).toString(),
-        },
-      });
-      this._view?.webview.postMessage({
-        type: "displayMessages",
-        value: this._publicConversationHistory,
-      });
+      // this._publicConversationHistory.push({
+      //   [this._activeAgent]: {
+      //     role: "error",
+      //     text:
+      //       error instanceof Error
+      //         ? (error as Error).message
+      //         : (error as any).toString(),
+      //   },
+      // });
     } finally {
       this?._view?.webview?.postMessage({ type: "hideLoadingIndicator" });
     }
@@ -730,19 +732,15 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     } catch (error) {
       console.error(error);
       logError("command-deck-conversation-error", error);
-      this._publicConversationHistory.push({
-        [this._activeAgent]: {
-          role: "error",
-          text:
-            error instanceof Error
-              ? (error as Error).message
-              : (error as any).toString(),
-        },
-      });
-      this._view?.webview.postMessage({
-        type: "displayMessages",
-        value: this._publicConversationHistory,
-      });
+      // this._publicConversationHistory.push({
+      //   [this._activeAgent]: {
+      //     role: "error",
+      //     text:
+      //       error instanceof Error
+      //         ? (error as Error).message
+      //         : (error as any).toString(),
+      //   },
+      // });
     } finally {
       this._view?.webview.postMessage({ type: "hideLoadingIndicator" });
       this._view?.webview.postMessage({

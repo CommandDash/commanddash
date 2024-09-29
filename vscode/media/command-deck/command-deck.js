@@ -99,8 +99,6 @@ class CommandDeck {
         let options = [];
         if (query.startsWith('@')) {
             options = await this.resolveFn(query, 'at');
-        } else if (query.startsWith('/')) {
-            options = await this.resolveFn(query, 'slash');
         }
 
         if (options.length !== 0) {
@@ -127,17 +125,13 @@ class CommandDeck {
             if (!option?.name.startsWith('/')) {
                 this.ref.textContent = '';
             }
-            if (option?.name.startsWith('/')) {
-                const textContent = this.ref.innerHTML;
-                const atIndex = textContent.lastIndexOf('/');
-                this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
-            }
             if (option?.name.startsWith('@')) {
-                console.log('agents options', option?.metadata);
                 activeAgentAttach.style = "color: #497BEF; !important";
                 
                 agentName = option?.metadata.display_name;
-                headerLogo.src = option.metadata.avatar_id;
+                headerLogo.classList.add("hidden");
+                headerAgentLogo.classList.remove("hidden");
+                headerAgentLogo.src = option.metadata.avatar_id;
                 headerText.classList.add("hidden");
                 headerAgentName.classList.remove("hidden");
                 headerAgentName.textContent = option?.metadata.display_name;
