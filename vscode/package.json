@@ -1,8 +1,8 @@
 {
   "name": "fluttergpt",
-  "displayName": "CommandDash: Assist for Packages, SDKs, APIs and Github",
+  "displayName": "CommandDash: AI Code Agents for libraries",
   "description": "Only AI Copilot to integrate libraries with expert agents",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "publisher": "WelltestedAI",
   "icon": "media/icon.png",
   "engines": {
