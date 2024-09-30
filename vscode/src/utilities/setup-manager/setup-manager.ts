@@ -29,36 +29,36 @@ export class SetupManager {
         if (!this.auth.getGithubAccessToken()) {
             this.pendingSetupSteps.push(SetupStep.github);
         }
-        this.dartClient = DartCLIClient.init(this.context);
-        this.dartClient.onGlobalError((error) => {
+        // this.dartClient = DartCLIClient.init(this.context);
+        // this.dartClient.onGlobalError((error) => {
 
-            vscode.window.showInformationMessage('Error processing an open task. Please consider closing existing tasks or restart IDE if there is trouble using CommandDash', {
-                detail: error
-            });
-            console.log(error);
-        });
-        this.dartClient.onProcessOperation('refresh_access_token', async (message) => {
-            let refreshToken = this.auth.getGithubRefreshToken();
-            if (refreshToken) {
-                let accessToken = await refreshAccessToken(refreshToken, context);
-                this.dartClient?.sendOperationResponse(message, {
-                    'access_token': accessToken
-                });
-            } else {
-                throw Error('No refresh token available.');
-            }
-        });
+        //     vscode.window.showInformationMessage('Error processing an open task. Please consider closing existing tasks or restart IDE if there is trouble using CommandDash', {
+        //         detail: error
+        //     });
+        //     console.log(error);
+        // });
+        // this.dartClient.onProcessOperation('refresh_access_token', async (message) => {
+        //     let refreshToken = this.auth.getGithubRefreshToken();
+        //     if (refreshToken) {
+        //         let accessToken = await refreshAccessToken(refreshToken, context);
+        //         this.dartClient?.sendOperationResponse(message, {
+        //             'access_token': accessToken
+        //         });
+        //     } else {
+        //         throw Error('No refresh token available.');
+        //     }
+        // });
 
-        if (!this.dartClient.executableExists()) {
-            this.pendingSetupSteps.push(SetupStep.executable);
-        } else {
-            this.dartClient.connect();
-            try {
-                this.dartClient.backgroundUpdateExecutable();
-            } catch (error) {
-                console.log(`Error: ${error}`);
-            }
-        }
+        // if (!this.dartClient.executableExists()) {
+        //     this.pendingSetupSteps.push(SetupStep.executable);
+        // } else {
+        //     this.dartClient.connect();
+        //     try {
+        //         this.dartClient.backgroundUpdateExecutable();
+        //     } catch (error) {
+        //         console.log(`Error: ${error}`);
+        //     }
+        // }
     }
 
     public async updatePendingSteps() {
@@ -66,9 +66,9 @@ export class SetupManager {
         if (!this.auth.getGithubAccessToken()) {
             this.pendingSetupSteps.push(SetupStep.github);
         }
-        if (this.dartClient && !this.dartClient.executableExists()) {
-            this.pendingSetupSteps.push(SetupStep.executable);
-        }
+        // if (this.dartClient && !this.dartClient.executableExists()) {
+        //     this.pendingSetupSteps.push(SetupStep.executable);
+        // }
         if (this.auth.getGithubAccessToken() && (this.dartClient && this.dartClient.executableExists())) {
             this.pendingSetupSteps.length = 0;
         }

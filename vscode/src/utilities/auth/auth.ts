@@ -66,15 +66,15 @@ export class Auth {
 
         // Wait for the promise to resolve and update the global state with the access and refresh tokens
         const { accessToken, refreshToken } = await authPromise;
-        await context.globalState.update('access_token', accessToken);
-        await context.globalState.update('refresh_token', refreshToken);
+        await this.cacheManager.setGlobalValue('access_token', accessToken);
+        await this.cacheManager.setGlobalValue('refresh_token', refreshToken);
         return refreshToken;
     }
 
     public async signOutFromGithub(context: vscode.ExtensionContext): Promise<void> {
         // Remove the access and refresh tokens from the global state
-        await context.globalState.update('access_token', undefined);
-        await context.globalState.update('refresh_token', undefined);
+        this.cacheManager.setGlobalValue('access_token', undefined);
+        this.cacheManager.setGlobalValue('refresh_token', undefined);
     
         // Additional cleanup code if needed
         // For example, you might want to unregister the URI handler

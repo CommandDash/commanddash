@@ -72,6 +72,8 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
     // set the HTML for the webview
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
     // this.setupManager.deleteGithub();
+    // this.setupManager.deleteExecutable();
+
     // add an event listener for messages received by the webview
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
@@ -404,6 +406,7 @@ export class FlutterGPTViewProvider implements vscode.WebviewViewProvider {
   private async _setupManager() {
     this.setupManager = SetupManager.getInstance();
     await this.setupManager.updatePendingSteps();
+    console.log('pendng steps', this.setupManager.pendingSetupSteps)
     this._view?.webview.postMessage({
       type: "pendingSteps",
       value: JSON.stringify(this.setupManager.pendingSetupSteps),

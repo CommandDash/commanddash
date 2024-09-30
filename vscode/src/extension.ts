@@ -29,6 +29,8 @@ export async function activate(context: vscode.ExtensionContext) {
     const cacheManager = CacheManager.getInstance(context.globalState, context.workspaceState);
 
     const setupManager = SetupManager.getInstance();
+    // setupManager.deleteExecutable();
+    // setupManager.deleteGithub();
     try {
         await setupManager.init(context);
     } catch (error) {
