@@ -1,1 +1,1 @@
-TEST_README
+CommandDash's Discord Bot assists members with queries related to your Framework, Package or Github Repository!
