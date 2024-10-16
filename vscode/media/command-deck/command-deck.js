@@ -99,8 +99,6 @@ class CommandDeck {
         let options = [];
         if (query.startsWith('@')) {
             options = await this.resolveFn(query, 'at');
-        } else if (query.startsWith('/')) {
-            options = await this.resolveFn(query, 'slash');
         }
 
         if (options.length !== 0) {
@@ -127,18 +125,21 @@ class CommandDeck {
             if (!option?.name.startsWith('/')) {
                 this.ref.textContent = '';
             }
-            if (option?.name.startsWith('/')) {
-                const textContent = this.ref.innerHTML;
-                const atIndex = textContent.lastIndexOf('/');
-                this.ref.innerHTML = textContent.substring(0, atIndex) + textContent.substring(atIndex + 1);
-            }
             if (option?.name.startsWith('@')) {
                 activeAgentAttach.style = "color: #497BEF; !important";
-                activeAgentAttach.textContent = `@${option?.metadata.display_name}`;
+                
+                agentName = option?.metadata.display_name;
+                headerLogo.classList.add("hidden");
+                headerAgentLogo.classList.remove("hidden");
+                headerAgentLogo.src = option.metadata.avatar_id;
+                headerText.classList.add("hidden");
+                headerAgentName.classList.remove("hidden");
+                headerAgentName.textContent = option?.metadata.display_name;
+                headerAgentDescription.classList.remove("hidden");
+                headerAgentDescription.textContent = option?.metadata.description;
                 activeAgent = true;
                 commandEnable = false;
-                activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
-                activeCommandsAttach.textContent = "/";
+                
                 currentActiveAgent = option.name;
                 this.closeMenu();
                 // Move the cursor to the end of the word
@@ -164,7 +165,7 @@ class CommandDeck {
                 setTimeout(() => {
                     adjustHeight();
                     commandEnable = true;
-                    activeCommandsAttach.style = "color: rgb(236 72 153); !important";
+                    // activeCommandsAttach.style = "color: rgb(236 72 153); !important";
                 }, 0);
             }
         };
@@ -247,10 +248,10 @@ class CommandDeck {
             setTimeout(() => {
                 if (this.ref.textContent.trim() === "") {
                     commandEnable = false;
-                    activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
+                    // activeCommandsAttach.style = "color: var(--vscode-input-placeholderForeground); !important";
                     agentInputsJson.length = 0;
                     codeInputId = 0;
-                    activeCommandsAttach.textContent = "/";
+                    // activeCommandsAttach.textContent = "/";
                 }
             }, 0);
         }

@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - web-app-prod
+name: Build and deploy SvelteKit app to Azure Web App - web-app-prod
 
 on:
   push:
@@ -20,14 +20,18 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          cd commanddash_web_app
+          cd web
           npm install
           npm run build --if-present
           npm run test --if-present
+        env:
+          VITE_INSTRUMENTATION_KEY: ${{ secrets.VITE_INSTRUMENTATION_KEY }}
+
       - name: Zip artifact for deployment
         run: |
-          cd commanddash_web_app/build
-          zip -r ../release.zip build node_modules package.json package-lock.json
+          cd web
+          zip -r ../release.zip build node_modules package.json package-lock.json -x "*.git*"
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
@@ -51,6 +55,11 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip -d deploy
+
+      - name: Install Node.js dependencies on Azure
+        run: |
+          cd deploy
+          npm install --production
 
       - name: Login to Azure
         uses: azure/login@v1
