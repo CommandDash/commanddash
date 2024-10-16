@@ -27,8 +27,8 @@ client.on('messageCreate', async message => {
     // Ignore messages from the bot itself
     if (message.author.bot) return;
 
-    // Check if the bot is tagged in the message
-    if (message.mentions.has(client.user)) {
+    // Check if the message mentions the bot directly and not @everyone or @here
+    if (message.mentions.has(client.user) && !message.mentions.everyone && !message.mentions.has('here')) {
         const fetch = (await import('node-fetch')).default;
 
         // Function to split message into chunks of 2000 characters or less
